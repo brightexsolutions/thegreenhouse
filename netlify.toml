@@ -1,0 +1,5 @@
+[build]
+  command = """
+    sed -i 's|<!-- NETLIFY ENV INJECTION.*-->|<script>window.__GH_SUPABASE={url:'\''$SUPABASE_URL'\'',key:'\''$SUPABASE_ANON_KEY'\''}</script>|' index.html
+  """
+  publish = "."
