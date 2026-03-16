@@ -52,6 +52,8 @@ nav.scrolled .logo-mark{background:var(--forest);}
 nav.scrolled .logo-mark::after{background:var(--gold-light);}
 nav.scrolled .nav-link{color:var(--moss);}
 nav.scrolled .nav-link:hover,nav.scrolled .nav-link.active{color:var(--forest);}
+nav .hamburger span{background:var(--forest);}
+nav.light-nav:not(.scrolled) .hamburger span{background:var(--cream);}
 nav.scrolled .hamburger span{background:var(--forest);}
 .nav-menu{display:flex;align-items:center;gap:1.8rem;list-style:none;}
 .nav-link{font-size:.76rem;letter-spacing:.1em;text-transform:uppercase;text-decoration:none;font-weight:400;position:relative;transition:color .25s;padding-bottom:2px;}
@@ -80,7 +82,7 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .section-eyebrow{font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:.9rem;display:block;}
 .section-title{font-family:var(--font-d);font-size:clamp(2.2rem,4.5vw,3.6rem);font-weight:300;line-height:1.12;color:var(--forest);}
 .section-title em{font-style:italic;color:var(--sage);}
-.section-body{color:var(--moss);font-size:.97rem;line-height:1.8;margin-top:1.2rem;max-width:580px;}
+.section-body{color:var(--moss);font-size:1rem;line-height:1.8;margin-top:1.2rem;max-width:580px;}
 .btn{display:inline-flex;align-items:center;gap:.55rem;padding:.85rem 2rem;border-radius:100px;font-family:var(--font-b);font-size:.8rem;letter-spacing:.1em;text-transform:uppercase;font-weight:400;cursor:pointer;border:none;text-decoration:none;transition:all .3s var(--ease-spring);position:relative;overflow:hidden;}
 .btn::before{content:'';position:absolute;inset:0;background:rgba(255,255,255,.12);opacity:0;transition:opacity .3s;}
 .btn:hover::before{opacity:1;}
@@ -158,8 +160,14 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .footer-links-list a:hover{color:var(--gold-light);}
 .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;font-size:.72rem;color:rgba(247,242,232,.25);}
 .footer-bottom em{font-style:italic;color:rgba(228,201,126,.4);}
+.footer-socials{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem;}
+.social-icon-link{font-size:1.1rem;text-decoration:none;opacity:.7;transition:opacity .2s;display:inline-block;}
+.social-icon-link:hover{opacity:1;}
 .admin-footer-link{color:rgba(247,242,232,.1)!important;font-size:.65rem!important;letter-spacing:.1em;text-transform:uppercase;transition:color .3s!important;cursor:pointer;}
 .admin-footer-link:hover{color:rgba(201,162,74,.35)!important;}
+.skeleton{background:linear-gradient(90deg,var(--cream-dark) 25%,var(--mist) 50%,var(--cream-dark) 75%);background-size:200% 100%;animation:skeleton-shimmer 1.4s infinite;}
+@keyframes skeleton-shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+.loading-card{background:var(--mist);border-radius:20px;min-height:320px;display:flex;align-items:center;justify-content:center;color:var(--sage-light);font-size:.85rem;letter-spacing:.08em;text-transform:uppercase;}
 .toast{position:fixed;bottom:2rem;right:2rem;background:var(--forest);color:var(--cream);padding:1rem 1.5rem;border-radius:12px;font-size:.84rem;display:flex;align-items:center;gap:.7rem;box-shadow:0 12px 32px rgba(27,58,42,.35);z-index:2000;transform:translateY(80px);opacity:0;transition:transform .5s var(--ease-spring),opacity .4s;border-left:3px solid var(--gold);pointer-events:none;max-width:320px;}
 .toast.show{transform:translateY(0);opacity:1;pointer-events:all;}
 /* HOME */
@@ -173,14 +181,14 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .hero-h1{font-family:var(--font-d);font-size:clamp(3.6rem,10vw,8rem);font-weight:300;line-height:1;color:var(--forest);margin-bottom:.25rem;letter-spacing:-.02em;opacity:0;animation:fadeUp 1s .4s forwards;}
 .hero-h1 em{font-style:italic;color:var(--sage);}
 .hero-sub{font-family:var(--font-d);font-size:clamp(.9rem,2vw,1.3rem);font-weight:400;color:var(--gold);letter-spacing:.28em;text-transform:uppercase;margin-bottom:2rem;opacity:0;animation:fadeUp 1s .6s forwards;}
-.hero-desc{max-width:520px;margin:0 auto 2.8rem;font-size:clamp(.9rem,1.5vw,1rem);color:var(--moss);line-height:1.85;font-weight:300;opacity:0;animation:fadeUp 1s .8s forwards;}
+.hero-desc{max-width:520px;margin:0 auto 2.8rem;font-size:clamp(1rem,1.5vw,1.05rem);color:var(--moss);line-height:1.85;font-weight:300;opacity:0;animation:fadeUp 1s .8s forwards;}
 .hero-btns{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;opacity:0;animation:fadeUp 1s 1s forwards;}
 .hero-stats{display:flex;gap:2.5rem;justify-content:center;flex-wrap:wrap;margin-top:3.5rem;opacity:0;animation:fadeUp 1s 1.2s forwards;}
 .hero-stat{text-align:center;}
 .hero-stat-num{font-family:var(--font-d);font-size:2rem;font-weight:400;color:var(--forest);display:block;line-height:1;}
 .hero-stat-label{font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--sage-light);margin-top:.2rem;display:block;}
 .hero-stat-sep{width:1px;background:rgba(78,122,94,.2);align-self:stretch;}
-.scroll-arrow{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;opacity:0;animation:fadeUp 1s 1.5s forwards;}
+.scroll-arrow{position:absolute;bottom:1.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:.5rem;opacity:0;animation:fadeUp 1s 1.5s forwards;}
 .scroll-arrow span{font-size:.6rem;letter-spacing:.25em;text-transform:uppercase;color:var(--sage-light);}
 .scroll-line{width:1px;height:44px;background:linear-gradient(to bottom,var(--sage-light),transparent);animation:line-pulse 2.2s ease-in-out infinite;}
 @keyframes line-pulse{0%,100%{opacity:.35;}50%{opacity:1;}}
@@ -215,7 +223,7 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .cp-title{font-family:var(--font-d);font-size:1.3rem;font-weight:400;margin-bottom:.6rem;line-height:1.25;}
 .cp-1 .cp-title{color:var(--cream);}
 .cp-2 .cp-title,.cp-3 .cp-title{color:var(--forest);}
-.cp-desc{font-size:.82rem;line-height:1.7;}
+.cp-desc{font-size:.9rem;line-height:1.7;}
 .cp-1 .cp-desc{color:rgba(247,242,232,.6);}
 .cp-2 .cp-desc,.cp-3 .cp-desc{color:var(--sage);}
 .cp-chip{display:inline-block;margin-top:1.1rem;padding:.22rem .8rem;border-radius:100px;font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;}
@@ -229,7 +237,7 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .page-hero-eyebrow{font-size:.68rem;letter-spacing:.3em;text-transform:uppercase;color:var(--gold);font-weight:500;margin-bottom:1rem;display:block;}
 .page-hero-h1{font-family:var(--font-d);font-size:clamp(2.8rem,6vw,5rem);font-weight:300;line-height:1.08;color:var(--forest);}
 .page-hero-h1 em{font-style:italic;color:var(--sage);}
-.page-hero-desc{color:var(--moss);font-size:.97rem;line-height:1.8;margin-top:1.2rem;}
+.page-hero-desc{color:var(--moss);font-size:1rem;line-height:1.8;margin-top:1.2rem;}
 .page-hero-aside{background:var(--forest);border-radius:20px;padding:2.5rem;color:var(--cream);}
 .pha-quote{font-family:var(--font-i);font-style:italic;font-size:1.15rem;line-height:1.7;color:var(--gold-light);margin-bottom:1.5rem;padding-left:1rem;border-left:2px solid rgba(201,162,74,.4);}
 .pha-list{list-style:none;}
@@ -243,10 +251,10 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .vision-card:hover::after{transform:scaleX(1);}
 .vc-icon{font-size:2rem;margin-bottom:1rem;display:block;}
 .vc-title{font-family:var(--font-d);font-size:1.2rem;color:var(--forest);margin-bottom:.5rem;font-weight:400;}
-.vc-text{font-size:.82rem;color:var(--sage);line-height:1.7;}
+.vc-text{font-size:.9rem;color:var(--sage);line-height:1.7;}
 .identity-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
 .identity-list{list-style:none;margin-top:1.5rem;}
-.identity-list li{display:flex;gap:1rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid rgba(78,122,94,.1);font-size:.9rem;color:var(--moss);}
+.identity-list li{display:flex;gap:1rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid rgba(78,122,94,.1);font-size:1rem;color:var(--moss);}
 .icheck{width:24px;height:24px;border-radius:50%;background:rgba(78,122,94,.12);display:flex;align-items:center;justify-content:center;color:var(--sage);font-size:.7rem;flex-shrink:0;margin-top:.1rem;}
 .icheck.no{background:rgba(201,162,74,.1);color:var(--gold);}
 .about-big-card{background:linear-gradient(145deg,var(--forest),var(--moss));border-radius:20px;padding:3rem;position:relative;overflow:hidden;}
@@ -270,7 +278,7 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .dc-n{font-family:var(--font-d);font-size:4rem;font-weight:300;position:absolute;top:.8rem;right:1.2rem;color:rgba(247,242,232,.06);line-height:1;}
 .dc-icon{font-size:1.8rem;margin-bottom:1rem;}
 .dc-name{font-family:var(--font-d);font-size:1.4rem;font-weight:400;color:var(--cream);margin-bottom:.7rem;line-height:1.25;}
-.dc-text{font-size:.84rem;color:rgba(247,242,232,.57);line-height:1.75;}
+.dc-text{font-size:.9rem;color:rgba(247,242,232,.57);line-height:1.75;}
 .dc-badge{display:inline-block;margin-top:1.2rem;padding:.25rem .85rem;border-radius:100px;font-size:.62rem;letter-spacing:.15em;text-transform:uppercase;}
 .dc-1 .dc-badge{background:rgba(78,122,94,.35);color:var(--sage-light);}
 .dc-2 .dc-badge{background:rgba(201,162,74,.25);color:var(--gold-light);}
@@ -302,7 +310,7 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .exp-step{font-family:var(--font-d);font-size:2.5rem;font-weight:300;color:rgba(78,122,94,.2);line-height:1;margin-bottom:.8rem;}
 .exp-icon{font-size:1.6rem;margin-bottom:.7rem;display:block;}
 .exp-title{font-family:var(--font-d);font-size:1.15rem;color:var(--forest);margin-bottom:.4rem;font-weight:400;}
-.exp-text{font-size:.8rem;color:var(--sage);line-height:1.7;}
+.exp-text{font-size:.9rem;color:var(--sage);line-height:1.7;}
 .future-sessions{padding:5rem 0;}
 .future-header{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:1rem;margin-bottom:2.5rem;}
 .sessions-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.3rem;}
@@ -478,17 +486,35 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
 .con-icon-gold{background:rgba(201,162,74,.12);}
 .con-icon-forest{background:rgba(27,58,42,.08);}
 .con-title{font-family:var(--font-d);font-size:1.2rem;color:var(--forest);margin-bottom:.5rem;font-weight:400;}
-.con-text{font-size:.82rem;color:var(--sage);line-height:1.7;}
+.con-text{font-size:.9rem;color:var(--sage);line-height:1.7;}
 .why-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;}
 .why-points{list-style:none;margin-top:1.5rem;}
 .why-points li{display:flex;gap:1rem;align-items:flex-start;padding:1rem 0;border-bottom:1px solid rgba(78,122,94,.1);}
 .why-num{font-family:var(--font-d);font-size:1.5rem;color:rgba(78,122,94,.25);font-weight:400;line-height:1;flex-shrink:0;min-width:2rem;}
 .why-text strong{display:block;font-size:.9rem;font-weight:500;color:var(--forest);margin-bottom:.2rem;}
-.why-text span{font-size:.82rem;color:var(--sage);}
+.why-text span{font-size:.9rem;color:var(--sage);}
 .why-card{background:var(--forest);border-radius:20px;padding:3rem;position:relative;overflow:hidden;}
 .why-card::before{content:'';position:absolute;bottom:-60px;right:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(201,162,74,.15),transparent 70%);}
 .why-card-quote{font-family:var(--font-i);font-style:italic;font-size:1.2rem;color:var(--gold-light);line-height:1.7;margin-bottom:1.5rem;}
 .why-card-meta{font-size:.75rem;color:rgba(247,242,232,.4);letter-spacing:.08em;text-transform:uppercase;border-top:1px solid rgba(255,255,255,.07);padding-top:1rem;}
+/* Partner section */
+.partner-section{padding:5rem 0;background:var(--cream-dark);}
+.partner-header{max-width:600px;margin:0 auto 3rem;text-align:center;}
+.partner-layout{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:start;}
+.partner-types{display:grid;grid-template-columns:1fr 1fr;gap:1rem;}
+.partner-type-card{background:var(--white);border-radius:14px;padding:1.4rem 1.2rem;border:1px solid rgba(78,122,94,.1);transition:transform .3s,box-shadow .3s;}
+.partner-type-card:hover{transform:translateY(-3px);box-shadow:0 10px 28px rgba(27,58,42,.08);}
+.ptc-icon{font-size:1.6rem;margin-bottom:.5rem;}
+.ptc-title{font-family:var(--font-d);font-size:1rem;color:var(--forest);font-weight:400;margin-bottom:.25rem;}
+.ptc-desc{font-size:.82rem;color:var(--sage);line-height:1.6;}
+.partner-form-wrap{position:sticky;top:90px;}
+.partner-form-card{background:var(--white);border-radius:20px;padding:2.4rem;border:1px solid rgba(78,122,94,.12);box-shadow:0 12px 40px rgba(27,58,42,.08);position:relative;overflow:hidden;}
+.partner-form-card::before{content:'';position:absolute;top:0;left:0;right:0;height:4px;background:linear-gradient(90deg,var(--gold),var(--sage-light),var(--gold));}
+.pfc-badge{display:inline-block;background:rgba(78,122,94,.1);color:var(--sage);font-size:.65rem;letter-spacing:.18em;text-transform:uppercase;padding:.3rem .9rem;border-radius:100px;margin-bottom:.9rem;}
+.pfc-title{font-family:var(--font-d);font-size:1.5rem;color:var(--forest);font-weight:400;margin-bottom:.3rem;}
+.pfc-sub{font-size:.88rem;color:var(--sage);margin-bottom:1.4rem;line-height:1.6;}
+@media(max-width:900px){.partner-layout{grid-template-columns:1fr;gap:2.5rem;}.partner-form-wrap{position:static;}}
+@media(max-width:600px){.partner-types{grid-template-columns:1fr;}}
 /* ADMIN LOGIN */
 .admin-login-overlay{position:fixed;inset:0;background:rgba(8,14,10,.95);backdrop-filter:blur(16px);z-index:1500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s;}
 .admin-login-overlay.open{opacity:1;pointer-events:all;}
@@ -525,7 +551,7 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
 .role-editor{background:rgba(78,122,94,.25);color:var(--sage-light);}
 .adm-nav{list-style:none;padding:1rem .75rem;flex:1;}
 .adm-nav li{margin-bottom:.15rem;}
-.adm-nav-btn{width:100%;display:flex;align-items:center;gap:.75rem;padding:.62rem .85rem;border-radius:8px;background:none;border:none;cursor:pointer;font-family:var(--font-b);font-size:.78rem;color:var(--adm-muted);letter-spacing:.04em;transition:background .2s,color .2s;text-align:left;}
+.adm-nav-btn{width:100%;display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:8px;background:none;border:none;cursor:pointer;font-family:var(--font-b);font-size:.82rem;color:rgba(232,237,233,.65);letter-spacing:.04em;transition:background .2s,color .2s;text-align:left;}
 .adm-nav-btn:hover{background:rgba(255,255,255,.06);color:var(--adm-text);}
 .adm-nav-btn.active{background:rgba(201,162,74,.15);color:var(--gold-light);}
 .adm-nav-btn .nav-icon{font-size:1rem;width:20px;text-align:center;flex-shrink:0;}
@@ -541,17 +567,17 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
 .adm-panel{display:none;}
 .adm-panel.active{display:block;}
 .adm-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:2rem;flex-wrap:wrap;gap:1rem;}
-.adm-page-title{font-family:var(--font-d);font-size:1.8rem;color:var(--adm-text);font-weight:300;}
+.adm-page-title{font-family:var(--font-d);font-size:2rem;color:var(--adm-text);font-weight:300;}
 .adm-page-title em{font-style:italic;color:var(--gold-light);}
 .adm-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:1.5rem;}
 .adm-stat-card{background:var(--adm-card);border:1px solid var(--adm-border);border-radius:12px;padding:1.2rem 1.4rem;}
-.adm-stat-num{font-family:var(--font-d);font-size:2.2rem;color:var(--adm-text);font-weight:300;line-height:1;display:block;margin-bottom:.2rem;}
+.adm-stat-num{font-family:var(--font-d);font-size:2.5rem;color:var(--adm-text);font-weight:300;line-height:1;display:block;margin-bottom:.2rem;}
 .adm-stat-label{font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--adm-muted);}
 .adm-stat-icon{font-size:1.2rem;float:right;margin-top:-.2rem;}
 .adm-card{background:var(--adm-card);border:1px solid var(--adm-border);border-radius:12px;padding:1.5rem;margin-bottom:1.5rem;}
-.adm-card-title{font-family:var(--font-d);font-size:1.05rem;color:var(--adm-text);font-weight:400;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;}
-.adm-label{display:block;font-size:.63rem;letter-spacing:.14em;text-transform:uppercase;color:var(--adm-muted);margin-bottom:.4rem;font-weight:500;}
-.adm-field{width:100%;padding:.7rem .9rem;background:rgba(255,255,255,.05);border:1px solid var(--adm-border);border-radius:8px;color:var(--adm-text);font-family:var(--font-b);font-size:.85rem;outline:none;appearance:none;transition:border-color .3s;margin-bottom:1rem;}
+.adm-card-title{font-family:var(--font-d);font-size:1.15rem;color:var(--adm-text);font-weight:500;margin-bottom:1rem;display:flex;align-items:center;justify-content:space-between;gap:.5rem;flex-wrap:wrap;}
+.adm-label{display:block;font-size:.67rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,237,233,.7);margin-bottom:.4rem;font-weight:600;}
+.adm-field{width:100%;padding:.75rem .9rem;background:rgba(255,255,255,.07);border:1px solid rgba(78,122,94,.35);border-radius:8px;color:var(--adm-text);font-family:var(--font-b);font-size:.9rem;outline:none;appearance:none;transition:border-color .3s;margin-bottom:1rem;}
 .adm-field:focus{border-color:rgba(201,162,74,.5);}
 .adm-field::placeholder{color:rgba(232,237,233,.25);}
 .adm-field option{background:var(--adm-card);color:var(--adm-text);}
@@ -569,8 +595,8 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
 .adm-btn-success:hover{background:rgba(78,122,94,.3);}
 .adm-btn-sm{padding:.32rem .72rem;font-size:.66rem;}
 .adm-table{width:100%;border-collapse:collapse;}
-.adm-table th{font-size:.59rem;letter-spacing:.16em;text-transform:uppercase;color:var(--adm-muted);font-weight:500;text-align:left;padding:.5rem .75rem;border-bottom:1px solid var(--adm-border);}
-.adm-table td{font-size:.78rem;color:var(--adm-text);padding:.72rem .75rem;border-bottom:1px solid rgba(78,122,94,.07);vertical-align:middle;}
+.adm-table th{font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:rgba(232,237,233,.75);font-weight:600;text-align:left;padding:.55rem .75rem;border-bottom:1px solid var(--adm-border);}
+.adm-table td{font-size:.84rem;color:var(--adm-text);padding:.8rem .75rem;border-bottom:1px solid rgba(78,122,94,.1);vertical-align:middle;}
 .adm-table tr:last-child td{border:none;}
 .adm-table tr:hover td{background:rgba(255,255,255,.02);}
 .adm-status{display:inline-block;padding:.2rem .65rem;border-radius:100px;font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;font-weight:500;}
@@ -585,7 +611,7 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
 .adm-photo-overlay{position:absolute;inset:0;background:rgba(13,22,16,.88);opacity:0;transition:opacity .25s;display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;padding:.5rem;}
 .adm-photo-item:hover .adm-photo-overlay{opacity:1;}
 .adm-photo-meta{padding:.6rem .75rem;background:var(--adm-card);}
-.adm-photo-caption{font-size:.7rem;color:var(--adm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.adm-photo-caption{font-size:.75rem;color:var(--adm-text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .adm-photo-status-row{display:flex;align-items:center;justify-content:space-between;margin-top:.3rem;}
 .adm-upload-area{border:2px dashed var(--adm-border);border-radius:12px;padding:2rem;text-align:center;cursor:pointer;transition:border-color .3s,background .3s;margin-bottom:1rem;}
 .adm-upload-area:hover{border-color:rgba(201,162,74,.4);background:rgba(201,162,74,.04);}
@@ -615,9 +641,15 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
 .dsub-header{display:flex;justify-content:space-between;align-items:flex-start;gap:.5rem;flex-wrap:wrap;margin-bottom:.5rem;}
 .dsub-name{font-size:.85rem;color:var(--adm-text);font-weight:400;}
 .dsub-amount{font-family:var(--font-d);font-size:1.1rem;color:var(--gold-light);}
-.dsub-meta{font-size:.72rem;color:var(--adm-muted);line-height:1.6;}
+.dsub-meta{font-size:.76rem;color:rgba(232,237,233,.65);line-height:1.6;}
 .dsub-img{width:48px;height:48px;border-radius:6px;object-fit:cover;border:1px solid var(--adm-border);}
 .event-poster-preview{width:100%;max-height:150px;object-fit:cover;border-radius:8px;margin-top:.5rem;display:block;}
+.adm-loading{display:flex;align-items:center;justify-content:center;padding:3rem;color:var(--adm-muted);gap:.75rem;font-size:.85rem;}
+.adm-loading-spinner{width:20px;height:20px;border:2px solid rgba(78,122,94,.3);border-top-color:var(--sage);border-radius:50%;animation:spin .8s linear infinite;flex-shrink:0;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.adm-refresh-btn{display:inline-flex;align-items:center;gap:.4rem;padding:.38rem .75rem;border-radius:6px;background:rgba(255,255,255,.05);border:1px solid var(--adm-border);color:var(--adm-muted);font-family:var(--font-b);font-size:.7rem;cursor:pointer;transition:all .2s;letter-spacing:.04em;}
+.adm-refresh-btn:hover{background:rgba(255,255,255,.1);color:var(--adm-text);}
+.adm-refresh-btn.spinning .refresh-icon{display:inline-block;animation:spin .6s linear infinite;}
 .sb-indicator{display:inline-flex;align-items:center;gap:.4rem;font-size:.7rem;color:var(--adm-muted);padding:.3rem .7rem;border-radius:100px;background:rgba(255,255,255,.04);border:1px solid var(--adm-border);}
 .sb-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;background:rgba(255,255,255,.2);}
 .sb-dot.connected{background:#4c9a6a;box-shadow:0 0 6px rgba(76,154,106,.5);}
@@ -648,7 +680,7 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
   .hero-btns{flex-direction:column;align-items:center;}.home-pillars{grid-template-columns:1fr;}
   .event-meta-grid,.fg-row{grid-template-columns:1fr;}
   .footer-bottom{flex-direction:column;text-align:center;}
-  .lb-nav{display:none;}.dsn-line{width:24px;}
+  .lb-nav{display:none;}.dsn-line{width:24px;}.scroll-arrow{display:none!important;}
 }
 </style>
 </head>
@@ -726,7 +758,7 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
       <ul style="list-style:none;margin-top:2rem;" class="reveal rd3">
         <li style="display:flex;gap:.8rem;align-items:center;padding:.7rem 0;border-bottom:1px solid rgba(78,122,94,.12);font-size:.9rem;color:var(--moss);"><span style="color:var(--sage);">✓</span> Open to everyone</li>
         <li style="display:flex;gap:.8rem;align-items:center;padding:.7rem 0;border-bottom:1px solid rgba(78,122,94,.12);font-size:.9rem;color:var(--moss);"><span style="color:var(--sage);">✓</span> 40–60 min of worship, prayer &amp; sharing</li>
-        <li style="display:flex;gap:.8rem;align-items:center;padding:.7rem 0;border-bottom:1px solid rgba(78,122,94,.12);font-size:.9rem;color:var(--moss);"><span style="color:var(--sage);">✓</span> Free. No dress code. Just come.</li>
+        <li style="display:flex;gap:.8rem;align-items:center;padding:.7rem 0;border-bottom:1px solid rgba(78,122,94,.12);font-size:.9rem;color:var(--moss);"><span style="color:var(--sage);">✓</span> Free entry. Come as you are.</li>
       </ul>
       <div style="margin-top:2rem;display:flex;gap:1rem;flex-wrap:wrap;" class="reveal rd4">
         <button class="btn btn-primary" onclick="navigate('join')">Reserve My Spot →</button>
@@ -803,7 +835,7 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
   </div></div></section>
   <div class="gallery-tabs"><div class="container"><div class="tabs-inner"><button class="tab-btn active" onclick="filterGallery('all',this)">All Moments</button><button class="tab-btn" onclick="filterGallery('worship',this)">Worship</button><button class="tab-btn" onclick="filterGallery('prayer',this)">Prayer</button><button class="tab-btn" onclick="filterGallery('community',this)">Community</button><button class="tab-btn" onclick="filterGallery('behind',this)">Behind the Scenes</button></div></div></div>
   <section class="gallery-section" id="gallery-grid-sec"><div class="container"><div id="gallery-masonry" class="gallery-masonry"></div><div id="gallery-empty" class="gallery-empty" style="display:none;"><div style="font-size:3rem;margin-bottom:1rem;">📷</div><p style="font-family:'Cormorant Garamond',serif;font-size:1.3rem;color:var(--forest);margin-bottom:.5rem;">Photos coming soon</p><p>Session photos will appear here after each gathering.</p></div></div></section>
-  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><a href="#" class="footer-logo" onclick="navigate('home');return false;"><div class="footer-logo-mark"></div><span class="footer-logo-text">The Green House</span></a><p class="footer-tagline">"Pause, breathe, worship."</p><div class="footer-info-box" id="footer-gallery-contact">📅 Quarterly · Friday · 7–8pm</div></div><div><p class="fc-title">Navigate</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('home');return false;">Home</a></li><li><a href="#" onclick="navigate('events');return false;">Events</a></li><li><a href="#" onclick="navigate('join');return false;">Join Us</a></li><li><a href="#" onclick="navigate('donate');return false;">Support Us</a></li></ul></div><div><p class="fc-title">Community</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('about');return false;">Our Vision</a></li></ul></div><div><p class="fc-title">Get Involved</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('join');return false;">Register</a></li><li><a href="#" class="admin-footer-link" onclick="openAdminLogin();return false;">Admin</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 The Green House</span><span>Made with <em>♥</em> for the Lord's presence</span></div></div></footer>
+  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><a href="#" class="footer-logo" onclick="navigate('home');return false;"><div class="footer-logo-mark"></div><span class="footer-logo-text">The Green House</span></a><p class="footer-tagline">"Pause, breathe, worship."</p><div class="footer-info-box" id="footer-gallery-contact">📅 Quarterly · Friday · 7–8pm</div></div><div><p class="fc-title">Navigate</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('home');return false;">Home</a></li><li><a href="#" onclick="navigate('about');return false;">About</a></li><li><a href="#" onclick="navigate('gallery');return false;">Gallery</a></li><li><a href="#" onclick="navigate('events');return false;">Events</a></li><li><a href="#" onclick="navigate('donate');return false;">Support Us</a></li><li><a href="#" onclick="navigate('join');return false;">Join Us</a></li></ul></div><div><p class="fc-title">Community</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('about');return false;">Our Vision</a></li></ul></div><div><p class="fc-title">Get Involved</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('join');return false;">Register</a></li><li><a href="#" class="admin-footer-link" onclick="openAdminLogin();return false;">Admin</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 The Green House</span><span>Made with <em>♥</em> for the Lord's presence</span></div></div></footer>
 </div>
 
 <!-- ═══════ EVENTS ═══════ -->
@@ -815,7 +847,7 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
   <section class="events-expect"><div class="container"><div style="text-align:center;max-width:500px;margin:0 auto 1rem;"><span class="section-eyebrow reveal">A Typical Evening</span><h2 class="section-title reveal rd1">What happens at<br/>a <em>session?</em></h2></div><div class="expect-grid"><div class="exp-card reveal rd1"><span class="exp-icon">🚪</span><div class="exp-step">01</div><h3 class="exp-title">Arrive &amp; Settle</h3><p class="exp-text">Come as you are. No dress code, no programme, no pressure.</p></div><div class="exp-card reveal rd2"><span class="exp-icon">🎵</span><div class="exp-step">02</div><h3 class="exp-title">Worship Together</h3><p class="exp-text">Songs, hymns and spontaneous worship led by rotating voices. Real and unpolished.</p></div><div class="exp-card reveal rd3"><span class="exp-icon">🙏</span><div class="exp-step">03</div><h3 class="exp-title">Pray &amp; Reflect</h3><p class="exp-text">Space to pray together and share what's on your heart.</p></div><div class="exp-card reveal rd4"><span class="exp-icon">💬</span><div class="exp-step">04</div><h3 class="exp-title">Share &amp; Connect</h3><p class="exp-text">Laugh, encourage, share testimonies. The informal moments are often the most life-giving.</p></div><div class="exp-card reveal rd5"><span class="exp-icon">🌿</span><div class="exp-step">05</div><h3 class="exp-title">Leave Recharged</h3><p class="exp-text">40–60 minutes max. Short enough not to feel heavy, meaningful enough to leave you refreshed.</p></div><div class="exp-card reveal"><span class="exp-icon">📅</span><div class="exp-step">06</div><h3 class="exp-title">See You Next Quarter</h3><p class="exp-text">Four times a year. A rhythm you can actually keep.</p></div></div></div></section>
   <section class="future-sessions" id="future-sec"><div class="container"><div class="future-header"><div><span class="section-eyebrow reveal">2026 Sessions</span><h2 class="section-title reveal rd1">All Upcoming<br/><em>Gatherings</em></h2></div><div class="reveal rd2"><button class="btn btn-ghost" onclick="navigate('join')">Get Notified</button></div></div><div class="sessions-grid" id="sessions-grid"></div></div></section>
   <section class="events-cta-banner"><div class="container"><div class="ecb-inner"><div class="ecb-text reveal"><h3>Don't miss<br/><em id="ecb-session-name">our next session</em></h3><p id="ecb-session-detail">Register now to receive location details.</p></div><div style="display:flex;gap:1rem;flex-wrap:wrap;" class="reveal rd2"><button class="btn btn-gold" onclick="navigate('join')">Reserve My Spot ✦</button><a href="https://wa.me/?text=Join%20The%20Green%20House!" class="btn btn-outline-light" target="_blank">Share on WhatsApp</a></div></div></div></section>
-  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><a href="#" class="footer-logo" onclick="navigate('home');return false;"><div class="footer-logo-mark"></div><span class="footer-logo-text">The Green House</span></a><p class="footer-tagline">"Pause, breathe, worship."</p><div class="footer-info-box" id="footer-events-contact">📅 Quarterly · Friday · 7–8pm</div></div><div><p class="fc-title">Navigate</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('home');return false;">Home</a></li><li><a href="#" onclick="navigate('about');return false;">About</a></li><li><a href="#" onclick="navigate('events');return false;">Events</a></li><li><a href="#" onclick="navigate('join');return false;">Join Us</a></li><li><a href="#" onclick="navigate('donate');return false;">Support Us</a></li></ul></div><div><p class="fc-title">Community</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('about');return false;">Our Vision</a></li></ul></div><div><p class="fc-title">Get Involved</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('join');return false;">Register</a></li><li><a href="#" class="admin-footer-link" onclick="openAdminLogin();return false;">Admin</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 The Green House</span><span>Made with <em>♥</em> for the Lord's presence</span></div></div></footer>
+  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><a href="#" class="footer-logo" onclick="navigate('home');return false;"><div class="footer-logo-mark"></div><span class="footer-logo-text">The Green House</span></a><p class="footer-tagline">"Pause, breathe, worship."</p><div class="footer-info-box" id="footer-events-contact">📅 Quarterly · Friday · 7–8pm</div></div><div><p class="fc-title">Navigate</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('home');return false;">Home</a></li><li><a href="#" onclick="navigate('about');return false;">About</a></li><li><a href="#" onclick="navigate('gallery');return false;">Gallery</a></li><li><a href="#" onclick="navigate('events');return false;">Events</a></li><li><a href="#" onclick="navigate('donate');return false;">Support Us</a></li><li><a href="#" onclick="navigate('join');return false;">Join Us</a></li></ul></div><div><p class="fc-title">Community</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('about');return false;">Our Vision</a></li></ul></div><div><p class="fc-title">Get Involved</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('join');return false;">Register</a></li><li><a href="#" class="admin-footer-link" onclick="openAdminLogin();return false;">Admin</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 The Green House</span><span>Made with <em>♥</em> for the Lord's presence</span></div></div></footer>
 </div>
 
 <!-- ═══════ DONATE ═══════ -->
@@ -831,6 +863,7 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
       <div class="donate-stat-card"><div class="donate-stat-icon">🌿</div><div><span class="donate-stat-label">Community Type</span><span class="donate-stat-val">100% Self-Funded</span></div></div>
       <div class="donate-stat-card"><div class="donate-stat-icon">🎯</div><div><span class="donate-stat-label">Contributions Go To</span><span class="donate-stat-val">Venue, Sound &amp; Community</span></div></div>
       <div class="donate-stat-card"><div class="donate-stat-icon">🔒</div><div><span class="donate-stat-label">Privacy</span><span class="donate-stat-val">Anonymous options respected</span></div></div>
+      <div class="donate-stat-card" style="cursor:pointer;" onclick="document.getElementById('partner-section').scrollIntoView({behavior:'smooth'})"><div class="donate-stat-icon">🤝</div><div><span class="donate-stat-label">Also Available</span><span class="donate-stat-val">Vendor & Partnership Enquiries</span></div></div>
     </div>
   </div></div></section>
   <section class="donate-body" id="donate-wizard"><div class="container">
@@ -922,14 +955,92 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
           <div class="dt-anon-note" id="dt-anon-note" style="display:none;"><span>🔒</span><span>Your contribution has been recorded anonymously. We will not share or mention your name.</span></div>
           <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
             <button class="btn btn-primary" onclick="navigate('home')">Back to Home</button>
-            <a href="https://wa.me/?text=I%20just%20supported%20The%20Green%20House%20worship%20community%20%E2%99%A5" class="btn btn-ghost" target="_blank">Share on WhatsApp</a>
+            <a href="https://wa.me/?text=I%20just%20supported%20The%20Green%20House%20worship%20community%20%E2%99%A5%20" + encodeURIComponent(window.location.origin) class="btn btn-ghost" target="_blank">Share on WhatsApp</a>
             <button class="btn btn-ghost" onclick="resetDonateWizard()">Donate Again</button>
           </div>
         </div>
       </div>
     </div>
   </div></section>
-  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><a href="#" class="footer-logo" onclick="navigate('home');return false;"><div class="footer-logo-mark"></div><span class="footer-logo-text">The Green House</span></a><p class="footer-tagline">"Pause, breathe, worship."</p><div class="footer-info-box" id="footer-donate-contact">📅 Quarterly · Friday · 7–8pm</div></div><div><p class="fc-title">Navigate</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('home');return false;">Home</a></li><li><a href="#" onclick="navigate('events');return false;">Events</a></li><li><a href="#" onclick="navigate('join');return false;">Join Us</a></li></ul></div><div><p class="fc-title">Community</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('about');return false;">Our Vision</a></li></ul></div><div><p class="fc-title">Get Involved</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('join');return false;">Register</a></li><li><a href="#" class="admin-footer-link" onclick="openAdminLogin();return false;">Admin</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 The Green House</span><span>Made with <em>♥</em> for the Lord's presence</span></div></div></footer>
+  <!-- Partnership Section -->
+  <section class="partner-section" id="partner-section"><div class="container">
+    <div class="partner-header">
+      <span class="section-eyebrow reveal">Work With Us</span>
+      <h2 class="section-title reveal rd1">Partner with<br/><em>The Green House</em></h2>
+      <p class="section-body reveal rd2">We welcome partnerships with vendors, service providers and organisations who share our values. Whether you offer sound equipment, venue spaces, catering, photography, or want to sponsor a session — we'd love to hear from you.</p>
+    </div>
+    <div class="partner-layout">
+      <div class="partner-types reveal rd1">
+        <div class="partner-type-card">
+          <div class="ptc-icon">🎵</div>
+          <div class="ptc-title">Sound &amp; AV</div>
+          <div class="ptc-desc">PA systems, instruments, recording and live sound engineering for sessions</div>
+        </div>
+        <div class="partner-type-card">
+          <div class="ptc-icon">📍</div>
+          <div class="ptc-title">Venue Provision</div>
+          <div class="ptc-desc">Spaces for 50–200 people across Nairobi — indoor or outdoor welcomed</div>
+        </div>
+        <div class="partner-type-card">
+          <div class="ptc-icon">📸</div>
+          <div class="ptc-title">Photography &amp; Film</div>
+          <div class="ptc-desc">Session coverage, short reels, testimonials and community storytelling</div>
+        </div>
+        <div class="partner-type-card">
+          <div class="ptc-icon">🌿</div>
+          <div class="ptc-title">Session Sponsor</div>
+          <div class="ptc-desc">Help cover venue, sound or logistics costs for one or more quarterly sessions</div>
+        </div>
+        <div class="partner-type-card">
+          <div class="ptc-icon">🍽️</div>
+          <div class="ptc-title">Catering &amp; Refreshments</div>
+          <div class="ptc-desc">Light refreshments, drinks or snacks to create a welcoming atmosphere</div>
+        </div>
+        <div class="partner-type-card">
+          <div class="ptc-icon">🤝</div>
+          <div class="ptc-title">General Vendor</div>
+          <div class="ptc-desc">Any other service or product that could support or enrich The Green House</div>
+        </div>
+      </div>
+      <div class="partner-form-wrap reveal rd2">
+        <div class="partner-form-card">
+          <div class="pfc-badge">Partnership Enquiry</div>
+          <h3 class="pfc-title">Let's work together</h3>
+          <p class="pfc-sub">Tell us who you are and how you'd like to work with us. We'll get back to you within 3 business days.</p>
+          <div id="pt-success" style="display:none;text-align:center;padding:2rem 1rem;">
+            <div style="font-size:2.5rem;margin-bottom:.75rem;">🌿</div>
+            <h4 style="font-family:var(--font-d);font-size:1.4rem;color:var(--forest);margin-bottom:.5rem;">Thank you!</h4>
+            <p style="color:var(--sage);">We've received your enquiry and will be in touch soon.</p>
+          </div>
+          <div id="pt-form-body">
+            <div class="fg-row">
+              <div class="fg"><label>Name / Organisation *</label><input type="text" id="pt-name" placeholder="Jane Wanjiku / Sound Studio"/></div>
+              <div class="fg"><label>Email *</label><input type="email" id="pt-email" placeholder="hello@example.com"/></div>
+            </div>
+            <div class="fg-row">
+              <div class="fg"><label>Phone (optional)</label><input type="tel" id="pt-phone" placeholder="+254 7XX XXX XXX"/></div>
+              <div class="fg"><label>Partnership Type *</label>
+                <select id="pt-type">
+                  <option value="">Select type...</option>
+                  <option>Sound &amp; AV Equipment / Services</option>
+                  <option>Venue Provider</option>
+                  <option>Photography &amp; Videography</option>
+                  <option>Catering &amp; Refreshments</option>
+                  <option>Session Sponsorship</option>
+                  <option>General Supplier / Vendor</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="fg"><label>Tell Us More *</label><textarea id="pt-message" placeholder="Describe your services or how you'd like to partner with us..."></textarea></div>
+            <button class="btn btn-primary" id="pt-submit-btn" style="width:100%;justify-content:center;" onclick="submitPartnerEnquiry()">Send Partnership Enquiry ✦</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div></section>
+
+  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><a href="#" class="footer-logo" onclick="navigate('home');return false;"><div class="footer-logo-mark"></div><span class="footer-logo-text">The Green House</span></a><p class="footer-tagline">"Pause, breathe, worship."</p><div class="footer-info-box" id="footer-donate-contact">📅 Quarterly · Friday · 7–8pm</div></div><div><p class="fc-title">Navigate</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('home');return false;">Home</a></li><li><a href="#" onclick="navigate('about');return false;">About</a></li><li><a href="#" onclick="navigate('gallery');return false;">Gallery</a></li><li><a href="#" onclick="navigate('events');return false;">Events</a></li><li><a href="#" onclick="navigate('donate');return false;">Support Us</a></li><li><a href="#" onclick="navigate('join');return false;">Join Us</a></li></ul></div><div><p class="fc-title">Community</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('about');return false;">Our Vision</a></li></ul></div><div><p class="fc-title">Get Involved</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('join');return false;">Register</a></li><li><a href="#" class="admin-footer-link" onclick="openAdminLogin();return false;">Admin</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 The Green House</span><span>Made with <em>♥</em> for the Lord's presence</span></div></div></footer>
 </div>
 
 <!-- ═══════ JOIN ═══════ -->
@@ -965,14 +1076,15 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
           <div class="fg"><label>Anything you'd like us to know? (optional)</label><textarea id="jf-note" placeholder="Tell us a bit about yourself..."></textarea></div>
           <div class="fg-check"><input type="checkbox" id="jf-wa"/><label for="jf-wa">Add me to The Green House WhatsApp broadcast for session updates and location details.</label></div>
           <div class="fg-check"><input type="checkbox" id="jf-agree"/><label for="jf-agree">I understand this is a free, open community session and my details will only be used for Green House updates.</label></div>
-          <button class="btn btn-primary" style="width:100%;justify-content:center;padding:1rem;" onclick="submitJoinForm()">I'm Coming — Reserve My Spot ✦</button>
+          <div class="fg-check"><input type="checkbox" id="jf-photo-consent"/><label for="jf-photo-consent">I consent to photography and filming during the session. Images may be used on The Green House website and social media.</label></div>
+          <button class="btn btn-primary"  style="width:100%;justify-content:center;padding:1rem;" onclick="submitJoinForm()">I'm Coming — Reserve My Spot ✦</button>
         </div>
         <div class="form-success-state" id="join-success">
           <div class="success-circle">🌿</div>
           <h4>You're Registered!</h4>
           <p>We're so glad you're coming. Location details will be sent closer to the date. 🙏</p>
           <div style="margin-top:1.5rem;display:flex;gap:.7rem;flex-wrap:wrap;justify-content:center;">
-            <a href="https://wa.me/?text=I%20just%20registered%20for%20The%20Green%20House%20-%20come%20join%20us!" class="btn btn-gold" target="_blank">Share on WhatsApp</a>
+            <a href="https://wa.me/?text=I%20just%20registered%20for%20The%20Green%20House%20%F0%9F%8C%BF%20Join%20us%3A%20" + encodeURIComponent(window.location.origin) class="btn btn-gold" target="_blank">Share on WhatsApp</a>
             <button class="btn btn-ghost" onclick="navigate('events')">View All Sessions</button>
           </div>
         </div>
@@ -990,7 +1102,7 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
       <div style="margin-top:2rem;"><button class="btn btn-gold" onclick="window.scrollTo({top:0,behavior:'smooth'})">Register Now ✦</button></div>
     </div>
   </div></div></section>
-  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><a href="#" class="footer-logo" onclick="navigate('home');return false;"><div class="footer-logo-mark"></div><span class="footer-logo-text">The Green House</span></a><p class="footer-tagline">"Pause, breathe, worship."</p><div class="footer-info-box" id="footer-join-contact">📅 Quarterly · Friday · 7–8pm</div></div><div><p class="fc-title">Navigate</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('home');return false;">Home</a></li><li><a href="#" onclick="navigate('about');return false;">About</a></li><li><a href="#" onclick="navigate('gallery');return false;">Gallery</a></li><li><a href="#" onclick="navigate('events');return false;">Events</a></li><li><a href="#" onclick="navigate('donate');return false;">Support Us</a></li></ul></div><div><p class="fc-title">Community</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('about');return false;">Our Vision</a></li></ul></div><div><p class="fc-title">Get Involved</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('join');return false;">Register</a></li><li><a href="#" onclick="navigate('donate');return false;">Donate</a></li><li><a href="#" class="admin-footer-link" onclick="openAdminLogin();return false;">Admin</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 The Green House</span><span>Made with <em>♥</em> for the Lord's presence</span></div></div></footer>
+  <footer class="site-footer"><div class="container"><div class="footer-grid"><div><a href="#" class="footer-logo" onclick="navigate('home');return false;"><div class="footer-logo-mark"></div><span class="footer-logo-text">The Green House</span></a><p class="footer-tagline">"Pause, breathe, worship."</p><div class="footer-info-box" id="footer-join-contact">📅 Quarterly · Friday · 7–8pm</div></div><div><p class="fc-title">Navigate</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('home');return false;">Home</a></li><li><a href="#" onclick="navigate('about');return false;">About</a></li><li><a href="#" onclick="navigate('gallery');return false;">Gallery</a></li><li><a href="#" onclick="navigate('events');return false;">Events</a></li><li><a href="#" onclick="navigate('donate');return false;">Support Us</a></li><li><a href="#" onclick="navigate('join');return false;">Join Us</a></li></ul></div><div><p class="fc-title">Community</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('about');return false;">Our Vision</a></li></ul></div><div><p class="fc-title">Get Involved</p><ul class="footer-links-list"><li><a href="#" onclick="navigate('join');return false;">Register</a></li><li><a href="#" onclick="navigate('donate');return false;">Donate</a></li><li><a href="#" class="admin-footer-link" onclick="openAdminLogin();return false;">Admin</a></li></ul></div></div><div class="footer-bottom"><span>© 2026 The Green House</span><span>Made with <em>♥</em> for the Lord's presence</span></div></div></footer>
 </div>
 
 <!-- ADMIN LOGIN -->
@@ -1036,6 +1148,9 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
         <div class="adm-topbar">
           <h1 class="adm-page-title">Overview <em>Dashboard</em></h1>
           <div style="display:flex;gap:.75rem;align-items:center;flex-wrap:wrap;">
+            <button class="adm-refresh-btn" id="adm-refresh-btn" onclick="refreshAdmPanel()" title="Refresh data">
+              <span class="refresh-icon">↻</span> Refresh
+            </button>
             <div class="sb-indicator"><div class="sb-dot" id="sb-dot"></div><span id="sb-status-text">Local Storage</span></div>
             <button class="adm-btn adm-btn-secondary" onclick="exitAdmin();navigate('home');">← View Public Site</button>
           </div>
@@ -1078,6 +1193,11 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
             </div>
             <div id="evt-poster-preview" style="display:none;margin-top:.5rem;"><img id="evt-poster-img" class="event-poster-preview" alt="Poster"/><button class="adm-btn adm-btn-danger adm-btn-sm" style="margin-top:.4rem;" onclick="clearPoster()">✕ Remove</button></div>
           </div>
+          <div class="adm-grid-3" style="margin-top:.5rem;">
+            <div><label class="adm-label">Entry Fee</label><input class="adm-field" id="evt-entry-fee" placeholder="Free" value="Free"/></div>
+            <div><label class="adm-label">Dress Code</label><input class="adm-field" id="evt-dresscode" placeholder="None / Casual / Smart Casual..." value="None"/></div>
+            <div><label class="adm-label">Capacity Limit</label><input class="adm-field" type="number" id="evt-capacity" placeholder="Leave blank for unlimited" min="1"/></div>
+          </div>
           <div style="display:flex;gap:1.5rem;align-items:center;flex-wrap:wrap;margin-top:.5rem;">
             <label class="adm-toggle" onclick="toggleEvtPub()"><div class="toggle-track on" id="evt-pub-track"><div class="toggle-thumb"></div></div><span class="toggle-label">Published (visible on site)</span></label>
             <label class="adm-toggle" onclick="toggleEvtFeat()"><div class="toggle-track on" id="evt-feat-track"><div class="toggle-thumb"></div></div><span class="toggle-label">Featured (next event card)</span></label>
@@ -1118,14 +1238,33 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
             <select class="reg-filter-select" id="reg-filter-role" onchange="renderRegistrationsTable()"><option value="">All Roles</option><option>Attending as a guest</option><option>Vocalist — interested in participating</option><option>Instrumentalist — interested in participating</option><option>I'd like to support the vision (inner circle)</option></select>
             <span class="reg-count" id="reg-count-label"></span>
           </div>
-          <div style="overflow-x:auto;"><table class="adm-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Event</th><th>WA</th><th>Date</th><th></th></tr></thead><tbody id="regs-tbody"></tbody></table></div>
+          <div style="overflow-x:auto;"><table class="adm-table"><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Event</th><th>WA</th><th>📷</th><th>Date</th><th></th></tr></thead><tbody id="regs-tbody"></tbody></table></div>
           <div id="regs-empty" style="text-align:center;padding:2rem;color:var(--adm-muted);font-size:.82rem;display:none;">No registrations yet.</div>
         </div>
       </div>
 
       <!-- DONATIONS -->
       <div class="adm-panel" id="adm-donations">
-        <div class="adm-topbar"><h1 class="adm-page-title">Donation <em>Submissions</em></h1><button class="adm-btn adm-btn-secondary" onclick="exportDonationsCSV()">⬇ Export CSV</button></div>
+        <div class="adm-topbar"><h1 class="adm-page-title">Donation <em>Submissions</em></h1><button class="adm-btn adm-btn-secondary" onclick="exportDonationsCSV()">⬇ Export Filtered CSV</button></div>
+        <div class="adm-card" style="padding:1rem 1.5rem;">
+          <div class="reg-filter-row">
+            <select class="reg-filter-select" id="don-filter-cause" onchange="renderDonationsList()">
+              <option value="">All Causes</option>
+              <option value="general">General Fund</option>
+              <option value="event">Specific Event</option>
+              <option value="project">Special Project</option>
+              <option value="partnership">Partnership Enquiry</option>
+            </select>
+            <select class="reg-filter-select" id="don-filter-status" onchange="renderDonationsList()">
+              <option value="">All Statuses</option>
+              <option value="pending">Pending</option>
+              <option value="verified">Verified</option>
+            </select>
+            <input class="reg-filter-select" type="date" id="don-filter-from" onchange="renderDonationsList()" placeholder="From date" title="From date"/>
+            <input class="reg-filter-select" type="date" id="don-filter-to" onchange="renderDonationsList()" placeholder="To date" title="To date"/>
+            <span class="reg-count" id="don-count-label"></span>
+          </div>
+        </div>
         <div class="adm-notify info">💛 These are self-reported donation evidences. Verify transactions against your M-Pesa statement.</div>
         <div class="adm-card"><div class="adm-card-title">All Submissions <span style="font-size:.7rem;color:var(--adm-muted);" id="donations-count-label"></span></div>
           <div id="donations-list"></div>
@@ -1171,13 +1310,21 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
           </div>
           <div class="adm-grid-2">
             <div><label class="adm-label">Instagram Handle</label><input class="adm-field" id="cfg-instagram" placeholder="@thegreenhousenairobi"/></div>
-            <div><label class="adm-label">Facebook Page</label><input class="adm-field" id="cfg-facebook" placeholder="The Green House Nairobi"/></div>
+            <div><label class="adm-label">Facebook Page URL / Handle</label><input class="adm-field" id="cfg-facebook" placeholder="thegreenhousenairobi"/></div>
+          </div>
+          <div class="adm-grid-2">
+            <div><label class="adm-label">TikTok Handle</label><input class="adm-field" id="cfg-tiktok" placeholder="@thegreenhousenairobi"/></div>
+            <div><label class="adm-label">YouTube Channel URL</label><input class="adm-field" id="cfg-youtube" placeholder="https://youtube.com/@thegreenhousenairobi"/></div>
+          </div>
+          <div class="adm-grid-2">
+            <div><label class="adm-label">WhatsApp / Call Number</label><input class="adm-field" id="cfg-call" placeholder="+254 7XX XXX XXX"/></div>
+            <div><!-- placeholder for layout --></div>
           </div>
           <div class="adm-grid-2">
             <div><label class="adm-label">City / Location</label><input class="adm-field" id="cfg-city" placeholder="Nairobi, Kenya"/></div>
             <div><label class="adm-label">Copyright Name</label><input class="adm-field" id="cfg-copyright" placeholder="The Green House"/></div>
           </div>
-          <button class="adm-btn adm-btn-primary" onclick="saveSiteConfig()">Save Contact Info</button>
+          <button class="adm-btn adm-btn-primary" id="save-contact-btn" onclick="saveSiteConfig()">Save Contact Info</button>
         </div>
 
         <!-- Donation Config -->
@@ -1196,14 +1343,14 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
             <div><label class="adm-label">Recipient / Account Name</label><input class="adm-field" id="cfg-mpesa-name" placeholder="e.g. John Doe or The Green House"/></div>
             <div><label class="adm-label">Account Number (paybill only)</label><input class="adm-field" id="cfg-mpesa-account" placeholder="e.g. 1463782863652 (leave blank for phone/till)"/></div>
           </div>
-          <button class="adm-btn adm-btn-primary" onclick="saveDonationConfig()">Save Donation Config</button>
+          <button class="adm-btn adm-btn-primary" id="save-donation-btn" onclick="saveDonationConfig()">Save Donation Config</button>
         </div>
 
         <!-- Projects -->
         <div class="adm-card">
           <div class="adm-card-title">🎯 Donation Projects / Causes <button class="adm-btn adm-btn-secondary adm-btn-sm" onclick="openAddProject()">+ Add Project</button></div>
           <div id="projects-list"></div>
-          <div id="add-project-form" style="display:none;background:rgba(255,255,255,.04);border-radius:8px;padding:1rem;margin-top:.75rem;border:1px solid var(--adm-border);">
+          <div id="add-project-form" style="display:none;background:rgba(255,255,255,.04);border-radius:8px;padding:1rem;margin-top:.75rem;border:1px solid var(--adm-border);"><input type="hidden" id="proj-edit-id"/>
             <div class="adm-grid-2">
               <div><label class="adm-label">Project Name</label><input class="adm-field" id="proj-name" placeholder="e.g. Sound Equipment Fund"/></div>
               <div><label class="adm-label">Target Amount (KES, optional)</label><input class="adm-field" type="number" id="proj-target" placeholder="e.g. 50000"/></div>
@@ -1225,13 +1372,31 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
 
         <!-- Change Password -->
         <div class="adm-card">
-          <div class="adm-card-title">🔑 Change Your Password</div>
-          <div class="adm-grid-3">
-            <div><label class="adm-label">Current Password</label><input class="adm-field" type="password" id="current-pw" placeholder="Current password"/></div>
-            <div><label class="adm-label">New Password (min 8 chars)</label><input class="adm-field" type="password" id="new-pw" placeholder="New password"/></div>
-            <div><label class="adm-label">Confirm New Password</label><input class="adm-field" type="password" id="confirm-pw" placeholder="Confirm"/></div>
+          <div class="adm-card-title">🔑 Password Management</div>
+          <div class="adm-notify info" style="margin-bottom:1rem;">Passwords are hashed with SHA-256 + unique random salt. Plain text is never stored.</div>
+
+          <div style="margin-bottom:1.5rem;padding-bottom:1.5rem;border-bottom:1px solid var(--adm-border);">
+            <div class="adm-label" style="margin-bottom:.75rem;font-size:.75rem;">Your Password (current account: <span id="pw-current-user" style="color:var(--gold);"></span>)</div>
+            <div class="adm-grid-3">
+              <div><label class="adm-label">Current Password</label><input class="adm-field" type="password" id="current-pw" placeholder="Current password"/></div>
+              <div><label class="adm-label">New Password (min 8 chars)</label><input class="adm-field" type="password" id="new-pw" placeholder="New password"/></div>
+              <div><label class="adm-label">Confirm New Password</label><input class="adm-field" type="password" id="confirm-pw" placeholder="Confirm"/></div>
+            </div>
+            <button class="adm-btn adm-btn-primary" onclick="changeMyPassword()">Update My Password</button>
           </div>
-          <button class="adm-btn adm-btn-primary" onclick="changeMyPassword()">Update Password</button>
+
+          <div id="other-account-pw-section">
+            <div class="adm-label" style="margin-bottom:.75rem;font-size:.75rem;">Other Account Password (Super Admin only)</div>
+            <div class="adm-grid-2" style="margin-bottom:.75rem;">
+              <div><label class="adm-label">Account</label>
+                <select class="adm-field" id="other-account-select">
+                  <option value="">Select account...</option>
+                </select>
+              </div>
+              <div><label class="adm-label">New Password (min 8 chars)</label><input class="adm-field" type="password" id="other-pw" placeholder="New password for selected account"/></div>
+            </div>
+            <button class="adm-btn adm-btn-secondary" onclick="changeOtherPassword()">Update Selected Account's Password</button>
+          </div>
         </div>
 
         <!-- Danger Zone -->
@@ -1313,18 +1478,28 @@ const DB = {
     const sb = getSupabaseClient();
     if (sb) {
       const { data, error } = await sb.from(table).select('*').order('created_at', { ascending: false });
-      if (error) { console.error('Supabase get error:', error); return []; }
+      if (error) {
+        console.error('Supabase get error on', table, error.message);
+        // In production, do NOT fall back to localStorage for data tables
+        if (window.__GH_SUPABASE) return [];
+        // In dev, fall back so offline work is possible
+        return JSON.parse(localStorage.getItem('gh_' + table) || '[]');
+      }
       return data || [];
     }
+    // Dev / offline mode — use localStorage
     return JSON.parse(localStorage.getItem('gh_' + table) || '[]');
   },
   async insert(table, row) {
     const sb = getSupabaseClient();
     if (sb) {
-      const { data, error } = await sb.from(table).insert([row]).select().single();
-      if (error) throw error;
+      // Always use Supabase when connected
+      const newRow = { ...row, id: row.id || (table + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,5)), created_at: row.created_at || new Date().toISOString() };
+      const { data, error } = await sb.from(table).insert([newRow]).select().single();
+      if (error) { console.error('Supabase insert error on', table, error.message); throw error; }
       return data;
     }
+    // Dev/offline mode
     const arr = JSON.parse(localStorage.getItem('gh_' + table) || '[]');
     const newRow = { ...row, id: table + '_' + Date.now() + '_' + Math.random().toString(36).slice(2,5), created_at: new Date().toISOString() };
     arr.unshift(newRow);
@@ -1335,7 +1510,7 @@ const DB = {
     const sb = getSupabaseClient();
     if (sb) {
       const { error } = await sb.from(table).update(updates).eq('id', id);
-      if (error) throw error;
+      if (error) { console.error('Supabase update error on', table, error.message); throw error; }
       return;
     }
     const arr = JSON.parse(localStorage.getItem('gh_' + table) || '[]');
@@ -1347,16 +1522,42 @@ const DB = {
     const sb = getSupabaseClient();
     if (sb) {
       const { error } = await sb.from(table).delete().eq('id', id);
-      if (error) throw error;
+      if (error) { console.error('Supabase delete error on', table, error.message); throw error; }
       return;
     }
     const arr = JSON.parse(localStorage.getItem('gh_' + table) || '[]').filter(r => r.id !== id);
     localStorage.setItem('gh_' + table, JSON.stringify(arr));
   },
+  // In-memory config cache — populated by loadSiteConfig() on init
+  _cfg: {},
   getConfig(key, def) {
+    if (key in this._cfg) return this._cfg[key];
+    // Supabase-key and localStorage-key fields (sb_url, sb_key) stay in localStorage
     try { const v = localStorage.getItem('gh_cfg_' + key); return v !== null ? JSON.parse(v) : def; } catch { return def; }
   },
-  setConfig(key, val) { localStorage.setItem('gh_cfg_' + key, JSON.stringify(val)); }
+  setConfig(key, val) {
+    this._cfg[key] = val;
+    // Always mirror to localStorage so non-Supabase fields work offline
+    localStorage.setItem('gh_cfg_' + key, JSON.stringify(val));
+  },
+  async loadFromDB() {
+    const sb = getSupabaseClient();
+    if (!sb) return; // dev mode — localStorage already used
+    try {
+      const { data, error } = await sb.from('site_config').select('key,value');
+      if (error || !data) return;
+      data.forEach(row => {
+        try { this._cfg[row.key] = JSON.parse(row.value); } catch { this._cfg[row.key] = row.value; }
+      });
+    } catch (e) { console.warn('Could not load site_config from Supabase:', e.message); }
+  },
+  async saveConfigToDB(key, val) {
+    const sb = getSupabaseClient();
+    if (!sb) return; // handled by localStorage mirror above
+    try {
+      await sb.from('site_config').upsert({ key, value: JSON.stringify(val) }, { onConflict: 'key' });
+    } catch (e) { console.warn('Could not save config to Supabase:', e.message); }
+  }
 };
 
 /* ═══════════════════════════════════════════════════════
@@ -1379,7 +1580,13 @@ async function verifyPassword(pw, hash, salt) { return (await hashPassword(pw, s
 let currentAdminSession = null;
 
 function saveSession(account) {
-  const s = { username: account.username, displayName: account.displayName, role: account.role, exp: Date.now() + 8*3600*1000 };
+  // Supabase returns snake_case (display_name), localStorage uses camelCase (displayName)
+  const s = {
+    username:    account.username,
+    displayName: account.displayName || account.display_name || account.username,
+    role:        account.role,
+    exp:         Date.now() + 8 * 3600 * 1000
+  };
   sessionStorage.setItem('gh_admin_session', JSON.stringify(s));
   currentAdminSession = s;
 }
@@ -1405,8 +1612,10 @@ function hasRole(required) {
    SEED DEFAULT DATA
    ═══════════════════════════════════════════════════════ */
 async function seedDefaults() {
-  /* Seed accounts */
-  if (!localStorage.getItem('gh_accounts')) {
+  /* Seed accounts — only in dev (no Supabase). In production,
+     accounts live in the Supabase admin_accounts table.
+     Run the SQL in DEPLOY.md to seed accounts on first deploy. */
+  if (!getSupabaseClient() && !localStorage.getItem('gh_accounts')) {
     const s1 = genSalt(), s2 = genSalt();
     const h1 = await hashPassword('greenhouse2026', s1);
     const h2 = await hashPassword('editor2026', s2);
@@ -1457,6 +1666,8 @@ function navigate(page) {
   document.querySelectorAll('.nav-link[data-page]').forEach(a => a.classList.toggle('active', a.dataset.page === page));
   updateNavTheme();
   setTimeout(initReveals, 60);
+  setTimeout(initReveals, 400);
+  setTimeout(initReveals, 900);
   if (page === 'events') renderEventsPage();
   if (page === 'gallery') renderGallery(true);
   if (page === 'home') renderHomeFeaturedEvent();
@@ -1490,9 +1701,14 @@ function closeMobileNav() {
   document.body.style.overflow = '';
 }
 function initReveals() {
-  const obs = new IntersectionObserver(e => {
-    e.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); obs.unobserve(e.target); } });
-  }, { threshold: 0.1 });
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in');
+        obs.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0, rootMargin: '0px 0px -40px 0px' });
   document.querySelectorAll('.page.active .reveal:not(.in)').forEach(el => obs.observe(el));
 }
 function toggleFaq(el) {
@@ -1566,7 +1782,8 @@ function buildEventCard(event, cdPrefix) {
         <div class="emeta"><div class="emeta-icon">📅</div><div><div class="emeta-label">Date</div><div class="emeta-val">${formatDate(event.date)}</div></div></div>
         <div class="emeta"><div class="emeta-icon">🕖</div><div><div class="emeta-label">Time</div><div class="emeta-val">${formatTime(event.time)} – ${formatTime(event.endTime)}</div></div></div>
         <div class="emeta"><div class="emeta-icon">📍</div><div><div class="emeta-label">Location</div><div class="emeta-val">${event.venue}${event.area?', '+event.area:''}</div></div></div>
-        <div class="emeta"><div class="emeta-icon">🎫</div><div><div class="emeta-label">Entry</div><div class="emeta-val">Free · All Welcome</div></div></div>
+        <div class="emeta"><div class="emeta-icon">🎫</div><div><div class="emeta-label">Entry</div><div class="emeta-val">${event.entryFee||'Free'} · All Welcome</div></div></div>
+        <div class="emeta"><div class="emeta-icon">👕</div><div><div class="emeta-label">Dress Code</div><div class="emeta-val">${event.dressCode&&event.dressCode!=='None'?event.dressCode:'Come as you are'}</div></div></div>
       </div>
       ${event.venue==='TBA'?'<div class="event-location-note">📢 Venue will be shared with registered attendees closer to the date.</div>':''}
       <div style="font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(247,242,232,.3);margin-bottom:.5rem;">Counting Down</div>
@@ -1580,7 +1797,7 @@ function buildEventCard(event, cdPrefix) {
         ? '<div style="text-align:center;padding:.8rem;background:var(--red-light);border-radius:10px;font-size:.82rem;color:#e07070;">Registrations are closed for this session.</div>'
         : `<button class="btn btn-gold" style="width:100%;justify-content:center;" onclick="navigate('join')">Reserve My Spot ✦</button>`}
       <div style="display:flex;gap:.7rem;margin-top:1rem;flex-wrap:wrap;">
-        <a href="https://wa.me/?text=Join%20The%20Green%20House%20-%20${encodeURIComponent(event.title)}!" class="share-btn" target="_blank">📲 Share</a>
+        <a href="https://wa.me/?text=Join%20The%20Green%20House%20-%20${encodeURIComponent(event.title)}%20%F0%9F%8C%BF%20${encodeURIComponent(window.location.href)}" class="share-btn" target="_blank">📲 Share</a>
         <button class="share-btn" onclick="copyLink()">🔗 Copy Link</button>
       </div>
     </div>
@@ -1594,7 +1811,15 @@ async function renderHomeFeaturedEvent() {
   countdownTargets = countdownTargets.filter(c => !c.ids[0].startsWith('hcd'));
   const evt = await getFeaturedEvent();
   const card = document.getElementById('home-featured-card');
-  if (card) card.innerHTML = buildEventCard(evt, 'hcd');
+  if (card) {
+    if (!card.innerHTML || card.innerHTML.includes('Loading')) {
+      card.innerHTML = '<div class="loading-card skeleton">Loading event details...</div>';
+    }
+    // Small timeout ensures DOM updates before we re-render
+    requestAnimationFrame(() => {
+      card.innerHTML = buildEventCard(evt, 'hcd');
+    });
+  }
   if (evt) {
     const h = document.getElementById('home-event-heading');
     const d = document.getElementById('home-event-desc');
@@ -1605,13 +1830,48 @@ async function renderHomeFeaturedEvent() {
 }
 
 function renderSiteContactInfo() {
-  const wa = DB.getConfig('site_whatsapp','');
-  const email = DB.getConfig('site_email','');
-  const city = DB.getConfig('site_city','Nairobi, Kenya');
-  const base = `📅 Quarterly · Friday · 7–8pm<br/>📍 Rotating venues, ${city}${wa?'<br/>📲 '+wa:''}${email?'<br/>✉ '+email:''}`;
-  ['footer-contact-box','footer-about-contact','footer-gallery-contact','footer-events-contact','footer-donate-contact','footer-join-contact'].forEach(id => {
-    const el = document.getElementById(id); if (el) el.innerHTML = base + '<br/>🎫 Free &amp; open to all';
+  const wa        = DB.getConfig('site_whatsapp','');
+  const callNum   = DB.getConfig('site_call', wa); // fall back to WA number for calls
+  const email     = DB.getConfig('site_email','');
+  const instagram = DB.getConfig('site_instagram','');
+  const facebook  = DB.getConfig('site_facebook','');
+  const tiktok    = DB.getConfig('site_tiktok','');
+  const youtube   = DB.getConfig('site_youtube','');
+  const city      = DB.getConfig('site_city','Nairobi, Kenya');
+  const copyright = DB.getConfig('site_copyright','The Green House');
+
+  // Build social icons row
+  const socials = [];
+  if (wa)        socials.push(`<a href="https://wa.me/${wa.replace(/[^0-9]/g,'')}" target="_blank" class="social-icon-link" title="WhatsApp">📲</a>`);
+  if (email)     socials.push(`<a href="mailto:${email}" class="social-icon-link" title="Email">✉️</a>`);
+  if (instagram) socials.push(`<a href="https://instagram.com/${instagram.replace('@','')}" target="_blank" class="social-icon-link" title="Instagram">📸</a>`);
+  if (facebook)  socials.push(`<a href="https://facebook.com/${facebook.replace('@','')}" target="_blank" class="social-icon-link" title="Facebook">🌐</a>`);
+  if (tiktok)    socials.push(`<a href="https://tiktok.com/${tiktok.replace('@','')}" target="_blank" class="social-icon-link" title="TikTok">🎵</a>`);
+  if (youtube)   socials.push(`<a href="${youtube.startsWith('http') ? youtube : 'https://youtube.com/@'+youtube.replace('@','')}" target="_blank" class="social-icon-link" title="YouTube">▶️</a>`);
+
+  const socialsHtml = socials.length
+    ? `<div class="footer-socials">${socials.join('')}</div>`
+    : '';
+
+  const info = [
+    '📅 Quarterly · Friday · 7–8pm',
+    `📍 Rotating venues, ${city}`,
+    wa        ? `📲 <a href="https://wa.me/${wa.replace(/[^0-9]/g,'')}" style="color:inherit;">${wa}</a>` : '',
+    email     ? `✉ <a href="mailto:${email}" style="color:inherit;">${email}</a>` : '',
+  ].filter(Boolean).join('<br/>');
+
+  const base = info + '<br/>🎫 Free &amp; open to all' + (socialsHtml ? '<br/>' + socialsHtml : '');
+
+  ['footer-contact-box','footer-about-contact','footer-gallery-contact',
+   'footer-events-contact','footer-donate-contact','footer-join-contact'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.innerHTML = base;
   });
+
+  // Update copyright spans
+  document.querySelectorAll('.footer-bottom span:first-child').forEach(el => {
+    if (el.textContent.includes('© 2026')) el.textContent = `© ${new Date().getFullYear()} ${copyright}`;
+  });
+
   const dt = document.getElementById('home-donate-title');
   const dd = document.getElementById('home-donate-desc');
   if (dt) dt.textContent = DB.getConfig('donate_title','Help Keep the Vision Alive');
@@ -1642,7 +1902,7 @@ async function renderEventsPage() {
         ${e.posterSrc?`<img src="${e.posterSrc}" style="width:100%;height:100px;object-fit:cover;border-radius:8px 8px 0 0;margin:-1.8rem -1.8rem 1rem;display:block;" alt=""/>`:''}
         <div class="sc-date">${formatDate(e.date)}</div>
         <div class="sc-name">${e.title}</div>
-        <div class="sc-details">${formatTime(e.time)} – ${formatTime(e.endTime)} · ${e.venue}${e.area?', '+e.area:''}</div>
+        <div class="sc-details">${formatTime(e.time)} – ${formatTime(e.endTime)} · ${e.venue}${e.area?', '+e.area:''}<br/>${e.entryFee||'Free'} entry · ${e.dressCode&&e.dressCode!=='None'?e.dressCode:'Come as you are'}</div>
         ${badge}
       </div>`;
     }).join('');
@@ -1736,6 +1996,7 @@ function clearJoinForm() {
   const source = document.getElementById('jf-source'); if (source) source.value  = '';
   const wa     = document.getElementById('jf-wa');     if (wa)     wa.checked    = false;
   const agree  = document.getElementById('jf-agree');  if (agree)  agree.checked = false;
+  const photo  = document.getElementById('jf-photo-consent'); if (photo) photo.checked  = false;
 }
 
 async function populateRegEventSelect() {
@@ -1788,10 +2049,14 @@ async function submitJoinForm() {
   const email = document.getElementById('jf-email').value.trim();
   const role = document.getElementById('jf-role').value;
   const agree = document.getElementById('jf-agree').checked;
-  if (!fname || !lname) { showToast('Please enter your full name.'); return; }
-  if (!email || !email.includes('@')) { showToast('Please enter a valid email address.'); return; }
-  if (!role) { showToast('Please select how you\'re joining.'); return; }
-  if (!agree) { showToast('Please confirm you understand the terms.'); return; }
+  clearFieldErrors(['jf-fname','jf-lname','jf-email','jf-phone','jf-role']);
+  if (!validateRequired(fname)) { showToast('Please enter your first name.'); showFieldError('jf-fname','Required'); return; }
+  if (!validateRequired(lname)) { showToast('Please enter your last name.');  showFieldError('jf-lname','Required'); return; }
+  if (!validateEmail(email))    { showToast('Please enter a valid email address.'); showFieldError('jf-email','Invalid email'); return; }
+  const phone = document.getElementById('jf-phone').value;
+  if (phone && !validatePhone(phone)) { showToast('Please enter a valid Kenyan phone number.'); showFieldError('jf-phone','Invalid phone'); return; }
+  if (!role)  { showToast('Please select how you\'re joining.'); showFieldError('jf-role','Required'); return; }
+  if (!agree) { showToast('Please accept the terms to continue.'); return; }
   let evtTitle = 'General Interest', evtId = eventId || 'general';
   if (eventId) {
     const events = await getEvents();
@@ -1801,6 +2066,8 @@ async function submitJoinForm() {
       evtTitle = evt.title;
     }
   }
+  const submitBtn = document.querySelector('#join-form-body .btn-primary');
+  setBtnState(submitBtn, true, "Reserving your spot...");
   try {
     await DB.insert('registrations', {
       firstName: fname, lastName: lname, email,
@@ -1808,12 +2075,27 @@ async function submitJoinForm() {
       role, source: document.getElementById('jf-source').value,
       note: document.getElementById('jf-note').value.trim(),
       whatsapp: document.getElementById('jf-wa').checked,
+      photoConsent: document.getElementById('jf-photo-consent')?.checked || false,
       eventId: evtId, eventTitle: evtTitle
     });
     document.getElementById('join-form-body').style.display = 'none';
     document.getElementById('join-success').classList.add('show');
     showToast('You\'re registered! 🌿');
+    setBtnState(submitBtn, false, '', 'I\'m Coming — Reserve My Spot ✦');
+    // Auto-lock if capacity reached
+    if (eventId && eventId !== 'general') {
+      const events = await getEvents();
+      const evt = events.find(e => e.id === eventId);
+      if (evt && evt.capacity > 0) {
+        const regCount = (await DB.get('registrations')).filter(r => r.eventId === eventId).length;
+        if (regCount >= evt.capacity) {
+          await DB.update('events', eventId, { registrationsClosed: true });
+          showToast('Session is now full — registrations auto-closed.');
+        }
+      }
+    }
   } catch (e) {
+    setBtnState(submitBtn, false, '', 'I\'m Coming — Reserve My Spot ✦');
     showToast('Registration failed. Please try again.'); console.error(e);
   }
 }
@@ -1842,7 +2124,8 @@ async function populateCauseDropdowns() {
   }
   const projSel = document.getElementById('cause-project-id');
   if (projSel) {
-    const projs = JSON.parse(localStorage.getItem('gh_projects') || '[]');
+    let projs = [];
+    try { projs = await DB.get('projects'); } catch { projs = JSON.parse(localStorage.getItem('gh_projects') || '[]'); }
     projSel.innerHTML = '<option value="">Select project...</option>' + projs.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
   }
 }
@@ -1975,20 +2258,28 @@ function handleEvidenceUpload(input) {
 }
 
 async function submitDonationEvidence() {
+  clearFieldErrors(['d-amount','d-ref']);
   const amount = document.getElementById('d-amount').value;
-  if (!amount || parseFloat(amount) <= 0) { showToast('Please enter the amount you donated.'); return; }
+  const ref    = document.getElementById('d-ref').value.trim();
+  if (!amount || parseFloat(amount) <= 0) { showToast('Please enter the amount you donated.'); showFieldError('d-amount','Required'); return; }
+  if (!ref) { showToast('Please enter your M-Pesa reference code.'); showFieldError('d-ref','Required'); return; }
   const file = document.getElementById('d-evidence-file');
+  const donBtn = document.querySelector('#d-step-3 .btn-gold');
+  setBtnState(donBtn, true, 'Submitting evidence...');
   if (file.files && file.files[0]) {
-    if (file.files[0].size > 5 * 1024 * 1024) { showToast('File too large. Max 5MB.'); return; }
+    if (file.files[0].size > 5 * 1024 * 1024) {
+      setBtnState(donBtn, false, '', 'Submit Evidence ✦');
+      showToast('File too large. Max 5MB.'); return;
+    }
     const r = new FileReader();
-    r.onload = e => _finishDonation(amount, e.target.result);
+    r.onload = e => _finishDonation(amount, e.target.result, donBtn);
     r.readAsDataURL(file.files[0]);
   } else {
-    _finishDonation(amount, '');
+    _finishDonation(amount, '', donBtn);
   }
 }
 
-async function _finishDonation(amount, evidenceSrc) {
+async function _finishDonation(amount, evidenceSrc, donBtn) {
   const anon = document.getElementById('donate-anon').checked;
   let causeName = 'General Fund';
   if (_donCause === 'event' && _donEventId) {
@@ -2017,7 +2308,39 @@ async function _finishDonation(amount, evidenceSrc) {
     const dtAnon = document.getElementById('dt-anon-note');
     if (dtAnon) dtAnon.style.display = anon ? 'flex' : 'none';
     donateGoStep(4);
+    if (donBtn) setBtnState(donBtn, false, '', 'Submit Evidence ✦');
   } catch (e) {
+    if (donBtn) setBtnState(donBtn, false, '', 'Submit Evidence ✦');
+    showToast('Submission failed. Please try again.'); console.error(e);
+  }
+}
+
+async function submitPartnerEnquiry() {
+  const name    = document.getElementById('pt-name')?.value.trim();
+  const email   = document.getElementById('pt-email')?.value.trim();
+  const type    = document.getElementById('pt-type')?.value;
+  const message = document.getElementById('pt-message')?.value.trim();
+  if (!name)              { showToast('Please enter your name or organisation.'); return; }
+  if (!validateEmail(email)) { showToast('Please enter a valid email address.'); return; }
+  if (!type)              { showToast('Please select a partnership type.'); return; }
+  if (!message)           { showToast('Please tell us a bit about your services.'); return; }
+  const btn = document.getElementById('pt-submit-btn');
+  setBtnState(btn, true, 'Sending enquiry...');
+  try {
+    await DB.insert('donations', {
+      anonymous: false, name,
+      phone: document.getElementById('pt-phone')?.value.trim(),
+      amount: 0, reference: '', message,
+      cause: 'partnership', causeName: type,
+      eventId: '', projectId: '', verified: false
+    });
+    const successEl = document.getElementById('pt-success');
+    const formBody  = document.getElementById('pt-form-body');
+    if (successEl) successEl.style.display = 'block';
+    if (formBody)  formBody.style.display  = 'none';
+    showToast('Partnership enquiry sent! 🌿');
+  } catch (e) {
+    setBtnState(btn, false, '', 'Send Partnership Enquiry ✦');
     showToast('Submission failed. Please try again.'); console.error(e);
   }
 }
@@ -2055,14 +2378,50 @@ function handleLoginOverlay(ev) { if (ev.target.id === 'admin-login-overlay') cl
 async function tryAdminLogin() {
   const username = document.getElementById('admin-username-input').value.trim();
   const password = document.getElementById('admin-password-input').value;
-  const errEl = document.getElementById('admin-login-error');
+  const errEl    = document.getElementById('admin-login-error');
   errEl.classList.remove('show');
-  if (!username || !password) { errEl.textContent = 'Please enter username and password.'; errEl.classList.add('show'); return; }
-  const accounts = JSON.parse(localStorage.getItem('gh_accounts') || '[]');
-  const account = accounts.find(a => a.username.toLowerCase() === username.toLowerCase());
-  if (!account) { errEl.textContent = 'Incorrect username or password.'; errEl.classList.add('show'); return; }
-  const valid = await verifyPassword(password, account.passwordHash, account.salt);
-  if (!valid) { errEl.textContent = 'Incorrect username or password.'; errEl.classList.add('show'); return; }
+  if (!username || !password) {
+    errEl.textContent = 'Please enter username and password.';
+    errEl.classList.add('show'); return;
+  }
+
+  let account = null;
+
+  // ── Production path: look up account in Supabase ──────────────
+  const sb = getSupabaseClient();
+  if (sb) {
+    try {
+      const { data, error } = await sb
+        .from('admin_accounts')
+        .select('*')
+        .ilike('username', username)
+        .limit(1)
+        .single();
+      if (!error && data) {
+        account = data;
+      }
+    } catch (e) {
+      console.warn('Supabase account lookup failed, trying localStorage:', e.message);
+    }
+  }
+
+  // ── Dev / offline fallback: localStorage ──────────────────────
+  if (!account) {
+    const localAccounts = JSON.parse(localStorage.getItem('gh_accounts') || '[]');
+    account = localAccounts.find(a => a.username.toLowerCase() === username.toLowerCase()) || null;
+  }
+
+  if (!account) {
+    errEl.textContent = 'Incorrect username or password.';
+    errEl.classList.add('show'); return;
+  }
+
+  const valid = await verifyPassword(password, account.passwordHash || account.password_hash, account.salt);
+  if (!valid) {
+    errEl.textContent = 'Incorrect username or password.';
+    errEl.classList.add('show'); return;
+  }
+
   saveSession(account);
   closeAdminLogin();
   _openAdminDashboard(account);
@@ -2100,12 +2459,27 @@ async function showAdmPanel(name) {
   if (panel) panel.classList.add('active');
   const btn = document.querySelector(`.adm-nav-btn[onclick*="'${name}'"]`);
   if (btn) btn.classList.add('active');
+  await renderAdminPanel(name);
+}
+
+async function renderAdminPanel(name) {
   if (name === 'overview')       await renderAdminOverview();
-  if (name === 'events')         await renderEventsTable();
-  if (name === 'photos')         await renderAdminPhotos();
-  if (name === 'registrations')  await renderRegistrationsTable();
-  if (name === 'donations')      await renderDonationsList();
-  if (name === 'settings')       renderSettings();
+  else if (name === 'events')    await renderEventsTable();
+  else if (name === 'photos')    await renderAdminPhotos();
+  else if (name === 'registrations') await renderRegistrationsTable();
+  else if (name === 'donations') await renderDonationsList();
+  else if (name === 'settings')  renderSettings();
+}
+
+// Expose for refresh buttons in each panel header
+window._currentAdmPanel = 'overview';
+const _origShowAdmPanel = showAdmPanel;
+async function refreshAdmPanel() {
+  const refreshBtn = document.getElementById('adm-refresh-btn');
+  if (refreshBtn) { refreshBtn.classList.add('spinning'); }
+  await renderAdminPanel(window._currentAdmPanel);
+  if (refreshBtn) { refreshBtn.classList.remove('spinning'); }
+  showToast('Refreshed ✦');
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -2195,6 +2569,9 @@ function openEventForm(eventData) {
     document.getElementById('evt-desc').value     = eventData.desc || '';
     _evtPub  = !!eventData.published;
     _evtFeat = !!eventData.featured;
+    setFieldVal('evt-entry-fee',  eventData.entryFee  || 'Free');
+    setFieldVal('evt-dresscode',  eventData.dressCode || 'None');
+    setFieldVal('evt-capacity',   eventData.capacity  || '');
     _evtLock = !!eventData.registrationsClosed;
     _evtPosterSrc = '';
     _evtPosterCleared = false;
@@ -2272,9 +2649,12 @@ async function saveEvent() {
   const time     = document.getElementById('evt-time').value;
   const venue    = document.getElementById('evt-venue').value.trim();
 
-  if (!title) { showToast('Session title is required.'); return; }
-  if (!date)  { showToast('Date is required.'); return; }
-  if (!venue) { showToast('Venue is required.'); return; }
+  clearFieldErrors(['evt-title','evt-date','evt-venue']);
+  if (!validateRequired(title)) { showToast('Session title is required.'); showFieldError('evt-title','Required'); return; }
+  if (!validateRequired(date))  { showToast('Date is required.'); showFieldError('evt-date','Required'); return; }
+  if (!validateRequired(venue)) { showToast('Venue is required.'); showFieldError('evt-venue','Required'); return; }
+  const saveBtn = document.querySelector('#event-form-card .adm-btn-primary');
+  setBtnState(saveBtn, true, editId ? 'Updating...' : 'Creating...');
 
   // Determine poster src
   const prevSrc = editId
@@ -2289,6 +2669,9 @@ async function saveEvent() {
     venue,
     area:                document.getElementById('evt-area').value.trim(),
     desc:                document.getElementById('evt-desc').value.trim(),
+    entryFee:            getFieldVal('evt-entry-fee') || 'Free',
+    dressCode:           getFieldVal('evt-dresscode') || 'None',
+    capacity:            parseInt(getFieldVal('evt-capacity')) || 0,
     published:           _evtPub,
     featured:            _evtFeat,
     registrationsClosed: _evtLock,
@@ -2304,6 +2687,7 @@ async function saveEvent() {
       showToast('Event created ✦');
     }
     _evtPosterSrc = '';
+    setBtnState(saveBtn, false, '', 'Save Event ✦');
     closeEventForm();
     await renderEventsTable();
   } catch (e) {
@@ -2402,7 +2786,7 @@ function handlePhotoFiles(input) {
     if (file.size > 5 * 1024 * 1024) { showToast(`${file.name} exceeds 5MB — skipped.`); return; }
     const r = new FileReader();
     r.onload = e => {
-      _pendingPhotos.push({ src: e.target.result, name: file.name });
+      _pendingPhotos.push({ src: e.target.result, name: file.name, blob: file, type: file.type });
       if (prev) prev.innerHTML += `<div style="position:relative;flex-shrink:0;">
         <img src="${e.target.result}" style="width:72px;height:72px;object-fit:cover;border-radius:8px;border:1px solid var(--adm-border);" alt=""/>
         <div style="position:absolute;bottom:2px;left:0;right:0;text-align:center;font-size:.58rem;color:rgba(232,237,233,.6);background:rgba(0,0,0,.5);border-radius:0 0 8px 8px;padding:2px;">
@@ -2419,11 +2803,28 @@ async function savePhotos() {
   const caption  = document.getElementById('ph-caption').value.trim();
   const category = document.getElementById('ph-category').value || 'worship';
   const session  = document.getElementById('ph-session').value.trim();
+  const sb = getSupabaseClient();
+  let uploaded = 0;
   try {
     for (const p of _pendingPhotos) {
-      await DB.insert('photos', { src: p.src, caption, category, session, approved: true });
+      let srcUrl = p.src; // default: base64 (dev mode)
+      if (sb && p.blob) {
+        // Production: upload to Supabase Storage 'photos' bucket
+        const fileName = `session_${Date.now()}_${Math.random().toString(36).slice(2,7)}.jpg`;
+        const { data: storageData, error: storErr } = await sb.storage
+          .from('photos')
+          .upload(fileName, p.blob, { contentType: p.type || 'image/jpeg', upsert: false });
+        if (storErr) {
+          console.warn('Storage upload failed, using base64:', storErr.message);
+        } else {
+          const { data: urlData } = sb.storage.from('photos').getPublicUrl(storageData.path);
+          srcUrl = urlData.publicUrl;
+        }
+      }
+      await DB.insert('photos', { src: srcUrl, caption, category, session, approved: true });
+      uploaded++;
     }
-    showToast(`${_pendingPhotos.length} photo(s) uploaded ✦`);
+    showToast(`${uploaded} photo(s) uploaded ✦`);
     closePhotoUpload();
     await renderAdminPhotos();
   } catch (e) {
@@ -2523,6 +2924,7 @@ async function renderRegistrationsTable() {
     <td style="font-size:.72rem;">${esc(r.role || '—')}</td>
     <td style="font-size:.75rem;">${esc(r.eventTitle || '—')}</td>
     <td style="text-align:center;">${r.whatsapp ? '✓' : '—'}</td>
+    <td style="text-align:center;">${r.photoConsent ? '✓' : '—'}</td>
     <td style="color:var(--adm-muted);font-size:.7rem;white-space:nowrap;">${formatDateShort(r.created_at?.split('T')[0] || '')}</td>
     <td>${hasRole('superadmin') ? `<button class="adm-btn adm-btn-danger adm-btn-sm" onclick="deleteReg('${r.id}')">✕</button>` : '—'}</td>
   </tr>`).join('');
@@ -2541,11 +2943,12 @@ async function deleteReg(id) {
 function exportCSV() {
   DB.get('registrations').then(regs => {
     if (!regs.length) { showToast('No registrations to export.'); return; }
-    const headers = ['First Name','Last Name','Email','Phone','Role','Event','WhatsApp','Date Registered','Note'];
+    const headers = ['First Name','Last Name','Email','Phone','Role','Event','WhatsApp','Photo Consent','Date Registered','Note'];
     const rows = regs.map(r => [
       r.firstName, r.lastName, r.email, r.phone||'',
       r.role||'', r.eventTitle||'',
       r.whatsapp ? 'Yes' : 'No',
+      r.photoConsent ? 'Yes' : 'No',
       r.created_at?.split('T')[0]||'',
       r.note||''
     ]);
@@ -2559,13 +2962,35 @@ function exportCSV() {
    ═══════════════════════════════════════════════════════ */
 
 async function renderDonationsList() {
-  const donations = await DB.get('donations');
-  const badge = document.getElementById('badge-donations'); if (badge) badge.textContent = donations.length;
+  const allDonations = await DB.get('donations');
+  const badge = document.getElementById('badge-donations'); if (badge) badge.textContent = allDonations.length;
+
+  // Apply filters
+  const filterCause  = document.getElementById('don-filter-cause')?.value  || '';
+  const filterStatus = document.getElementById('don-filter-status')?.value || '';
+  const filterFrom   = document.getElementById('don-filter-from')?.value   || '';
+  const filterTo     = document.getElementById('don-filter-to')?.value     || '';
+  const donations = allDonations.filter(d => {
+    if (filterCause  && d.cause !== filterCause) return false;
+    if (filterStatus === 'verified' && !d.verified) return false;
+    if (filterStatus === 'pending'  && d.verified)  return false;
+    if (filterFrom) {
+      const dDate = (d.created_at || '').split('T')[0];
+      if (dDate && dDate < filterFrom) return false;
+    }
+    if (filterTo) {
+      const dDate = (d.created_at || '').split('T')[0];
+      if (dDate && dDate > filterTo) return false;
+    }
+    return true;
+  });
   const list  = document.getElementById('donations-list');
   const empty = document.getElementById('donations-empty');
   const label = document.getElementById('donations-count-label');
 
   const total = donations.reduce((sum, d) => sum + (parseFloat(d.amount) || 0), 0);
+  const cntLabel = document.getElementById('don-count-label');
+  if (cntLabel) cntLabel.textContent = `${donations.length} of ${allDonations.length} · KES ${total.toLocaleString()} total`;
   if (label) label.textContent = `${donations.length} submissions · KES ${total.toLocaleString()} total`;
 
   if (!list) return;
@@ -2619,7 +3044,20 @@ async function deleteDonation(id) {
 }
 
 function exportDonationsCSV() {
-  DB.get('donations').then(donations => {
+  DB.get('donations').then(allDon => {
+    // Apply same filters as the current view
+    const filterCause  = document.getElementById('don-filter-cause')?.value  || '';
+    const filterStatus = document.getElementById('don-filter-status')?.value || '';
+    const filterFrom   = document.getElementById('don-filter-from')?.value   || '';
+    const filterTo     = document.getElementById('don-filter-to')?.value     || '';
+    const donations = allDon.filter(d => {
+      if (filterCause  && d.cause !== filterCause) return false;
+      if (filterStatus === 'verified' && !d.verified) return false;
+      if (filterStatus === 'pending'  && d.verified)  return false;
+      if (filterFrom) { const dt = (d.created_at||'').split('T')[0]; if (dt && dt < filterFrom) return false; }
+      if (filterTo)   { const dt = (d.created_at||'').split('T')[0]; if (dt && dt > filterTo)   return false; }
+      return true;
+    });
     if (!donations.length) { showToast('No donations to export.'); return; }
     const headers = ['Name','Anonymous','Amount (KES)','Reference','Cause','Event/Project','Phone','Message','Verified','Date'];
     const rows = donations.map(d => [
@@ -2653,8 +3091,11 @@ function renderSettings() {
   // Load contact info
   setFieldVal('cfg-whatsapp', DB.getConfig('site_whatsapp',''));
   setFieldVal('cfg-email',    DB.getConfig('site_email',''));
-  setFieldVal('cfg-instagram',DB.getConfig('site_instagram',''));
-  setFieldVal('cfg-facebook', DB.getConfig('site_facebook',''));
+  setFieldVal('cfg-instagram', DB.getConfig('site_instagram',''));
+  setFieldVal('cfg-facebook',  DB.getConfig('site_facebook',''));
+  setFieldVal('cfg-tiktok',    DB.getConfig('site_tiktok',''));
+  setFieldVal('cfg-youtube',   DB.getConfig('site_youtube',''));
+  setFieldVal('cfg-call',      DB.getConfig('site_call',''));
   setFieldVal('cfg-city',     DB.getConfig('site_city','Nairobi, Kenya'));
   setFieldVal('cfg-copyright',DB.getConfig('site_copyright','The Green House'));
 
@@ -2674,6 +3115,9 @@ function renderSettings() {
 
   // Render accounts
   renderAccountsList();
+
+  // Password panel
+  populatePasswordPanel();
 }
 
 async function saveSupabaseConfig() {
@@ -2708,24 +3152,39 @@ function disconnectSupabase() {
   renderSettings();
 }
 
-function saveSiteConfig() {
-  DB.setConfig('site_whatsapp', getFieldVal('cfg-whatsapp'));
-  DB.setConfig('site_email',    getFieldVal('cfg-email'));
-  DB.setConfig('site_instagram',getFieldVal('cfg-instagram'));
-  DB.setConfig('site_facebook', getFieldVal('cfg-facebook'));
-  DB.setConfig('site_city',     getFieldVal('cfg-city') || 'Nairobi, Kenya');
-  DB.setConfig('site_copyright',getFieldVal('cfg-copyright') || 'The Green House');
+async function saveSiteConfig() {
+  setBtnState('save-contact-btn', true, 'Saving...');
+  const fields = {
+    'site_whatsapp':   getFieldVal('cfg-whatsapp'),
+    'site_call':       getFieldVal('cfg-call'),
+    'site_email':      getFieldVal('cfg-email'),
+    'site_instagram':  getFieldVal('cfg-instagram'),
+    'site_facebook':   getFieldVal('cfg-facebook'),
+    'site_tiktok':     getFieldVal('cfg-tiktok'),
+    'site_youtube':    getFieldVal('cfg-youtube'),
+    'site_city':       getFieldVal('cfg-city') || 'Nairobi, Kenya',
+    'site_copyright':  getFieldVal('cfg-copyright') || 'The Green House',
+  };
+  Object.entries(fields).forEach(([k,v]) => DB.setConfig(k, v));
+  await Promise.all(Object.entries(fields).map(([k,v]) => DB.saveConfigToDB(k,v)));
+  setBtnState('save-contact-btn', false, 'Save Contact Info');
   showToast('Contact info saved ✦');
   renderSiteContactInfo();
 }
 
-function saveDonationConfig() {
-  DB.setConfig('donate_title',   getFieldVal('cfg-donate-title'));
-  DB.setConfig('donate_desc',    getFieldVal('cfg-donate-desc'));
-  DB.setConfig('mpesa_type',     getFieldVal('cfg-mpesa-type'));
-  DB.setConfig('mpesa_num',      getFieldVal('cfg-mpesa-num'));
-  DB.setConfig('mpesa_name',     getFieldVal('cfg-mpesa-name'));
-  DB.setConfig('mpesa_account',  getFieldVal('cfg-mpesa-account'));
+async function saveDonationConfig() {
+  setBtnState('save-donation-btn', true, 'Saving...');
+  const fields = {
+    'donate_title':   getFieldVal('cfg-donate-title'),
+    'donate_desc':    getFieldVal('cfg-donate-desc'),
+    'mpesa_type':     getFieldVal('cfg-mpesa-type'),
+    'mpesa_num':      getFieldVal('cfg-mpesa-num'),
+    'mpesa_name':     getFieldVal('cfg-mpesa-name'),
+    'mpesa_account':  getFieldVal('cfg-mpesa-account'),
+  };
+  Object.entries(fields).forEach(([k,v]) => DB.setConfig(k,v));
+  await Promise.all(Object.entries(fields).map(([k,v]) => DB.saveConfigToDB(k,v)));
+  setBtnState('save-donation-btn', false, 'Save Donation Config');
   showToast('Donation config saved ✦');
 }
 
@@ -2738,8 +3197,10 @@ function toggleDonateEnabled() {
 }
 
 /* Projects */
-function renderProjectsList() {
-  const projs = JSON.parse(localStorage.getItem('gh_projects') || '[]');
+async function renderProjectsList() {
+  // Try DB first (Supabase), fall back to localStorage for legacy data
+  let projs = [];
+  try { projs = await DB.get('projects'); } catch { projs = JSON.parse(localStorage.getItem('gh_projects') || '[]'); }
   const el = document.getElementById('projects-list'); if (!el) return;
   if (!projs.length) { el.innerHTML = '<div style="color:var(--adm-muted);font-size:.82rem;padding:.5rem 0;">No projects yet.</div>'; return; }
   el.innerHTML = projs.map(p => `
@@ -2748,8 +3209,24 @@ function renderProjectsList() {
         <div class="project-item-name">${esc(p.name)}</div>
         <div class="project-item-desc">${esc(p.description||'')}${p.target?' · Target: KES '+Number(p.target).toLocaleString():''}</div>
       </div>
-      <button class="adm-btn adm-btn-danger adm-btn-sm" onclick="deleteProject('${p.id}')">Delete</button>
+      ${hasRole('superadmin') ? `<button class="adm-btn adm-btn-secondary adm-btn-sm" onclick="editProject('${p.id}')">Edit</button>` : ''}
+      ${hasRole('superadmin') ? `<button class="adm-btn adm-btn-danger adm-btn-sm" onclick="deleteProject('${p.id}')">Delete</button>` : ''}
     </div>`).join('');
+}
+
+async function editProject(id) {
+  let projs = [];
+  try { projs = await DB.get('projects'); } catch { projs = JSON.parse(localStorage.getItem('gh_projects') || '[]'); }
+  const proj = projs.find(p => p.id === id);
+  if (!proj) return;
+  document.getElementById('add-project-form').style.display = 'block';
+  const editIdEl = document.getElementById('proj-edit-id'); if (editIdEl) editIdEl.value = id;
+  document.getElementById('proj-name').value    = proj.name || '';
+  document.getElementById('proj-desc').value    = proj.description || '';
+  document.getElementById('proj-target').value  = proj.target || '';
+  const btn = document.querySelector('#add-project-form button[onclick="saveProject()"]');
+  if (btn) btn.textContent = 'Update Project';
+  document.getElementById('add-project-form').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 function openAddProject() {
@@ -2757,69 +3234,186 @@ function openAddProject() {
   if (form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
 }
 
-function saveProject() {
-  const name = document.getElementById('proj-name')?.value.trim();
-  const desc = document.getElementById('proj-desc')?.value.trim();
+async function saveProject() {
+  const editId = document.getElementById('proj-edit-id')?.value || '';
+  const name   = document.getElementById('proj-name')?.value.trim();
+  const desc   = document.getElementById('proj-desc')?.value.trim();
   const target = document.getElementById('proj-target')?.value;
   if (!name) { showToast('Project name is required.'); return; }
-  const projs = JSON.parse(localStorage.getItem('gh_projects') || '[]');
-  projs.push({ id: 'proj_' + Date.now(), name, description: desc, target: parseFloat(target)||0, created_at: new Date().toISOString() });
-  localStorage.setItem('gh_projects', JSON.stringify(projs));
-  showToast('Project added ✦');
-  document.getElementById('add-project-form').style.display = 'none';
-  document.getElementById('proj-name').value = '';
-  document.getElementById('proj-desc').value = '';
-  document.getElementById('proj-target').value = '';
-  renderProjectsList();
+  try {
+    if (editId) {
+      await DB.update('projects', editId, { name, description: desc, target: parseFloat(target)||0 });
+      showToast('Project updated ✦');
+    } else {
+      await DB.insert('projects', { id: 'proj_' + Date.now(), name, description: desc, target: parseFloat(target)||0 });
+      showToast('Project added ✦');
+    }
+    document.getElementById('add-project-form').style.display = 'none';
+    const editIdEl = document.getElementById('proj-edit-id'); if (editIdEl) editIdEl.value = '';
+    document.getElementById('proj-name').value = '';
+    document.getElementById('proj-desc').value = '';
+    document.getElementById('proj-target').value = '';
+    document.querySelector('#add-project-form button[onclick="saveProject()"]').textContent = 'Add Project';
+    await renderProjectsList();
+  } catch (e) { showToast('Failed to save project.'); console.error(e); }
 }
 
-function deleteProject(id) {
+async function deleteProject(id) {
+  if (!hasRole('superadmin')) { showToast('⛔ Super Admin only.'); return; }
   if (!confirm('Delete this project?')) return;
-  const projs = JSON.parse(localStorage.getItem('gh_projects') || '[]').filter(p => p.id !== id);
-  localStorage.setItem('gh_projects', JSON.stringify(projs));
-  showToast('Project deleted.');
-  renderProjectsList();
+  try {
+    await DB.delete('projects', id);
+    showToast('Project deleted.');
+    await renderProjectsList();
+  } catch (e) { showToast('Delete failed.'); console.error(e); }
 }
 
 /* Accounts */
-function renderAccountsList() {
-  const accounts = JSON.parse(localStorage.getItem('gh_accounts') || '[]');
+async function renderAccountsList() {
+  let accounts = [];
+  const sb = getSupabaseClient();
+  if (sb) {
+    try {
+      const { data } = await sb.from('admin_accounts').select('username, display_name, role').order('role');
+      if (data) accounts = data.map(a => ({ username: a.username, displayName: a.display_name, role: a.role }));
+    } catch {}
+  }
+  if (!accounts.length) accounts = JSON.parse(localStorage.getItem('gh_accounts') || '[]');
   const el = document.getElementById('accounts-list'); if (!el) return;
-  el.innerHTML = accounts.map(a => `
-    <div style="display:flex;align-items:center;gap:.75rem;padding:.7rem 0;border-bottom:1px solid var(--adm-border);">
+  el.innerHTML = accounts.map(a => {
+    const displayName = a.displayName || a.display_name || a.username;
+    const isCurrent = currentAdminSession && a.username === currentAdminSession.username;
+    // Refresh the sidebar name if this is the logged-in user
+    if (isCurrent) {
+      const udisp = document.getElementById('adm-username-display');
+      const uavat = document.getElementById('adm-user-avatar');
+      if (udisp) udisp.textContent = displayName;
+      if (uavat) uavat.textContent = displayName.charAt(0).toUpperCase();
+      // Update session so it reflects everywhere
+      if (currentAdminSession) currentAdminSession.displayName = displayName;
+    }
+    return `<div style="display:flex;align-items:center;gap:.75rem;padding:.7rem 0;border-bottom:1px solid var(--adm-border);">
       <div style="width:32px;height:32px;border-radius:50%;background:rgba(201,162,74,.2);display:flex;align-items:center;justify-content:center;color:var(--gold-light);font-size:.8rem;flex-shrink:0;">
-        ${a.displayName?.charAt(0).toUpperCase()||'A'}
+        ${displayName.charAt(0).toUpperCase()}
       </div>
       <div style="flex:1;">
-        <div style="font-size:.85rem;color:var(--adm-text);">${esc(a.displayName)}</div>
-        <div style="font-size:.7rem;color:var(--adm-muted);">@${esc(a.username)}</div>
+        <div style="font-size:.85rem;color:var(--adm-text);">${esc(displayName)}</div>
+        <div style="font-size:.7rem;color:var(--adm-muted);">@${esc(a.username)}${isCurrent ? ' <span style="color:var(--gold);font-size:.6rem;">● you</span>' : ''}</div>
       </div>
       <span class="adm-role-badge ${a.role === 'superadmin' ? 'role-superadmin' : 'role-editor'}">${a.role === 'superadmin' ? 'Super Admin' : 'Editor'}</span>
-    </div>`).join('');
+    </div>`;
+  }).join('');
+}
+
+async function populatePasswordPanel() {
+  const uEl = document.getElementById('pw-current-user');
+  if (uEl && currentAdminSession) uEl.textContent = currentAdminSession.username;
+  const otherSec = document.getElementById('other-account-pw-section');
+  const sel = document.getElementById('other-account-select');
+  if (!hasRole('superadmin')) {
+    if (otherSec) otherSec.style.display = 'none';
+    return;
+  }
+  if (otherSec) otherSec.style.display = '';
+  let accts = [];
+  const sb2 = getSupabaseClient();
+  if (sb2) {
+    try {
+      const { data } = await sb2.from('admin_accounts').select('username, display_name, role').order('role');
+      if (data) accts = data.map(a => ({ username: a.username, displayName: a.display_name, role: a.role }));
+    } catch {}
+  }
+  if (!accts.length) accts = JSON.parse(localStorage.getItem('gh_accounts') || '[]');
+  if (sel) sel.innerHTML = '<option value="">Select account...</option>' +
+    accts
+      .filter(a => a.username !== currentAdminSession?.username) // don't show yourself
+      .map(a => `<option value="${a.username}">${a.displayName || a.display_name} (@${a.username})</option>`)
+      .join('');
+}
+
+async function changeOtherPassword() {
+  if (!hasRole('superadmin')) { showToast('⛔ Super Admin only.'); return; }
+  const targetUsername = document.getElementById('other-account-select')?.value;
+  const newPw = document.getElementById('other-pw')?.value;
+  if (!targetUsername) { showToast('Please select an account.'); return; }
+  if (!newPw || newPw.length < 8) { showToast('New password must be at least 8 characters.'); return; }
+
+  const salt = genSalt();
+  const hash = await hashPassword(newPw, salt);
+  const sb = getSupabaseClient();
+
+  if (sb) {
+    const { error } = await sb.from('admin_accounts')
+      .update({ password_hash: hash, salt })
+      .ilike('username', targetUsername);
+    if (error) { showToast('Failed to update password.'); console.error(error); return; }
+  } else {
+    const accounts = JSON.parse(localStorage.getItem('gh_accounts') || '[]');
+    const idx = accounts.findIndex(a => a.username === targetUsername);
+    if (idx === -1) { showToast('Account not found.'); return; }
+    accounts[idx].passwordHash = hash;
+    accounts[idx].salt = salt;
+    localStorage.setItem('gh_accounts', JSON.stringify(accounts));
+  }
+
+  document.getElementById('other-pw').value = '';
+  document.getElementById('other-account-select').value = '';
+  showToast(`✅ Password updated for @${targetUsername}`);
 }
 
 async function changeMyPassword() {
   const current = document.getElementById('current-pw')?.value;
   const newPw   = document.getElementById('new-pw')?.value;
-  const confirm = document.getElementById('confirm-pw')?.value;
-  if (!current || !newPw || !confirm) { showToast('Please fill all password fields.'); return; }
+  const conf    = document.getElementById('confirm-pw')?.value;
+  if (!current || !newPw || !conf) { showToast('Please fill all password fields.'); return; }
   if (newPw.length < 8) { showToast('New password must be at least 8 characters.'); return; }
-  if (newPw !== confirm) { showToast('Passwords do not match.'); return; }
+  if (newPw !== conf) { showToast('Passwords do not match.'); return; }
   if (!currentAdminSession) { showToast('Session expired. Please log in again.'); return; }
-  const accounts = JSON.parse(localStorage.getItem('gh_accounts') || '[]');
-  const idx = accounts.findIndex(a => a.username === currentAdminSession.username);
-  if (idx === -1) { showToast('Account not found.'); return; }
-  const valid = await verifyPassword(current, accounts[idx].passwordHash, accounts[idx].salt);
+
+  // Fetch current account to verify old password
+  let accountRecord = null;
+  const sb = getSupabaseClient();
+  if (sb) {
+    const { data } = await sb.from('admin_accounts').select('*').ilike('username', currentAdminSession.username).limit(1).single();
+    if (data) accountRecord = data;
+  }
+  if (!accountRecord) {
+    const locals = JSON.parse(localStorage.getItem('gh_accounts') || '[]');
+    accountRecord = locals.find(a => a.username === currentAdminSession.username) || null;
+  }
+  if (!accountRecord) { showToast('Account not found.'); return; }
+
+  const valid = await verifyPassword(
+    current,
+    accountRecord.passwordHash || accountRecord.password_hash,
+    accountRecord.salt
+  );
   if (!valid) { showToast('Current password is incorrect.'); return; }
+
   const salt = genSalt();
   const hash = await hashPassword(newPw, salt);
-  accounts[idx].passwordHash = hash;
-  accounts[idx].salt = salt;
-  localStorage.setItem('gh_accounts', JSON.stringify(accounts));
+
+  if (sb) {
+    // Production: update in Supabase
+    const { error } = await sb.from('admin_accounts')
+      .update({ password_hash: hash, salt })
+      .ilike('username', currentAdminSession.username);
+    if (error) { showToast('Failed to update password.'); console.error(error); return; }
+  } else {
+    // Dev: update localStorage
+    const accounts = JSON.parse(localStorage.getItem('gh_accounts') || '[]');
+    const idx = accounts.findIndex(a => a.username === currentAdminSession.username);
+    if (idx !== -1) {
+      accounts[idx].passwordHash = hash;
+      accounts[idx].salt = salt;
+      localStorage.setItem('gh_accounts', JSON.stringify(accounts));
+    }
+  }
+
   document.getElementById('current-pw').value = '';
   document.getElementById('new-pw').value     = '';
   document.getElementById('confirm-pw').value = '';
-  showToast('Password updated ✦');
+  showToast('✅ Password updated successfully');
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -2855,6 +3449,55 @@ function confirmClearData() {
    UTILITY FUNCTIONS
    ═══════════════════════════════════════════════════════ */
 
+// ── Form Validation Helpers ────────────────────────────────────
+function validateEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+}
+function validatePhone(phone) {
+  // Kenyan format: 07XXXXXXXX, +2547XXXXXXXX, 2547XXXXXXXX
+  const clean = phone.replace(/[\s\-()]/g, '');
+  return !phone || /^(\+254|254|0)[17]\d{8}$/.test(clean);
+}
+function validateRequired(value) {
+  return value && value.trim().length > 0;
+}
+function validateMinLength(value, min) {
+  return value && value.trim().length >= min;
+}
+function showFieldError(fieldId, message) {
+  const field = document.getElementById(fieldId);
+  if (!field) return;
+  field.style.borderColor = '#e07070';
+  field.style.boxShadow = '0 0 0 3px rgba(192,57,43,.15)';
+  // Remove error after user starts typing
+  field.addEventListener('input', () => {
+    field.style.borderColor = '';
+    field.style.boxShadow = '';
+  }, { once: true });
+}
+function clearFieldErrors(fieldIds) {
+  fieldIds.forEach(id => {
+    const f = document.getElementById(id);
+    if (f) { f.style.borderColor = ''; f.style.boxShadow = ''; }
+  });
+}
+// ── End Validation Helpers ──────────────────────────────────
+
+// ── Button loading state helper ─────────────────────────────
+function setBtnState(idOrEl, loading, loadingText, defaultText) {
+  const el = typeof idOrEl === 'string' ? document.getElementById(idOrEl) : idOrEl;
+  if (!el) return;
+  if (loading) {
+    el._defaultText = el._defaultText || el.innerHTML;
+    el.disabled = true;
+    el.innerHTML = `<span style="opacity:.7;">${loadingText || 'Saving...'}</span>`;
+  } else {
+    el.disabled = false;
+    el.innerHTML = defaultText || el._defaultText || el.innerHTML;
+    delete el._defaultText;
+  }
+}
+
 function showToast(msg) {
   const t = document.getElementById('toast');
   const m = document.getElementById('toast-msg');
@@ -2875,9 +3518,11 @@ function getFieldVal(id) { const el = document.getElementById(id); return el ? e
 function setFieldVal(id, val) { const el = document.getElementById(id); if (el) el.value = val || ''; }
 
 function copyLink() {
-  navigator.clipboard.writeText(window.location.href)
+  const url = window.location.href;
+  const text = `The Green House — Worship & Sharing Sessions 🌿 ${url}`;
+  navigator.clipboard.writeText(text)
     .then(() => showToast('Link copied! 🔗'))
-    .catch(() => showToast('Copy not supported in this browser.'));
+    .catch(() => showToast('URL: ' + url));
 }
 
 function downloadCSV(filename, rows) {
@@ -2897,8 +3542,12 @@ function downloadCSV(filename, rows) {
 /* ═══════════════════════════════════════════════════════
    INIT
    ═══════════════════════════════════════════════════════ */
+// ── Hash routing helpers (must be defined before init runs) ──
+
 (async function init() {
   await seedDefaults();
+  // Load site config from Supabase (social links, contact info, etc.)
+  await DB.loadFromDB();
 
   // Restore admin session if valid
   const session = loadSession();
@@ -2910,25 +3559,41 @@ function downloadCSV(filename, rows) {
   // Boot public site — restore page from URL hash if present
   const initialPage = getPageFromHash();
   if (initialPage !== 'home') {
-    await renderHomeFeaturedEvent(); // always pre-render home data
-    navigate(initialPage, false);    // restore without pushing history
+    await renderHomeFeaturedEvent();
+    navigate(initialPage, false);
   } else {
     await renderHomeFeaturedEvent();
   }
+  // Force all .reveal elements visible after data has loaded
+  // This prevents empty sections when Supabase is slow
+  const forceReveals = () => {
+    document.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in'));
+  };
   initReveals();
+  setTimeout(initReveals,  200);
+  setTimeout(initReveals,  600);
+  setTimeout(forceReveals, 1200); // guarantee all sections visible after 1.2s
   updateNavTheme();
 
-  // Leaf particles
-  const hero = document.querySelector('.hero');
-  if (hero) {
-    for (let i = 0; i < 8; i++) {
+  // Leaf particles — delayed to ensure hero is active and visible
+  setTimeout(() => {
+    const hero = document.querySelector('#page-home .hero');
+    if (!hero) return;
+    // Clear any existing particles to avoid duplication on re-init
+    hero.querySelectorAll('.leaf-particle').forEach(el => el.remove());
+    for (let i = 0; i < 10; i++) {
       const leaf = document.createElement('div');
       leaf.className = 'leaf-particle';
-      leaf.textContent = ['🌿','✦','◇','·'][i % 4];
-      leaf.style.cssText = `left:${10+Math.random()*80}%;font-size:${.5+Math.random()*.7}rem;animation-duration:${12+Math.random()*16}s;animation-delay:${Math.random()*12}s;`;
+      const chars = ['🌿','🌿','✦','◇','·','🌱'];
+      leaf.textContent = chars[i % chars.length];
+      const size  = 0.5 + Math.random() * 0.8;
+      const x     = 5 + Math.random() * 90;
+      const dur   = 14 + Math.random() * 14;
+      const delay = Math.random() * 10;
+      leaf.style.cssText = `left:${x}%;font-size:${size}rem;animation-duration:${dur}s;animation-delay:${delay}s;`;
       hero.appendChild(leaf);
     }
-  }
+  }, 200);
 })();
 </script>
 </body>
