@@ -135,7 +135,7 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .event-subtitle-text{font-size:.8rem;color:var(--sage-light);letter-spacing:.05em;}
 .event-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;margin-bottom:1.4rem;}
 .emeta{display:flex;gap:.75rem;align-items:flex-start;}
-.emeta-icon{width:32px;height:32px;border-radius:8px;background:rgba(78,122,94,.25);display:flex;align-items:center;justify-content:center;font-size:.85rem;flex-shrink:0;}
+.emeta-icon{width:32px;height:32px;border-radius:8px;background:rgba(78,122,94,.25);display:flex;align-items:center;justify-content:center;font-size:.78rem;color:var(--sage-light);flex-shrink:0;}
 .emeta-label{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--sage-light);margin-bottom:.1rem;}
 .emeta-val{font-size:.86rem;color:var(--cream);font-weight:400;}
 .event-location-note{background:rgba(78,122,94,.2);border-radius:10px;padding:.9rem 1.1rem;font-size:.8rem;color:rgba(247,242,232,.65);display:flex;gap:.6rem;align-items:flex-start;margin-bottom:1.3rem;}
@@ -158,9 +158,9 @@ nav.scrolled .nav-support-link{color:var(--gold)!important;}
 .footer-links-list a:hover{color:var(--gold-light);}
 .footer-bottom{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;font-size:.72rem;color:rgba(247,242,232,.25);}
 .footer-bottom em{font-style:italic;color:rgba(228,201,126,.4);}
-.footer-socials{display:flex;gap:.6rem;flex-wrap:wrap;margin-top:.5rem;}
-.social-icon-link{font-size:1.1rem;text-decoration:none;opacity:.7;transition:opacity .2s;display:inline-block;}
-.social-icon-link:hover{opacity:1;}
+.footer-socials{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.6rem;align-items:center;}
+.social-icon-link{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.1);color:rgba(247,242,232,.55);text-decoration:none;display:inline-flex;align-items:center;justify-content:center;transition:all .25s;font-size:.8rem;}
+.social-icon-link:hover{background:rgba(201,162,74,.25);border-color:rgba(201,162,74,.3);color:var(--gold-light);}
 .admin-footer-link{color:rgba(247,242,232,.1)!important;font-size:.65rem!important;letter-spacing:.1em;text-transform:uppercase;transition:color .3s!important;cursor:pointer;}
 .admin-footer-link:hover{color:rgba(201,162,74,.35)!important;}
 .skeleton{background:linear-gradient(90deg,var(--cream-dark) 25%,var(--mist) 50%,var(--cream-dark) 75%);background-size:200% 100%;animation:skeleton-shimmer 1.4s infinite;}
@@ -1459,6 +1459,27 @@ function isFileMode() {
   return window.location.protocol === 'file:';
 }
 
+// Wait for the Supabase CDN library to be available (max maxMs ms).
+// Handles slow network / CDN latency without blocking the entire page.
+async function waitForSupabase(maxMs = 5000) {
+  if (typeof supabase !== 'undefined') return true;
+  return new Promise(resolve => {
+    const step = 80;
+    let elapsed = 0;
+    const timer = setInterval(() => {
+      elapsed += step;
+      if (typeof supabase !== 'undefined') {
+        clearInterval(timer);
+        resolve(true);
+      } else if (elapsed >= maxMs) {
+        clearInterval(timer);
+        console.warn('[GH] Supabase CDN did not load after', maxMs, 'ms — using fallback.');
+        resolve(false);
+      }
+    }, step);
+  });
+}
+
 function getSupabaseClient() {
   if (_sbClient) return _sbClient;
   // Priority 1: env vars injected at Netlify build time (window.__GH_SUPABASE)
@@ -1822,11 +1843,11 @@ function buildEventCard(event, cdPrefix) {
     </div>
     <div class="event-card-body">
       <div class="event-meta-grid">
-        <div class="emeta"><div class="emeta-icon">📅</div><div><div class="emeta-label">Date</div><div class="emeta-val">${formatDate(event.date)}</div></div></div>
-        <div class="emeta"><div class="emeta-icon">🕖</div><div><div class="emeta-label">Time</div><div class="emeta-val">${formatTime(event.time)} – ${formatTime(event.endTime)}</div></div></div>
-        <div class="emeta"><div class="emeta-icon">📍</div><div><div class="emeta-label">Location</div><div class="emeta-val">${event.venue}${event.area?', '+event.area:''}</div></div></div>
-        <div class="emeta"><div class="emeta-icon">🎫</div><div><div class="emeta-label">Entry</div><div class="emeta-val">${event.entryFee||'Free'} · All Welcome</div></div></div>
-        <div class="emeta"><div class="emeta-icon">👕</div><div><div class="emeta-label">Dress Code</div><div class="emeta-val">${event.dressCode&&event.dressCode!=='None'?event.dressCode:'Come as you are'}</div></div></div>
+        <div class="emeta"><div class="emeta-icon"><i class="fa-regular fa-calendar"></i></div><div><div class="emeta-label">Date</div><div class="emeta-val">${formatDate(event.date)}</div></div></div>
+        <div class="emeta"><div class="emeta-icon"><i class="fa-regular fa-clock"></i></div><div><div class="emeta-label">Time</div><div class="emeta-val">${formatTime(event.time)} – ${formatTime(event.endTime)}</div></div></div>
+        <div class="emeta"><div class="emeta-icon"><i class="fa-solid fa-location-dot"></i></div><div><div class="emeta-label">Location</div><div class="emeta-val">${event.venue}${event.area?', '+event.area:''}</div></div></div>
+        <div class="emeta"><div class="emeta-icon"><i class="fa-solid fa-ticket"></i></div><div><div class="emeta-label">Entry</div><div class="emeta-val">${event.entryFee||'Free'} · All Welcome</div></div></div>
+        <div class="emeta"><div class="emeta-icon"><i class="fa-solid fa-shirt"></i></div><div><div class="emeta-label">Dress Code</div><div class="emeta-val">${event.dressCode&&event.dressCode!=='None'?event.dressCode:'Come as you are'}</div></div></div>
       </div>
       ${event.venue==='TBA'?'<div class="event-location-note">📢 Venue will be shared with registered attendees closer to the date.</div>':''}
       <div style="font-size:.58rem;letter-spacing:.2em;text-transform:uppercase;color:rgba(247,242,232,.3);margin-bottom:.5rem;">Counting Down</div>
@@ -1885,12 +1906,12 @@ function renderSiteContactInfo() {
 
   // Build social icons row
   const socials = [];
-  if (wa)        socials.push(`<a href="https://wa.me/${wa.replace(/[^0-9]/g,'')}" target="_blank" class="social-icon-link" title="WhatsApp">📲</a>`);
-  if (email)     socials.push(`<a href="mailto:${email}" class="social-icon-link" title="Email">✉️</a>`);
-  if (instagram) socials.push(`<a href="https://instagram.com/${instagram.replace('@','')}" target="_blank" class="social-icon-link" title="Instagram">📸</a>`);
-  if (facebook)  socials.push(`<a href="https://facebook.com/${facebook.replace('@','')}" target="_blank" class="social-icon-link" title="Facebook">🌐</a>`);
-  if (tiktok)    socials.push(`<a href="https://tiktok.com/${tiktok.replace('@','')}" target="_blank" class="social-icon-link" title="TikTok">🎵</a>`);
-  if (youtube)   socials.push(`<a href="${youtube.startsWith('http') ? youtube : 'https://youtube.com/@'+youtube.replace('@','')}" target="_blank" class="social-icon-link" title="YouTube">▶️</a>`);
+  if (wa)        socials.push(`<a href="https://wa.me/${wa.replace(/[^0-9]/g,'')}" target="_blank" class="social-icon-link" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>`);
+  if (email)     socials.push(`<a href="mailto:${email}" class="social-icon-link" title="Email"><i class="fa-solid fa-envelope"></i></a>`);
+  if (instagram) socials.push(`<a href="https://instagram.com/${instagram.replace('@','')}" target="_blank" class="social-icon-link" title="Instagram"><i class="fa-brands fa-instagram"></i></a>`);
+  if (facebook)  socials.push(`<a href="https://facebook.com/${facebook.replace('@','')}" target="_blank" class="social-icon-link" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>`);
+  if (tiktok)    socials.push(`<a href="https://tiktok.com/${tiktok.replace('@','')}" target="_blank" class="social-icon-link" title="TikTok"><i class="fa-brands fa-tiktok"></i></a>`);
+  if (youtube)   socials.push(`<a href="${youtube.startsWith('http') ? youtube : 'https://youtube.com/@'+youtube.replace('@','')}" target="_blank" class="social-icon-link" title="YouTube"><i class="fa-brands fa-youtube"></i></a>`);
 
   const socialsHtml = socials.length
     ? `<div class="footer-socials">${socials.join('')}</div>`
@@ -2231,83 +2252,95 @@ function renderPaymentInfo() {
     return;
   }
 
-  // ── Build config based on payment type ──────────────────────
-  let typeLabel, typeBadge, typeIcon, steps, primaryLabel;
+  // ── Labels, badge and steps per payment type ─────────────────
+  let typeLabel, typeBadge, typeIcon, primaryLabel, steps;
 
   if (type === 'phone') {
-    typeLabel   = 'M-Pesa Phone Number';
-    typeBadge   = 'Send Money';
-    typeIcon    = 'fa-mobile-screen-button';
+    typeLabel    = 'M-Pesa Phone Number';
+    typeBadge    = 'Send Money';
+    typeIcon     = 'fa-mobile-screen-button';
     primaryLabel = 'Phone Number';
     steps = [
-      { icon: 'fa-mobile-screen-button', text: 'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>' },
-      { icon: 'fa-list',                 text: 'Select <strong>Send Money</strong>' },
-      { icon: 'fa-phone',                text: `Enter phone number <strong style="color:var(--gold-light);letter-spacing:.04em;">${num}</strong>` },
-      { icon: 'fa-coins',                text: 'Enter the <strong>amount</strong> you wish to donate' },
-      { icon: 'fa-lock',                 text: 'Enter your <strong>M-Pesa PIN</strong> and confirm the transaction' },
-      { icon: 'fa-comment-sms',          text: '<strong>Keep your confirmation SMS</strong> — you\'ll submit it as evidence in the next step' },
+      'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>',
+      'Select <strong>Send Money</strong>',
+      `Enter phone number: <strong style="color:var(--gold-light);letter-spacing:.04em;">${num}</strong>`,
+      'Enter the <strong>amount</strong> you wish to donate',
+      'Enter your <strong>M-Pesa PIN</strong> and confirm',
+      'Keep your <strong>confirmation SMS</strong> — you\'ll need it in the next step',
     ];
   } else if (type === 'till') {
     typeLabel    = 'M-Pesa Till Number';
-    typeBadge    = 'Buy Goods &amp; Services';
+    typeBadge    = 'Lipa na M-Pesa · Buy Goods &amp; Services';
     typeIcon     = 'fa-store';
     primaryLabel = 'Till Number';
     steps = [
-      { icon: 'fa-mobile-screen-button', text: 'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>' },
-      { icon: 'fa-list',                 text: 'Select <strong>Lipa na M-Pesa</strong> → <strong>Buy Goods &amp; Services</strong>' },
-      { icon: 'fa-hashtag',              text: `Enter till number <strong style="color:var(--gold-light);letter-spacing:.04em;">${num}</strong>` },
-      { icon: 'fa-coins',                text: 'Enter the <strong>amount</strong> you wish to donate' },
-      { icon: 'fa-lock',                 text: 'Enter your <strong>M-Pesa PIN</strong> and confirm the transaction' },
-      { icon: 'fa-comment-sms',          text: '<strong>Keep your confirmation SMS</strong> — you\'ll submit it as evidence in the next step' },
+      'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>',
+      'Select <strong>Lipa na M-Pesa</strong>',
+      'Select <strong>Buy Goods &amp; Services</strong>',
+      `Enter till number: <strong style="color:var(--gold-light);letter-spacing:.04em;">${num}</strong>`,
+      'Enter the <strong>amount</strong> you wish to donate',
+      'Enter your <strong>M-Pesa PIN</strong> and confirm',
+      'Keep your <strong>confirmation SMS</strong> — you\'ll need it in the next step',
     ];
   } else {
     // paybill
     typeLabel    = 'M-Pesa Paybill Number';
-    typeBadge    = 'Pay Bill';
+    typeBadge    = 'Lipa na M-Pesa · Pay Bill';
     typeIcon     = 'fa-building-columns';
     primaryLabel = 'Paybill Number';
     steps = [
-      { icon: 'fa-mobile-screen-button', text: 'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>' },
-      { icon: 'fa-list',                 text: 'Select <strong>Lipa na M-Pesa</strong> → <strong>Pay Bill</strong>' },
-      { icon: 'fa-building-columns',     text: `Enter business number <strong style="color:var(--gold-light);letter-spacing:.04em;">${num}</strong>` },
-      { icon: 'fa-id-card',              text: account
-          ? `Enter account number <strong style="color:var(--gold-light);">${account}</strong>`
-          : 'Enter <strong>your full name</strong> as the account number' },
-      { icon: 'fa-coins',                text: 'Enter the <strong>amount</strong> you wish to donate' },
-      { icon: 'fa-lock',                 text: 'Enter your <strong>M-Pesa PIN</strong> and confirm the transaction' },
-      { icon: 'fa-comment-sms',          text: '<strong>Keep your confirmation SMS</strong> — you\'ll submit it as evidence in the next step' },
+      'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>',
+      'Select <strong>Lipa na M-Pesa</strong>',
+      'Select <strong>Pay Bill</strong>',
+      `Enter business number: <strong style="color:var(--gold-light);letter-spacing:.04em;">${num}</strong>`,
+      account
+        ? `Enter account number: <strong style="color:var(--gold-light);">${account}</strong>`
+        : 'Enter <strong>your full name</strong> as the account number',
+      'Enter the <strong>amount</strong> you wish to donate',
+      'Enter your <strong>M-Pesa PIN</strong> and confirm',
+      'Keep your <strong>confirmation SMS</strong> — you\'ll need it in the next step',
     ];
   }
 
-  // ── Copy buttons ──────────────────────────────────────────────
+  // ── Copy action buttons ───────────────────────────────────────
   const copyBtns = [
-    `<button class="pi-copy-btn" onclick="copyField('${num}','${primaryLabel}')"><i class="fa-regular fa-copy"></i> Copy ${primaryLabel}</button>`,
-    ...(account ? [`<button class="pi-copy-btn" onclick="copyField('${account}','Account Number')"><i class="fa-regular fa-copy"></i> Copy Account No.</button>`] : []),
-    `<button class="pi-copy-btn" onclick="copyField('${name}','Recipient name')"><i class="fa-regular fa-copy"></i> Copy Name</button>`,
-  ].join('\n    ');
+    `<button class="pi-copy-btn" onclick="copyField('${num}','${primaryLabel}')">
+       <i class="fa-regular fa-copy"></i> Copy ${primaryLabel}
+     </button>`,
+    ...(account
+      ? [`<button class="pi-copy-btn" onclick="copyField('${account}','Account Number')">
+           <i class="fa-regular fa-copy"></i> Copy Account No.
+         </button>`]
+      : []),
+    `<button class="pi-copy-btn" onclick="copyField('${name}','Recipient name')">
+       <i class="fa-regular fa-copy"></i> Copy Name
+     </button>`,
+  ].join('');
 
   // ── Render ────────────────────────────────────────────────────
   c.innerHTML = `
-    <div style="margin-bottom:1rem;">
-      <div class="pi-label"><i class="fa-solid ${typeIcon}" style="margin-right:.35rem;"></i>${typeLabel}</div>
+    <div style="margin-bottom:1.2rem;">
+      <div class="pi-label">
+        <i class="fa-solid ${typeIcon}" style="margin-right:.4rem;"></i>${typeLabel}
+      </div>
       <div class="pi-number">${num}</div>
       <div class="pi-name">${name}</div>
       ${account
-        ? `<div style="font-size:.85rem;color:rgba(247,242,232,.55);margin-top:.2rem;">
-             <i class="fa-solid fa-id-card" style="margin-right:.3rem;opacity:.6;"></i>Account No: <strong style="color:var(--gold-light);">${account}</strong>
+        ? `<div style="font-size:.84rem;color:rgba(247,242,232,.55);margin-top:.25rem;">
+             <i class="fa-solid fa-id-card" style="opacity:.6;margin-right:.3rem;"></i>
+             Account No: <strong style="color:var(--gold-light);">${account}</strong>
            </div>`
         : ''}
     </div>
-    <span class="pi-type-badge"><i class="fa-solid ${typeIcon}" style="margin-right:.35rem;"></i>${typeBadge}</span>
+    <span class="pi-type-badge">
+      <i class="fa-solid ${typeIcon}" style="margin-right:.35rem;"></i>${typeBadge}
+    </span>
     <div class="pi-actions">${copyBtns}</div>
     <ul class="pi-steps">
-      ${steps.map((s, i) => `
+      ${steps.map((text, i) => `
       <li>
-        <div class="pi-step-num" style="background:rgba(201,162,74,.18);">${i + 1}</div>
-        <div style="display:flex;align-items:flex-start;gap:.6rem;">
-          <i class="fa-solid ${s.icon}" style="color:var(--gold);opacity:.7;margin-top:.18rem;font-size:.8rem;flex-shrink:0;width:14px;text-align:center;"></i>
-          <div>${s.text}</div>
-        </div>
+        <div class="pi-step-num">${i + 1}</div>
+        <div>${text}</div>
       </li>`).join('')}
     </ul>`;
 }
@@ -3672,6 +3705,24 @@ window.addEventListener('popstate', (e) => {
 })();
 
 (async function init() {
+  // 1. Ensure Supabase CDN is ready before any DB call
+  await waitForSupabase();
+
+  // 2. Eagerly create the Supabase client when env vars are present.
+  //    This guarantees all visitors on the live site connect to the DB
+  //    without needing to open Admin → Settings first.
+  if (isProductionEnv() && typeof supabase !== 'undefined' && !_sbClient) {
+    try {
+      _sbClient = supabase.createClient(
+        window.__GH_SUPABASE.url,
+        window.__GH_SUPABASE.key
+      );
+      console.info('[GH] Supabase client initialised from environment variables.');
+    } catch (e) {
+      console.error('[GH] Supabase createClient failed:', e.message);
+    }
+  }
+
   await seedDefaults();
   // Load site config from Supabase (social links, contact info, etc.)
   await DB.loadFromDB();
