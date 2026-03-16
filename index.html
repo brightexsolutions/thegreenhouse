@@ -681,6 +681,19 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
   .lb-nav{display:none;}.dsn-line{width:24px;}.scroll-arrow{display:none!important;}
 }
 </style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+<style>
+.pi-step-icon{width:22px;height:22px;border-radius:50%;background:rgba(201,162,74,.2);color:var(--gold-light);font-size:.62rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.pi-copy-btn{display:inline-flex;align-items:center;gap:.45rem;background:rgba(201,162,74,.15);border:1px solid rgba(201,162,74,.25);color:var(--gold-light);padding:.42rem .9rem;border-radius:8px;font-family:var(--font-b);font-size:.72rem;cursor:pointer;transition:all .25s;margin:.2rem 0;}
+.pi-copy-btn:hover{background:rgba(201,162,74,.28);}
+.pi-copy-btn i{font-size:.75rem;}
+.pi-actions{display:flex;flex-wrap:wrap;gap:.4rem;margin:.5rem 0 1.2rem;}
+.env-badge{display:inline-flex;align-items:center;gap:.4rem;background:rgba(76,154,106,.2);color:#7fa98a;border:1px solid rgba(76,154,106,.3);border-radius:100px;padding:.28rem .9rem;font-size:.65rem;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.75rem;}
+.env-badge i{font-size:.7rem;}
+.env-input-group{position:relative;}
+.env-input-group .adm-field:disabled{opacity:.55;cursor:not-allowed;background:rgba(255,255,255,.03);}
+.env-input-group .env-lock{position:absolute;right:.75rem;top:50%;transform:translateY(-50%);color:var(--adm-muted);font-size:.75rem;pointer-events:none;}
+</style>
 </head>
 <body>
 
@@ -1287,11 +1300,18 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
             3. <strong>Dev/local:</strong> paste keys below and click Save &amp; Connect<br/>
             4. <strong>Production:</strong> add as Netlify env vars — no pasting needed
           </div>
-          <div class="adm-grid-2">
-            <div><label class="adm-label">Supabase Project URL</label><input class="adm-field" id="sb-url" placeholder="https://xxxx.supabase.co"/></div>
-            <div><label class="adm-label">Supabase Anon Key</label><input class="adm-field" id="sb-key" placeholder="eyJhbGci..."/></div>
+          <div id="sb-env-banner" style="display:none;margin-bottom:.75rem;">
+            <div class="env-badge"><i class="fa-solid fa-shield-halved"></i> Connected via Environment Variables (Production Mode)</div>
+            <div style="font-size:.78rem;color:var(--adm-muted);line-height:1.7;margin-top:.3rem;">
+              Supabase credentials are injected by Netlify at build time. All site visitors get live data automatically.
+              To change credentials, update them in <strong style="color:var(--adm-text);">Netlify → Site Settings → Environment Variables</strong>.
+            </div>
           </div>
-          <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+          <div class="adm-grid-2">
+            <div class="env-input-group"><label class="adm-label">Supabase Project URL</label><input class="adm-field" id="sb-url" placeholder="https://xxxx.supabase.co"/><i class="fa-solid fa-lock env-lock" id="sb-url-lock" style="display:none;"></i></div>
+            <div class="env-input-group"><label class="adm-label">Supabase Anon Key</label><input class="adm-field" id="sb-key" placeholder="eyJhbGci..."/><i class="fa-solid fa-lock env-lock" id="sb-key-lock" style="display:none;"></i></div>
+          </div>
+          <div id="sb-manual-actions" style="display:flex;gap:.75rem;flex-wrap:wrap;">
             <button class="adm-btn adm-btn-primary" onclick="saveSupabaseConfig()">Save &amp; Connect ✦</button>
             <button class="adm-btn adm-btn-secondary" id="sb-disconnect-btn" style="display:none;" onclick="disconnectSupabase()">Disconnect (Use Local Storage)</button>
           </div>
@@ -1427,6 +1447,18 @@ input:checked + .toggle-track-ui:before{transform:translateX(20px);}
 
 let _sbClient = null;
 
+// ── Production environment detection ──────────────────────────
+// Returns true when Netlify-injected env vars are present.
+// In this mode Supabase is used for EVERYONE — no login needed.
+function isProductionEnv() {
+  return !!(window.__GH_SUPABASE?.url && window.__GH_SUPABASE?.key);
+}
+
+// Returns true when running from a file:// path (pure dev mode)
+function isFileMode() {
+  return window.location.protocol === 'file:';
+}
+
 function getSupabaseClient() {
   if (_sbClient) return _sbClient;
   // Priority 1: env vars injected at Netlify build time (window.__GH_SUPABASE)
@@ -1450,22 +1482,32 @@ function isSupabaseMode() {
 }
 
 function updateSupabaseIndicator() {
-  const dot = document.getElementById('sb-dot');
-  const txt = document.getElementById('sb-status-text');
-  const note = document.getElementById('overview-storage-note');
-  const badge = document.getElementById('sb-conn-badge');
+  const dot     = document.getElementById('sb-dot');
+  const txt     = document.getElementById('sb-status-text');
+  const note    = document.getElementById('overview-storage-note');
+  const badge   = document.getElementById('sb-conn-badge');
   const discBtn = document.getElementById('sb-disconnect-btn');
-  if (isSupabaseMode()) {
-    if (dot) { dot.style.background = '#4c9a6a'; dot.style.boxShadow = '0 0 6px rgba(76,154,106,.5)'; }
-    if (txt) txt.textContent = 'Supabase Connected';
-    if (note) { note.className = 'adm-notify success'; note.textContent = '☁️ Connected to Supabase — data is stored in your production database.'; }
-    if (badge) { badge.textContent = '✓ Connected'; badge.style.background = 'rgba(76,154,106,.2)'; badge.style.color = '#7fa98a'; }
+  const envMode = isProductionEnv();
+  const connected = isSupabaseMode();
+
+  if (envMode) {
+    // Keys injected at build time — read-only, always connected
+    if (dot)  { dot.style.background = '#4c9a6a'; dot.style.boxShadow = '0 0 6px rgba(76,154,106,.5)'; }
+    if (txt)  txt.textContent = 'Production (Env Vars)';
+    if (note) { note.className = 'adm-notify success'; note.innerHTML = '<i class="fa-solid fa-cloud" style="margin-right:.4rem;"></i>Connected via Netlify environment variables. All visitors read live data from Supabase.'; }
+    if (badge){ badge.textContent = '✓ Production'; badge.style.background = 'rgba(76,154,106,.2)'; badge.style.color = '#7fa98a'; }
+    if (discBtn) discBtn.style.display = 'none'; // can't disconnect env-var mode
+  } else if (connected) {
+    if (dot)  { dot.style.background = '#4c9a6a'; dot.style.boxShadow = '0 0 6px rgba(76,154,106,.5)'; }
+    if (txt)  txt.textContent = 'Supabase (Manual)';
+    if (note) { note.className = 'adm-notify success'; note.textContent = '☁️ Connected to Supabase. Data syncs across devices.'; }
+    if (badge){ badge.textContent = '✓ Connected'; badge.style.background = 'rgba(76,154,106,.2)'; badge.style.color = '#7fa98a'; }
     if (discBtn) discBtn.style.display = '';
   } else {
-    if (dot) { dot.style.background = 'rgba(255,255,255,.2)'; dot.style.boxShadow = 'none'; }
-    if (txt) txt.textContent = 'Local Storage';
-    if (note) { note.className = 'adm-notify info'; note.textContent = '🌿 Using local storage (development mode). Connect Supabase in Settings for cross-device production sync.'; }
-    if (badge) { badge.textContent = 'Not Connected'; badge.style.background = ''; badge.style.color = ''; }
+    if (dot)  { dot.style.background = 'rgba(255,255,255,.2)'; dot.style.boxShadow = 'none'; }
+    if (txt)  txt.textContent = 'Local Storage';
+    if (note) { note.className = 'adm-notify info'; note.textContent = '🌿 Using local storage (dev mode). Connect Supabase in Settings for cross-device sync.'; }
+    if (badge){ badge.textContent = 'Not Connected'; badge.style.background = ''; badge.style.color = ''; }
     if (discBtn) discBtn.style.display = 'none';
   }
 }
@@ -1622,8 +1664,11 @@ async function seedDefaults() {
       { username: 'editor', displayName: 'Content Editor', role: 'editor', passwordHash: h2, salt: s2 }
     ]));
   }
-  /* Seed events */
-  if (!localStorage.getItem('gh_events')) {
+  /* Seed events — LOCAL / DEV ONLY.
+     In production (Netlify with __GH_SUPABASE) events come from Supabase.
+     We must NOT seed localStorage data that would show to all visitors
+     before Supabase loads, hiding real database content. */
+  if (!isProductionEnv() && !localStorage.getItem('gh_events')) {
     const defaults = [
       { num:'01', title:'Session 01 — Inaugural', date:'2026-03-27', time:'19:00', endTime:'20:00', venue:'Chrisco Donholm Ground', area:'Donholm, Nairobi', desc:"Our inaugural gathering. Come as you are — no dress code, no agenda, just the Lord's presence.", published:true, featured:true, registrationsClosed:false, posterSrc:'' },
       { num:'02', title:'Session 02', date:'2026-06-26', time:'19:00', endTime:'20:00', venue:'TBA', area:'Nairobi', desc:'', published:true, featured:false, registrationsClosed:false, posterSrc:'' },
@@ -2172,66 +2217,99 @@ async function donateGoStep(step) {
 
 function renderPaymentInfo() {
   const c = document.getElementById('payment-info-display'); if (!c) return;
-  const type    = DB.getConfig('mpesa_type','till');
-  const num     = DB.getConfig('mpesa_num','');
-  const name    = DB.getConfig('mpesa_name','The Green House');
-  const account = DB.getConfig('mpesa_account','');
+  const type    = DB.getConfig('mpesa_type', 'till');
+  const num     = DB.getConfig('mpesa_num', '');
+  const name    = DB.getConfig('mpesa_name', 'The Green House');
+  const account = DB.getConfig('mpesa_account', '');
+
   if (!num) {
-    c.innerHTML = `<div style="padding:2rem;text-align:center;"><div style="font-size:2.5rem;margin-bottom:.75rem;">💛</div><p style="color:rgba(247,242,232,.45);font-size:.88rem;">Payment details will be configured soon.<br/>Please contact us for donation information.</p></div>`;
+    c.innerHTML = `
+      <div style="padding:2rem;text-align:center;">
+        <i class="fa-solid fa-heart" style="font-size:2.5rem;color:var(--gold);margin-bottom:.75rem;display:block;"></i>
+        <p style="color:rgba(247,242,232,.45);font-size:.88rem;">Payment details will be configured soon.<br/>Please contact us for donation information.</p>
+      </div>`;
     return;
   }
-  let typeLabel, typeBadge, steps;
+
+  // ── Build config based on payment type ──────────────────────
+  let typeLabel, typeBadge, typeIcon, steps, primaryLabel;
+
   if (type === 'phone') {
-    typeLabel = 'M-Pesa Phone Number';
-    typeBadge = 'Send Money';
+    typeLabel   = 'M-Pesa Phone Number';
+    typeBadge   = 'Send Money';
+    typeIcon    = 'fa-mobile-screen-button';
+    primaryLabel = 'Phone Number';
     steps = [
-      'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>',
-      'Select <strong>Send Money</strong>',
-      `Enter Phone Number: <strong style="color:var(--gold-light);font-size:1.05em;">${num}</strong>`,
-      'Enter the <strong>amount</strong> you wish to donate',
-      'Enter your <strong>M-Pesa PIN</strong> and confirm',
-      "<strong>Save your confirmation SMS</strong> — you'll need it in the next step",
+      { icon: 'fa-mobile-screen-button', text: 'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>' },
+      { icon: 'fa-list',                 text: 'Select <strong>Send Money</strong>' },
+      { icon: 'fa-phone',                text: `Enter phone number <strong style="color:var(--gold-light);letter-spacing:.04em;">${num}</strong>` },
+      { icon: 'fa-coins',                text: 'Enter the <strong>amount</strong> you wish to donate' },
+      { icon: 'fa-lock',                 text: 'Enter your <strong>M-Pesa PIN</strong> and confirm the transaction' },
+      { icon: 'fa-comment-sms',          text: '<strong>Keep your confirmation SMS</strong> — you\'ll submit it as evidence in the next step' },
     ];
   } else if (type === 'till') {
-    typeLabel = 'M-Pesa Till Number';
-    typeBadge = 'Buy Goods &amp; Services';
+    typeLabel    = 'M-Pesa Till Number';
+    typeBadge    = 'Buy Goods &amp; Services';
+    typeIcon     = 'fa-store';
+    primaryLabel = 'Till Number';
     steps = [
-      'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>',
-      'Select <strong>Lipa na M-Pesa → Buy Goods &amp; Services</strong>',
-      `Enter Till Number: <strong style="color:var(--gold-light);font-size:1.05em;">${num}</strong>`,
-      'Enter the <strong>amount</strong> you wish to donate',
-      'Enter your <strong>M-Pesa PIN</strong> and confirm',
-      "<strong>Save your confirmation SMS</strong> — you'll need it in the next step",
+      { icon: 'fa-mobile-screen-button', text: 'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>' },
+      { icon: 'fa-list',                 text: 'Select <strong>Lipa na M-Pesa</strong> → <strong>Buy Goods &amp; Services</strong>' },
+      { icon: 'fa-hashtag',              text: `Enter till number <strong style="color:var(--gold-light);letter-spacing:.04em;">${num}</strong>` },
+      { icon: 'fa-coins',                text: 'Enter the <strong>amount</strong> you wish to donate' },
+      { icon: 'fa-lock',                 text: 'Enter your <strong>M-Pesa PIN</strong> and confirm the transaction' },
+      { icon: 'fa-comment-sms',          text: '<strong>Keep your confirmation SMS</strong> — you\'ll submit it as evidence in the next step' },
     ];
   } else {
-    typeLabel = 'M-Pesa Paybill Number';
-    typeBadge = 'Pay Bill' + (account ? ' · Acc: ' + account : '');
+    // paybill
+    typeLabel    = 'M-Pesa Paybill Number';
+    typeBadge    = 'Pay Bill';
+    typeIcon     = 'fa-building-columns';
+    primaryLabel = 'Paybill Number';
     steps = [
-      'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>',
-      'Select <strong>Lipa na M-Pesa → Pay Bill</strong>',
-      `Enter Business Number: <strong style="color:var(--gold-light);font-size:1.05em;">${num}</strong>`,
-      account ? `Enter Account Number: <strong style="color:var(--gold-light);">${account}</strong>` : 'Enter <strong>your name</strong> as the Account Number',
-      'Enter the <strong>amount</strong> you wish to donate',
-      'Enter your <strong>M-Pesa PIN</strong> and confirm',
-      "<strong>Save your confirmation SMS</strong> — you'll need it in the next step",
+      { icon: 'fa-mobile-screen-button', text: 'Open your <strong>M-Pesa</strong> app or dial <strong>*334#</strong>' },
+      { icon: 'fa-list',                 text: 'Select <strong>Lipa na M-Pesa</strong> → <strong>Pay Bill</strong>' },
+      { icon: 'fa-building-columns',     text: `Enter business number <strong style="color:var(--gold-light);letter-spacing:.04em;">${num}</strong>` },
+      { icon: 'fa-id-card',              text: account
+          ? `Enter account number <strong style="color:var(--gold-light);">${account}</strong>`
+          : 'Enter <strong>your full name</strong> as the account number' },
+      { icon: 'fa-coins',                text: 'Enter the <strong>amount</strong> you wish to donate' },
+      { icon: 'fa-lock',                 text: 'Enter your <strong>M-Pesa PIN</strong> and confirm the transaction' },
+      { icon: 'fa-comment-sms',          text: '<strong>Keep your confirmation SMS</strong> — you\'ll submit it as evidence in the next step' },
     ];
   }
-  const numLabel  = type === 'phone' ? 'Phone' : type === 'till' ? 'Till No.' : 'Paybill No.';
-  const copyParts = [
-    `<button class="pi-copy-btn" onclick="copyField('${num}','${numLabel}')">📋 Copy ${numLabel}</button>`,
-    ...(account ? [`<button class="pi-copy-btn" onclick="copyField('${account}','Account No.')">📋 Copy Acc. No.</button>`] : []),
-    `<button class="pi-copy-btn" onclick="copyField('${name}','Recipient name')">📋 Copy Name</button>`,
-  ];
+
+  // ── Copy buttons ──────────────────────────────────────────────
+  const copyBtns = [
+    `<button class="pi-copy-btn" onclick="copyField('${num}','${primaryLabel}')"><i class="fa-regular fa-copy"></i> Copy ${primaryLabel}</button>`,
+    ...(account ? [`<button class="pi-copy-btn" onclick="copyField('${account}','Account Number')"><i class="fa-regular fa-copy"></i> Copy Account No.</button>`] : []),
+    `<button class="pi-copy-btn" onclick="copyField('${name}','Recipient name')"><i class="fa-regular fa-copy"></i> Copy Name</button>`,
+  ].join('\n    ');
+
+  // ── Render ────────────────────────────────────────────────────
   c.innerHTML = `
-    <div class="pi-label">${typeLabel}</div>
-    <div class="pi-number">${num}</div>
-    <div class="pi-name">${name}</div>
-    ${account ? `<div style="font-size:.88rem;color:rgba(247,242,232,.5);margin-bottom:.5rem;">Account No: <strong style="color:var(--gold-light);">${account}</strong></div>` : ''}
-    <div style="display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-bottom:1.5rem;">
-      <span class="pi-type-badge">${typeBadge}</span>
-      ${copyParts.join('')}
+    <div style="margin-bottom:1rem;">
+      <div class="pi-label"><i class="fa-solid ${typeIcon}" style="margin-right:.35rem;"></i>${typeLabel}</div>
+      <div class="pi-number">${num}</div>
+      <div class="pi-name">${name}</div>
+      ${account
+        ? `<div style="font-size:.85rem;color:rgba(247,242,232,.55);margin-top:.2rem;">
+             <i class="fa-solid fa-id-card" style="margin-right:.3rem;opacity:.6;"></i>Account No: <strong style="color:var(--gold-light);">${account}</strong>
+           </div>`
+        : ''}
     </div>
-    <ul class="pi-steps">${steps.map((s,i) => `<li><div class="pi-step-num">${i+1}</div><div>${s}</div></li>`).join('')}</ul>`;
+    <span class="pi-type-badge"><i class="fa-solid ${typeIcon}" style="margin-right:.35rem;"></i>${typeBadge}</span>
+    <div class="pi-actions">${copyBtns}</div>
+    <ul class="pi-steps">
+      ${steps.map((s, i) => `
+      <li>
+        <div class="pi-step-num" style="background:rgba(201,162,74,.18);">${i + 1}</div>
+        <div style="display:flex;align-items:flex-start;gap:.6rem;">
+          <i class="fa-solid ${s.icon}" style="color:var(--gold);opacity:.7;margin-top:.18rem;font-size:.8rem;flex-shrink:0;width:14px;text-align:center;"></i>
+          <div>${s.text}</div>
+        </div>
+      </li>`).join('')}
+    </ul>`;
 }
 
 function copyField(text, label) {
@@ -3086,8 +3164,30 @@ function renderSettings() {
   updateSupabaseIndicator();
 
   // Load Supabase
-  const sbUrl = document.getElementById('sb-url'); if (sbUrl) sbUrl.value = localStorage.getItem('gh_cfg_sb_url') || '';
-  const sbKey = document.getElementById('sb-key'); if (sbKey) sbKey.value = localStorage.getItem('gh_cfg_sb_key') || '';
+  // Supabase section — show env var mode or manual mode
+  const envMode = isProductionEnv();
+  const envBanner = document.getElementById('sb-env-banner');
+  const manualActions = document.getElementById('sb-manual-actions');
+  const sbUrl  = document.getElementById('sb-url');
+  const sbKey  = document.getElementById('sb-key');
+  const urlLock = document.getElementById('sb-url-lock');
+  const keyLock = document.getElementById('sb-key-lock');
+  if (envMode) {
+    // Env var mode: pre-fill, disable, show banner
+    if (envBanner) envBanner.style.display = 'block';
+    if (manualActions) manualActions.style.display = 'none';
+    if (sbUrl)  { sbUrl.value = window.__GH_SUPABASE.url || ''; sbUrl.disabled = true; }
+    if (sbKey)  { sbKey.value = (window.__GH_SUPABASE.key || '').slice(0,24) + '••••••••••••'; sbKey.disabled = true; }
+    if (urlLock) urlLock.style.display = '';
+    if (keyLock) keyLock.style.display = '';
+  } else {
+    if (envBanner) envBanner.style.display = 'none';
+    if (manualActions) manualActions.style.display = 'flex';
+    if (sbUrl)  { sbUrl.value = localStorage.getItem('gh_cfg_sb_url') || ''; sbUrl.disabled = false; }
+    if (sbKey)  { sbKey.value = localStorage.getItem('gh_cfg_sb_key') || ''; sbKey.disabled = false; }
+    if (urlLock) urlLock.style.display = 'none';
+    if (keyLock) keyLock.style.display = 'none';
+  }
 
   // Load contact info
   setFieldVal('cfg-whatsapp', DB.getConfig('site_whatsapp',''));
@@ -3599,7 +3699,7 @@ window.addEventListener('popstate', (e) => {
   initReveals();
   setTimeout(initReveals,  200);
   setTimeout(initReveals,  600);
-  setTimeout(forceReveals, 1200); // guarantee all sections visible after 1.2s
+  setTimeout(forceReveals, 800); // guarantee all sections visible after 1.2s
   updateNavTheme();
 
   // Leaf particles — delayed to ensure hero is active and visible
