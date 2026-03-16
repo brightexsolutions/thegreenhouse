@@ -7,7 +7,48 @@
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Libre+Baskerville:ital@1&display=swap" rel="stylesheet"/>
 <!-- NETLIFY ENV INJECTION -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"
+  onerror="this.remove();var s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2/dist/umd/supabase.min.js';document.head.appendChild(s);">
+</script>
+<!-- Inline production init: runs immediately after the CDN, before the main script.
+     Creates window.__GH_SB_CLIENT so ALL visitors get Supabase automatically.
+     No admin action, no localStorage keys, no timing dependency. -->
+<script>
+(function() {
+  function tryInit() {
+    if (
+      window.__GH_SUPABASE &&
+      window.__GH_SUPABASE.url &&
+      window.__GH_SUPABASE.key &&
+      typeof window.supabase !== 'undefined' &&
+      typeof window.supabase.createClient === 'function'
+    ) {
+      try {
+        window.__GH_SB_CLIENT = window.supabase.createClient(
+          window.__GH_SUPABASE.url,
+          window.__GH_SUPABASE.key
+        );
+        console.info('[GH] Supabase client ready (env vars, inline init).');
+      } catch(e) {
+        console.error('[GH] createClient failed:', e.message);
+      }
+    }
+  }
+  // Run immediately (sync CDN case)
+  tryInit();
+  // Also schedule a retry in case onerror fallback CDN is still loading
+  if (!window.__GH_SB_CLIENT && window.__GH_SUPABASE) {
+    window.__GH_INIT_RETRY = setInterval(function() {
+      if (typeof window.supabase !== 'undefined') {
+        clearInterval(window.__GH_INIT_RETRY);
+        tryInit();
+      }
+    }, 100);
+    // Give up after 10 seconds
+    setTimeout(function() { clearInterval(window.__GH_INIT_RETRY); }, 10000);
+  }
+})();
+</script>
 <style>
 :root{
   --forest:#1b3a2a;--sage:#4e7a5e;--sage-light:#7fa98a;--moss:#2d5240;
@@ -1482,19 +1523,26 @@ async function waitForSupabase(maxMs = 5000) {
 
 function getSupabaseClient() {
   if (_sbClient) return _sbClient;
-  // Priority 1: env vars injected at Netlify build time (window.__GH_SUPABASE)
-  // Set SUPABASE_URL + SUPABASE_ANON_KEY in Netlify → Site Settings → Env Variables
-  const envUrl = window.__GH_SUPABASE?.url;
-  const envKey = window.__GH_SUPABASE?.key;
-  // Priority 2: keys entered by admin in Settings (localStorage — dev only)
-  const lsUrl  = localStorage.getItem('gh_cfg_sb_url');
-  const lsKey  = localStorage.getItem('gh_cfg_sb_key');
-  const url = envUrl || lsUrl;
-  const key = envKey || lsKey;
-  if (url && key && typeof supabase !== 'undefined') {
-    _sbClient = supabase.createClient(url, key);
+
+  // Priority 1 — client created by inline head script from Netlify env vars
+  // This is set for ALL visitors in production, no localStorage needed
+  if (window.__GH_SB_CLIENT) {
+    _sbClient = window.__GH_SB_CLIENT;
     return _sbClient;
   }
+
+  // Priority 2 — manual connect via Admin → Settings (dev / local file mode)
+  const lsUrl = localStorage.getItem('gh_cfg_sb_url');
+  const lsKey = localStorage.getItem('gh_cfg_sb_key');
+  if (lsUrl && lsKey && typeof window.supabase !== 'undefined') {
+    try {
+      _sbClient = window.supabase.createClient(lsUrl, lsKey);
+      return _sbClient;
+    } catch (e) {
+      console.error('[GH] createClient (localStorage) failed:', e.message);
+    }
+  }
+
   return null;
 }
 
@@ -3264,9 +3312,16 @@ async function saveSupabaseConfig() {
   _sbClient = null; // Force re-init
   if (res) { res.style.display = 'block'; res.textContent = 'Testing connection...'; res.style.color = 'var(--adm-muted)'; }
   try {
-    const client = getSupabaseClient();
-    const { error } = await client.from('events').select('id').limit(1);
+    // Create the client directly (not via getSupabaseClient which caches old client)
+    if (typeof window.supabase === 'undefined') {
+      throw new Error('Supabase library not loaded. Check your internet connection.');
+    }
+    const testClient = window.supabase.createClient(url, key);
+    const { error } = await testClient.from('events').select('id').limit(1);
     if (error) throw error;
+    // Success — store as the active client
+    _sbClient = testClient;
+    window.__GH_SB_CLIENT = testClient;
     if (res) { res.textContent = '✓ Connected successfully!'; res.style.color = 'var(--sage-light)'; }
     showToast('Supabase connected ✦');
     updateSupabaseIndicator();
@@ -3705,22 +3760,18 @@ window.addEventListener('popstate', (e) => {
 })();
 
 (async function init() {
-  // 1. Ensure Supabase CDN is ready before any DB call
-  await waitForSupabase();
-
-  // 2. Eagerly create the Supabase client when env vars are present.
-  //    This guarantees all visitors on the live site connect to the DB
-  //    without needing to open Admin → Settings first.
-  if (isProductionEnv() && typeof supabase !== 'undefined' && !_sbClient) {
-    try {
-      _sbClient = supabase.createClient(
-        window.__GH_SUPABASE.url,
-        window.__GH_SUPABASE.key
-      );
-      console.info('[GH] Supabase client initialised from environment variables.');
-    } catch (e) {
-      console.error('[GH] Supabase createClient failed:', e.message);
-    }
+  // If the inline head script hasn't set __GH_SB_CLIENT yet (fallback CDN still
+  // loading), wait briefly for the retry interval to resolve it.
+  if (isProductionEnv() && !window.__GH_SB_CLIENT) {
+    await new Promise(resolve => {
+      const start = Date.now();
+      const check = setInterval(() => {
+        if (window.__GH_SB_CLIENT || Date.now() - start > 5000) {
+          clearInterval(check);
+          resolve();
+        }
+      }, 100);
+    });
   }
 
   await seedDefaults();
