@@ -6,7 +6,7 @@
 <title>The Green House — Worship & Sharing Sessions</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500;1,600&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&family=Libre+Baskerville:ital@1&display=swap" rel="stylesheet"/>
-  <!-- NETLIFY ENV INJECTION -->
+<!-- NETLIFY ENV INJECTION -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 :root{
@@ -2595,6 +2595,9 @@ function openEventForm(eventData) {
     document.getElementById('evt-poster-preview').style.display = 'none';
     document.getElementById('evt-poster-img').src = '';
     document.getElementById('evt-poster-input').value = '';
+    setFieldVal('evt-entry-fee', 'Free');
+    setFieldVal('evt-dresscode', 'None');
+    setFieldVal('evt-capacity',  '');
   }
   syncToggle('evt-pub-track',  _evtPub);
   syncToggle('evt-feat-track', _evtFeat);
@@ -2719,7 +2722,7 @@ async function renderEventsTable() {
       <td style="white-space:nowrap;">${formatDateShort(e.date)}</td>
       <td>${esc(e.venue)}${e.area ? '<br/><span style="font-size:.7rem;color:var(--adm-muted);">'+esc(e.area)+'</span>' : ''}</td>
       <td><span class="adm-status ${statusText}">${statusText}</span></td>
-      <td style="text-align:center;">${regCount(e.id)}</td>
+      <td style="text-align:center;">${regCount(e.id)}${e.capacity > 0 ? ' / ' + e.capacity : ''}</td>
       <td>
         <div style="display:flex;gap:.4rem;flex-wrap:wrap;">
           <button class="adm-btn adm-btn-secondary adm-btn-sm" onclick="editEvent('${e.id}')">Edit</button>
@@ -3540,7 +3543,33 @@ function downloadCSV(filename, rows) {
 /* ═══════════════════════════════════════════════════════
    INIT
    ═══════════════════════════════════════════════════════ */
-// ── Hash routing helpers (must be defined before init runs) ──
+// ── Hash routing helpers — defined before init() runs ──────────
+function getPageFromHash() {
+  const hash = window.location.hash.replace('#', '').toLowerCase();
+  const valid = ['home','about','gallery','events','donate','join'];
+  return valid.includes(hash) ? hash : 'home';
+}
+
+window.addEventListener('popstate', (e) => {
+  const page = e.state?.page || getPageFromHash();
+  navigate(page, false);
+});
+
+// Also patch navigate() to push hash so back/forward works
+(function patchNavigate() {
+  const _orig = navigate;
+  window.navigate = navigate = function(page, updateHash) {
+    if (updateHash !== false) {
+      const hash = page === 'home' ? '' : '#' + page;
+      try {
+        if (window.location.hash !== (hash || window.location.pathname)) {
+          history.pushState({ page }, '', hash || window.location.pathname);
+        }
+      } catch (e) { /* ignore */ }
+    }
+    return _orig(page);
+  };
+})();
 
 (async function init() {
   await seedDefaults();
