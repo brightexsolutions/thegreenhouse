@@ -49,6 +49,16 @@ interface RegistrationFormProps {
 
 export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
   const [submitted, setSubmitted] = useState(false);
+  const [ticketUrl,  setTicketUrl]  = useState<string | null>(null);
+  const [waShareUrl, setWaShareUrl] = useState<string | null>(null);
+  const [copied,     setCopied]     = useState(false);
+
+  async function copyTicketUrl() {
+    if (!ticketUrl) return;
+    await navigator.clipboard.writeText(ticketUrl).catch(() => {});
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
 
   const {
     register,
@@ -80,13 +90,18 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
       throw new Error(err);
     }
 
+    const responseBody = await res.json().catch(() => ({}));
+    setTicketUrl(responseBody.ticketUrl ?? null);
+    setWaShareUrl(responseBody.waShareUrl ?? null);
     setSubmitted(true);
     onSuccess?.();
   }
 
   if (submitted) {
+    const hasEmail = !!watch("email");
+
     return (
-      <div className="py-10 text-center">
+      <div className="py-8 text-center">
         <div className="relative w-20 h-20 mx-auto mb-6">
           <div className="absolute inset-0 rounded-full bg-forest/10 animate-ping opacity-40" />
           <div className="relative w-20 h-20 rounded-full bg-forest/10 border border-forest/20 flex items-center justify-center">
@@ -94,13 +109,47 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
           </div>
         </div>
         <h3 className="font-display text-2xl font-semibold text-forest mb-2">You&apos;re registered</h3>
-        <p className="text-charcoal/60 text-sm max-w-xs mx-auto leading-relaxed">
-          Your ticket is on its way. We look forward to seeing you at {event.venue_name || "the venue"}.
+        <p className="text-charcoal/60 text-sm max-w-xs mx-auto leading-relaxed mb-6">
+          {hasEmail
+            ? "Your ticket has been sent to your email. We look forward to seeing you."
+            : "Save your ticket link below — you'll need it at the door."}
         </p>
-        <div className="mt-6 inline-flex items-center gap-2 text-xs text-forest/60 bg-forest/5 px-4 py-2 rounded-full border border-forest/10">
-          <CheckCircle2 size={13} />
-          <span>Check your email or WhatsApp</span>
-        </div>
+
+        {hasEmail && (
+          <div className="inline-flex items-center gap-2 text-xs text-forest/60 bg-forest/5 px-4 py-2 rounded-full border border-forest/10">
+            <CheckCircle2 size={13} />
+            <span>Check your email for your ticket</span>
+          </div>
+        )}
+
+        {/* Ticket link for phone-only attendees */}
+        {!hasEmail && ticketUrl && (
+          <div className="mt-2 space-y-3">
+            <div className="bg-forest/5 border border-forest/10 rounded-2xl px-4 py-3 text-xs font-mono text-forest/70 break-all">
+              {ticketUrl}
+            </div>
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={copyTicketUrl}
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full border border-forest/20 text-xs font-medium text-forest hover:bg-forest/5 transition-colors"
+              >
+                <CheckCircle2 size={12} />
+                {copied ? "Copied!" : "Copy link"}
+              </button>
+              {waShareUrl && (
+                <a
+                  href={waShareUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-[#25d366] text-white text-xs font-medium hover:bg-[#20b858] transition-colors"
+                >
+                  Send to myself on WhatsApp
+                </a>
+              )}
+            </div>
+            <p className="text-[10px] text-charcoal/30">Save this link — you&apos;ll need it to access your ticket</p>
+          </div>
+        )}
       </div>
     );
   }
@@ -178,7 +227,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
           />
         </div>
         <span className="text-xs text-charcoal/60 leading-relaxed">
-          Keep me updated on future sessions via WhatsApp
+          Keep me updated on future sessions
         </span>
       </label>
 
@@ -199,7 +248,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
       </button>
 
       <p className="text-center text-[10px] text-charcoal/30 leading-relaxed">
-        Entry is free. We&apos;ll send your ticket by email or WhatsApp.
+        Entry is free. Ticket sent by email — or save your link if phone only.
       </p>
     </form>
   );

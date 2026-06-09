@@ -5,7 +5,8 @@ import { registrationSchema } from "@/lib/validations/registration";
 import { createAdminClient } from "@/lib/supabase/server";
 import { registerLimiter } from "@/lib/rate-limit";
 import { sendTicketEmail } from "@/lib/communications/email";
-import { sendTicketWhatsApp } from "@/lib/communications/whatsapp";
+import { waTicketShareUrl } from "@/lib/communications/whatsapp";
+import { SITE_URL } from "@/lib/constants";
 import { TicketPdf } from "@/lib/pdf/ticket-pdf";
 import { logger } from "@/lib/logger";
 
@@ -176,38 +177,29 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  // Send WhatsApp if phone provided
-  if (data.phone) {
-    const waResult = await sendTicketWhatsApp({
-      to:          data.phone,
-      firstName:   data.first_name,
-      eventTitle:  event.title,
-      eventDate:   formattedDate,
-      venueName:   event.venue_name,
-      ticketToken: reg.ticket_token,
-    });
+  const ticketUrl  = `${SITE_URL}/ticket/${reg.ticket_token}`;
 
-    await supabase.from("communications_log").insert({
-      event_id:        data.event_id,
-      registration_id: reg.id,
-      channel:         "whatsapp",
-      recipient:       data.phone,
-      status:          waResult.success ? "sent" : "failed",
-      provider_id:     waResult.providerId,
-      error_message:   waResult.error ?? null,
-      sent_at:         waResult.success ? new Date().toISOString() : null,
-    });
-
-    if (waResult.success && !data.email) {
-      await supabase.from("registrations").update({ ticket_sent: true }).eq("id", reg.id);
-    }
-  }
+  // Generate wa.me share link for phone-only attendees (no API call — free)
+  const waShareUrl = data.phone
+    ? waTicketShareUrl({
+        firstName:   data.first_name,
+        eventTitle:  event.title,
+        eventDate:   formattedDate,
+        venueName:   event.venue_name,
+        ticketToken: reg.ticket_token,
+      })
+    : null;
 
   logger.info("registration_created", {
-    event_id:       data.event_id,
+    event_id:        data.event_id,
     registration_id: reg.id,
-    channel:        data.email ? (data.phone ? "both" : "email") : "whatsapp",
+    channel:         data.email ? (data.phone ? "both" : "email") : "phone",
   });
 
-  return NextResponse.json({ success: true, ticketToken: reg.ticket_token }, { status: 201 });
+  return NextResponse.json({
+    success:     true,
+    ticketToken: reg.ticket_token,
+    ticketUrl,
+    waShareUrl,
+  }, { status: 201 });
 }
