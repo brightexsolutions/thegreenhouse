@@ -5,8 +5,9 @@ export const SESSION_FREQUENCY = "quarterly";
 export const CONTACT_EMAIL    = "hello@thegreenhouseke.com";
 export const CONTACT_WHATSAPP = "254700000000"; // update with real number
 
-export const SOCIAL_INSTAGRAM = "";
-export const SOCIAL_TWITTER   = "";
+export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
+export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";
+export const SOCIAL_YOUTUBE   = "https://youtube.com/@thegreenhouseke";
 
 /** Build a WhatsApp link with optional pre-filled message */
 export function whatsappUrl(message?: string): string {
