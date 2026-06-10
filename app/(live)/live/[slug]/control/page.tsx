@@ -1,11 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import {
   Tv2, Music, ChevronLeft, ChevronRight, Clock, Users,
-  BookOpen, Heart, Zap, AlignLeft, MessageSquare, Loader2, ExternalLink
+  BookOpen, Heart, Zap, AlignLeft, MessageSquare, Loader2,
+  ExternalLink, QrCode, Sun, Moon, Leaf,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -16,6 +17,8 @@ type DisplayState = {
   song_id:     string | null;
   verse_index: number;
   custom_text: string | null;
+  theme:       string;
+  show_qr:     boolean;
 };
 
 type Song = { id: string; title: string; artist: string | null; lyrics: string | null };
@@ -33,26 +36,25 @@ type EventData = {
   }>;
 };
 
-function useSupabase() {
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  );
-}
-
 const SCENES = [
-  { key: "branding",    label: "Branding",   icon: Tv2 },
-  { key: "countdown",   label: "Countdown",  icon: Clock },
-  { key: "now_playing", label: "Now Playing",icon: Music },
-  { key: "lyrics",      label: "Lyrics",     icon: AlignLeft },
-  { key: "program",     label: "Program",    icon: BookOpen },
-  { key: "theme",       label: "Theme",      icon: Zap },
-  { key: "prayer",      label: "Prayer",     icon: Heart },
-  { key: "community",   label: "Community",  icon: Users },
-  { key: "custom",      label: "Custom",     icon: MessageSquare },
+  { key: "branding",    label: "Branding",    icon: Tv2 },
+  { key: "countdown",   label: "Countdown",   icon: Clock },
+  { key: "now_playing", label: "Now Playing", icon: Music },
+  { key: "lyrics",      label: "Lyrics",      icon: AlignLeft },
+  { key: "program",     label: "Program",     icon: BookOpen },
+  { key: "theme",       label: "Theme",       icon: Zap },
+  { key: "prayer",      label: "Prayer",      icon: Heart },
+  { key: "community",   label: "Community",   icon: Users },
+  { key: "custom",      label: "Custom",      icon: MessageSquare },
 ] as const;
 
 type SceneKey = typeof SCENES[number]["key"];
+
+const DISPLAY_THEMES: Array<{ key: string; label: string; icon: typeof Sun; bg: string; fg: string }> = [
+  { key: "dark",   label: "Dark",   icon: Moon, bg: "#0d1a12", fg: "#c9a24a" },
+  { key: "light",  label: "Light",  icon: Sun,  bg: "#f7f2e8", fg: "#1b3a2a" },
+  { key: "forest", label: "Forest", icon: Leaf, bg: "#1b3a2a", fg: "#c9a24a" },
+];
 
 function getLyricsVerses(lyrics: string | null) {
   if (!lyrics) return [];
@@ -60,23 +62,27 @@ function getLyricsVerses(lyrics: string | null) {
 }
 
 export default function ControlPage({ params }: { params: { slug: string } }) {
-  const [authed, setAuthed]     = useState<boolean | null>(null);
-  const [event, setEvent]       = useState<EventData | null>(null);
-  const [display, setDisplay]   = useState<DisplayState | null>(null);
-  const [saving, setSaving]     = useState(false);
-  const [customText, setCustomText] = useState("");
-  const [activeSong, setActiveSong] = useState<Song | null>(null);
-
   const slug = params.slug;
 
-  const supabase = useSupabase();
+  const supabaseRef = useRef(createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ));
+  const supabase = supabaseRef.current;
+
+  const [authed,     setAuthed]     = useState<boolean | null>(null);
+  const [event,      setEvent]      = useState<EventData | null>(null);
+  const [display,    setDisplay]    = useState<DisplayState | null>(null);
+  const [saving,     setSaving]     = useState(false);
+  const [customText, setCustomText] = useState("");
+  const [activeSong, setActiveSong] = useState<Song | null>(null);
 
   // Auth check
   useEffect(() => {
     supabase.auth.getUser().then(({ data: { user } }) => setAuthed(!!user));
   }, []);
 
-  // Load event data
+  // Load event data once authed
   useEffect(() => {
     if (authed !== true) return;
     supabase
@@ -95,34 +101,35 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       });
   }, [slug, authed]);
 
-  // Realtime subscribe to display state
+  // Realtime subscription
   useEffect(() => {
     if (!event) return;
     const channel = supabase
       .channel(`control-${event.id}`)
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "display_state", filter: `event_id=eq.${event.id}` },
-        (payload) => setDisplay(payload.new as DisplayState)
-      )
+      .on("postgres_changes", {
+        event: "*",
+        schema: "public",
+        table: "display_state",
+        filter: `event_id=eq.${event.id}`,
+      }, (payload) => {
+        if (payload.new && Object.keys(payload.new).length > 0) {
+          setDisplay(payload.new as DisplayState);
+        }
+      })
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [event?.id]);
 
-  // Keep custom text in sync
+  // Sync custom text when scene changes
   useEffect(() => {
     if (display?.custom_text) setCustomText(display.custom_text);
   }, [display?.scene]);
 
-  // Keep active song in sync
+  // Sync active song
   useEffect(() => {
     if (!display?.song_id || !event) { setActiveSong(null); return; }
     const allSongs: Song[] = [];
-    for (const sess of event.event_sessions) {
-      for (const ss of sess.session_songs) {
-        if (ss.songs) allSongs.push(ss.songs);
-      }
-    }
+    for (const sess of event.event_sessions) for (const ss of sess.session_songs) if (ss.songs) allSongs.push(ss.songs);
     setActiveSong(allSongs.find(s => s.id === display.song_id) ?? null);
   }, [display?.song_id, event]);
 
@@ -130,16 +137,18 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     if (!event || !display) return;
     setSaving(true);
     const updated = { ...display, ...patch };
-    await supabase.from("display_state").upsert({
+    const { data } = await supabase.from("display_state").upsert({
       id:          display.id,
       event_id:    event.id,
       scene:       updated.scene,
       song_id:     updated.song_id,
       verse_index: updated.verse_index,
       custom_text: updated.custom_text,
+      theme:       updated.theme ?? "dark",
+      show_qr:     updated.show_qr ?? false,
       updated_at:  new Date().toISOString(),
-    }, { onConflict: "event_id" });
-    setDisplay(updated);
+    }, { onConflict: "event_id" }).select("*").single();
+    if (data) setDisplay(data as DisplayState);
     setSaving(false);
   }
 
@@ -148,39 +157,30 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     setSaving(true);
     const { data } = await supabase
       .from("display_state")
-      .upsert({ event_id: event.id, scene: "branding", song_id: null, verse_index: 0, custom_text: null, updated_at: new Date().toISOString() }, { onConflict: "event_id" })
+      .upsert({
+        event_id: event.id, scene: "branding", song_id: null,
+        verse_index: 0, custom_text: null, theme: "dark", show_qr: false,
+        updated_at: new Date().toISOString(),
+      }, { onConflict: "event_id" })
       .select("*")
       .single();
     if (data) setDisplay(data as DisplayState);
     setSaving(false);
   }
 
-  async function setScene(scene: SceneKey) {
-    await upsertDisplay({ scene, verse_index: 0 });
-  }
-
-  async function setSong(songId: string) {
-    await upsertDisplay({ song_id: songId, verse_index: 0, scene: "lyrics" });
-  }
-
+  async function setScene(scene: SceneKey)   { await upsertDisplay({ scene, verse_index: 0 }); }
+  async function setSong(songId: string)      { await upsertDisplay({ song_id: songId, verse_index: 0, scene: "lyrics" }); }
   async function nextVerse() {
     const verses = getLyricsVerses(activeSong?.lyrics ?? null);
-    const next = Math.min((display?.verse_index ?? 0) + 1, verses.length - 1);
-    await upsertDisplay({ verse_index: next });
+    await upsertDisplay({ verse_index: Math.min((display?.verse_index ?? 0) + 1, verses.length - 1) });
   }
-
   async function prevVerse() {
-    const prev = Math.max((display?.verse_index ?? 0) - 1, 0);
-    await upsertDisplay({ verse_index: prev });
+    await upsertDisplay({ verse_index: Math.max((display?.verse_index ?? 0) - 1, 0) });
   }
-
-  async function pushCustom() {
-    await upsertDisplay({ custom_text: customText, scene: "custom" });
-  }
-
-  async function panic() {
-    await upsertDisplay({ scene: "branding" });
-  }
+  async function pushCustom()                 { await upsertDisplay({ custom_text: customText, scene: "custom" }); }
+  async function panic()                      { await upsertDisplay({ scene: "branding" }); }
+  async function setTheme(theme: string)      { await upsertDisplay({ theme }); }
+  async function toggleQr()                   { await upsertDisplay({ show_qr: !display?.show_qr }); }
 
   if (authed === null) {
     return (
@@ -217,12 +217,9 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const allSongs: Song[] = [];
   for (const sess of [...event.event_sessions].sort((a, b) => a.sort_order - b.sort_order)) {
     for (const ss of sess.session_songs) {
-      if (ss.songs && !allSongs.find(s => s.id === ss.songs!.id)) {
-        allSongs.push(ss.songs);
-      }
+      if (ss.songs && !allSongs.find(s => s.id === ss.songs!.id)) allSongs.push(ss.songs);
     }
   }
-
   const verses = getLyricsVerses(activeSong?.lyrics ?? null);
 
   return (
@@ -235,12 +232,8 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
         </div>
         <div className="flex items-center gap-2">
           {saving && <Loader2 size={14} className="animate-spin text-cream/40" />}
-          <a
-            href={`/live/${event.slug}/display`}
-            target="_blank"
-            rel="noopener"
-            className="p-2 rounded-xl bg-cream/10 hover:bg-cream/20 transition-colors"
-          >
+          <a href={`/live/${event.slug}/display`} target="_blank" rel="noopener"
+            className="p-2 rounded-xl bg-cream/10 hover:bg-cream/20 transition-colors">
             <ExternalLink size={14} className="text-cream/60" />
           </a>
         </div>
@@ -249,18 +242,13 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       {/* Current scene chip */}
       <div className="bg-cream/10 rounded-2xl px-4 py-3 mb-5 flex items-center justify-between">
         <span className="text-xs text-cream/50">Current scene</span>
-        <span className="text-sm font-semibold text-gold uppercase tracking-wider">
-          {display?.scene ?? "—"}
-        </span>
+        <span className="text-sm font-semibold text-gold uppercase tracking-wider">{display?.scene ?? "—"}</span>
       </div>
 
       {/* Init display state if not set */}
       {!display && (
-        <button
-          onClick={initDisplay}
-          disabled={saving}
-          className="w-full py-3 rounded-2xl bg-gold text-forest font-semibold text-sm mb-4 disabled:opacity-50"
-        >
+        <button onClick={initDisplay} disabled={saving}
+          className="w-full py-3 rounded-2xl bg-gold text-forest font-semibold text-sm mb-4 disabled:opacity-50">
           {saving ? "Initialising…" : "Initialise display"}
         </button>
       )}
@@ -272,16 +260,10 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
             <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Scenes</h2>
             <div className="grid grid-cols-3 gap-2">
               {SCENES.map(({ key, label, icon: Icon }) => (
-                <button
-                  key={key}
-                  onClick={() => setScene(key)}
-                  disabled={saving}
+                <button key={key} onClick={() => setScene(key)} disabled={saving}
                   className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl text-xs font-medium transition-all ${
-                    display.scene === key
-                      ? "bg-gold text-forest"
-                      : "bg-cream/10 text-cream/60 hover:bg-cream/20"
-                  }`}
-                >
+                    display.scene === key ? "bg-gold text-forest" : "bg-cream/10 text-cream/60 hover:bg-cream/20"
+                  }`}>
                   <Icon size={16} />
                   {label}
                 </button>
@@ -292,47 +274,32 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
           {/* Lyrics control */}
           <section className="mb-5">
             <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Lyrics</h2>
-
-            {/* Song selector */}
             {allSongs.length > 0 ? (
               <div className="mb-3">
-                <select
-                  value={display.song_id ?? ""}
-                  onChange={e => e.target.value && setSong(e.target.value)}
-                  className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-sm text-cream focus:outline-none focus:border-gold"
-                >
+                <select value={display.song_id ?? ""} onChange={e => e.target.value && setSong(e.target.value)}
+                  className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-sm text-cream focus:outline-none focus:border-gold">
                   <option value="">Select a song…</option>
                   {allSongs.map(s => (
                     <option key={s.id} value={s.id}>{s.title}{s.artist ? ` — ${s.artist}` : ""}</option>
                   ))}
                 </select>
               </div>
-            ) : (
-              <p className="text-cream/30 text-xs mb-3">No songs in program yet</p>
-            )}
-
-            {/* Verse navigation */}
+            ) : <p className="text-cream/30 text-xs mb-3">No songs in program yet</p>}
             {activeSong && verses.length > 0 && (
               <>
                 <div className="bg-cream/5 rounded-xl p-3 mb-3 text-xs text-cream/50 min-h-[60px] whitespace-pre-line leading-relaxed">
                   {verses[display.verse_index] ?? "—"}
                 </div>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={prevVerse}
-                    disabled={saving || display.verse_index === 0}
-                    className="flex-1 py-3 rounded-xl bg-cream/10 hover:bg-cream/20 disabled:opacity-30 flex items-center justify-center gap-2 text-sm font-medium transition-colors"
-                  >
+                  <button onClick={prevVerse} disabled={saving || display.verse_index === 0}
+                    className="flex-1 py-3 rounded-xl bg-cream/10 hover:bg-cream/20 disabled:opacity-30 flex items-center justify-center gap-2 text-sm font-medium transition-colors">
                     <ChevronLeft size={16} /> Prev
                   </button>
                   <span className="text-cream/30 text-xs tabular-nums w-12 text-center">
                     {display.verse_index + 1}/{verses.length}
                   </span>
-                  <button
-                    onClick={nextVerse}
-                    disabled={saving || display.verse_index >= verses.length - 1}
-                    className="flex-1 py-3 rounded-xl bg-cream/10 hover:bg-cream/20 disabled:opacity-30 flex items-center justify-center gap-2 text-sm font-medium transition-colors"
-                  >
+                  <button onClick={nextVerse} disabled={saving || display.verse_index >= verses.length - 1}
+                    className="flex-1 py-3 rounded-xl bg-cream/10 hover:bg-cream/20 disabled:opacity-30 flex items-center justify-center gap-2 text-sm font-medium transition-colors">
                     Next <ChevronRight size={16} />
                   </button>
                 </div>
@@ -340,31 +307,54 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
             )}
           </section>
 
-          {/* Custom text / prayer push */}
-          <section className="mb-6">
+          {/* Custom text */}
+          <section className="mb-5">
             <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Custom text</h2>
-            <textarea
-              value={customText}
-              onChange={e => setCustomText(e.target.value)}
-              rows={3}
+            <textarea value={customText} onChange={e => setCustomText(e.target.value)} rows={3}
               placeholder="Type any text to push to the display…"
-              className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold resize-none"
-            />
-            <button
-              onClick={pushCustom}
-              disabled={!customText.trim() || saving}
-              className="w-full mt-2 py-3 rounded-xl bg-cream/15 hover:bg-cream/25 text-cream text-sm font-medium disabled:opacity-40 transition-colors"
-            >
+              className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold resize-none" />
+            <button onClick={pushCustom} disabled={!customText.trim() || saving}
+              className="w-full mt-2 py-3 rounded-xl bg-cream/15 hover:bg-cream/25 text-cream text-sm font-medium disabled:opacity-40 transition-colors">
               Push to display
             </button>
           </section>
 
-          {/* Panic / branding */}
-          <button
-            onClick={panic}
-            disabled={saving}
-            className="w-full py-3.5 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-300 text-sm font-semibold hover:bg-red-500/30 transition-colors disabled:opacity-50"
-          >
+          {/* Display theme */}
+          <section className="mb-5">
+            <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Display theme</h2>
+            <div className="grid grid-cols-3 gap-2">
+              {DISPLAY_THEMES.map(({ key, label, icon: Icon, bg, fg }) => (
+                <button key={key} onClick={() => setTheme(key)} disabled={saving}
+                  className="flex flex-col items-center gap-2 py-3 px-2 rounded-2xl text-xs font-medium transition-all border"
+                  style={{
+                    background:   (display.theme ?? "dark") === key ? bg : "rgba(247,242,232,0.08)",
+                    borderColor:  (display.theme ?? "dark") === key ? fg : "rgba(247,242,232,0.08)",
+                    color:        (display.theme ?? "dark") === key ? fg : "rgba(247,242,232,0.5)",
+                  }}>
+                  <Icon size={15} />
+                  {label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          {/* QR code toggle */}
+          <section className="mb-6">
+            <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">QR Code</h2>
+            <button onClick={toggleQr} disabled={saving}
+              className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all border ${
+                display.show_qr
+                  ? "bg-gold/20 border-gold/40 text-gold"
+                  : "bg-cream/10 border-cream/10 text-cream/60 hover:bg-cream/20"
+              }`}>
+              <QrCode size={15} />
+              {display.show_qr ? "Hide QR code" : "Show QR code on display"}
+            </button>
+          </section>
+
+          {/* Panic button */}
+          <button onClick={panic} disabled={saving}
+            className="w-full py-3.5 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-300 text-sm font-semibold hover:bg-red-500/30 transition-colors disabled:opacity-50">
             ⚡ Back to branding
           </button>
         </>
