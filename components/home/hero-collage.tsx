@@ -7,32 +7,85 @@ import { ArrowRight } from "lucide-react";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
-// Unsplash photos chosen for warmth, community, and green/natural tones
 const PHOTOS = {
+  pause:   "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=600&q=80",
   worship: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=700&q=80",
   connect: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=700&q=80",
   reflect: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=700&q=80",
 };
 
-export function HeroCollage() {
+/**
+ * Outer div: entrance slide-up. Inner div: infinite float.
+ * Separating them prevents the float loop from resetting the entrance.
+ */
+function FloatCard({
+  entranceDelay,
+  rotate,
+  floatDuration,
+  floatDelay,
+  floatAmount = 10,
+  className,
+  style,
+  children,
+}: {
+  entranceDelay: number;
+  rotate: number;
+  floatDuration: number;
+  floatDelay: number;
+  floatAmount?: number;
+  className: string;
+  style?: React.CSSProperties;
+  children: React.ReactNode;
+}) {
   const reduce = useReducedMotion();
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 36, rotate }}
+      animate={{ opacity: 1, y: 0, rotate }}
+      transition={{ duration: 0.8, delay: entranceDelay, ease: EASE }}
+      className={className}
+      style={style}
+    >
+      <motion.div
+        animate={reduce ? {} : { y: [0, -floatAmount, 0] }}
+        transition={{ duration: floatDuration, repeat: Infinity, ease: "easeInOut", delay: floatDelay }}
+        className="w-full h-full"
+      >
+        {children}
+      </motion.div>
+    </motion.div>
+  );
+}
 
+function CardInner({
+  src, alt, label, borderRadius,
+}: {
+  src: string; alt: string; label: string; borderRadius?: string;
+}) {
+  return (
+    <div className="relative w-full h-full overflow-hidden shadow-2xl" style={{ borderRadius: borderRadius ?? "2rem" }}>
+      <Image src={src} alt={alt} fill className="object-cover" sizes="(max-width:1024px) 40vw, 22vw" priority={alt === "Worship" || alt === "Pause"} />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+      <div className="absolute bottom-0 left-0 right-0 p-4">
+        <span className="label-caps text-cream text-xs font-bold tracking-widest">{label}</span>
+      </div>
+    </div>
+  );
+}
+
+export function HeroCollage() {
   const container = {
     hidden: {},
     show: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } },
   };
-
   const item = (delay = 0) => ({
-    hidden: { opacity: 0, y: reduce ? 0 : 32 },
+    hidden: { opacity: 0, y: 32 },
     show:   { opacity: 1, y: 0, transition: { duration: 0.65, ease: EASE, delay } },
   });
 
   return (
     <section className="relative min-h-[100svh] bg-forest-dark flex items-center overflow-hidden pt-20">
-      {/* Background radial glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_60%_40%,rgba(201,162,74,0.10),transparent)]" />
-
-      {/* Decorative rings */}
       <div className="absolute top-12 right-[38%] w-48 h-48 rounded-full border border-cream/5 hidden lg:block" />
       <div className="absolute bottom-16 left-8 w-32 h-32 rounded-full border border-gold/10 hidden lg:block" />
 
@@ -40,12 +93,7 @@ export function HeroCollage() {
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
           {/* Left — copy */}
-          <motion.div
-            variants={container}
-            initial="hidden"
-            animate="show"
-            className="flex flex-col gap-6"
-          >
+          <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-6">
             <motion.div variants={item(0)} className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse-dot" />
               <span className="label-caps text-gold/80 tracking-widest">Nairobi · Quarterly</span>
@@ -55,18 +103,15 @@ export function HeroCollage() {
               variants={item(0.05)}
               className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream leading-[0.95] tracking-tight"
             >
-              A place to{" "}
-              <em className="not-italic text-gold">breathe</em>
-              {" "}and{" "}
-              <em className="not-italic text-gold">connect</em>
+              Pause.{" "}
+              <em className="not-italic text-gold">Worship.</em>
+              <br />
+              Reflect.{" "}
+              <em className="not-italic text-gold">Connect.</em>
             </motion.h1>
 
-            <motion.p
-              variants={item(0.1)}
-              className="text-cream/70 text-base sm:text-lg max-w-sm leading-relaxed"
-            >
-              Cross-church. Low pressure.
-              A quarterly evening of worship, prayer, and real conversation.
+            <motion.p variants={item(0.1)} className="text-cream/70 text-base sm:text-lg max-w-sm leading-relaxed">
+              A quarterly cross-church gathering in Nairobi — low pressure, real connection, all welcome.
             </motion.p>
 
             <motion.div variants={item(0.15)} className="flex flex-wrap gap-3 pt-2">
@@ -74,8 +119,7 @@ export function HeroCollage() {
                 href="/events"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gold text-forest font-semibold text-sm hover:bg-gold-light transition-all duration-200 hover:-translate-y-0.5"
               >
-                Reserve a spot
-                <ArrowRight size={15} />
+                Reserve a spot <ArrowRight size={15} />
               </Link>
               <Link
                 href="/about"
@@ -86,99 +130,93 @@ export function HeroCollage() {
             </motion.div>
           </motion.div>
 
-          {/* Right — photo collage */}
+          {/* Right — 4-card floating collage */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative h-[420px] sm:h-[500px] lg:h-[580px] hidden sm:block"
+            className="relative h-[480px] sm:h-[540px] lg:h-[600px] hidden sm:block"
           >
-            {/* Card 1 — large pill, left, Worship */}
-            <motion.div
-              initial={{ opacity: 0, y: 40, rotate: -6 }}
-              animate={{ opacity: 1, y: 0, rotate: -6 }}
-              transition={{ duration: 0.8, delay: 0.4, ease: EASE }}
-              className="absolute left-0 top-8 w-[48%] h-[72%] rounded-[2.5rem] overflow-hidden shadow-2xl"
+            {/* Card: PAUSE — small square, top-left */}
+            <FloatCard
+              entranceDelay={0.38}
+              rotate={-4}
+              floatDuration={4.0}
+              floatDelay={1.6}
+              floatAmount={8}
+              className="absolute left-0 top-0 w-[33%] h-[32%]"
             >
-              <Image
-                src={PHOTOS.worship}
-                alt="Worship"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 40vw, 22vw"
-                priority
-              />
-              {/* Strong scrim for text legibility */}
-              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5">
-                <span className="label-caps text-cream text-xs font-semibold tracking-widest">Worship</span>
-              </div>
-            </motion.div>
+              <CardInner src={PHOTOS.pause} alt="Pause" label="Pause" borderRadius="1.75rem" />
+            </FloatCard>
 
-            {/* Card 2 — medium, top right, Connect */}
-            <motion.div
-              initial={{ opacity: 0, y: 30, rotate: 4 }}
-              animate={{ opacity: 1, y: 0, rotate: 4 }}
-              transition={{ duration: 0.8, delay: 0.55, ease: EASE }}
-              className="absolute right-0 top-0 w-[44%] h-[46%] rounded-[2rem] overflow-hidden shadow-xl"
+            {/* Card: WORSHIP — large pill, left-center */}
+            <FloatCard
+              entranceDelay={0.50}
+              rotate={-5}
+              floatDuration={4.4}
+              floatDelay={0}
+              floatAmount={12}
+              className="absolute left-0 top-[30%] w-[47%] h-[66%]"
             >
-              <Image
-                src={PHOTOS.connect}
-                alt="Connect"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 36vw, 20vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <span className="label-caps text-cream text-xs font-semibold tracking-widest">Connect</span>
-              </div>
-            </motion.div>
+              <CardInner src={PHOTOS.worship} alt="Worship" label="Worship" borderRadius="2.5rem" />
+            </FloatCard>
 
-            {/* Card 3 — arch, bottom right, Reflect */}
-            <motion.div
-              initial={{ opacity: 0, y: 20, rotate: 2 }}
-              animate={{ opacity: 1, y: 0, rotate: 2 }}
-              transition={{ duration: 0.8, delay: 0.68, ease: EASE }}
-              className="absolute right-4 bottom-4 w-[40%] h-[46%] overflow-hidden shadow-xl"
+            {/* Card: CONNECT — medium, top-right */}
+            <FloatCard
+              entranceDelay={0.62}
+              rotate={4}
+              floatDuration={3.6}
+              floatDelay={2.0}
+              floatAmount={10}
+              className="absolute right-0 top-0 w-[44%] h-[46%]"
+            >
+              <CardInner src={PHOTOS.connect} alt="Connect" label="Connect" borderRadius="2rem" />
+            </FloatCard>
+
+            {/* Card: REFLECT — arch, bottom-right */}
+            <FloatCard
+              entranceDelay={0.74}
+              rotate={2}
+              floatDuration={4.8}
+              floatDelay={0.8}
+              floatAmount={9}
+              className="absolute right-4 bottom-0 w-[40%] h-[46%]"
               style={{ borderRadius: "50% 50% 2rem 2rem / 50% 50% 2rem 2rem" }}
             >
-              <Image
-                src={PHOTOS.reflect}
-                alt="Reflect"
-                fill
-                className="object-cover"
-                sizes="(max-width: 1024px) 32vw, 18vw"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/15 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-4">
-                <span className="label-caps text-cream text-xs font-semibold tracking-widest">Reflect</span>
+              <div
+                className="relative w-full h-full overflow-hidden shadow-2xl"
+                style={{ borderRadius: "inherit" }}
+              >
+                <Image src={PHOTOS.reflect} alt="Reflect" fill className="object-cover" sizes="(max-width:1024px) 34vw, 18vw" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-4">
+                  <span className="label-caps text-cream text-xs font-bold tracking-widest">Reflect</span>
+                </div>
               </div>
-            </motion.div>
+            </FloatCard>
 
-            {/* Gold decorative circle */}
+            {/* Decorative gold ring between cards */}
             <motion.div
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.8 }}
-              className="absolute right-[36%] bottom-[28%] w-12 h-12 rounded-full border-2 border-gold/50"
+              transition={{ duration: 0.6, delay: 0.85 }}
+              className="absolute right-[38%] bottom-[30%] w-11 h-11 rounded-full border-2 border-gold/50 pointer-events-none"
             />
 
-            {/* Session count badge */}
+            {/* Session badge */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
+              initial={{ opacity: 0, x: 16 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.9 }}
-              className="absolute left-[42%] top-[42%] bg-forest/80 backdrop-blur-sm border border-gold/30 rounded-2xl px-4 py-3 shadow-lg"
+              transition={{ duration: 0.5, delay: 0.95 }}
+              className="absolute left-[40%] top-[44%] bg-forest/80 backdrop-blur-sm border border-gold/30 rounded-2xl px-4 py-2.5 shadow-lg"
             >
-              <span className="font-display text-2xl font-semibold text-cream">02</span>
+              <span className="font-display text-xl font-semibold text-cream">02</span>
               <p className="text-xs text-cream/70 mt-0.5 uppercase tracking-wider">Session</p>
             </motion.div>
           </motion.div>
         </div>
       </div>
 
-      {/* Scroll hint */}
       <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
         <span className="label-caps text-cream/60 text-xs">Scroll</span>
         <div className="w-px h-8 bg-gradient-to-b from-cream/60 to-transparent" />

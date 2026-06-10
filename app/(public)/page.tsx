@@ -1,8 +1,10 @@
-import { HeroCollage }       from "@/components/home/hero-collage";
-import { MarqueeStrip }      from "@/components/home/marquee-strip";
-import { StatsStrip }        from "@/components/home/stats-strip";
-import { EventTeaser }       from "@/components/home/event-teaser";
-import { CommunityCircles }  from "@/components/home/community-circles";
+import { HeroCollage }      from "@/components/home/hero-collage";
+import { MarqueeStrip }     from "@/components/home/marquee-strip";
+import { StatsStrip }       from "@/components/home/stats-strip";
+import { WhatHappens }      from "@/components/home/what-happens";
+import { VisionCards }      from "@/components/about/vision-cards";
+import { EventTeaser }      from "@/components/home/event-teaser";
+import { CommunityCircles } from "@/components/home/community-circles";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Event } from "@/types/database";
 
@@ -30,10 +32,23 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* 1 — Hero with 4-card floating collage */}
       <HeroCollage />
+
+      {/* Thin identity strip */}
       <MarqueeStrip />
       <StatsStrip />
+
+      {/* 2 — What a session feels like (image + text) */}
+      <WhatHappens />
+
+      {/* 3 — What makes it different (4 pillars) */}
+      <VisionCards />
+
+      {/* 4 — Next session countdown */}
       {nextEvent && <EventTeaser event={nextEvent} />}
+
+      {/* 5 — Community circles */}
       <CommunityCircles />
     </>
   );
