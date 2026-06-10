@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { normalisePhone } from "@/lib/phone";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -41,7 +42,7 @@ export async function POST(req: NextRequest, { params }: Props) {
       event_id:     eventId,
       first_name:   first_name.trim(),
       last_name:    last_name.trim(),
-      phone:        phone?.trim() || null,
+      phone:        phone?.trim() ? normalisePhone(phone.trim()) : null,
       role:            "guest",
       source:          "other",
       is_walkin:       true,

@@ -5,7 +5,8 @@ export const SESSION_FREQUENCY = "quarterly";
 export const GOOGLE_SITE_VERIFICATION = "VF6ZtFBVZPyZxr2XDozrNRD_U1Tuy6B69pJp7gERino";
 
 export const CONTACT_EMAIL    = "hello@greenhousews.co.ke";
-export const CONTACT_WHATSAPP = "254700000000"; // update with real number
+export const REPLY_TO_EMAIL   = "thegreenhouse.contact01@gmail.com";
+export const CONTACT_WHATSAPP = "254706609085";
 
 export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
 export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";

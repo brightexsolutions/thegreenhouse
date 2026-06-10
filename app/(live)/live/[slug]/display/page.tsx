@@ -254,6 +254,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
   const [activeVocalist, setActiveVocalist] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [galleryUrls,  setGalleryUrls] = useState<string[]>([]);
+  const [communityAttendees, setCommunityAttendees] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Shared event loader — called on mount and periodically to pick up song/session changes
@@ -315,6 +316,22 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
       .subscribe();
     return () => { supabase.removeChannel(channel); };
   }, [event?.id]);
+
+  // Poll community attendee count every 4s — runs at top level so data is ready when scene shows
+  useEffect(() => {
+    let cancelled = false;
+    async function pollAttendees() {
+      try {
+        const res = await fetch(`/api/live/${slug}/stats`, { cache: "no-store" });
+        if (!res.ok || cancelled) return;
+        const data = await res.json() as { attendees?: Array<{ id: string; first_name: string; last_name: string }> };
+        setCommunityAttendees((data.attendees ?? []).slice(0, 40));
+      } catch { /* ignore */ }
+    }
+    pollAttendees();
+    const id = setInterval(pollAttendees, 4000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [slug]);
 
   // Polling fallback every 3s — ensures display stays in sync even if Realtime drops
   useEffect(() => {
@@ -570,7 +587,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
               )}
 
               {scene === "community" && (
-                <CommunityScene slug={event.slug} t={t} />
+                <CommunityScene attendees={communityAttendees} t={t} />
               )}
 
               {scene === "interlude" && (
@@ -835,29 +852,10 @@ function avatarPos(i: number, total: number) {
   return { cx, cy, size, floatDur, floatDel };
 }
 
-function CommunityScene({ slug, t }: {
-  slug: string;
+function CommunityScene({ attendees, t }: {
+  attendees: Array<{ id: string; first_name: string; last_name: string }>;
   t: typeof THEMES[ThemeKey];
 }) {
-  const [attendees, setAttendees] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
-
-  useEffect(() => {
-    let cancelled = false;
-
-    async function poll() {
-      try {
-        const res = await fetch(`/api/live/${slug}/stats`);
-        if (!res.ok || cancelled) return;
-        const data = await res.json();
-        setAttendees((data.attendees ?? []).slice(0, 40));
-      } catch { /* ignore */ }
-    }
-
-    poll();
-    const id = setInterval(poll, 4000);
-    return () => { cancelled = true; clearInterval(id); };
-  }, [slug]);
-
   const count = attendees.length;
 
   return (

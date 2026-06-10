@@ -375,7 +375,7 @@ export default async function EventDetailPage({ params }: Props) {
 
                   {isOpen && !isFull && (
                     <p className="text-center text-xs text-charcoal/50 mt-3 leading-relaxed">
-                      Ticket delivered by email or WhatsApp
+                      Ticket sent to your email — link can also be copied &amp; shared
                     </p>
                   )}
 
