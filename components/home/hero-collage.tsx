@@ -103,11 +103,10 @@ export function HeroCollage() {
               variants={item(0.05)}
               className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream leading-[0.95] tracking-tight"
             >
-              Pause.{" "}
-              <em className="not-italic text-gold">Worship.</em>
-              <br />
-              Reflect.{" "}
-              <em className="not-italic text-gold">Connect.</em>
+              A place to{" "}
+              <em className="not-italic text-gold">breathe</em>
+              {" "}and{" "}
+              <em className="not-italic text-gold">connect</em>
             </motion.h1>
 
             <motion.p variants={item(0.1)} className="text-cream/70 text-base sm:text-lg max-w-sm leading-relaxed">
@@ -140,7 +139,7 @@ export function HeroCollage() {
             {/* Card: PAUSE — small square, top-left */}
             <FloatCard
               entranceDelay={0.38}
-              rotate={-4}
+              rotate={3}
               floatDuration={4.0}
               floatDelay={1.6}
               floatAmount={8}
