@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Calendar, Clock, MapPin, Download, ArrowLeft } from "lucide-react";
+import { Calendar, Clock, MapPin, Download, ArrowLeft, Shirt } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import type { Metadata } from "next";
@@ -13,7 +13,7 @@ async function getTicket(token: string) {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("registrations")
-    .select("*, events(id, title, event_date, event_time, venue_name, slug)")
+    .select("*, events(id, title, event_date, event_time, venue_name, slug, dress_code)")
     .eq("ticket_token", token)
     .is("deleted_at", null)
     .single();
@@ -44,6 +44,7 @@ export default async function TicketPage({ params }: Props) {
       event_time: string;
       venue_name: string | null;
       slug: string;
+      dress_code: string | null;
     };
   } | null;
 
@@ -119,6 +120,16 @@ export default async function TicketPage({ params }: Props) {
               <div className="flex items-center gap-1.5 text-sm text-charcoal font-medium">
                 <MapPin size={12} className="text-charcoal/40" />
                 <span>{event.venue_name}</span>
+              </div>
+            </div>
+          )}
+
+          {event.dress_code && (
+            <div className="rounded-2xl bg-gold/8 border border-gold/20 px-4 py-3 flex items-start gap-3">
+              <Shirt size={13} className="text-gold mt-0.5 shrink-0" />
+              <div>
+                <p className="text-[9px] label-caps text-gold/70 mb-0.5">Dress Code</p>
+                <p className="text-sm text-charcoal/80">{event.dress_code}</p>
               </div>
             </div>
           )}

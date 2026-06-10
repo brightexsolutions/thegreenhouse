@@ -27,6 +27,7 @@ export interface Event {
   theme_title:      string | null;
   theme_scripture:  string | null;
   theme_description:string | null;
+  dress_code:       string | null;
   playlist_url:     string | null;
   checkin_token:    string | null;
   deleted_at:       string | null;

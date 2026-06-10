@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio, Shirt } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { storageUrl, SITE_URL, SITE_NAME } from "@/lib/constants";
 import { FadeIn } from "@/components/motion/fade-in";
@@ -251,6 +251,21 @@ export default async function EventDetailPage({ params }: Props) {
                 </FadeIn>
               )}
 
+              {/* Dress code */}
+              {event.dress_code && (
+                <FadeIn>
+                  <div className="rounded-2xl bg-gold/8 border border-gold/20 p-5 flex items-start gap-4">
+                    <div className="w-9 h-9 rounded-xl bg-gold/15 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <Shirt size={15} className="text-gold" />
+                    </div>
+                    <div>
+                      <span className="label-caps text-gold/80 text-xs">Dress Code</span>
+                      <p className="text-sm text-charcoal/80 mt-1 leading-relaxed">{event.dress_code}</p>
+                    </div>
+                  </div>
+                </FadeIn>
+              )}
+
               {/* Venue details */}
               {(event.venue_name || event.venue_address) && (
                 <FadeIn>
@@ -318,6 +333,7 @@ export default async function EventDetailPage({ params }: Props) {
                     <InfoRow icon={<Calendar size={12} />} label={formattedDate} />
                     <InfoRow icon={<Clock size={12} />} label={`${time}pm`} />
                     {event.venue_name && <InfoRow icon={<MapPin size={12} />} label={event.venue_name} />}
+                    {event.dress_code && <InfoRow icon={<Shirt size={12} />} label={event.dress_code} />}
                     {event.capacity && (
                       <InfoRow icon={<span className="text-[10px] font-bold">∞</span>} label={`${event.capacity} capacity`} />
                     )}

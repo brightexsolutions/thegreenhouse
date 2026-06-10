@@ -50,6 +50,7 @@ CREATE TABLE public.events (
   theme_title       TEXT,
   theme_scripture   TEXT,
   theme_description TEXT,
+  dress_code        TEXT,
   playlist_url      TEXT,
   checkin_token     UUID        UNIQUE DEFAULT uuid_generate_v4(),
   deleted_at        TIMESTAMPTZ,

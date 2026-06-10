@@ -18,7 +18,7 @@ INSERT INTO public.events (
 INSERT INTO public.events (
   slug, title, subtitle, event_date, event_time, venue_name,
   type, status, description,
-  theme_title, theme_scripture, theme_description
+  theme_title, theme_scripture, theme_description, dress_code
 ) VALUES (
   'session-02',
   'The Green House — Session 02',
@@ -31,7 +31,8 @@ INSERT INTO public.events (
   'The second gathering of The Green House. Come as you are. Low pressure. Real connection.',
   'Delusion',
   '2 Timothy 4:3-6',
-  'A conversation about truth, comfort, and what we choose to hear.'
+  'A conversation about truth, comfort, and what we choose to hear.',
+  'Smart casual — come comfortable, come yourself.'
 ) ON CONFLICT (slug) DO NOTHING;
 
 -- ─── Seed: Site settings defaults ────────────────────────────────────────────

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { X, Calendar, MapPin } from "lucide-react";
+import { X, Calendar, MapPin, Leaf } from "lucide-react";
 import { RegistrationForm } from "@/components/registration/registration-form";
 import type { Event } from "@/types/database";
 
@@ -22,64 +22,76 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
       {/* Trigger */}
       <div onClick={() => setOpen(true)}>
         {trigger ?? (
-          <button className="inline-flex items-center gap-2 px-8 py-4 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-all duration-200">
+          <button className="w-full flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-all duration-200">
             Register — it&apos;s free
           </button>
         )}
       </div>
 
-      {/* Backdrop */}
       {open && (
-        <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 lg:p-8"
-          onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
-        >
-          {/* Overlay */}
-          <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={() => setOpen(false)} />
+        <div className="fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
 
-          {/* Modal */}
-          <div className="relative w-full sm:max-w-lg bg-cream rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl overflow-hidden z-10 max-h-[94dvh] flex flex-col">
-            {/* Handle (mobile) */}
-            <div className="flex justify-center pt-3 pb-1 sm:hidden">
-              <div className="w-10 h-1 rounded-full bg-charcoal/15" />
-            </div>
+          {/* Positioning wrapper */}
+          <div className="absolute inset-0 flex items-end sm:items-center justify-center sm:p-6">
 
-            {/* Header */}
-            <div className="px-6 pt-4 pb-5 border-b border-mist flex-shrink-0 sticky top-0 bg-cream z-10">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <span className="label-caps text-gold text-xs">Registration</span>
-                  <h2 className="font-display text-xl sm:text-2xl font-semibold text-forest mt-0.5 leading-tight">
-                    {event.title}
-                  </h2>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-                    <div className="flex items-center gap-1.5 text-xs text-charcoal/60">
-                      <Calendar size={11} />
-                      <span>{formattedDate}</span>
-                    </div>
-                    {event.venue_name && (
-                      <div className="flex items-center gap-1.5 text-xs text-charcoal/60">
-                        <MapPin size={11} />
-                        <span>{event.venue_name}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={() => setOpen(false)}
-                  className="w-8 h-8 rounded-full border border-mist flex items-center justify-center text-charcoal/40 hover:text-charcoal hover:border-charcoal/20 transition-all flex-shrink-0"
-                >
-                  <X size={14} />
-                </button>
+            {/* Modal shell — NO overflow-hidden so the header never clips */}
+            <div className="relative z-10 w-full sm:max-w-lg flex flex-col bg-cream rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl"
+              style={{ maxHeight: "min(92vh, 760px)" }}
+            >
+              {/* Decorative top bar */}
+              <div className="flex-none h-1 w-full rounded-t-[2rem] sm:rounded-t-[2rem] bg-gradient-to-r from-forest via-moss to-gold" />
+
+              {/* Drag handle (mobile only) */}
+              <div className="flex-none flex justify-center pt-2.5 pb-1 sm:hidden">
+                <div className="w-10 h-1 rounded-full bg-charcoal/15" />
               </div>
-            </div>
 
-            {/* Scrollable body */}
-            <div className="flex-1 overflow-y-auto px-6 py-5">
-              <RegistrationForm
-                event={{ id: event.id, slug: event.slug, title: event.title, event_date: event.event_date, venue_name: event.venue_name }}
-                onSuccess={() => setTimeout(() => setOpen(false), 3000)}
-              />
+              {/* Header — flex-none keeps it always visible */}
+              <div className="flex-none px-6 pt-3 pb-4 border-b border-mist">
+                <div className="flex items-start justify-between gap-4">
+                  <div>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Leaf size={11} className="text-gold" />
+                      <span className="label-caps text-gold text-xs">Registration</span>
+                    </div>
+                    <h2 className="font-display text-xl sm:text-2xl font-semibold text-forest leading-tight">
+                      {event.title}
+                    </h2>
+                    <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1.5">
+                      <div className="flex items-center gap-1.5 text-xs text-charcoal/55">
+                        <Calendar size={11} />
+                        <span>{formattedDate}</span>
+                      </div>
+                      {event.venue_name && event.venue_name !== "TBA" && (
+                        <div className="flex items-center gap-1.5 text-xs text-charcoal/55">
+                          <MapPin size={11} />
+                          <span>{event.venue_name}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setOpen(false)}
+                    className="w-8 h-8 rounded-full border border-mist flex items-center justify-center text-charcoal/40 hover:text-charcoal hover:border-charcoal/30 transition-all flex-shrink-0 mt-0.5"
+                    aria-label="Close"
+                  >
+                    <X size={14} />
+                  </button>
+                </div>
+              </div>
+
+              {/* Scrollable form body — min-h-0 is required for overflow-y to activate in flex */}
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 py-5">
+                <RegistrationForm
+                  event={{ id: event.id, slug: event.slug, title: event.title, event_date: event.event_date, venue_name: event.venue_name }}
+                  onSuccess={() => setTimeout(() => setOpen(false), 3500)}
+                />
+              </div>
             </div>
           </div>
         </div>
