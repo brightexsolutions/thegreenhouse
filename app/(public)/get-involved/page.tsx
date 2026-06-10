@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
-import { whatsappUrl } from "@/lib/constants";
+import { InvolvementForm } from "@/components/get-involved/involvement-form";
 
 export const revalidate = 3600;
 
@@ -17,32 +17,24 @@ const ROLES = [
     title:   "Worship Team",
     tagline: "Lead the room",
     body:    "Are you a vocalist or instrumentalist? We rotate worship teams each session. Your church background doesn't matter — your heart does.",
-    cta:     "Join the worship rotation",
-    wa:      "I'd love to be part of the worship team at The Green House. My name is…",
   },
   {
     emoji:   "🏛",
     title:   "Host a Venue",
     tagline: "Open your doors",
     body:    "We intentionally rotate between spaces. If your church or space can seat 80–200 people and you'd like to host, we'd love to talk.",
-    cta:     "Offer your venue",
-    wa:      "I'd like to offer a venue for The Green House. Our space is…",
   },
   {
     emoji:   "🌿",
     title:   "Vision Carrier",
     tagline: "Shape what it becomes",
     body:    "A small group of people who believe in what The Green House is doing and want to help it grow — through prayer, ideas, and showing up.",
-    cta:     "Become a vision carrier",
-    wa:      "I want to be a Vision Carrier at The Green House. I'm interested in…",
   },
   {
     emoji:   "📸",
     title:   "Creative Team",
     tagline: "Capture and create",
     body:    "Photography, video, design, or social — if you have a creative skill and want to use it for something meaningful, this is for you.",
-    cta:     "Join the creative team",
-    wa:      "I'd like to join the creative team at The Green House. My skills include…",
   },
 ];
 
@@ -72,7 +64,7 @@ export default function GetInvolvedPage() {
               </h1>
             </FadeIn>
             <FadeIn delay={0.1}>
-              <p className="text-cream/50 text-base sm:text-lg max-w-md leading-relaxed">
+              <p className="text-cream/70 text-base sm:text-lg max-w-md leading-relaxed">
                 The Green House runs because people choose to show up — before, during, and after sessions. Every role is voluntary. Every contribution matters.
               </p>
             </FadeIn>
@@ -96,23 +88,13 @@ export default function GetInvolvedPage() {
             {ROLES.map((role) => (
               <StaggerChild key={role.title}>
                 <div className="group relative bg-white border border-mist rounded-3xl p-7 h-full flex flex-col hover:-translate-y-1 transition-all duration-300 shadow-card hover:shadow-card-hover overflow-hidden">
-                  {/* Hover gold line */}
                   <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gold group-hover:w-full transition-all duration-500" />
-
                   <span className="text-4xl mb-5">{role.emoji}</span>
                   <div className="flex-1">
-                    <span className="label-caps text-gold text-[9px]">{role.tagline}</span>
+                    <span className="label-caps text-gold text-xs">{role.tagline}</span>
                     <h3 className="font-display text-2xl font-semibold text-forest mt-1 mb-3">{role.title}</h3>
-                    <p className="text-sm text-charcoal/60 leading-relaxed">{role.body}</p>
+                    <p className="text-sm text-charcoal/70 leading-relaxed">{role.body}</p>
                   </div>
-                  <Link
-                    href={whatsappUrl(role.wa)}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-forest hover:text-gold transition-colors"
-                  >
-                    {role.cta} →
-                  </Link>
                 </div>
               </StaggerChild>
             ))}
@@ -129,7 +111,7 @@ export default function GetInvolvedPage() {
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <div className="text-center mb-14">
-              <span className="label-caps text-gold/70">How we serve</span>
+              <span className="label-caps text-gold/80">How we serve</span>
               <h2 className="font-display text-4xl md:text-5xl font-semibold text-cream mt-2">
                 The posture we carry
               </h2>
@@ -142,7 +124,7 @@ export default function GetInvolvedPage() {
                 <div className="text-center px-4">
                   <p className="font-display text-5xl font-semibold text-gold/20 mb-4">{String(i + 1).padStart(2, "0")}</p>
                   <h3 className="font-display text-xl font-semibold text-cream mb-2">{v.label}</h3>
-                  <p className="text-cream/50 text-sm leading-relaxed">{v.body}</p>
+                  <p className="text-cream/70 text-sm leading-relaxed">{v.body}</p>
                 </div>
               </StaggerChild>
             ))}
@@ -150,34 +132,55 @@ export default function GetInvolvedPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="py-20 bg-cream text-center">
-        <div className="max-w-lg mx-auto px-4">
-          <FadeIn>
-            <p className="text-2xl mb-4">🌱</p>
-            <h2 className="font-display text-4xl font-semibold text-forest mb-3">
-              Not sure where to start?
-            </h2>
-            <p className="text-charcoal/50 text-sm mb-8 leading-relaxed">
-              Just attend a session first. Let the room show you where you belong.
-            </p>
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+      {/* Contact form */}
+      <section className="py-20 md:py-28 bg-cream">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-start">
+            {/* Left — copy */}
+            <FadeIn>
+              <span className="label-caps text-gold">Get in touch</span>
+              <h2 className="font-display text-4xl md:text-5xl font-semibold text-forest mt-2 mb-5 leading-tight">
+                Tell us a little<br />about yourself
+              </h2>
+              <p className="text-charcoal/60 text-base leading-relaxed mb-8">
+                Fill in the form and someone from the team will reach out.
+                No pressure, no commitment — just a conversation.
+              </p>
+              <div className="space-y-4">
+                <div className="flex items-start gap-3">
+                  <span className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-sm">🌱</span>
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-forest">Not sure where to start?</p>
+                    <p className="text-sm text-charcoal/60 mt-0.5">Just attend a session first. Let the room show you where you belong.</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-3">
+                  <span className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center shrink-0 mt-0.5">
+                    <span className="text-sm">📅</span>
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-forest">Sessions are quarterly</p>
+                    <p className="text-sm text-charcoal/60 mt-0.5">We gather four times a year in different venues across Nairobi.</p>
+                  </div>
+                </div>
+              </div>
               <Link
                 href="/events"
-                className="px-7 py-3.5 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-all"
+                className="inline-flex items-center gap-2 mt-8 px-6 py-3 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-all"
               >
-                See upcoming sessions
+                See upcoming sessions →
               </Link>
-              <Link
-                href={whatsappUrl("Hi, I'd like to know more about The Green House and how to get involved.")}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="px-7 py-3.5 rounded-full border border-mist text-charcoal/60 font-semibold text-sm hover:border-forest/30 hover:text-forest transition-all"
-              >
-                Ask on WhatsApp
-              </Link>
-            </div>
-          </FadeIn>
+            </FadeIn>
+
+            {/* Right — form */}
+            <FadeIn delay={0.1}>
+              <div className="bg-white border border-mist rounded-3xl p-8 shadow-card">
+                <InvolvementForm />
+              </div>
+            </FadeIn>
+          </div>
         </div>
       </section>
     </>
