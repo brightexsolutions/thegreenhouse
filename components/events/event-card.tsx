@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Calendar, MapPin, ArrowUpRight } from "lucide-react";
+import { Calendar, MapPin, ArrowUpRight, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { storageUrl } from "@/lib/constants";
 import type { Event } from "@/types/database";
@@ -113,14 +113,16 @@ export function EventCard({ event, featured = false }: EventCardProps) {
         <div>
           {event.theme_title && (
             <div className="mb-3">
-              <span className="label-caps text-gold/70 text-xs">Theme</span>
-              <p className="text-sm text-cream/70 mt-0.5 font-medium">{event.theme_title}</p>
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-gold/20 border border-gold/35">
+                <span className="label-caps text-gold/80 text-[10px]">Theme</span>
+                <span className="text-xs font-semibold text-gold leading-none">{event.theme_title}</span>
+              </div>
             </div>
           )}
           <h3 className="font-display text-2xl sm:text-3xl font-semibold text-cream leading-tight mb-3">
             {event.title}
           </h3>
-          <div className="flex flex-col gap-1.5">
+          <div className="flex flex-col gap-1.5 mb-4">
             <div className="flex items-center gap-1.5 text-sm text-cream/60">
               <Calendar size={12} />
               <span>{formattedDate} · {formattedTime}pm</span>
@@ -131,6 +133,11 @@ export function EventCard({ event, featured = false }: EventCardProps) {
                 <span>{event.venue_name}</span>
               </div>
             )}
+          </div>
+          {/* Explicit tap affordance */}
+          <div className="flex items-center gap-1.5 text-xs text-cream/35 group-hover:text-gold/70 transition-colors duration-300 border-t border-cream/10 pt-3">
+            <span>{isPast ? "View session recap" : "Register & view details"}</span>
+            <ArrowRight size={10} className="group-hover:translate-x-0.5 transition-transform duration-300" />
           </div>
         </div>
       </div>

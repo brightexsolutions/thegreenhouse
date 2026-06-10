@@ -7,11 +7,16 @@ export async function middleware(request: NextRequest) {
   // Only protect admin routes
   if (!pathname.startsWith("/admin")) return NextResponse.next();
 
-  // Allow login page
-  if (pathname === "/admin/login") return NextResponse.next();
+  // Allow login page — set x-pathname so admin layout can detect it
+  if (pathname === "/admin/login") {
+    const res = NextResponse.next({ request });
+    res.headers.set("x-pathname", pathname);
+    return res;
+  }
 
   // Build a response we can mutate cookies on
   let response = NextResponse.next({ request });
+  response.headers.set("x-pathname", pathname);
 
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,

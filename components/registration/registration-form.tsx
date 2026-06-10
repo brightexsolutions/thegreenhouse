@@ -17,6 +17,7 @@ const formSchema = z.object({
   role:            z.enum(["guest","vocalist","instrumentalist","vision_carrier","curious"]),
   source:          z.enum(["friend","whatsapp","instagram","church","website","other"]),
   whatsapp_opt_in: z.boolean(),
+  photo_consent:   z.boolean(),
   notes:           z.string().max(200).optional(),
 }).refine((d) => d.email || d.phone, {
   message: "Please provide at least an email or phone number",
@@ -69,7 +70,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
     formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: { role: "guest", source: "friend", whatsapp_opt_in: false },
+    defaultValues: { role: "guest", source: "friend", whatsapp_opt_in: false, photo_consent: false },
   });
 
   const emailValue = watch("email");
@@ -273,7 +274,27 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         </span>
       </label>
 
-      {/* Consent note */}
+      {/* Photo / filming consent */}
+      <label className="flex items-start gap-3 cursor-pointer group">
+        <div className="relative mt-0.5 shrink-0">
+          <input
+            {...register("photo_consent")}
+            type="checkbox"
+            className="sr-only peer"
+          />
+          <div className="w-4 h-4 rounded border border-mist group-hover:border-forest/40 peer-checked:bg-forest peer-checked:border-forest transition-all" />
+          <CheckCircle2
+            size={10}
+            className="absolute inset-0 m-auto text-cream opacity-0 peer-checked:opacity-100 pointer-events-none"
+          />
+        </div>
+        <span className="text-sm text-charcoal/65 leading-relaxed">
+          I understand The Green House may photograph or film the session for social media. I consent to appearing in such content.
+          <span className="block text-xs text-charcoal/40 mt-0.5">If you prefer not to be photographed, please let us know on the day.</span>
+        </span>
+      </label>
+
+      {/* Data consent note */}
       <p className="text-xs text-charcoal/50 leading-relaxed border border-mist rounded-2xl px-4 py-3 bg-off-white">
         By registering you consent to The Green House storing your details to manage this event.
         Your information is never sold or shared with third parties.

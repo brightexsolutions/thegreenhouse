@@ -34,17 +34,17 @@ function Countdown({ targetDate }: { targetDate: string }) {
   ];
 
   return (
-    <div className="flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-4">
       {units.map((u, i) => (
-        <div key={u.label} className="flex items-center gap-3">
-          <div className="flex flex-col items-center">
-            <span className="font-display text-3xl font-semibold text-forest tabular-nums">
+        <div key={u.label} className="flex items-center gap-2 sm:gap-4">
+          <div className="flex flex-col items-center min-w-[48px]">
+            <span className="font-display text-4xl sm:text-5xl font-semibold text-cream tabular-nums leading-none">
               {String(u.value).padStart(2, "0")}
             </span>
-            <span className="label-caps text-charcoal/50 text-xs">{u.label}</span>
+            <span className="label-caps text-cream/45 text-[10px] mt-1.5">{u.label}</span>
           </div>
           {i < units.length - 1 && (
-            <span className="text-gold font-semibold text-xl mb-3">:</span>
+            <span className="text-gold/60 font-semibold text-2xl mb-4 leading-none">:</span>
           )}
         </div>
       ))}

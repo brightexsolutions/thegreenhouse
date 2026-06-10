@@ -31,21 +31,21 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
       {/* Backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-6 lg:p-8"
           onClick={(e) => { if (e.target === e.currentTarget) setOpen(false); }}
         >
           {/* Overlay */}
-          <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setOpen(false)} />
+          <div className="absolute inset-0 bg-black/75 backdrop-blur-md" onClick={() => setOpen(false)} />
 
           {/* Modal */}
-          <div className="relative w-full sm:max-w-md bg-cream rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden z-10 max-h-[92dvh] flex flex-col">
+          <div className="relative w-full sm:max-w-lg bg-cream rounded-t-[2rem] sm:rounded-[2rem] shadow-2xl overflow-hidden z-10 max-h-[94dvh] flex flex-col">
             {/* Handle (mobile) */}
             <div className="flex justify-center pt-3 pb-1 sm:hidden">
               <div className="w-10 h-1 rounded-full bg-charcoal/15" />
             </div>
 
             {/* Header */}
-            <div className="px-6 pt-4 pb-5 border-b border-mist flex-shrink-0">
+            <div className="px-6 pt-4 pb-5 border-b border-mist flex-shrink-0 sticky top-0 bg-cream z-10">
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <span className="label-caps text-gold text-xs">Registration</span>

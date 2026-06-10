@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { storageUrl, SITE_URL, SITE_NAME } from "@/lib/constants";
 import { FadeIn } from "@/components/motion/fade-in";
@@ -96,11 +96,17 @@ function jsonLd(event: Event) {
   return JSON.stringify(base);
 }
 
-const STATUS_BANNER: Record<string, { bg: string; text: string; label: string }> = {
-  live:      { bg: "bg-green-500", text: "text-white", label: "This session is live right now" },
-  past:      { bg: "bg-charcoal/80", text: "text-cream/70", label: "This session has ended" },
-  cancelled: { bg: "bg-red-700", text: "text-white", label: "This session has been cancelled" },
-};
+// Fallback hero photos when event has no cover image
+const HERO_FALLBACKS = [
+  "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=1600&q=80",
+];
+function pickHeroFallback(slug: string) {
+  const hash = slug.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+  return HERO_FALLBACKS[hash % HERO_FALLBACKS.length];
+}
 
 export default async function EventDetailPage({ params }: Props) {
   const { slug } = await params;
@@ -109,7 +115,7 @@ export default async function EventDetailPage({ params }: Props) {
 
   const coverUrl = event.cover_image
     ? storageUrl(`event-images/${event.cover_image}`, { width: 1600, quality: 85 })
-    : null;
+    : pickHeroFallback(event.slug);
 
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
@@ -117,31 +123,49 @@ export default async function EventDetailPage({ params }: Props) {
   const time = event.event_time.slice(0, 5).replace(":", ".");
 
   const isOpen = event.status === "published" || event.status === "live";
-  const banner = STATUS_BANNER[event.status];
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(event) }} />
 
-      {/* Status banner */}
-      {banner && (
-        <div className={`${banner.bg} ${banner.text} text-center py-2 px-4 text-xs font-medium tracking-wide`}>
-          {banner.label}
-        </div>
-      )}
-
       {/* Hero */}
-      <section className="relative min-h-[65vh] flex items-end overflow-hidden pt-20">
-        {/* BG */}
-        {coverUrl ? (
-          <div
-            className="absolute inset-0 bg-cover bg-center scale-[1.02]"
-            style={{ backgroundImage: `url(${coverUrl})` }}
+      <section className="relative min-h-[70vh] flex items-end overflow-hidden pt-20">
+        {/* BG photo — always present */}
+        <div className="absolute inset-0">
+          <Image
+            src={coverUrl}
+            alt=""
+            fill
+            className="object-cover scale-[1.03] transition-transform duration-[8s] ease-out"
+            priority
+            sizes="100vw"
+            aria-hidden
           />
-        ) : (
-          <div className="absolute inset-0 bg-gradient-to-br from-moss via-forest to-forest-dark" />
+        </div>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20" />
+        {/* Subtle colour tint for brand feel */}
+        <div className="absolute inset-0 bg-gradient-to-br from-forest/30 via-transparent to-transparent" />
+
+        {/* Status ribbon — sits over the hero */}
+        {event.status === "past" && (
+          <div className="absolute top-[72px] left-0 right-0 z-10 flex justify-center pointer-events-none">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/50 backdrop-blur-md border border-cream/15 text-cream/70 text-xs font-medium">
+              <History size={11} className="text-cream/50" />
+              This session has ended
+            </div>
+          </div>
         )}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
+        {event.status === "live" && (
+          <div className="absolute top-0 left-0 right-0 z-10 bg-green-600/95 backdrop-blur-sm text-white text-center py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2">
+            <Radio size={12} className="animate-pulse" />
+            This session is happening right now — join us
+          </div>
+        )}
+        {event.status === "cancelled" && (
+          <div className="absolute top-0 left-0 right-0 z-10 bg-red-700/95 backdrop-blur-sm text-white text-center py-2.5 px-4 text-xs font-semibold">
+            This session has been cancelled
+          </div>
+        )}
 
         {/* Decorative */}
         <div className="absolute top-24 right-12 w-64 h-64 rounded-full border border-cream/5 hidden lg:block" />
