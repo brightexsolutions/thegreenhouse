@@ -1,7 +1,6 @@
 import { notFound, redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
-import { CheckinList } from "@/components/checkin/checkin-list";
-import { CheckinStatsBar } from "@/components/checkin/checkin-stats-bar";
+import { CheckinPanel } from "@/components/checkin/checkin-panel";
 import { Calendar, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 
@@ -88,13 +87,8 @@ export default async function CheckinPage({ params, searchParams }: Props) {
         </div>
       </div>
 
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
-        <CheckinStatsBar
-          slug={slug}
-          initialTotal={list.length}
-          initialPresent={list.filter((r) => r.checked_in).length}
-        />
-        <CheckinList
+      <div className="max-w-lg mx-auto px-4 py-6">
+        <CheckinPanel
           registrants={list}
           eventSlug={slug}
           checkinToken={token}
