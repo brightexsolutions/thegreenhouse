@@ -449,9 +449,15 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
                   <h1 className="font-display text-6xl md:text-8xl font-semibold" style={{ color: t.text }}>{activeSong.title}</h1>
                   {activeSong.artist && <p className="mt-6 text-2xl md:text-3xl" style={{ color: t.sub }}>{activeSong.artist}</p>}
                   {activeVocalist && (
-                    <p className="mt-4 text-lg md:text-xl uppercase tracking-[0.3em]" style={{ color: t.gold, opacity: 0.7 }}>
-                      {activeVocalist}
-                    </p>
+                    <div className="mt-8 flex items-center justify-center gap-4">
+                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-lg md:text-xl font-bold flex-shrink-0"
+                        style={{ background: `${t.gold}22`, border: `1.5px solid ${t.gold}66`, color: t.gold }}>
+                        {activeVocalist.charAt(0).toUpperCase()}
+                      </div>
+                      <p className="text-xl md:text-3xl font-medium tracking-wide" style={{ color: t.gold }}>
+                        {activeVocalist}
+                      </p>
+                    </div>
                   )}
                 </div>
               )}
@@ -459,10 +465,16 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
               {scene === "lyrics" && (
                 <div className="text-center max-w-5xl w-full">
                   {activeSong && (
-                    <div className="mb-10 flex flex-col items-center gap-1">
+                    <div className="mb-10 flex flex-col items-center gap-2">
                       <p className="text-sm uppercase tracking-[0.35em] font-semibold" style={{ color: t.goldSub }}>{activeSong.title}</p>
                       {activeVocalist && (
-                        <p className="text-xs uppercase tracking-[0.25em]" style={{ color: t.gold, opacity: 0.55 }}>{activeVocalist}</p>
+                        <div className="flex items-center gap-2.5">
+                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                            style={{ background: `${t.gold}22`, border: `1px solid ${t.gold}55`, color: t.gold }}>
+                            {activeVocalist.charAt(0).toUpperCase()}
+                          </div>
+                          <p className="text-base md:text-lg tracking-[0.2em]" style={{ color: t.gold }}>{activeVocalist}</p>
+                        </div>
                       )}
                     </div>
                   )}
