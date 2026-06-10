@@ -81,7 +81,7 @@ export default function AboutPage() {
                   </ul>
                 </div>
                 <div>
-                  <span className="label-caps text-charcoal/40">What it isn&apos;t</span>
+                  <span className="label-caps text-charcoal/50">What it isn&apos;t</span>
                   <ul className="mt-5 space-y-3">
                     {[
                       "A replacement for your local church",
@@ -90,9 +90,9 @@ export default function AboutPage() {
                       "A weekly service",
                       "Exclusive to any denomination",
                     ].map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm text-charcoal/35">
-                        <span className="mt-1 w-4 h-4 rounded-full bg-charcoal/8 flex items-center justify-center shrink-0">
-                          <span className="w-1.5 h-1.5 rounded-full bg-charcoal/20" />
+                      <li key={item} className="flex items-start gap-3 text-sm text-charcoal/55">
+                        <span className="mt-1 w-4 h-4 rounded-full bg-charcoal/10 flex items-center justify-center shrink-0">
+                          <span className="w-1.5 h-1.5 rounded-full bg-charcoal/30" />
                         </span>
                         {item}
                       </li>

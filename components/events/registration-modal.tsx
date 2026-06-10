@@ -48,18 +48,18 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
             <div className="px-6 pt-4 pb-5 border-b border-mist flex-shrink-0">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <span className="label-caps text-gold text-[9px]">Registration</span>
+                  <span className="label-caps text-gold text-xs">Registration</span>
                   <h2 className="font-display text-xl sm:text-2xl font-semibold text-forest mt-0.5 leading-tight">
                     {event.title}
                   </h2>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2">
-                    <div className="flex items-center gap-1.5 text-[11px] text-charcoal/50">
-                      <Calendar size={10} />
+                    <div className="flex items-center gap-1.5 text-xs text-charcoal/60">
+                      <Calendar size={11} />
                       <span>{formattedDate}</span>
                     </div>
                     {event.venue_name && (
-                      <div className="flex items-center gap-1.5 text-[11px] text-charcoal/50">
-                        <MapPin size={10} />
+                      <div className="flex items-center gap-1.5 text-xs text-charcoal/60">
+                        <MapPin size={11} />
                         <span>{event.venue_name}</span>
                       </div>
                     )}

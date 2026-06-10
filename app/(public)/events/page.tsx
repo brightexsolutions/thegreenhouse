@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { FadeIn } from "@/components/motion/fade-in";
 import { EventGrid } from "@/components/events/event-grid";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -39,13 +40,25 @@ export default async function EventsPage() {
 
   return (
     <>
-      {/* Hero */}
-      <section className="relative bg-forest pt-32 pb-16 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_80%_50%,rgba(201,162,74,0.07),transparent)]" />
+      {/* Hero — photo background */}
+      <section className="relative min-h-[55vh] flex items-end overflow-hidden pt-20">
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=75"
+            alt=""
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+            aria-hidden
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/85 to-forest/55" />
+        </div>
+
         <div className="absolute top-20 right-32 w-48 h-48 rounded-full border border-cream/5 hidden lg:block" />
         <div className="absolute bottom-8 left-16 w-24 h-24 rounded-full border border-gold/10 hidden lg:block" />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">
           <FadeIn>
             <span className="label-caps text-gold/80">Sessions</span>
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream mt-2 leading-[0.95]">
@@ -55,7 +68,7 @@ export default async function EventsPage() {
             </h1>
           </FadeIn>
           <FadeIn delay={0.1}>
-            <p className="mt-5 text-cream/50 text-base sm:text-lg max-w-md leading-relaxed">
+            <p className="mt-5 text-cream/70 text-base sm:text-lg max-w-md leading-relaxed">
               Quarterly evenings of worship, prayer, and real conversation. No performance — just people.
             </p>
           </FadeIn>
@@ -65,36 +78,32 @@ export default async function EventsPage() {
       {/* Events */}
       <section className="py-16 md:py-24 bg-cream">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-
-          {/* Upcoming */}
           {upcoming.length > 0 && (
             <div className="mb-16">
               <FadeIn>
                 <div className="flex items-center gap-3 mb-8">
                   <span className="label-caps text-forest">Upcoming</span>
                   <div className="flex-1 h-px bg-mist" />
-                  <span className="text-xs text-charcoal/30 font-medium">{upcoming.length} session{upcoming.length !== 1 ? "s" : ""}</span>
+                  <span className="text-xs text-charcoal/40 font-medium">{upcoming.length} session{upcoming.length !== 1 ? "s" : ""}</span>
                 </div>
               </FadeIn>
               <EventGrid events={upcoming} />
             </div>
           )}
 
-          {/* Past */}
           {past.length > 0 && (
             <div>
               <FadeIn>
                 <div className="flex items-center gap-3 mb-8">
                   <span className="label-caps text-charcoal/40">Past Sessions</span>
                   <div className="flex-1 h-px bg-mist" />
-                  <span className="text-xs text-charcoal/30 font-medium">{past.length} session{past.length !== 1 ? "s" : ""}</span>
+                  <span className="text-xs text-charcoal/40 font-medium">{past.length} session{past.length !== 1 ? "s" : ""}</span>
                 </div>
               </FadeIn>
               <EventGrid events={past} />
             </div>
           )}
 
-          {/* Empty state */}
           {events.length === 0 && (
             <FadeIn>
               <div className="text-center py-24">

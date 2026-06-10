@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
 import { InvolvementForm } from "@/components/get-involved/involvement-form";
@@ -48,12 +49,23 @@ const VALUES = [
 export default function GetInvolvedPage() {
   return (
     <>
-      {/* Hero */}
-      <section className="relative bg-forest pt-32 pb-14 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_70%_at_70%_30%,rgba(201,162,74,0.08),transparent)]" />
+      {/* Hero — photo background */}
+      <section className="relative min-h-[60vh] flex items-end overflow-hidden pt-20">
+        <div className="absolute inset-0">
+          <Image
+            src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=75"
+            alt=""
+            fill
+            className="object-cover"
+            priority
+            sizes="100vw"
+            aria-hidden
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/88 to-forest/55" />
+        </div>
         <div className="absolute top-24 left-16 w-36 h-36 rounded-full border border-cream/5 hidden lg:block" />
 
-        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">
           <div className="grid lg:grid-cols-2 gap-10 items-end">
             <FadeIn>
               <span className="label-caps text-gold/80">Get Involved</span>

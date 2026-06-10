@@ -212,9 +212,9 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         </select>
       </Field>
 
-      {/* WhatsApp opt-in */}
+      {/* WhatsApp / comms opt-in */}
       <label className="flex items-start gap-3 cursor-pointer group">
-        <div className="relative mt-0.5">
+        <div className="relative mt-0.5 shrink-0">
           <input
             {...register("whatsapp_opt_in")}
             type="checkbox"
@@ -226,10 +226,16 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
             className="absolute inset-0 m-auto text-cream opacity-0 peer-checked:opacity-100 pointer-events-none"
           />
         </div>
-        <span className="text-xs text-charcoal/60 leading-relaxed">
-          Keep me updated on future sessions
+        <span className="text-sm text-charcoal/65 leading-relaxed">
+          Keep me updated about future sessions and community news
         </span>
       </label>
+
+      {/* Consent note */}
+      <p className="text-xs text-charcoal/50 leading-relaxed border border-mist rounded-2xl px-4 py-3 bg-off-white">
+        By registering you consent to The Green House storing your details to manage this event.
+        Your information is never sold or shared with third parties.
+      </p>
 
       {/* Submit */}
       <button
@@ -247,7 +253,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         )}
       </button>
 
-      <p className="text-center text-[10px] text-charcoal/30 leading-relaxed">
+      <p className="text-center text-xs text-charcoal/50 leading-relaxed">
         Entry is free. Ticket sent by email — or save your link if phone only.
       </p>
     </form>
@@ -279,10 +285,10 @@ function Field({ label, hint, error, children }: FieldProps) {
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2">
         <label className="text-xs font-semibold text-charcoal/70">{label}</label>
-        {hint && <span className="text-[10px] text-charcoal/40">{hint}</span>}
+        {hint && <span className="text-xs text-charcoal/50">{hint}</span>}
       </div>
       {children}
-      {error && <p className="text-[11px] text-red-500">{error}</p>}
+      {error && <p className="text-xs text-red-500">{error}</p>}
     </div>
   );
 }

@@ -157,7 +157,7 @@ export default async function EventDetailPage({ params }: Props) {
             <div className="max-w-3xl">
               {event.theme_title && (
                 <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/15 border border-gold/30">
-                  <span className="text-[10px] label-caps text-gold/80">Theme</span>
+                  <span className="label-caps text-xs text-gold/80">Theme</span>
                   <span className="text-xs text-gold font-medium">{event.theme_title}</span>
                 </div>
               )}
@@ -208,7 +208,7 @@ export default async function EventDetailPage({ params }: Props) {
                   <div className="rounded-3xl bg-forest p-8 text-cream relative overflow-hidden">
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_100%_0%,rgba(201,162,74,0.12),transparent)]" />
                     <div className="relative">
-                      <span className="label-caps text-gold/70 text-[9px]">Tonight&apos;s Theme</span>
+                      <span className="label-caps text-gold/70 text-xs">Tonight&apos;s Theme</span>
                       <h2 className="font-display text-3xl sm:text-4xl font-semibold mt-1 mb-3">
                         {event.theme_title}
                       </h2>
@@ -230,7 +230,7 @@ export default async function EventDetailPage({ params }: Props) {
               {(event.venue_name || event.venue_address) && (
                 <FadeIn>
                   <div>
-                    <span className="label-caps text-charcoal/40 text-[10px]">Venue</span>
+                    <span className="label-caps text-charcoal/50 text-xs">Venue</span>
                     <div className="mt-3 rounded-2xl bg-off-white border border-mist p-5">
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -307,7 +307,7 @@ export default async function EventDetailPage({ params }: Props) {
                   )}
 
                   {isOpen && (
-                    <p className="text-center text-[10px] text-charcoal/30 mt-3 leading-relaxed">
+                    <p className="text-center text-xs text-charcoal/50 mt-3 leading-relaxed">
                       Ticket delivered by email or WhatsApp
                     </p>
                   )}
