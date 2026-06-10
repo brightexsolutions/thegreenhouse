@@ -24,12 +24,14 @@ export async function GET(_req: NextRequest, { params }: Props) {
     .eq("event_id", (event as { id: string }).id)
     .is("deleted_at", null);
 
-  const all      = rows ?? [];
-  const present  = all.filter(r => r.checked_in);
+  const all     = rows ?? [];
+  const present = all.filter(r => r.checked_in);
 
   return NextResponse.json({
     total:     all.length,
     present:   present.length,
-    attendees: present.map(r => ({ id: r.id, first_name: r.first_name, last_name: r.last_name })),
+    attendees: all.map(r => ({ id: r.id, first_name: r.first_name, last_name: r.last_name })),
+  }, {
+    headers: { "Cache-Control": "no-store" },
   });
 }
