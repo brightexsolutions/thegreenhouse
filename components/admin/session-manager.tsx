@@ -308,18 +308,26 @@ function SortableSessionCard({
   session, index, expanded, onToggle, onUpdate, onDelete, onAddSong, onRemoveSong, onUpdateLyrics, onUpdateVocalist,
 }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: session.id });
-  const [addingSong,    setAddingSong]    = useState(false);
-  const [addMode,       setAddMode]       = useState<"new" | "library">("new");
-  const [songTitle,     setSongTitle]     = useState("");
-  const [songArtist,    setSongArtist]    = useState("");
-  const [songLyrics,    setSongLyrics]    = useState("");
-  const [expandedSong,  setExpandedSong]  = useState<string | null>(null);
-  const [editingSong,   setEditingSong]   = useState<string | null>(null);
-  const [libQuery,      setLibQuery]      = useState("");
-  const [libResults,    setLibResults]    = useState<LibrarySong[]>([]);
-  const [libLoading,    setLibLoading]    = useState(false);
-  const [addingFromLib, setAddingFromLib] = useState<string | null>(null);
-  const lyricsRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
+  const [addingSong,      setAddingSong]      = useState(false);
+  const [addMode,         setAddMode]         = useState<"new" | "library">("library");
+  const [songTitle,       setSongTitle]       = useState("");
+  const [songArtist,      setSongArtist]      = useState("");
+  const [songLyrics,      setSongLyrics]      = useState("");
+  const [expandedSong,    setExpandedSong]    = useState<string | null>(null);
+  const [editingSong,     setEditingSong]     = useState<string | null>(null);
+  const [libQuery,        setLibQuery]        = useState("");
+  const [libResults,      setLibResults]      = useState<LibrarySong[]>([]);
+  const [libLoading,      setLibLoading]      = useState(false);
+  const [addingBulk,      setAddingBulk]      = useState(false);
+  const [selectedSongs,   setSelectedSongs]   = useState<Set<string>>(new Set());
+  // Vocalist inline editing
+  const [editingVocalist, setEditingVocalist] = useState<string | null>(null);
+  const [savedVocalist,   setSavedVocalist]   = useState<string | null>(null);
+  const lyricsRefs   = useRef<Record<string, HTMLTextAreaElement | null>>({});
+  const vocalistRefs = useRef<Record<string, HTMLInputElement | null>>({});
+
+  // IDs already in this session — used to mark library songs as added
+  const addedSongIds = new Set(session.session_songs.map(ss => ss.songs?.id).filter(Boolean) as string[]);
 
   const searchLib = useCallback(async (q: string) => {
     setLibLoading(true);
@@ -334,19 +342,45 @@ function SortableSessionCard({
     }
   }, []);
 
+  // Auto-load library when panel opens
   useEffect(() => {
-    if (addMode !== "library") return;
+    if (addingSong && addMode === "library") searchLib(libQuery);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [addingSong]);
+
+  // Debounced search on query change
+  useEffect(() => {
+    if (addMode !== "library" || !addingSong) return;
     const timer = setTimeout(() => searchLib(libQuery), 250);
     return () => clearTimeout(timer);
-  }, [libQuery, addMode, searchLib]);
+  }, [libQuery, addMode, addingSong, searchLib]);
 
-  async function addFromLibrary(song: LibrarySong) {
-    setAddingFromLib(song.id);
-    await onAddSong(song.title, song.artist ?? "", song.lyrics ?? "", song.id);
-    setAddingFromLib(null);
+  function toggleLibSong(id: string) {
+    setSelectedSongs(prev => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  async function addSelectedFromLibrary() {
+    const toAdd = libResults.filter(s => selectedSongs.has(s.id));
+    if (!toAdd.length) return;
+    setAddingBulk(true);
+    for (const song of toAdd) {
+      await onAddSong(song.title, song.artist ?? "", song.lyrics ?? "", song.id);
+    }
+    setAddingBulk(false);
+    setSelectedSongs(new Set());
     setAddingSong(false);
     setLibQuery("");
-    setLibResults([]);
+  }
+
+  async function saveVocalist(ssId: string, value: string) {
+    onUpdateVocalist(ssId, value);
+    setEditingVocalist(null);
+    setSavedVocalist(ssId);
+    setTimeout(() => setSavedVocalist(null), 2000);
   }
 
   const style = { transform: CSS.Transform.toString(transform), transition };
@@ -466,7 +500,7 @@ function SortableSessionCard({
                 <span className="text-[10px] font-semibold text-charcoal/40 uppercase tracking-wider">Song</span>
               </div>
               <button
-                onClick={() => setAddingSong(true)}
+                onClick={() => { setAddingSong(true); setAddMode("library"); }}
                 className="flex items-center gap-1.5 text-[11px] font-semibold text-forest hover:underline"
               >
                 <Plus size={11} /> Add song
@@ -502,12 +536,34 @@ function SortableSessionCard({
                           {ss.songs.artist && (
                             <p className="text-[11px] text-charcoal/45 truncate">{ss.songs.artist}</p>
                           )}
-                          {ss.songs.artist && ss.vocalist && <span className="text-[9px] text-charcoal/20">·</span>}
-                          {ss.vocalist && (
-                            <p className="text-[11px] text-forest/60 truncate flex items-center gap-1">
-                              <Mic size={9} />
-                              {ss.vocalist}
-                            </p>
+                          {/* Vocalist inline */}
+                          {editingVocalist === ss.id ? (
+                            <input
+                              ref={el => { vocalistRefs.current[ss.id] = el; }}
+                              autoFocus
+                              defaultValue={ss.vocalist ?? ""}
+                              placeholder="Vocalist name…"
+                              onBlur={e => saveVocalist(ss.id, e.target.value.trim())}
+                              onKeyDown={e => { if (e.key === "Enter") vocalistRefs.current[ss.id]?.blur(); if (e.key === "Escape") setEditingVocalist(null); }}
+                              onClick={e => e.stopPropagation()}
+                              className="text-[11px] text-forest bg-forest/8 border border-forest/20 rounded px-1.5 py-0.5 outline-none focus:border-forest w-28"
+                            />
+                          ) : savedVocalist === ss.id ? (
+                            <span className="text-[10px] text-green-600 font-semibold flex items-center gap-0.5" onClick={e => e.stopPropagation()}>✓ saved</span>
+                          ) : ss.vocalist ? (
+                            <button
+                              onClick={e => { e.stopPropagation(); setEditingVocalist(ss.id); }}
+                              className="text-[11px] text-forest/65 flex items-center gap-0.5 hover:text-forest transition-colors"
+                            >
+                              <Mic size={9} />{ss.vocalist}
+                            </button>
+                          ) : (
+                            <button
+                              onClick={e => { e.stopPropagation(); setEditingVocalist(ss.id); }}
+                              className="text-[10px] text-charcoal/25 flex items-center gap-0.5 hover:text-forest/60 transition-colors"
+                            >
+                              <Mic size={9} />+ vocalist
+                            </button>
                           )}
                         </div>
                       </div>
@@ -569,19 +625,6 @@ function SortableSessionCard({
                         <p className="text-[10px] text-cream/20 mt-3">
                           Separate verses/sections with a blank line. The display screen advances one section at a time.
                         </p>
-                        {/* Vocalist */}
-                        <div className="mt-4 pt-3 border-t border-cream/10">
-                          <label className="block text-[9px] font-semibold text-gold/50 uppercase tracking-wider mb-1.5 flex items-center gap-1">
-                            <Mic size={9} /> Vocalist for this session
-                          </label>
-                          <input
-                            defaultValue={ss.vocalist ?? ""}
-                            onBlur={e => onUpdateVocalist(ss.id, e.target.value.trim())}
-                            placeholder="e.g. Sarah Wambui"
-                            className="w-full bg-transparent text-cream/70 text-sm outline-none border-b border-cream/15 focus:border-gold/40 pb-1 placeholder:text-cream/20 transition-colors"
-                          />
-                          <p className="text-[9px] text-cream/15 mt-1">Shown on the display screen while this song plays.</p>
-                        </div>
                       </div>
                     )}
                   </div>
@@ -663,11 +706,11 @@ function SortableSessionCard({
                         autoFocus
                         value={libQuery}
                         onChange={e => setLibQuery(e.target.value)}
-                        placeholder="Search songs by title…"
+                        placeholder="Search songs…"
                         className="w-full pl-9 pr-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
                       />
                     </div>
-                    <div className="max-h-48 overflow-y-auto rounded-xl border border-mist bg-white divide-y divide-mist">
+                    <div className="max-h-52 overflow-y-auto rounded-xl border border-mist bg-white divide-y divide-mist">
                       {libLoading ? (
                         <div className="py-6 text-center">
                           <Loader2 size={14} className="animate-spin text-charcoal/30 mx-auto" />
@@ -676,35 +719,60 @@ function SortableSessionCard({
                         <div className="py-5 text-center text-xs text-charcoal/35">
                           {libQuery ? "No songs found" : "No songs in library yet"}
                         </div>
-                      ) : libResults.map(song => (
-                        <button
-                          key={song.id}
-                          onClick={() => addFromLibrary(song)}
-                          disabled={addingFromLib === song.id}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-forest/4 transition-colors text-left"
-                        >
-                          <div className="w-7 h-7 rounded-lg bg-forest/8 flex items-center justify-center flex-shrink-0">
-                            {addingFromLib === song.id
-                              ? <Loader2 size={11} className="animate-spin text-forest" />
-                              : <Music2 size={11} className="text-forest/60" />
-                            }
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-medium text-charcoal truncate">{song.title}</p>
-                            {song.artist && <p className="text-[11px] text-charcoal/45 truncate">{song.artist}</p>}
-                          </div>
-                          {song.lyrics && (
-                            <span className="text-[9px] text-charcoal/25 ml-auto flex-shrink-0">lyrics</span>
-                          )}
-                        </button>
-                      ))}
+                      ) : libResults.map(song => {
+                        const alreadyAdded = addedSongIds.has(song.id);
+                        const isSelected   = selectedSongs.has(song.id);
+                        return (
+                          <button
+                            key={song.id}
+                            onClick={() => { if (!alreadyAdded) toggleLibSong(song.id); }}
+                            disabled={alreadyAdded || addingBulk}
+                            className={cn(
+                              "w-full flex items-center gap-3 px-4 py-2.5 transition-colors text-left",
+                              alreadyAdded ? "opacity-40 cursor-not-allowed" : isSelected ? "bg-forest/8 hover:bg-forest/12" : "hover:bg-forest/4"
+                            )}
+                          >
+                            {/* Checkbox */}
+                            <div className={cn(
+                              "w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-all",
+                              alreadyAdded ? "border-charcoal/20 bg-charcoal/8"
+                                : isSelected ? "border-forest bg-forest" : "border-charcoal/25"
+                            )}>
+                              {alreadyAdded
+                                ? <span className="text-[8px] text-charcoal/40">✓</span>
+                                : isSelected && <span className="text-[8px] text-cream font-bold">✓</span>
+                              }
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium text-charcoal truncate">{song.title}</p>
+                              {song.artist && <p className="text-[11px] text-charcoal/45 truncate">{song.artist}</p>}
+                            </div>
+                            {alreadyAdded && <span className="text-[9px] text-charcoal/30 flex-shrink-0">in session</span>}
+                            {!alreadyAdded && song.lyrics && <span className="text-[9px] text-charcoal/25 flex-shrink-0">lyrics</span>}
+                          </button>
+                        );
+                      })}
                     </div>
-                    <button
-                      onClick={() => { setAddingSong(false); setLibQuery(""); setLibResults([]); }}
-                      className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
-                    >
-                      Cancel
-                    </button>
+                    <div className="flex items-center gap-2 pt-1">
+                      {selectedSongs.size > 0 ? (
+                        <button
+                          onClick={addSelectedFromLibrary}
+                          disabled={addingBulk}
+                          className="flex items-center gap-2 px-4 py-2 rounded-full bg-forest text-cream text-xs font-semibold disabled:opacity-60"
+                        >
+                          {addingBulk
+                            ? <><Loader2 size={11} className="animate-spin" /> Adding…</>
+                            : <>Add {selectedSongs.size} song{selectedSongs.size > 1 ? "s" : ""}</>
+                          }
+                        </button>
+                      ) : null}
+                      <button
+                        onClick={() => { setAddingSong(false); setLibQuery(""); setLibResults([]); setSelectedSongs(new Set()); }}
+                        className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
+                      >
+                        Cancel
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
