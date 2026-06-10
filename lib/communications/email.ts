@@ -41,7 +41,7 @@ export async function sendTicketEmail(p: SendTicketParams): Promise<SendResult> 
     const result = await getResend().emails.send({
       from:     FROM(),
       to:       [p.to],
-      reply_to: REPLY_TO_EMAIL,
+      replyTo: REPLY_TO_EMAIL,
       subject:  `Your ticket — ${p.eventTitle}`,
       html,
       text,
@@ -82,7 +82,7 @@ export async function sendBroadcastEmail(p: BroadcastEmailParams): Promise<SendR
       const result = await getResend().emails.send({
         from:     FROM(),
         to:       [recipient],
-        reply_to: REPLY_TO_EMAIL,
+        replyTo: REPLY_TO_EMAIL,
         subject:  p.subject,
         html:     p.html,
         text:     p.text,
