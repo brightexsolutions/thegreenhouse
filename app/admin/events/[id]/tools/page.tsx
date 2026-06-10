@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { CheckinLinkPanel } from "@/components/admin/checkin-link-panel";
 import { QrSharePanel } from "@/components/admin/qr-share-panel";
 import { CommsSendDialog } from "@/components/admin/comms-send-dialog";
+import { SongContributionPanel } from "@/components/admin/song-contribution-panel";
 import Link from "next/link";
 import { ExternalLink, Download, Tv2 } from "lucide-react";
 
@@ -16,7 +17,7 @@ export default async function EventToolsPage({ params }: Props) {
 
   const { data: event } = await supabase
     .from("events")
-    .select("id, title, slug, status, checkin_token")
+    .select("id, title, slug, status, checkin_token, song_submission_token")
     .eq("id", id)
     .is("deleted_at", null)
     .single();
@@ -64,6 +65,15 @@ export default async function EventToolsPage({ params }: Props) {
         <CheckinLinkPanel eventId={id} eventSlug={event.slug} checkinToken={event.checkin_token} />
         <QrSharePanel eventId={id} eventSlug={event.slug} />
       </div>
+
+      {/* Song contributions */}
+      {event.song_submission_token && (
+        <SongContributionPanel
+          eventId={id}
+          eventTitle={event.title}
+          songSubmissionToken={event.song_submission_token}
+        />
+      )}
 
       {/* Export & broadcast */}
       <div className="bg-white rounded-2xl border border-mist p-5 space-y-4">
