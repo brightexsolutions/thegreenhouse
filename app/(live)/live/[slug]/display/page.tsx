@@ -542,7 +542,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
               )}
 
               {scene === "community" && (
-                <CommunityScene eventId={event.id} supabase={supabase} t={t} />
+                <CommunityScene slug={event.slug} t={t} />
               )}
 
               {scene === "interlude" && (
@@ -790,38 +790,28 @@ function avatarPos(i: number, total: number) {
   return { cx, cy, size, floatDur, floatDel };
 }
 
-function CommunityScene({ eventId, supabase, t }: {
-  eventId: string;
-  supabase: ReturnType<typeof createBrowserClient>;
+function CommunityScene({ slug, t }: {
+  slug: string;
   t: typeof THEMES[ThemeKey];
 }) {
   const [attendees, setAttendees] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
 
   useEffect(() => {
-    function fetchAttendees() {
-      supabase
-        .from("registrations")
-        .select("id, first_name, last_name")
-        .eq("event_id", eventId)
-        .eq("checked_in", true)
-        .is("deleted_at", null)
-        .limit(40)
-        .then(({ data }: { data: Array<{ id: string; first_name: string; last_name: string }> | null }) => {
-          if (data) setAttendees(data);
-        });
+    let cancelled = false;
+
+    async function poll() {
+      try {
+        const res = await fetch(`/api/live/${slug}/stats`);
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        setAttendees((data.attendees ?? []).slice(0, 40));
+      } catch { /* ignore */ }
     }
-    fetchAttendees();
 
-    const channel = supabase
-      .channel(`community-checkin-${eventId}`)
-      .on("postgres_changes", {
-        event: "*", schema: "public", table: "registrations",
-        filter: `event_id=eq.${eventId}`,
-      }, () => fetchAttendees())
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [eventId]);
+    poll();
+    const id = setInterval(poll, 4000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [slug]);
 
   const count = attendees.length;
 

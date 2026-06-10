@@ -64,22 +64,22 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
     .filter(s => !(s as { deleted_at?: string | null }).deleted_at)
     .sort((a, b) => a.sort_order - b.sort_order);
 
-  // Pre-event: not live yet
-  if (typedEvent.status !== "live") {
-    return (
-      <PreEventView
-        eventTitle={typedEvent.title}
-        eventDate={typedEvent.event_date}
-        eventTime={typedEvent.event_time}
-        venueName={typedEvent.venue_name}
-        themeTitle={typedEvent.theme_title}
-        themeScripture={typedEvent.theme_scripture}
-        isPast={typedEvent.status === "past"}
-      />
-    );
-  }
+  // TODO: re-enable status gate before go-live
+  // if (typedEvent.status !== "live") {
+  //   return (
+  //     <PreEventView
+  //       eventTitle={typedEvent.title}
+  //       eventDate={typedEvent.event_date}
+  //       eventTime={typedEvent.event_time}
+  //       venueName={typedEvent.venue_name}
+  //       themeTitle={typedEvent.theme_title}
+  //       themeScripture={typedEvent.theme_scripture}
+  //       isPast={typedEvent.status === "past"}
+  //     />
+  //   );
+  // }
 
-  // Live state
+  // Live state (status gate temporarily disabled for testing)
   return (
     <div className="min-h-screen bg-cream">
       <div className="bg-green-600 text-white text-center py-2.5 text-xs font-medium flex items-center justify-center gap-2">

@@ -1,51 +1,37 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { createBrowserClient } from "@supabase/ssr";
 import { Users, CheckCircle2 } from "lucide-react";
 
-interface CheckinStatsBarProps {
-  eventId:        string;
+interface Props {
+  slug:           string;
   initialTotal:   number;
   initialPresent: number;
 }
 
-export function CheckinStatsBar({ eventId, initialTotal, initialPresent }: CheckinStatsBarProps) {
+export function CheckinStatsBar({ slug, initialTotal, initialPresent }: Props) {
   const [total,   setTotal]   = useState(initialTotal);
   const [present, setPresent] = useState(initialPresent);
 
   useEffect(() => {
-    const supabase = createBrowserClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-    );
+    let cancelled = false;
 
-    function fetchStats() {
-      supabase
-        .from("registrations")
-        .select("checked_in")
-        .eq("event_id", eventId)
-        .is("deleted_at", null)
-        .then(({ data }) => {
-          if (!data) return;
-          const rows = data as { checked_in: boolean }[];
-          setTotal(rows.length);
-          setPresent(rows.filter(r => r.checked_in).length);
-        });
+    async function poll() {
+      try {
+        const res = await fetch(`/api/live/${slug}/stats`);
+        if (!res.ok || cancelled) return;
+        const data = await res.json();
+        setTotal(data.total ?? 0);
+        setPresent(data.present ?? 0);
+      } catch {
+        // silently ignore network blip
+      }
     }
 
-    const channel = supabase
-      .channel(`stats-bar-${eventId}`)
-      .on("postgres_changes", {
-        event:  "*",
-        schema: "public",
-        table:  "registrations",
-        filter: `event_id=eq.${eventId}`,
-      }, () => fetchStats())
-      .subscribe();
-
-    return () => { supabase.removeChannel(channel); };
-  }, [eventId]);
+    poll(); // immediate on mount
+    const id = setInterval(poll, 4000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [slug]);
 
   const pct = total > 0 ? Math.round((present / total) * 100) : 0;
 
