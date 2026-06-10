@@ -60,7 +60,9 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
     }>;
   };
 
-  const sessions = [...(typedEvent.event_sessions ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+  const sessions = [...(typedEvent.event_sessions ?? [])]
+    .filter(s => !(s as { deleted_at?: string | null }).deleted_at)
+    .sort((a, b) => a.sort_order - b.sort_order);
 
   // Pre-event: not live yet
   if (typedEvent.status !== "live") {

@@ -32,9 +32,10 @@ type EventData = {
   event_date:  string;
   slug:        string;
   event_sessions: Array<{
-    id: string;
-    title: string;
-    sort_order: number;
+    id:           string;
+    title:        string;
+    sort_order:   number;
+    deleted_at:   string | null;
     session_songs: Array<{ vocalist: string | null; songs: Song | null }>;
   }>;
 };
@@ -104,12 +105,13 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     if (authed !== true) return;
     supabase
       .from("events")
-      .select("id, title, event_date, slug, event_sessions(id, title, sort_order, session_songs(vocalist, songs(id, title, artist, lyrics)))")
+      .select("id, title, event_date, slug, event_sessions(id, title, sort_order, deleted_at, session_songs(vocalist, songs(id, title, artist, lyrics)))")
       .eq("slug", slug)
       .single()
       .then(({ data }) => {
         if (!data) return;
         const ev = data as unknown as EventData;
+        ev.event_sessions = ev.event_sessions.filter(s => !s.deleted_at);
         setEvent(ev);
         return supabase.from("display_state").select("*").eq("event_id", ev.id).maybeSingle();
       })

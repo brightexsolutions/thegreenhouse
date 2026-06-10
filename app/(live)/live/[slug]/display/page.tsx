@@ -33,6 +33,7 @@ type Session = {
   title:         string;
   type:          string;
   sort_order:    number;
+  deleted_at:    string | null;
   session_songs: Array<SessionSong>;
 };
 
@@ -260,11 +261,12 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
     async function load() {
       const { data: ev } = await supabase
         .from("events")
-        .select("id, title, subtitle, event_date, event_time, theme_title, theme_scripture, theme_description, venue_name, cover_image, slug, event_sessions(id, title, type, sort_order, session_songs(vocalist, songs(id, title, artist, lyrics))), event_images(id, path, sort_order)")
+        .select("id, title, subtitle, event_date, event_time, theme_title, theme_scripture, theme_description, venue_name, cover_image, slug, event_sessions(id, title, type, sort_order, deleted_at, session_songs(vocalist, songs(id, title, artist, lyrics))), event_images(id, path, sort_order)")
         .eq("slug", slug)
         .single();
       if (!ev) return;
       const evTyped = ev as unknown as EventData;
+      evTyped.event_sessions = evTyped.event_sessions.filter(s => !s.deleted_at);
       setEvent(evTyped);
 
       // Build gallery URLs from event images
