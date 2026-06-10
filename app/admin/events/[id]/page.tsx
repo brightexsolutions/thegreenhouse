@@ -19,7 +19,7 @@ export default async function EditEventPage({ params }: Props) {
   if (!event) notFound();
 
   return (
-    <div className="max-w-2xl">
+    <div>
       <EventForm
         eventId={id}
         defaultValues={{

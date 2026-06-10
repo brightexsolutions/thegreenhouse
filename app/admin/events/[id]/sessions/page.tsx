@@ -12,7 +12,7 @@ async function getEventWithSessions(id: string) {
     supabase.from("events").select("id, title, status").eq("id", id).single(),
     supabase
       .from("event_sessions")
-      .select("id, title, type, duration_min, notes, sort_order, session_songs(id, sort_order, songs(id, title, artist, lyrics))")
+      .select("id, title, type, duration_min, notes, sort_order, session_songs(id, sort_order, vocalist, songs(id, title, artist, lyrics))")
       .eq("event_id", id)
       .is("deleted_at", null)
       .order("sort_order", { ascending: true }),
@@ -26,13 +26,13 @@ export default async function SessionsPage({ params }: Props) {
   if (!event) notFound();
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="space-y-6">
       <div className="mb-6">
         <p className="text-xs font-medium text-charcoal/40 uppercase tracking-wider mb-1">
           {(event as { title: string }).title}
         </p>
         <h1 className="text-2xl font-semibold text-forest">Program & Lyrics</h1>
-        <p className="text-sm text-charcoal/50 mt-1">Manage the order of service and song lyrics</p>
+        <p className="text-sm text-charcoal/50 mt-1">Manage the evening&apos;s program and song lyrics</p>
       </div>
 
       <SessionManager eventId={id} initialSessions={sessions as unknown as Parameters<typeof SessionManager>[0]["initialSessions"]} />

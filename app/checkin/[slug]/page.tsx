@@ -89,8 +89,9 @@ export default async function CheckinPage({ params, searchParams }: Props) {
 
       <div className="max-w-lg mx-auto px-4 py-6 space-y-4">
         <CheckinStatsBar
-          total={list.length}
-          present={list.filter((r) => r.checked_in).length}
+          eventId={(event as { id: string }).id}
+          initialTotal={list.length}
+          initialPresent={list.filter((r) => r.checked_in).length}
         />
         <CheckinList
           registrants={list}

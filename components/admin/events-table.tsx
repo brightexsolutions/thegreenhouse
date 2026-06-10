@@ -1,8 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
 import Link from "next/link";
-import { Search, Calendar, Users, Edit2, ExternalLink, Music2 } from "lucide-react";
+import { Search, Calendar, Users, Edit2, ExternalLink, Music2, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { StatusBadge } from "@/components/admin/ui/status-badge";
 import type { EventStatus } from "@/types/database";
@@ -28,10 +30,45 @@ const STATUS_FILTERS: Array<{ key: EventStatus | "all"; label: string }> = [
 
 const PAGE_SIZE = 15;
 
-export function EventsTable({ events }: { events: EventRow[] }) {
-  const [query,  setQuery]  = useState("");
-  const [status, setStatus] = useState<EventStatus | "all">("all");
-  const [page,   setPage]   = useState(1);
+export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
+  const router     = useRouter();
+  const [query,    setQuery]    = useState("");
+  const [status,   setStatus]   = useState<EventStatus | "all">("all");
+  const [page,     setPage]     = useState(1);
+  const [events,   setEvents]   = useState(initialEvents);
+  const [spinning, setSpinning] = useState(false);
+  const supabaseRef = useRef(createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ));
+
+  useEffect(() => {
+    const supabase = supabaseRef.current;
+    const channel = supabase
+      .channel("admin-events-registrations")
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "registrations",
+      }, (payload) => {
+        const newReg = payload.new as { event_id: string };
+        setEvents(prev =>
+          prev.map(e => e.id === newReg.event_id ? { ...e, registrations: e.registrations + 1 } : e)
+        );
+      })
+      .on("postgres_changes", {
+        event: "UPDATE", schema: "public", table: "events",
+      }, (payload) => {
+        const updated = payload.new as EventRow;
+        setEvents(prev => prev.map(e => e.id === updated.id ? { ...e, status: updated.status } : e));
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, []);
+
+  function refresh() {
+    setSpinning(true);
+    router.refresh();
+    setTimeout(() => setSpinning(false), 800);
+  }
 
   const filtered = useMemo(() => {
     return events.filter((e) => {
@@ -41,18 +78,12 @@ export function EventsTable({ events }: { events: EventRow[] }) {
     });
   }, [events, query, status]);
 
-  const pages      = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const safePage   = Math.min(page, pages);
-  const slice      = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+  const pages    = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, pages);
+  const slice    = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
 
-  function changeStatus(s: EventStatus | "all") {
-    setStatus(s);
-    setPage(1);
-  }
-  function changeQuery(q: string) {
-    setQuery(q);
-    setPage(1);
-  }
+  function changeStatus(s: EventStatus | "all") { setStatus(s); setPage(1); }
+  function changeQuery(q: string) { setQuery(q); setPage(1); }
 
   return (
     <div className="flex flex-col gap-3">
@@ -83,6 +114,13 @@ export function EventsTable({ events }: { events: EventRow[] }) {
             </button>
           ))}
         </div>
+        <button
+          onClick={refresh}
+          title="Refresh"
+          className="flex-shrink-0 p-2 rounded-xl border border-mist bg-white text-charcoal/40 hover:text-forest hover:border-forest/30 transition-all"
+        >
+          <RefreshCw size={14} className={cn("transition-transform", spinning && "animate-spin")} />
+        </button>
       </div>
 
       {/* Table */}
@@ -103,34 +141,20 @@ export function EventsTable({ events }: { events: EventRow[] }) {
               <table className="w-full">
                 <thead className="sticky top-0 bg-white z-10">
                   <tr className="border-b border-mist">
-                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3">
-                      Event
-                    </th>
-                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden sm:table-cell">
-                      Date
-                    </th>
-                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3">
-                      Status
-                    </th>
-                    <th className="text-center text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden md:table-cell">
-                      Registrations
-                    </th>
-                    <th className="text-right text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3">
-                      Actions
-                    </th>
+                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3">Event</th>
+                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden sm:table-cell">Date</th>
+                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3">Status</th>
+                    <th className="text-center text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden md:table-cell">Registrations</th>
+                    <th className="text-right text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-mist">
                   {slice.map((e) => (
                     <tr key={e.id} className="hover:bg-off-white transition-colors group">
-                      {/* Event name + slug */}
                       <td className="px-5 py-3.5">
-                        <p className="text-sm font-medium text-charcoal group-hover:text-forest transition-colors line-clamp-1">
-                          {e.title}
-                        </p>
+                        <p className="text-sm font-medium text-charcoal group-hover:text-forest transition-colors line-clamp-1">{e.title}</p>
                         <p className="text-[10px] text-charcoal/35 mt-0.5">/events/{e.slug}</p>
                       </td>
-                      {/* Date */}
                       <td className="px-4 py-3.5 hidden sm:table-cell">
                         <p className="text-xs text-charcoal/70">
                           {new Date(e.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
@@ -139,18 +163,13 @@ export function EventsTable({ events }: { events: EventRow[] }) {
                           {new Date(e.event_date).toLocaleDateString("en-KE", { weekday: "long" })}
                         </p>
                       </td>
-                      {/* Status */}
-                      <td className="px-4 py-3.5">
-                        <StatusBadge status={e.status} />
-                      </td>
-                      {/* Registrations */}
+                      <td className="px-4 py-3.5"><StatusBadge status={e.status} /></td>
                       <td className="px-4 py-3.5 hidden md:table-cell text-center">
                         <div className="inline-flex items-center gap-1.5 text-xs text-charcoal/60">
                           <Users size={11} className="text-charcoal/35" />
                           {e.registrations}
                         </div>
                       </td>
-                      {/* Actions */}
                       <td className="px-5 py-3.5">
                         <div className="flex items-center justify-end gap-1">
                           <Link
@@ -189,7 +208,6 @@ export function EventsTable({ events }: { events: EventRow[] }) {
               </table>
             </div>
 
-            {/* Pagination */}
             {pages > 1 && (
               <div className="flex items-center justify-between px-5 py-3 border-t border-mist flex-shrink-0">
                 <p className="text-xs text-charcoal/40">

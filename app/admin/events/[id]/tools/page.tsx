@@ -42,7 +42,7 @@ export default async function EventToolsPage({ params }: Props) {
   const isPreviewOnly = event.status !== "live" && event.status !== "published";
 
   return (
-    <div className="max-w-3xl space-y-6">
+    <div className="space-y-6">
 
       {/* Live display — always visible to admins; labelled as preview when not yet published */}
       <div className="bg-white rounded-2xl border border-mist p-5">

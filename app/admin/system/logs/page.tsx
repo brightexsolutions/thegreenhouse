@@ -39,7 +39,7 @@ export default async function LogsPage() {
   const pendingCount = logs.filter(l => l.status === "pending").length;
 
   return (
-    <div className="p-6 max-w-6xl mx-auto">
+    <div className="space-y-6">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-forest">System Logs</h1>
         <p className="text-sm text-charcoal/50 mt-1">Communications history — last 200 entries</p>

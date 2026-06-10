@@ -157,6 +157,21 @@
   outline-offset: 2px;
 }
 
+/* ─── Mobile input: prevent iOS auto-zoom (< 16px triggers zoom) ──────── */
+@media (max-width: 640px) {
+  input[type="text"],
+  input[type="email"],
+  input[type="tel"],
+  input[type="number"],
+  input[type="password"],
+  input[type="search"],
+  input[type="url"],
+  textarea,
+  select {
+    font-size: 16px;
+  }
+}
+
 /* ─── Accordion keyframes (shadcn Radix) ──────────────────────────────── */
 @keyframes accordion-down {
   from { height: 0; }

@@ -6,13 +6,14 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, CalendarDays, Users, MessageSquare,
   Settings2, BookOpen, Leaf, Shield, FileText, Trash2,
-  UserCog, Radio, ExternalLink,
+  UserCog, Radio, ExternalLink, Library,
 } from "lucide-react";
 
 const NAV = [
   { href: "/admin/dashboard",      icon: LayoutDashboard, label: "Dashboard" },
   { href: "/admin/events",         icon: CalendarDays,    label: "Events" },
   { href: "/admin/registrants",    icon: Users,           label: "Registrants" },
+  { href: "/admin/library",        icon: Library,         label: "Library" },
   { href: "/admin/communications", icon: MessageSquare,   label: "Comms" },
   { href: "/admin/docs",           icon: BookOpen,        label: "Docs" },
 ];

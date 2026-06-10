@@ -1,18 +1,19 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio, Shirt } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio, Shirt, Users } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { storageUrl, SITE_URL, SITE_NAME } from "@/lib/constants";
 import { FadeIn } from "@/components/motion/fade-in";
 import { RegistrationModal } from "@/components/events/registration-modal";
+import { EventQRCode } from "@/components/events/event-qr-code";
 import type { Event } from "@/types/database";
 
 export const revalidate = 60;
 
 type Props = { params: Promise<{ slug: string }> };
 
-async function getEvent(slug: string): Promise<Event | null> {
+async function getEventWithCount(slug: string): Promise<{ event: Event; registrantCount: number } | null> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
@@ -21,7 +22,19 @@ async function getEvent(slug: string): Promise<Event | null> {
       .eq("slug", slug)
       .is("deleted_at", null)
       .single();
-    return (data as Event) ?? null;
+    if (!data) return null;
+    const event = data as Event;
+
+    let registrantCount = 0;
+    if (event.capacity) {
+      const { count } = await supabase
+        .from("registrations")
+        .select("id", { count: "exact", head: true })
+        .eq("event_id", event.id)
+        .is("deleted_at", null);
+      registrantCount = count ?? 0;
+    }
+    return { event, registrantCount };
   } catch {
     return null;
   }
@@ -29,7 +42,8 @@ async function getEvent(slug: string): Promise<Event | null> {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const event = await getEvent(slug);
+  const result = await getEventWithCount(slug);
+  const event = result?.event;
   if (!event) return {};
 
   const coverUrl = event.cover_image
@@ -111,8 +125,9 @@ function pickHeroFallback(slug: string) {
 
 export default async function EventDetailPage({ params }: Props) {
   const { slug } = await params;
-  const event = await getEvent(slug);
-  if (!event) notFound();
+  const result = await getEventWithCount(slug);
+  if (!result) notFound();
+  const { event, registrantCount } = result;
 
   const coverUrl = event.cover_image
     ? storageUrl(`event-images/${event.cover_image}`, { width: 1600, quality: 85 })
@@ -124,6 +139,7 @@ export default async function EventDetailPage({ params }: Props) {
   const time = event.event_time.slice(0, 5).replace(":", ".");
 
   const isOpen = event.status === "published" || event.status === "live";
+  const isFull = !!(event.capacity && registrantCount >= event.capacity);
 
   return (
     <>
@@ -335,11 +351,21 @@ export default async function EventDetailPage({ params }: Props) {
                     {event.venue_name && <InfoRow icon={<MapPin size={12} />} label={event.venue_name} />}
                     {event.dress_code && <InfoRow icon={<Shirt size={12} />} label={event.dress_code} />}
                     {event.capacity && (
-                      <InfoRow icon={<span className="text-[10px] font-bold">∞</span>} label={`${event.capacity} capacity`} />
+                      <InfoRow
+                        icon={<Users size={12} />}
+                        label={isFull
+                          ? `${event.capacity} — session full`
+                          : `${registrantCount} / ${event.capacity} registered`
+                        }
+                      />
                     )}
                   </div>
 
-                  {isOpen ? (
+                  {isOpen && isFull ? (
+                    <div className="w-full py-3.5 rounded-full bg-red-50 border border-red-100 text-red-500 text-sm text-center font-medium">
+                      This session is full
+                    </div>
+                  ) : isOpen ? (
                     <RegistrationModal event={event} />
                   ) : (
                     <div className="w-full py-3.5 rounded-full bg-charcoal/8 text-charcoal/40 text-sm text-center font-medium cursor-not-allowed">
@@ -347,10 +373,17 @@ export default async function EventDetailPage({ params }: Props) {
                     </div>
                   )}
 
-                  {isOpen && (
+                  {isOpen && !isFull && (
                     <p className="text-center text-xs text-charcoal/50 mt-3 leading-relaxed">
                       Ticket delivered by email or WhatsApp
                     </p>
+                  )}
+
+                  {/* QR code for sharing */}
+                  {isOpen && !isFull && (
+                    <div className="mt-5">
+                      <EventQRCode slug={event.slug} />
+                    </div>
                   )}
                 </div>
               </FadeIn>

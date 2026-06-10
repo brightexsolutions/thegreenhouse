@@ -18,11 +18,12 @@ export default async function EventRegistrantsPage({ params }: Props) {
     .is("deleted_at", null)
     .single();
 
+
   if (!event) notFound();
 
   const { data: registrants } = await supabase
     .from("registrations")
-    .select("id, first_name, last_name, email, phone, role, source, ticket_sent, checked_in, whatsapp_opt_in, created_at, event_id")
+    .select("id, first_name, last_name, email, phone, role, source, ticket_sent, checked_in, whatsapp_opt_in, created_at, event_id, ticket_token")
     .eq("event_id", id)
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
@@ -31,8 +32,8 @@ export default async function EventRegistrantsPage({ params }: Props) {
     id: string; first_name: string; last_name: string;
     email: string | null; phone: string | null; role: string;
     source: string | null; ticket_sent: boolean; checked_in: boolean;
-    whatsapp_opt_in: boolean; created_at: string; event_id: string;
-  }>).map(r => ({ ...r, events: { id, title: event.title } }));
+    whatsapp_opt_in: boolean; created_at: string; event_id: string; ticket_token: string;
+  }>).map(r => ({ ...r, events: { id, title: (event as { title: string; slug: string }).title, slug: (event as { title: string; slug: string }).slug } }));
 
   const eventEntry = [{ id, title: event.title }];
 

@@ -187,9 +187,9 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
 
   /* ── Form ───────────────────────────────────────────────── */
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
       {/* Name row */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-2.5">
         <Field label="First name" error={errors.first_name?.message}>
           <input
             {...register("first_name")}
@@ -206,7 +206,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         </Field>
       </div>
 
-      {/* Email — reassurance shown as soon as they type */}
+      {/* Email */}
       <Field
         label="Email address"
         hint={emailValue ? undefined : "Optional if you provide a phone"}
@@ -219,8 +219,8 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
           className={inputCls(!!errors.email)}
         />
         {emailValue && (
-          <p className="flex items-center gap-1.5 text-xs text-forest/70 mt-1.5">
-            <Mail size={12} className="shrink-0" />
+          <p className="flex items-center gap-1 text-[11px] text-forest/70 mt-1">
+            <Mail size={11} className="shrink-0" />
             We&apos;ll email your ticket here — nothing else.
           </p>
         )}
@@ -237,67 +237,52 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         />
       </Field>
 
-      {/* Role */}
-      <Field label="You're attending as" error={errors.role?.message}>
-        <select {...register("role")} className={inputCls(!!errors.role)}>
-          {ROLE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-      </Field>
-
-      {/* Source */}
-      <Field label="How did you hear about us?" error={errors.source?.message}>
-        <select {...register("source")} className={inputCls(!!errors.source)}>
-          {SOURCE_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
-      </Field>
+      {/* Role + Source in two columns */}
+      <div className="grid grid-cols-2 gap-2.5">
+        <Field label="Attending as" error={errors.role?.message}>
+          <select {...register("role")} className={inputCls(!!errors.role)}>
+            {ROLE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </Field>
+        <Field label="How did you hear?" error={errors.source?.message}>
+          <select {...register("source")} className={inputCls(!!errors.source)}>
+            {SOURCE_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>{o.label}</option>
+            ))}
+          </select>
+        </Field>
+      </div>
 
       {/* Comms opt-in */}
-      <label className="flex items-start gap-3 cursor-pointer group">
+      <label className="flex items-start gap-2.5 cursor-pointer group">
         <div className="relative mt-0.5 shrink-0">
-          <input
-            {...register("whatsapp_opt_in")}
-            type="checkbox"
-            className="sr-only peer"
-          />
-          <div className="w-4 h-4 rounded border border-mist group-hover:border-forest/40 peer-checked:bg-forest peer-checked:border-forest transition-all" />
-          <CheckCircle2
-            size={10}
-            className="absolute inset-0 m-auto text-cream opacity-0 peer-checked:opacity-100 pointer-events-none"
-          />
+          <input {...register("whatsapp_opt_in")} type="checkbox" className="sr-only peer" />
+          <div className="w-5 h-5 rounded-md border-2 border-charcoal/25 group-hover:border-forest/60 peer-checked:bg-forest peer-checked:border-forest transition-all" />
+          <CheckCircle2 size={13} className="absolute inset-0 m-auto text-cream opacity-0 peer-checked:opacity-100 pointer-events-none" />
         </div>
-        <span className="text-sm text-charcoal/65 leading-relaxed">
-          Keep me updated about future sessions and community news
+        <span className="text-[13px] text-charcoal/65 leading-snug">
+          Keep me updated about future gatherings and community news
         </span>
       </label>
 
-      {/* Photo / filming consent */}
-      <label className="flex items-start gap-3 cursor-pointer group">
+      {/* Photo consent */}
+      <label className="flex items-start gap-2.5 cursor-pointer group">
         <div className="relative mt-0.5 shrink-0">
-          <input
-            {...register("photo_consent")}
-            type="checkbox"
-            className="sr-only peer"
-          />
-          <div className="w-4 h-4 rounded border border-mist group-hover:border-forest/40 peer-checked:bg-forest peer-checked:border-forest transition-all" />
-          <CheckCircle2
-            size={10}
-            className="absolute inset-0 m-auto text-cream opacity-0 peer-checked:opacity-100 pointer-events-none"
-          />
+          <input {...register("photo_consent")} type="checkbox" className="sr-only peer" />
+          <div className="w-5 h-5 rounded-md border-2 border-charcoal/25 group-hover:border-forest/60 peer-checked:bg-forest peer-checked:border-forest transition-all" />
+          <CheckCircle2 size={13} className="absolute inset-0 m-auto text-cream opacity-0 peer-checked:opacity-100 pointer-events-none" />
         </div>
-        <span className="text-sm text-charcoal/65 leading-relaxed">
-          I understand The Green House may photograph or film the session for social media. I consent to appearing in such content.
-          <span className="block text-xs text-charcoal/40 mt-0.5">If you prefer not to be photographed, please let us know on the day.</span>
+        <span className="text-[13px] text-charcoal/65 leading-snug">
+          I&apos;m okay with being photographed or filmed during the gathering for social media.
+          <span className="block text-[11px] text-charcoal/38 mt-0.5">Let us know on the night if you&apos;d prefer not to.</span>
         </span>
       </label>
 
-      {/* Data consent note */}
-      <p className="text-xs text-charcoal/50 leading-relaxed border border-mist rounded-2xl px-4 py-3 bg-off-white">
-        By registering you consent to The Green House storing your details to manage this event.
-        Your information is never sold or shared with third parties.
+      {/* Data note */}
+      <p className="text-[11px] text-charcoal/45 leading-relaxed border border-mist rounded-xl px-3.5 py-2.5 bg-off-white">
+        Your details are stored securely to manage this event and never shared.
       </p>
 
       {/* Submit */}
@@ -307,18 +292,14 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         className="w-full flex items-center justify-center gap-2 py-3.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-all duration-200 disabled:opacity-60 disabled:cursor-not-allowed"
       >
         {isSubmitting ? (
-          <>
-            <Loader2 size={15} className="animate-spin" />
-            Registering…
-          </>
+          <><Loader2 size={15} className="animate-spin" />Registering…</>
         ) : (
-          "Reserve my spot"
+          "Reserve my spot — it's free"
         )}
       </button>
 
-      <p className="text-center text-xs text-charcoal/50 leading-relaxed">
-        Entry is free.{" "}
-        {emailValue ? "Ticket will be sent to your email." : "Ticket sent by email — or download directly if phone only."}
+      <p className="text-center text-[11px] text-charcoal/45">
+        {emailValue ? "Ticket will be sent to your email." : "Provide an email or phone to receive your ticket."}
       </p>
     </form>
   );
@@ -328,12 +309,12 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
 
 function inputCls(hasError: boolean) {
   return cn(
-    "w-full px-4 py-3 rounded-2xl border text-sm text-charcoal bg-off-white",
-    "placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40",
+    "w-full px-3.5 py-2.5 rounded-xl border text-base text-charcoal bg-off-white",
+    "placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40",
     "transition-all duration-150",
     hasError
       ? "border-red-300 focus:ring-red-200 focus:border-red-400"
-      : "border-mist hover:border-forest/20"
+      : "border-charcoal/20 hover:border-forest/30"
   );
 }
 
@@ -346,13 +327,13 @@ interface FieldProps {
 
 function Field({ label, hint, error, children }: FieldProps) {
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       <div className="flex items-baseline justify-between gap-2">
-        <label className="text-sm font-semibold text-charcoal/70">{label}</label>
-        {hint && <span className="text-xs text-charcoal/50">{hint}</span>}
+        <label className="text-xs font-semibold text-charcoal/65">{label}</label>
+        {hint && <span className="text-[10px] text-charcoal/45">{hint}</span>}
       </div>
       {children}
-      {error && <p className="text-xs text-red-500">{error}</p>}
+      {error && <p className="text-[11px] text-red-500">{error}</p>}
     </div>
   );
 }

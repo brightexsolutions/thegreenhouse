@@ -14,33 +14,54 @@ export async function POST(req: NextRequest, { params }: Props) {
   if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { sessionId } = await params;
-  const { title, artist, lyrics } = await req.json() as { title: string; artist?: string; lyrics?: string };
-
-  // Upsert song in library (search by title+artist first)
-  const { data: existing } = await supabase
-    .from("songs")
-    .select("id")
-    .ilike("title", title)
-    .eq("artist", artist ?? "")
-    .maybeSingle();
+  const body = await req.json() as {
+    songId?: string;         // link an existing song from library
+    title?: string;
+    artist?: string;
+    lyrics?: string;
+  };
 
   let songId: string;
-  if (existing) {
-    songId = existing.id;
-    if (lyrics) {
-      await supabase.from("songs").update({ lyrics }).eq("id", songId);
-    }
+
+  if (body.songId) {
+    // Linking an existing song directly
+    songId = body.songId;
   } else {
-    const { data: newSong, error } = await supabase
+    const { title, artist, lyrics } = body;
+    if (!title) return NextResponse.json({ error: "title required" }, { status: 400 });
+
+    // Upsert: find existing by title (case-insensitive) + artist
+    const { data: existing } = await supabase
       .from("songs")
-      .insert({ title, artist: artist ?? null, lyrics: lyrics ?? null })
       .select("id")
-      .single();
-    if (error || !newSong) return NextResponse.json({ error: error?.message ?? "Failed" }, { status: 500 });
-    songId = newSong.id;
+      .ilike("title", title)
+      .eq("artist", artist ?? "")
+      .is("deleted_at", null)
+      .maybeSingle();
+
+    if (existing) {
+      songId = existing.id;
+      if (lyrics) await supabase.from("songs").update({ lyrics }).eq("id", songId);
+    } else {
+      const { data: newSong, error } = await supabase
+        .from("songs")
+        .insert({ title, artist: artist ?? null, lyrics: lyrics ?? null })
+        .select("id")
+        .single();
+      if (error || !newSong) return NextResponse.json({ error: error?.message ?? "Failed" }, { status: 500 });
+      songId = newSong.id;
+    }
   }
 
-  // Get current max sort_order for this session
+  // Prevent duplicate in same session
+  const { data: dup } = await supabase
+    .from("session_songs")
+    .select("id")
+    .eq("session_id", sessionId)
+    .eq("song_id", songId)
+    .maybeSingle();
+  if (dup) return NextResponse.json({ error: "This song is already in the session" }, { status: 409 });
+
   const { count } = await supabase
     .from("session_songs")
     .select("id", { count: "exact", head: true })

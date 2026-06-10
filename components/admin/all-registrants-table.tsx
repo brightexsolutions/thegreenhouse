@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Search, Mail, Phone, CheckCircle2, Circle, Users } from "lucide-react";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useRouter } from "next/navigation";
+import { createBrowserClient } from "@supabase/ssr";
+import { Search, Mail, Phone, CheckCircle2, Circle, Users, Send, Copy, ExternalLink, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Registrant {
@@ -17,7 +19,8 @@ interface Registrant {
   whatsapp_opt_in: boolean;
   created_at:      string;
   event_id:        string;
-  events:          { id: string; title: string } | null;
+  ticket_token:    string;
+  events:          { id: string; title: string; slug?: string } | null;
 }
 
 interface Props {
@@ -35,11 +38,80 @@ const ROLE_LABELS: Record<string, string> = {
 
 const PAGE_SIZE = 20;
 
-export function AllRegistrantsTable({ registrants, events }: Props) {
-  const [query,    setQuery]    = useState("");
-  const [eventId,  setEventId]  = useState("all");
-  const [attended, setAttended] = useState<"all" | "present" | "absent">("all");
-  const [page,     setPage]     = useState(1);
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegreenhousekws.co.ke";
+
+export function AllRegistrantsTable({ registrants: initialRegistrants, events }: Props) {
+  const router   = useRouter();
+  const [query,       setQuery]      = useState("");
+  const [eventId,     setEventId]    = useState("all");
+  const [attended,    setAttended]   = useState<"all" | "present" | "absent">("all");
+  const [page,        setPage]       = useState(1);
+  const [registrants, setRegistrants] = useState(initialRegistrants);
+  const [resending,   setResending]  = useState<string | null>(null);
+  const [resendMsg,   setResendMsg]  = useState<{ id: string; ok: boolean; text: string } | null>(null);
+  const [copied,      setCopied]     = useState<string | null>(null);
+  const [spinning,    setSpinning]   = useState(false);
+  const supabaseRef = useRef(createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  ));
+
+  useEffect(() => {
+    const supabase = supabaseRef.current;
+    const channel = supabase
+      .channel("admin-registrants-rt")
+      .on("postgres_changes", {
+        event: "INSERT", schema: "public", table: "registrations",
+      }, (payload) => {
+        const r = payload.new as Registrant & { events: null };
+        const matchedEvent = events.find(e => e.id === r.event_id);
+        setRegistrants(prev => [{ ...r, events: matchedEvent ?? null }, ...prev]);
+      })
+      .on("postgres_changes", {
+        event: "UPDATE", schema: "public", table: "registrations",
+      }, (payload) => {
+        const updated = payload.new as Registrant;
+        setRegistrants(prev =>
+          prev.map(r => r.id === updated.id ? { ...r, checked_in: updated.checked_in, ticket_sent: updated.ticket_sent } : r)
+        );
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [events]);
+
+  function refresh() {
+    setSpinning(true);
+    router.refresh();
+    setTimeout(() => setSpinning(false), 800);
+  }
+
+  async function resendTicket(registrantId: string) {
+    setResending(registrantId);
+    const res = await fetch(`/api/admin/registrations/${registrantId}/resend-ticket`, { method: "POST" });
+    const data = await res.json().catch(() => ({}));
+    setResendMsg({
+      id:   registrantId,
+      ok:   res.ok,
+      text: res.ok ? "Ticket resent" : (data.error ?? "Failed to resend"),
+    });
+    setResending(null);
+    setTimeout(() => setResendMsg(null), 3000);
+  }
+
+  function copyTicketLink(token: string, regId: string) {
+    const url = `${SITE_URL}/ticket/${token}`;
+    navigator.clipboard.writeText(url).catch(() => {});
+    setCopied(regId);
+    setTimeout(() => setCopied(null), 2000);
+  }
+
+  function buildWaLink(r: Registrant) {
+    if (!r.ticket_token) return null;
+    const url        = `${SITE_URL}/ticket/${r.ticket_token}`;
+    const eventTitle = r.events?.title?.replace("The Green House — ", "") ?? "the session";
+    const text = `Hi ${r.first_name}, here is your ticket for ${eventTitle}:\n${url}\nPresent this at the door. See you there!`;
+    return `https://wa.me/?text=${encodeURIComponent(text)}`;
+  }
 
   const filtered = useMemo(() => {
     return registrants.filter(r => {
@@ -103,6 +175,14 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
             </button>
           ))}
         </div>
+
+        <button
+          onClick={refresh}
+          title="Refresh"
+          className="flex-shrink-0 p-2 rounded-xl border border-mist bg-white text-charcoal/40 hover:text-forest hover:border-forest/30 transition-all"
+        >
+          <RefreshCw size={14} className={cn("transition-transform", spinning && "animate-spin")} />
+        </button>
       </div>
 
       {/* Table */}
@@ -116,7 +196,7 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
             <p className="text-xs text-charcoal/25 mt-1">
               {query || eventId !== "all" || attended !== "all"
                 ? "Try adjusting your filters"
-                : "Registrations for this session will appear here"}
+                : "Registrations will appear here"}
             </p>
           </div>
         ) : (
@@ -131,12 +211,12 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
                     <th className="text-center text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3">Ticket</th>
                     <th className="text-center text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3">Attended</th>
                     <th className="text-right text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3 hidden lg:table-cell">Registered</th>
+                    <th className="px-4 py-3" />
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-mist">
                   {slice.map(r => (
                     <tr key={r.id} className="hover:bg-off-white transition-colors">
-                      {/* Person — dual-row column */}
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
                           <div className="w-8 h-8 rounded-full bg-forest/8 flex items-center justify-center flex-shrink-0">
@@ -161,7 +241,6 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
                           </div>
                         </div>
                       </td>
-                      {/* Session */}
                       <td className="px-4 py-3 hidden md:table-cell">
                         {r.events ? (
                           <p className="text-xs text-charcoal/60 truncate max-w-[140px]">
@@ -171,13 +250,11 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
                           <span className="text-[10px] text-charcoal/30">—</span>
                         )}
                       </td>
-                      {/* Role */}
                       <td className="px-4 py-3 hidden sm:table-cell">
                         <span className="text-[10px] text-charcoal/50 bg-charcoal/5 px-2 py-0.5 rounded-lg">
                           {ROLE_LABELS[r.role] ?? r.role}
                         </span>
                       </td>
-                      {/* Ticket sent */}
                       <td className="px-4 py-3 text-center">
                         <span title={r.ticket_sent ? "Ticket sent" : "Not sent"}>
                           {r.ticket_sent
@@ -186,7 +263,6 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
                           }
                         </span>
                       </td>
-                      {/* Attended */}
                       <td className="px-4 py-3 text-center">
                         <span className={cn(
                           "text-[10px] px-2 py-0.5 rounded-full font-semibold",
@@ -195,11 +271,58 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
                           {r.checked_in ? "Present" : "Absent"}
                         </span>
                       </td>
-                      {/* Date */}
                       <td className="px-5 py-3 text-right hidden lg:table-cell">
                         <p className="text-[10px] text-charcoal/35">
                           {new Date(r.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "2-digit" })}
                         </p>
+                      </td>
+                      <td className="px-4 py-3">
+                        <div className="flex items-center gap-1 justify-end">
+                          {r.email && (
+                            <button
+                              onClick={() => resendTicket(r.id)}
+                              disabled={resending === r.id}
+                              title="Resend ticket email"
+                              className="p-1.5 rounded-lg text-charcoal/30 hover:text-forest hover:bg-forest/8 transition-colors disabled:opacity-40"
+                            >
+                              {resending === r.id
+                                ? <span className="block w-3 h-3 rounded-full border border-forest/30 border-t-forest animate-spin" />
+                                : <Send size={12} />
+                              }
+                            </button>
+                          )}
+                          {r.ticket_token && (
+                            <button
+                              onClick={() => copyTicketLink(r.ticket_token, r.id)}
+                              title="Copy ticket link"
+                              className="p-1.5 rounded-lg text-charcoal/30 hover:text-forest hover:bg-forest/8 transition-colors"
+                            >
+                              {copied === r.id
+                                ? <CheckCircle2 size={12} className="text-green-500" />
+                                : <Copy size={12} />
+                              }
+                            </button>
+                          )}
+                          {r.ticket_token && (() => {
+                            const waLink = buildWaLink(r);
+                            return waLink ? (
+                              <a
+                                href={waLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                title="Share via WhatsApp"
+                                className="p-1.5 rounded-lg text-charcoal/30 hover:text-[#25d366] hover:bg-green-50 transition-colors"
+                              >
+                                <ExternalLink size={12} />
+                              </a>
+                            ) : null;
+                          })()}
+                        </div>
+                        {resendMsg?.id === r.id && (
+                          <p className={`text-[10px] mt-1 text-right ${resendMsg.ok ? "text-green-600" : "text-red-500"}`}>
+                            {resendMsg.text}
+                          </p>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -207,7 +330,6 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
               </table>
             </div>
 
-            {/* Pagination */}
             <div className="flex items-center justify-between px-5 py-3 border-t border-mist flex-shrink-0">
               <p className="text-xs text-charcoal/40">
                 {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length}

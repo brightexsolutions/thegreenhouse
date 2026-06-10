@@ -67,7 +67,7 @@ export default function TrashPage() {
   ];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="space-y-6">
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-forest">Trash</h1>

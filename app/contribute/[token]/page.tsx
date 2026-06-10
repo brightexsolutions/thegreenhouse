@@ -148,11 +148,11 @@ export default function ContributePage({ params }: { params: { token: string } }
             <div className="w-5 h-5 rounded-full bg-gold/20 flex items-center justify-center">
               <Music2 size={11} className="text-gold" />
             </div>
-            <span className="text-xs uppercase tracking-widest text-cream/40">The Green House</span>
+            <span className="text-xs uppercase tracking-widest text-cream/65">The Green House</span>
           </div>
           <h1 className="font-display text-2xl font-semibold text-cream mt-2">{event?.title}</h1>
-          <p className="text-sm text-cream/45 mt-0.5">{formattedDate}</p>
-          <p className="text-xs text-cream/30 mt-3">
+          <p className="text-sm text-cream/70 mt-0.5">{formattedDate}</p>
+          <p className="text-sm text-cream/55 mt-3">
             Add the songs you&apos;ll be singing. Others can see the full list and read lyrics.
           </p>
         </div>
@@ -167,34 +167,34 @@ export default function ContributePage({ params }: { params: { token: string } }
           </h2>
           <form onSubmit={handleSubmit} className="space-y-3">
             <div>
-              <label className="text-xs font-medium text-charcoal/50 mb-1 block">Song title *</label>
+              <label className="text-xs font-semibold text-charcoal/70 mb-1.5 block">Song title *</label>
               <input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. Great Are You Lord"
                 required
-                className="w-full px-3 py-2.5 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
+                className="w-full px-3.5 py-3 rounded-xl border border-mist text-base text-charcoal placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-charcoal/50 mb-1 block">Artist / band <span className="text-charcoal/25 font-normal">(optional)</span></label>
+              <label className="text-xs font-semibold text-charcoal/70 mb-1.5 block">Artist / band <span className="text-charcoal/40 font-normal">(optional)</span></label>
               <input
                 value={artist}
                 onChange={e => setArtist(e.target.value)}
                 placeholder="e.g. All Sons & Daughters"
-                className="w-full px-3 py-2.5 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
+                className="w-full px-3.5 py-3 rounded-xl border border-mist text-base text-charcoal placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-charcoal/50 mb-1 block">
-                Lyrics <span className="text-charcoal/25 font-normal">(optional — separate verses with a blank line)</span>
+              <label className="text-xs font-semibold text-charcoal/70 mb-1.5 block">
+                Lyrics <span className="text-charcoal/40 font-normal">(optional — separate verses with a blank line)</span>
               </label>
               <textarea
                 value={lyrics}
                 onChange={e => setLyrics(e.target.value)}
                 placeholder={"Verse 1 lyrics here...\n\nChorus lyrics here...\n\nVerse 2 lyrics here..."}
                 rows={7}
-                className="w-full px-3 py-2.5 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/25 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all resize-none font-mono leading-relaxed"
+                className="w-full px-3.5 py-3 rounded-xl border border-mist text-base text-charcoal placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all resize-none leading-relaxed"
               />
             </div>
 

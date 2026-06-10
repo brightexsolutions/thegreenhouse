@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { Search, CheckCircle2, Circle, Mail, Phone } from "lucide-react";
+import { Search, CheckCircle2, Circle, Mail, Phone, UserPlus, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Registrant {
@@ -12,6 +12,7 @@ interface Registrant {
   phone:      string | null;
   role:       string;
   checked_in: boolean;
+  is_walkin?: boolean;
 }
 
 interface CheckinListProps {
@@ -21,17 +22,23 @@ interface CheckinListProps {
 }
 
 export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinListProps) {
-  const [items,     setItems]     = useState(registrants);
-  const [query,     setQuery]     = useState("");
-  const [filter,    setFilter]    = useState<"all" | "present" | "absent">("all");
-  const [updating,  setUpdating]  = useState<Set<string>>(new Set());
+  const [items,        setItems]        = useState(registrants);
+  const [query,        setQuery]        = useState("");
+  const [filter,       setFilter]       = useState<"all" | "present" | "absent">("all");
+  const [updating,     setUpdating]     = useState<Set<string>>(new Set());
+  const [showWalkIn,   setShowWalkIn]   = useState(false);
+  const [walkInFirst,  setWalkInFirst]  = useState("");
+  const [walkInLast,   setWalkInLast]   = useState("");
+  const [walkInPhone,  setWalkInPhone]  = useState("");
+  const [walkInSaving, setWalkInSaving] = useState(false);
+  const [walkInError,  setWalkInError]  = useState<string | null>(null);
 
   const filtered = items.filter((r) => {
-    const matchName = `${r.first_name} ${r.last_name}`.toLowerCase().includes(query.toLowerCase());
+    const matchName   = `${r.first_name} ${r.last_name}`.toLowerCase().includes(query.toLowerCase());
     const matchFilter =
       filter === "all" ||
       (filter === "present" && r.checked_in) ||
-      (filter === "absent" && !r.checked_in);
+      (filter === "absent"  && !r.checked_in);
     return matchName && matchFilter;
   });
 
@@ -50,6 +57,37 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
       setUpdating((s) => { const next = new Set(s); next.delete(id); return next; });
     }
   }, [eventSlug, checkinToken]);
+
+  async function addWalkIn(e: React.FormEvent) {
+    e.preventDefault();
+    if (!walkInFirst.trim() || !walkInLast.trim()) return;
+    setWalkInSaving(true);
+    setWalkInError(null);
+
+    const res = await fetch(`/api/checkin/${eventSlug}/walkin`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        first_name: walkInFirst.trim(),
+        last_name:  walkInLast.trim(),
+        phone:      walkInPhone.trim() || undefined,
+        token:      checkinToken,
+      }),
+    });
+
+    if (res.ok) {
+      const newRegistrant = await res.json() as Registrant;
+      setItems((prev) => [...prev, newRegistrant]);
+      setWalkInFirst("");
+      setWalkInLast("");
+      setWalkInPhone("");
+      setShowWalkIn(false);
+    } else {
+      const data = await res.json().catch(() => ({})) as { error?: string };
+      setWalkInError(data.error ?? "Failed to add walk-in");
+    }
+    setWalkInSaving(false);
+  }
 
   return (
     <div className="space-y-3">
@@ -80,6 +118,61 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
         </div>
       </div>
 
+      {/* Walk-in form */}
+      {showWalkIn ? (
+        <form onSubmit={addWalkIn} className="bg-white rounded-2xl border border-forest/20 p-4 space-y-3">
+          <div className="flex items-center justify-between mb-1">
+            <p className="text-xs font-semibold text-charcoal">Add walk-in attendee</p>
+            <button type="button" onClick={() => { setShowWalkIn(false); setWalkInError(null); }}
+              className="p-1 rounded-lg hover:bg-charcoal/6 transition-colors">
+              <X size={13} className="text-charcoal/40" />
+            </button>
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <input
+              value={walkInFirst}
+              onChange={e => setWalkInFirst(e.target.value)}
+              placeholder="First name *"
+              required
+              className="px-3 py-2.5 rounded-xl border border-mist bg-off-white text-sm focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
+            />
+            <input
+              value={walkInLast}
+              onChange={e => setWalkInLast(e.target.value)}
+              placeholder="Last name *"
+              required
+              className="px-3 py-2.5 rounded-xl border border-mist bg-off-white text-sm focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
+            />
+          </div>
+          <input
+            value={walkInPhone}
+            onChange={e => setWalkInPhone(e.target.value)}
+            placeholder="Phone (optional)"
+            type="tel"
+            className="w-full px-3 py-2.5 rounded-xl border border-mist bg-off-white text-sm focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
+          />
+          {walkInError && (
+            <p className="text-xs text-red-500 bg-red-50 px-3 py-2 rounded-xl">{walkInError}</p>
+          )}
+          <button
+            type="submit"
+            disabled={walkInSaving || !walkInFirst.trim() || !walkInLast.trim()}
+            className="w-full py-2.5 rounded-xl bg-forest text-cream text-xs font-semibold disabled:opacity-50 flex items-center justify-center gap-2"
+          >
+            {walkInSaving ? <Loader2 size={12} className="animate-spin" /> : <CheckCircle2 size={12} />}
+            {walkInSaving ? "Adding…" : "Mark as present"}
+          </button>
+        </form>
+      ) : (
+        <button
+          onClick={() => setShowWalkIn(true)}
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-forest/30 text-xs font-medium text-forest/60 hover:border-forest/50 hover:text-forest hover:bg-forest/4 transition-all"
+        >
+          <UserPlus size={13} />
+          Add walk-in attendee
+        </button>
+      )}
+
       {/* List */}
       <div className="bg-white rounded-2xl border border-mist overflow-hidden">
         {filtered.length === 0 ? (
@@ -89,17 +182,28 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
             {filtered.map((r) => (
               <div key={r.id} className="flex items-center gap-3 px-4 py-3.5">
                 {/* Avatar */}
-                <div className="w-9 h-9 rounded-full bg-forest/8 flex items-center justify-center flex-shrink-0">
-                  <span className="text-[10px] font-bold text-forest">
+                <div className={cn(
+                  "w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0",
+                  r.is_walkin ? "bg-gold/10" : "bg-forest/8"
+                )}>
+                  <span className={cn(
+                    "text-[10px] font-bold",
+                    r.is_walkin ? "text-gold" : "text-forest"
+                  )}>
                     {r.first_name[0]}{r.last_name[0]}
                   </span>
                 </div>
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-charcoal">
-                    {r.first_name} {r.last_name}
-                  </p>
+                  <div className="flex items-center gap-1.5">
+                    <p className="text-sm font-medium text-charcoal">
+                      {r.first_name} {r.last_name}
+                    </p>
+                    {r.is_walkin && (
+                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gold/12 text-gold/80 font-medium">Walk-in</span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     {r.email && (
                       <span className="flex items-center gap-1 text-[9px] text-charcoal/30">
@@ -139,7 +243,7 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
       </div>
 
       <p className="text-center text-[10px] text-charcoal/30">
-        {filtered.length} of {items.length} shown
+        {filtered.length} of {items.length} shown · {items.filter(r => r.checked_in).length} present
       </p>
     </div>
   );

@@ -1,13 +1,52 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { createBrowserClient } from "@supabase/ssr";
 import { Users, CheckCircle2 } from "lucide-react";
 
 interface CheckinStatsBarProps {
-  total:   number;
-  present: number;
+  eventId:        string;
+  initialTotal:   number;
+  initialPresent: number;
 }
 
-export function CheckinStatsBar({ total, present }: CheckinStatsBarProps) {
+export function CheckinStatsBar({ eventId, initialTotal, initialPresent }: CheckinStatsBarProps) {
+  const [total,   setTotal]   = useState(initialTotal);
+  const [present, setPresent] = useState(initialPresent);
+
+  useEffect(() => {
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+
+    function fetchStats() {
+      supabase
+        .from("registrations")
+        .select("checked_in")
+        .eq("event_id", eventId)
+        .is("deleted_at", null)
+        .then(({ data }) => {
+          if (!data) return;
+          const rows = data as { checked_in: boolean }[];
+          setTotal(rows.length);
+          setPresent(rows.filter(r => r.checked_in).length);
+        });
+    }
+
+    const channel = supabase
+      .channel(`stats-bar-${eventId}`)
+      .on("postgres_changes", {
+        event:  "*",
+        schema: "public",
+        table:  "registrations",
+        filter: `event_id=eq.${eventId}`,
+      }, () => fetchStats())
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [eventId]);
+
   const pct = total > 0 ? Math.round((present / total) * 100) : 0;
 
   return (

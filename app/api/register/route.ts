@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
   // Fetch event
   const { data: event, error: eventErr } = await supabase
     .from("events")
-    .select("id, title, event_date, event_time, venue_name, status, capacity")
+    .select("id, slug, title, event_date, event_time, venue_name, status, capacity, type, price_kes")
     .eq("id", data.event_id)
     .is("deleted_at", null)
     .single();
@@ -157,6 +157,9 @@ export async function POST(req: NextRequest) {
       eventTime:   formattedTime,
       venueName:   event.venue_name,
       ticketToken: reg.ticket_token,
+      eventSlug:   (event as { slug: string }).slug,
+      isFree:      (event as { type: string }).type === "free",
+      priceKes:    (event as { price_kes: number | null }).price_kes,
       pdfBuffer,
     });
 

@@ -60,7 +60,7 @@ export default async function SystemPage() {
   ];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="space-y-6">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-forest">System Overview</h1>
         <p className="text-sm text-charcoal/50 mt-1">Super admin only — platform health at a glance</p>

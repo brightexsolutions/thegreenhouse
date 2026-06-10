@@ -1,26 +1,29 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UserPlus, Trash2 } from "lucide-react";
+import { UserPlus, Trash2, ShieldCheck } from "lucide-react";
 
 type AdminProfile = {
-  id: string;
-  full_name: string | null;
+  id:         string;
+  full_name:  string | null;
   avatar_url: string | null;
-  role: "admin" | "super_admin";
+  role:       "admin" | "super_admin";
   created_at: string;
-  email?: string;
+  email?:     string;
 };
 
 export default function AdminsPage() {
-  const [admins, setAdmins]   = useState<AdminProfile[]>([]);
+  const [admins,  setAdmins]  = useState<AdminProfile[]>([]);
   const [loading, setLoading] = useState(true);
-  const [adding, setAdding]   = useState(false);
-  const [email, setEmail]     = useState("");
-  const [name, setName]       = useState("");
-  const [role, setRole]       = useState<"admin" | "super_admin">("admin");
-  const [msg, setMsg]         = useState<{ type: "ok" | "err"; text: string } | null>(null);
-  const [busy, setBusy]       = useState<string | null>(null);
+  const [adding,  setAdding]  = useState(false);
+  const [email,   setEmail]   = useState("");
+  const [name,    setName]    = useState("");
+  const [role,    setRole]    = useState<"admin" | "super_admin">("admin");
+  const [msg,     setMsg]     = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [busy,    setBusy]    = useState<string | null>(null);
+
+  // The current user's own ID — fetched so we never let them delete themselves
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
 
   async function load() {
     setLoading(true);
@@ -28,6 +31,7 @@ export default function AdminsPage() {
     if (res.ok) {
       const data = await res.json();
       setAdmins(data.admins ?? []);
+      setCurrentUserId(data.currentUserId ?? null);
     }
     setLoading(false);
   }
@@ -38,9 +42,9 @@ export default function AdminsPage() {
     e.preventDefault();
     setBusy("add");
     const res = await fetch("/api/admin/system/admins", {
-      method: "POST",
+      method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, full_name: name, role }),
+      body:    JSON.stringify({ email, full_name: name, role }),
     });
     const data = await res.json();
     if (res.ok) {
@@ -57,28 +61,28 @@ export default function AdminsPage() {
   async function changeRole(id: string, newRole: "admin" | "super_admin") {
     setBusy(id);
     await fetch("/api/admin/system/admins", {
-      method: "PATCH",
+      method:  "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id, role: newRole }),
+      body:    JSON.stringify({ id, role: newRole }),
     });
     setAdmins(prev => prev.map(a => a.id === id ? { ...a, role: newRole } : a));
     setBusy(null);
   }
 
-  async function removeAdmin(id: string) {
-    if (!confirm("Remove this admin? They will lose all admin access.")) return;
+  async function removeAdmin(id: string, name: string | null) {
+    if (!confirm(`Remove ${name ?? "this admin"}? They will lose all admin access.`)) return;
     setBusy(id + "-del");
     await fetch("/api/admin/system/admins", {
-      method: "DELETE",
+      method:  "DELETE",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ id }),
+      body:    JSON.stringify({ id }),
     });
     setAdmins(prev => prev.filter(a => a.id !== id));
     setBusy(null);
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="space-y-6">
       <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-forest">Admin Accounts</h1>
@@ -111,10 +115,7 @@ export default function AdminsPage() {
             <div>
               <label className="block text-xs font-medium text-charcoal/60 mb-1">Email *</label>
               <input
-                type="email"
-                required
-                value={email}
-                onChange={e => setEmail(e.target.value)}
+                type="email" required value={email} onChange={e => setEmail(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest"
                 placeholder="admin@example.com"
               />
@@ -122,9 +123,7 @@ export default function AdminsPage() {
             <div>
               <label className="block text-xs font-medium text-charcoal/60 mb-1">Full name</label>
               <input
-                type="text"
-                value={name}
-                onChange={e => setName(e.target.value)}
+                type="text" value={name} onChange={e => setName(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest"
                 placeholder="Jane Doe"
               />
@@ -132,28 +131,19 @@ export default function AdminsPage() {
           </div>
           <div className="mb-4">
             <label className="block text-xs font-medium text-charcoal/60 mb-1">Role</label>
-            <select
-              value={role}
-              onChange={e => setRole(e.target.value as "admin" | "super_admin")}
-              className="w-full sm:w-48 px-3 py-2 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest"
-            >
+            <select value={role} onChange={e => setRole(e.target.value as "admin" | "super_admin")}
+              className="w-full sm:w-48 px-3 py-2 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest">
               <option value="admin">Admin</option>
               <option value="super_admin">Super Admin</option>
             </select>
           </div>
           <div className="flex gap-2">
-            <button
-              type="submit"
-              disabled={busy === "add"}
-              className="px-4 py-2 rounded-xl bg-forest text-cream text-sm font-medium disabled:opacity-50"
-            >
+            <button type="submit" disabled={busy === "add"}
+              className="px-4 py-2 rounded-xl bg-forest text-cream text-sm font-medium disabled:opacity-50">
               {busy === "add" ? "Adding…" : "Add admin"}
             </button>
-            <button
-              type="button"
-              onClick={() => setAdding(false)}
-              className="px-4 py-2 rounded-xl border border-mist text-sm text-charcoal/60 hover:text-charcoal"
-            >
+            <button type="button" onClick={() => setAdding(false)}
+              className="px-4 py-2 rounded-xl border border-mist text-sm text-charcoal/60 hover:text-charcoal">
               Cancel
             </button>
           </div>
@@ -176,44 +166,76 @@ export default function AdminsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-mist/60">
-              {admins.map(admin => (
-                <tr key={admin.id} className="hover:bg-off-white/50 transition-colors">
-                  <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center text-xs font-semibold text-forest flex-shrink-0">
-                        {(admin.full_name ?? "?").charAt(0).toUpperCase()}
+              {admins.map(admin => {
+                const isSuperAdmin = admin.role === "super_admin";
+                const isSelf       = admin.id === currentUserId;
+                const canDelete    = !isSuperAdmin && !isSelf;
+                const canToggle    = !isSuperAdmin;
+
+                return (
+                  <tr key={admin.id} className="hover:bg-off-white/50 transition-colors">
+                    {/* Name */}
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center text-xs font-semibold text-forest flex-shrink-0">
+                          {(admin.full_name ?? "?").charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-1.5">
+                            <p className="font-medium text-charcoal/80">{admin.full_name ?? "—"}</p>
+                            {isSelf && (
+                              <span className="text-[10px] text-charcoal/30 bg-mist px-1.5 py-0.5 rounded-full">you</span>
+                            )}
+                          </div>
+                          {admin.email && <p className="text-xs text-charcoal/40">{admin.email}</p>}
+                        </div>
                       </div>
-                      <div>
-                        <p className="font-medium text-charcoal/80">{admin.full_name ?? "—"}</p>
-                        {admin.email && <p className="text-xs text-charcoal/40">{admin.email}</p>}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <select
-                      value={admin.role}
-                      onChange={e => changeRole(admin.id, e.target.value as "admin" | "super_admin")}
-                      disabled={busy === admin.id}
-                      className="text-xs border border-mist rounded-lg px-2 py-1 focus:outline-none focus:border-forest disabled:opacity-50"
-                    >
-                      <option value="admin">Admin</option>
-                      <option value="super_admin">Super Admin</option>
-                    </select>
-                  </td>
-                  <td className="px-4 py-3 text-charcoal/40 text-xs">
-                    {new Date(admin.created_at).toLocaleDateString("en-KE", { dateStyle: "medium" })}
-                  </td>
-                  <td className="px-4 py-3 text-right">
-                    <button
-                      onClick={() => removeAdmin(admin.id)}
-                      disabled={busy === admin.id + "-del"}
-                      className="p-1.5 rounded-lg text-charcoal/30 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
-                    >
-                      <Trash2 size={14} />
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+
+                    {/* Role */}
+                    <td className="px-4 py-3">
+                      {isSuperAdmin ? (
+                        /* Super admins get a static blue badge — not a select */
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 text-xs font-semibold border border-blue-200">
+                          <ShieldCheck size={11} />
+                          Super Admin
+                        </span>
+                      ) : (
+                        <select
+                          value={admin.role}
+                          onChange={e => changeRole(admin.id, e.target.value as "admin" | "super_admin")}
+                          disabled={!canToggle || busy === admin.id}
+                          className="text-xs border border-mist rounded-lg px-2 py-1 focus:outline-none focus:border-forest disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          <option value="admin">Admin</option>
+                          <option value="super_admin">Super Admin</option>
+                        </select>
+                      )}
+                    </td>
+
+                    {/* Added date */}
+                    <td className="px-4 py-3 text-charcoal/40 text-xs">
+                      {new Date(admin.created_at).toLocaleDateString("en-KE", { dateStyle: "medium" })}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="px-4 py-3 text-right">
+                      {canDelete ? (
+                        <button
+                          onClick={() => removeAdmin(admin.id, admin.full_name)}
+                          disabled={busy === admin.id + "-del"}
+                          className="p-1.5 rounded-lg text-charcoal/30 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                          title="Remove admin"
+                        >
+                          <Trash2 size={14} />
+                        </button>
+                      ) : (
+                        <div className="w-7 h-7" /> /* placeholder to keep column width */
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

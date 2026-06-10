@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -18,12 +18,12 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   GripVertical, Plus, Trash2, ChevronDown, ChevronUp,
-  Music2, Loader2, Mic, BookOpen, Heart, Zap, Headphones,
+  Music2, Loader2, Mic, BookOpen, Heart, Zap, Headphones, Library, Search,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type Song = { id: string; title: string; artist: string | null; lyrics: string | null };
-type SessionSong = { id: string; sort_order: number; songs: Song };
+type SessionSong = { id: string; sort_order: number; vocalist: string | null; songs: Song };
 type Session = {
   id: string; title: string; type: string;
   duration_min: number | null; notes: string | null;
@@ -109,11 +109,12 @@ export function SessionManager({ eventId, initialSessions }: Props) {
     });
   }
 
-  async function addSong(sessionId: string, title: string, artist: string, lyrics: string) {
+  async function addSong(sessionId: string, title: string, artist: string, lyrics: string, songId?: string) {
+    const body = songId ? { songId } : { title, artist, lyrics };
     const res = await fetch(`/api/admin/events/${eventId}/sessions/${sessionId}/songs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, artist, lyrics }),
+      body: JSON.stringify(body),
     });
     if (res.ok) {
       const data = await res.json();
@@ -126,10 +127,32 @@ export function SessionManager({ eventId, initialSessions }: Props) {
   }
 
   async function updateSongLyrics(sessionId: string, songId: string, lyrics: string) {
+    setSessions(prev => prev.map(s =>
+      s.id === sessionId
+        ? { ...s, session_songs: s.session_songs.map(ss =>
+            ss.id === songId ? { ...ss, songs: { ...ss.songs, lyrics } } : ss
+          )}
+        : s
+    ));
     await fetch(`/api/admin/events/${eventId}/sessions/${sessionId}/songs/${songId}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ lyrics }),
+    });
+  }
+
+  async function updateVocalist(sessionId: string, sessionSongId: string, vocalist: string) {
+    setSessions(prev => prev.map(s =>
+      s.id === sessionId
+        ? { ...s, session_songs: s.session_songs.map(ss =>
+            ss.id === sessionSongId ? { ...ss, vocalist: vocalist || null } : ss
+          )}
+        : s
+    ));
+    await fetch(`/api/admin/events/${eventId}/sessions/${sessionId}/songs/${sessionSongId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ vocalist: vocalist || null }),
     });
   }
 
@@ -229,7 +252,7 @@ export function SessionManager({ eventId, initialSessions }: Props) {
             <Music2 size={22} className="text-forest/40" />
           </div>
           <p className="text-sm font-medium text-charcoal/50 mb-1">No program yet</p>
-          <p className="text-xs text-charcoal/30 mb-5">Add sections to build the order of service</p>
+          <p className="text-xs text-charcoal/30 mb-5">Add sections to build the evening&apos;s program</p>
           <button
             onClick={() => setAddingSession(true)}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
@@ -251,9 +274,10 @@ export function SessionManager({ eventId, initialSessions }: Props) {
                     onToggle={() => toggleExpand(session.id)}
                     onUpdate={patch => updateSession(session.id, patch)}
                     onDelete={() => deleteSession(session.id)}
-                    onAddSong={(title, artist, lyrics) => addSong(session.id, title, artist, lyrics)}
+                    onAddSong={(title, artist, lyrics, songId) => addSong(session.id, title, artist, lyrics, songId)}
                     onRemoveSong={ssId => removeSong(session.id, ssId)}
                     onUpdateLyrics={(songId, lyrics) => updateSongLyrics(session.id, songId, lyrics)}
+                    onUpdateVocalist={(ssId, vocalist) => updateVocalist(session.id, ssId, vocalist)}
                   />
                 ))}
               </div>
@@ -272,22 +296,58 @@ interface CardProps {
   onToggle:       () => void;
   onUpdate:       (patch: Partial<Session>) => void;
   onDelete:       () => void;
-  onAddSong:      (title: string, artist: string, lyrics: string) => void;
-  onRemoveSong:   (ssId: string) => void;
-  onUpdateLyrics: (songId: string, lyrics: string) => void;
+  onAddSong:      (title: string, artist: string, lyrics: string, songId?: string) => Promise<void>;
+  onRemoveSong:    (ssId: string) => void;
+  onUpdateLyrics:  (songId: string, lyrics: string) => void;
+  onUpdateVocalist:(ssId: string, vocalist: string) => void;
 }
 
+type LibrarySong = { id: string; title: string; artist: string | null; lyrics: string | null };
+
 function SortableSessionCard({
-  session, index, expanded, onToggle, onUpdate, onDelete, onAddSong, onRemoveSong, onUpdateLyrics,
+  session, index, expanded, onToggle, onUpdate, onDelete, onAddSong, onRemoveSong, onUpdateLyrics, onUpdateVocalist,
 }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: session.id });
   const [addingSong,    setAddingSong]    = useState(false);
+  const [addMode,       setAddMode]       = useState<"new" | "library">("new");
   const [songTitle,     setSongTitle]     = useState("");
   const [songArtist,    setSongArtist]    = useState("");
   const [songLyrics,    setSongLyrics]    = useState("");
   const [expandedSong,  setExpandedSong]  = useState<string | null>(null);
   const [editingSong,   setEditingSong]   = useState<string | null>(null);
+  const [libQuery,      setLibQuery]      = useState("");
+  const [libResults,    setLibResults]    = useState<LibrarySong[]>([]);
+  const [libLoading,    setLibLoading]    = useState(false);
+  const [addingFromLib, setAddingFromLib] = useState<string | null>(null);
   const lyricsRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
+
+  const searchLib = useCallback(async (q: string) => {
+    setLibLoading(true);
+    try {
+      const res = await fetch(`/api/admin/songs?q=${encodeURIComponent(q)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setLibResults(data.songs ?? []);
+      }
+    } finally {
+      setLibLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (addMode !== "library") return;
+    const timer = setTimeout(() => searchLib(libQuery), 250);
+    return () => clearTimeout(timer);
+  }, [libQuery, addMode, searchLib]);
+
+  async function addFromLibrary(song: LibrarySong) {
+    setAddingFromLib(song.id);
+    await onAddSong(song.title, song.artist ?? "", song.lyrics ?? "", song.id);
+    setAddingFromLib(null);
+    setAddingSong(false);
+    setLibQuery("");
+    setLibResults([]);
+  }
 
   const style = { transform: CSS.Transform.toString(transform), transition };
   const typeInfo = getTypeInfo(session.type);
@@ -438,9 +498,18 @@ function SortableSessionCard({
                       </div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-charcoal truncate">{ss.songs.title}</p>
-                        {ss.songs.artist && (
-                          <p className="text-[11px] text-charcoal/45 truncate">{ss.songs.artist}</p>
-                        )}
+                        <div className="flex items-center gap-1.5 mt-0.5">
+                          {ss.songs.artist && (
+                            <p className="text-[11px] text-charcoal/45 truncate">{ss.songs.artist}</p>
+                          )}
+                          {ss.songs.artist && ss.vocalist && <span className="text-[9px] text-charcoal/20">·</span>}
+                          {ss.vocalist && (
+                            <p className="text-[11px] text-forest/60 truncate flex items-center gap-1">
+                              <Mic size={9} />
+                              {ss.vocalist}
+                            </p>
+                          )}
+                        </div>
                       </div>
                       <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                         <button
@@ -500,6 +569,19 @@ function SortableSessionCard({
                         <p className="text-[10px] text-cream/20 mt-3">
                           Separate verses/sections with a blank line. The display screen advances one section at a time.
                         </p>
+                        {/* Vocalist */}
+                        <div className="mt-4 pt-3 border-t border-cream/10">
+                          <label className="block text-[9px] font-semibold text-gold/50 uppercase tracking-wider mb-1.5 flex items-center gap-1">
+                            <Mic size={9} /> Vocalist for this session
+                          </label>
+                          <input
+                            defaultValue={ss.vocalist ?? ""}
+                            onBlur={e => onUpdateVocalist(ss.id, e.target.value.trim())}
+                            placeholder="e.g. Sarah Wambui"
+                            className="w-full bg-transparent text-cream/70 text-sm outline-none border-b border-cream/15 focus:border-gold/40 pb-1 placeholder:text-cream/20 transition-colors"
+                          />
+                          <p className="text-[9px] text-cream/15 mt-1">Shown on the display screen while this song plays.</p>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -510,44 +592,121 @@ function SortableSessionCard({
             {/* Add song inline form */}
             {addingSong && (
               <div className="border-t border-[#1b3a2a]/15 bg-off-white px-4 py-3 space-y-2">
-                <div className="grid sm:grid-cols-2 gap-2">
-                  <input
-                    autoFocus
-                    value={songTitle}
-                    onChange={e => setSongTitle(e.target.value)}
-                    onKeyDown={e => e.key === "Enter" && submitSong()}
-                    placeholder="Song title *"
-                    className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
-                  />
-                  <input
-                    value={songArtist}
-                    onChange={e => setSongArtist(e.target.value)}
-                    placeholder="Artist / songwriter"
-                    className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
-                  />
-                </div>
-                <textarea
-                  value={songLyrics}
-                  onChange={e => setSongLyrics(e.target.value)}
-                  placeholder={"Verse 1:\n...\n\nChorus:\n..."}
-                  rows={5}
-                  className="w-full px-3 py-2 rounded-xl border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-y placeholder:text-charcoal/25"
-                />
-                <div className="flex gap-2 pt-1">
+                {/* Mode toggle */}
+                <div className="flex items-center gap-1 bg-white rounded-xl border border-mist p-1 w-fit">
                   <button
-                    onClick={submitSong}
-                    disabled={!songTitle.trim()}
-                    className="px-4 py-2 rounded-full bg-forest text-cream text-xs font-semibold disabled:opacity-50"
+                    onClick={() => setAddMode("new")}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all",
+                      addMode === "new" ? "bg-forest text-cream" : "text-charcoal/50 hover:text-charcoal"
+                    )}
                   >
-                    Add song
+                    <Plus size={10} /> New song
                   </button>
                   <button
-                    onClick={() => { setAddingSong(false); setSongTitle(""); setSongArtist(""); setSongLyrics(""); }}
-                    className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
+                    onClick={() => { setAddMode("library"); if (!libResults.length) searchLib(""); }}
+                    className={cn(
+                      "flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all",
+                      addMode === "library" ? "bg-forest text-cream" : "text-charcoal/50 hover:text-charcoal"
+                    )}
                   >
-                    Cancel
+                    <Library size={10} /> From library
                   </button>
                 </div>
+
+                {addMode === "new" ? (
+                  <>
+                    <div className="grid sm:grid-cols-2 gap-2">
+                      <input
+                        autoFocus
+                        value={songTitle}
+                        onChange={e => setSongTitle(e.target.value)}
+                        onKeyDown={e => e.key === "Enter" && submitSong()}
+                        placeholder="Song title *"
+                        className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
+                      />
+                      <input
+                        value={songArtist}
+                        onChange={e => setSongArtist(e.target.value)}
+                        placeholder="Artist / songwriter"
+                        className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
+                      />
+                    </div>
+                    <textarea
+                      value={songLyrics}
+                      onChange={e => setSongLyrics(e.target.value)}
+                      placeholder={"Verse 1:\n...\n\nChorus:\n..."}
+                      rows={5}
+                      className="w-full px-3 py-2 rounded-xl border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-y placeholder:text-charcoal/25"
+                    />
+                    <div className="flex gap-2 pt-1">
+                      <button
+                        onClick={submitSong}
+                        disabled={!songTitle.trim()}
+                        className="px-4 py-2 rounded-full bg-forest text-cream text-xs font-semibold disabled:opacity-50"
+                      >
+                        Add song
+                      </button>
+                      <button
+                        onClick={() => { setAddingSong(false); setSongTitle(""); setSongArtist(""); setSongLyrics(""); }}
+                        className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <div className="relative">
+                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+                      <input
+                        autoFocus
+                        value={libQuery}
+                        onChange={e => setLibQuery(e.target.value)}
+                        placeholder="Search songs by title…"
+                        className="w-full pl-9 pr-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
+                      />
+                    </div>
+                    <div className="max-h-48 overflow-y-auto rounded-xl border border-mist bg-white divide-y divide-mist">
+                      {libLoading ? (
+                        <div className="py-6 text-center">
+                          <Loader2 size={14} className="animate-spin text-charcoal/30 mx-auto" />
+                        </div>
+                      ) : libResults.length === 0 ? (
+                        <div className="py-5 text-center text-xs text-charcoal/35">
+                          {libQuery ? "No songs found" : "No songs in library yet"}
+                        </div>
+                      ) : libResults.map(song => (
+                        <button
+                          key={song.id}
+                          onClick={() => addFromLibrary(song)}
+                          disabled={addingFromLib === song.id}
+                          className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-forest/4 transition-colors text-left"
+                        >
+                          <div className="w-7 h-7 rounded-lg bg-forest/8 flex items-center justify-center flex-shrink-0">
+                            {addingFromLib === song.id
+                              ? <Loader2 size={11} className="animate-spin text-forest" />
+                              : <Music2 size={11} className="text-forest/60" />
+                            }
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-sm font-medium text-charcoal truncate">{song.title}</p>
+                            {song.artist && <p className="text-[11px] text-charcoal/45 truncate">{song.artist}</p>}
+                          </div>
+                          {song.lyrics && (
+                            <span className="text-[9px] text-charcoal/25 ml-auto flex-shrink-0">lyrics</span>
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      onClick={() => { setAddingSong(false); setLibQuery(""); setLibResults([]); }}
+                      className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
+                    >
+                      Cancel
+                    </button>
+                  </>
+                )}
               </div>
             )}
           </div>

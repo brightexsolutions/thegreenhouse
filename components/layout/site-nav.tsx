@@ -47,7 +47,7 @@ export function SiteNav() {
           "fixed top-0 inset-x-0 z-50 transition-all duration-500",
           solid
             ? "bg-cream/95 backdrop-blur-md border-b border-mist shadow-sm"
-            : "bg-transparent"
+            : "[background:linear-gradient(to_bottom,rgba(0,0,0,0.45)_0%,transparent_100%)]"
         )}
       >
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 lg:h-20">
@@ -91,7 +91,7 @@ export function SiteNav() {
                         : "text-charcoal/70 hover:text-forest after:w-0 hover:after:w-full"
                       : active
                         ? "text-gold after:w-full"
-                        : "text-cream/80 hover:text-cream after:w-0 hover:after:w-full"
+                        : "text-cream hover:text-gold after:w-0 hover:after:w-full"
                   )}
                 >
                   {l.label}
