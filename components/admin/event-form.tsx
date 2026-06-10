@@ -25,6 +25,7 @@ const schema = z.object({
   theme_title:       z.string().optional(),
   theme_scripture:   z.string().optional(),
   theme_description: z.string().optional(),
+  dress_code:        z.string().optional(),
   playlist_url:      z.string().url().optional().or(z.literal("")),
   feedback_url:      z.string().url().optional().or(z.literal("")),
 });
@@ -33,7 +34,7 @@ type FormData = z.infer<typeof schema>;
 
 interface EventFormProps {
   eventId?: string;
-  defaultValues?: Partial<FormData & { cover_image?: string; slug?: string }>;
+  defaultValues?: Partial<FormData & { cover_image?: string; slug?: string; dress_code?: string }>;
 }
 
 export function EventForm({ eventId, defaultValues }: EventFormProps) {
@@ -84,6 +85,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
       theme_title:       data.theme_title || null,
       theme_scripture:   data.theme_scripture || null,
       theme_description: data.theme_description || null,
+      dress_code:        data.dress_code || null,
     };
 
     const url    = isNew ? "/api/admin/events" : `/api/admin/events/${eventId}`;
@@ -231,6 +233,14 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         </div>
         <Field label="Theme description">
           <textarea {...register("theme_description")} rows={2} placeholder="A conversation about…" className={cn(inp(false), "resize-none")} />
+        </Field>
+      </div>
+
+      {/* Dress code */}
+      <div className="bg-white rounded-2xl border border-mist p-6 space-y-4">
+        <h3 className="text-sm font-semibold text-charcoal">Dress code</h3>
+        <Field label="Dress code guidance">
+          <input {...register("dress_code")} placeholder="Smart casual — come comfortable, come yourself." className={inp(false)} />
         </Field>
       </div>
 

@@ -1,10 +1,6 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/server";
 import { EventForm } from "@/components/admin/event-form";
-import { CheckinLinkPanel } from "@/components/admin/checkin-link-panel";
-import { QrSharePanel } from "@/components/admin/qr-share-panel";
-import { Users, Music } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -23,28 +19,7 @@ export default async function EditEventPage({ params }: Props) {
   if (!event) notFound();
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-start justify-between">
-        <div>
-          <h1 className="text-xl font-semibold text-charcoal">{event.title}</h1>
-          <p className="text-sm text-charcoal/40 mt-0.5">Edit event details</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link
-            href={`/admin/events/${id}/sessions`}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-mist text-xs text-charcoal/60 hover:border-forest/30 hover:text-forest transition-all"
-          >
-            <Music size={12} /> Sessions
-          </Link>
-          <Link
-            href={`/admin/events/${id}/registrants`}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-mist text-xs text-charcoal/60 hover:border-forest/30 hover:text-forest transition-all"
-          >
-            <Users size={12} /> Registrants
-          </Link>
-        </div>
-      </div>
-
+    <div className="max-w-2xl">
       <EventForm
         eventId={id}
         defaultValues={{
@@ -63,17 +38,13 @@ export default async function EditEventPage({ params }: Props) {
           theme_title:       event.theme_title ?? undefined,
           theme_scripture:   event.theme_scripture ?? undefined,
           theme_description: event.theme_description ?? undefined,
+          dress_code:        event.dress_code ?? undefined,
           playlist_url:      event.playlist_url ?? undefined,
           feedback_url:      event.feedback_url ?? undefined,
           cover_image:       event.cover_image ?? undefined,
           slug:              event.slug,
         }}
       />
-
-      <div className="grid sm:grid-cols-2 gap-4">
-        <CheckinLinkPanel eventId={id} eventSlug={event.slug} checkinToken={event.checkin_token} />
-        <QrSharePanel eventId={id} eventSlug={event.slug} />
-      </div>
     </div>
   );
 }

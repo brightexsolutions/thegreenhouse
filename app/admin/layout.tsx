@@ -6,7 +6,6 @@ import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { AdminTopbar } from "@/components/layout/admin-topbar";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
-  // Login page must not go through the auth layout — it would create a redirect loop
   const h = await headers();
   const pathname = h.get("x-pathname") ?? "";
   if (pathname === "/admin/login") return <>{children}</>;
@@ -17,20 +16,25 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   if (!user) redirect("/admin/login");
 
   const adminSupa = createAdminClient();
-  const { data: profile } = await adminSupa
-    .from("admin_profiles")
-    .select("full_name, role")
-    .eq("id", user.id)
-    .single();
+  const [{ data: profile }, { data: liveEvent }] = await Promise.all([
+    adminSupa.from("admin_profiles").select("full_name, role").eq("id", user.id).single(),
+    adminSupa.from("events").select("slug, title").eq("status", "live").is("deleted_at", null).limit(1).maybeSingle(),
+  ]);
 
   if (!profile) redirect("/admin/login");
 
+  const live = liveEvent as { slug: string; title: string } | null;
+
   return (
-    <div className="flex min-h-screen bg-off-white">
-      <AdminSidebar role={profile.role} />
-      <div className="flex-1 flex flex-col min-w-0">
+    <div className="flex h-screen overflow-hidden bg-off-white">
+      <AdminSidebar
+        role={profile.role}
+        liveSlug={live?.slug ?? null}
+        liveName={live?.title ?? null}
+      />
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminTopbar fullName={profile.full_name} role={profile.role} />
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 overflow-y-auto p-6">
           {children}
         </main>
       </div>

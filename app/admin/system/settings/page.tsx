@@ -1,23 +1,60 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, Loader2 } from "lucide-react";
+import { Save, Loader2, Globe, Mail, Share2, Sliders } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type SettingsMap = Record<string, string>;
 
-const SETTINGS_FIELDS = [
-  { key: "site_name",       label: "Site name",         placeholder: "The Green House",             type: "text" },
-  { key: "contact_email",   label: "Contact email",     placeholder: "hello@thegreenhouseke.com",   type: "email" },
-  { key: "whatsapp_number", label: "WhatsApp number",   placeholder: "+254712345678",                type: "text" },
-  { key: "instagram_handle",label: "Instagram handle",  placeholder: "@thegreenhouseke",             type: "text" },
-  { key: "site_tagline",    label: "Site tagline",      placeholder: "Cross-church. Low pressure.",  type: "text" },
+const SECTIONS = [
+  {
+    key: "identity",
+    icon: Globe,
+    title: "Site Identity",
+    description: "The name and description shown across the platform and in emails.",
+    fields: [
+      { key: "site_name",    label: "Site name",    placeholder: "The Green House", type: "text" },
+      { key: "site_tagline", label: "Tagline",       placeholder: "Cross-church. Low pressure.", type: "text" },
+    ],
+  },
+  {
+    key: "contact",
+    icon: Mail,
+    title: "Contact",
+    description: "Used in email footers, confirmation messages, and the public contact page.",
+    fields: [
+      { key: "contact_email",   label: "Contact email",   placeholder: "hello@greenhousews.co.ke",  type: "email" },
+      { key: "whatsapp_number", label: "WhatsApp number", placeholder: "+254717645180",              type: "tel" },
+    ],
+  },
+  {
+    key: "social",
+    icon: Share2,
+    title: "Social Links",
+    description: "Social media handles and links shown in the footer.",
+    fields: [
+      { key: "instagram_handle", label: "Instagram handle", placeholder: "@thegreenhouseke", type: "text" },
+      { key: "twitter_handle",   label: "X / Twitter handle", placeholder: "@thegreenhouseke", type: "text" },
+      { key: "facebook_url",     label: "Facebook page URL", placeholder: "https://facebook.com/...", type: "url" },
+    ],
+  },
+  {
+    key: "platform",
+    icon: Sliders,
+    title: "Platform Behaviour",
+    description: "Global toggles that affect how the platform behaves for all visitors.",
+    fields: [
+      { key: "registration_open",  label: "Registration status (\"open\" or \"closed\")", placeholder: "open", type: "text" },
+      { key: "default_capacity",   label: "Default event capacity",     placeholder: "150",  type: "number" },
+    ],
+  },
 ] as const;
 
 export default function SettingsPage() {
-  const [values, setValues]   = useState<SettingsMap>({});
+  const [values,  setValues]  = useState<SettingsMap>({});
   const [loading, setLoading] = useState(true);
-  const [saving, setSaving]   = useState(false);
-  const [msg, setMsg]         = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [saving,  setSaving]  = useState(false);
+  const [msg,     setMsg]     = useState<{ type: "ok" | "err"; text: string } | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/system/settings")
@@ -28,70 +65,86 @@ export default function SettingsPage() {
   async function save(e: React.FormEvent) {
     e.preventDefault();
     setSaving(true);
+    setMsg(null);
     const res = await fetch("/api/admin/system/settings", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ settings: values }),
     });
-    if (res.ok) {
-      setMsg({ type: "ok", text: "Settings saved" });
-    } else {
-      setMsg({ type: "err", text: "Failed to save settings" });
-    }
+    setMsg(res.ok ? { type: "ok", text: "Settings saved successfully" } : { type: "err", text: "Failed to save settings" });
     setSaving(false);
-    setTimeout(() => setMsg(null), 4000);
+    setTimeout(() => setMsg(null), 5000);
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <Loader2 size={20} className="animate-spin text-forest/40" />
+      </div>
+    );
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="max-w-2xl">
       <div className="mb-6">
-        <h1 className="text-2xl font-semibold text-forest">Site Settings</h1>
-        <p className="text-sm text-charcoal/50 mt-1">Global configuration for The Green House</p>
+        <h1 className="text-lg font-semibold text-charcoal">Site Settings</h1>
+        <p className="text-sm text-charcoal/45 mt-1">Global configuration for The Green House platform</p>
       </div>
 
       {msg && (
-        <div className={`mb-4 px-4 py-3 rounded-xl text-sm ${
+        <div className={cn(
+          "mb-5 px-4 py-3 rounded-xl text-sm border",
           msg.type === "ok"
-            ? "bg-green-50 text-green-700 border border-green-200"
-            : "bg-red-50 text-red-600 border border-red-200"
-        }`}>
+            ? "bg-green-50 text-green-700 border-green-200"
+            : "bg-red-50 text-red-600 border-red-200"
+        )}>
           {msg.text}
         </div>
       )}
 
-      {loading ? (
-        <div className="bg-white rounded-2xl border border-mist p-8 text-center">
-          <p className="text-sm text-charcoal/40">Loading settings…</p>
-        </div>
-      ) : (
-        <form onSubmit={save} className="bg-white rounded-2xl border border-mist p-6">
-          <div className="space-y-4">
-            {SETTINGS_FIELDS.map(({ key, label, placeholder, type }) => (
-              <div key={key}>
-                <label className="block text-xs font-medium text-charcoal/60 mb-1">{label}</label>
-                <input
-                  type={type}
-                  value={values[key] ?? ""}
-                  onChange={e => setValues(prev => ({ ...prev, [key]: e.target.value }))}
-                  placeholder={placeholder}
-                  className="w-full px-3 py-2.5 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest transition-colors"
-                />
+      <form onSubmit={save} className="space-y-5">
+        {SECTIONS.map(({ key, icon: Icon, title, description, fields }) => (
+          <div key={key} className="bg-white rounded-2xl border border-mist overflow-hidden">
+            {/* Section header */}
+            <div className="flex items-center gap-3 px-5 py-4 border-b border-mist bg-off-white/60">
+              <div className="w-8 h-8 rounded-xl bg-forest/8 flex items-center justify-center flex-shrink-0">
+                <Icon size={14} className="text-forest" />
               </div>
-            ))}
-          </div>
+              <div>
+                <p className="text-sm font-semibold text-charcoal">{title}</p>
+                <p className="text-[11px] text-charcoal/45 mt-0.5">{description}</p>
+              </div>
+            </div>
 
-          <div className="mt-6 pt-5 border-t border-mist">
-            <button
-              type="submit"
-              disabled={saving}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-forest text-cream text-sm font-medium hover:bg-moss transition-colors disabled:opacity-60"
-            >
-              {saving ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
-              {saving ? "Saving…" : "Save settings"}
-            </button>
+            {/* Fields */}
+            <div className="px-5 py-4 space-y-4">
+              {fields.map(({ key: fkey, label, placeholder, type }) => (
+                <div key={fkey}>
+                  <label className="block text-xs font-semibold text-charcoal/60 mb-1.5">{label}</label>
+                  <input
+                    type={type}
+                    value={values[fkey] ?? ""}
+                    onChange={e => setValues(prev => ({ ...prev, [fkey]: e.target.value }))}
+                    placeholder={placeholder}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-mist text-sm focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all bg-white"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
-        </form>
-      )}
+        ))}
+
+        <div className="flex items-center gap-3 pb-6">
+          <button
+            type="submit"
+            disabled={saving}
+            className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-all disabled:opacity-60"
+          >
+            {saving ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+            {saving ? "Saving…" : "Save all settings"}
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

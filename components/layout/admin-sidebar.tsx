@@ -4,40 +4,34 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import {
-  LayoutDashboard,
-  CalendarDays,
-  Users,
-  MessageSquare,
-  Settings2,
-  BookOpen,
-  Leaf,
-  Shield,
-  FileText,
-  Trash2,
-  UserCog,
+  LayoutDashboard, CalendarDays, Users, MessageSquare,
+  Settings2, BookOpen, Leaf, Shield, FileText, Trash2,
+  UserCog, Radio, ExternalLink,
 } from "lucide-react";
 
 const NAV = [
-  { href: "/admin/dashboard",       icon: LayoutDashboard, label: "Dashboard" },
-  { href: "/admin/events",          icon: CalendarDays,    label: "Events" },
-  { href: "/admin/registrants",     icon: Users,           label: "Registrants" },
-  { href: "/admin/communications",  icon: MessageSquare,   label: "Comms" },
-  { href: "/admin/docs",            icon: BookOpen,        label: "Docs" },
+  { href: "/admin/dashboard",      icon: LayoutDashboard, label: "Dashboard" },
+  { href: "/admin/events",         icon: CalendarDays,    label: "Events" },
+  { href: "/admin/registrants",    icon: Users,           label: "Registrants" },
+  { href: "/admin/communications", icon: MessageSquare,   label: "Comms" },
+  { href: "/admin/docs",           icon: BookOpen,        label: "Docs" },
 ];
 
 const SYSTEM_NAV = [
-  { href: "/admin/system",          icon: Shield,   label: "System" },
-  { href: "/admin/system/logs",     icon: FileText, label: "Logs" },
-  { href: "/admin/system/trash",    icon: Trash2,   label: "Trash" },
-  { href: "/admin/system/admins",   icon: UserCog,  label: "Admins" },
+  { href: "/admin/system",          icon: Shield,    label: "System" },
+  { href: "/admin/system/logs",     icon: FileText,  label: "Logs" },
+  { href: "/admin/system/trash",    icon: Trash2,    label: "Trash" },
+  { href: "/admin/system/admins",   icon: UserCog,   label: "Admins" },
   { href: "/admin/system/settings", icon: Settings2, label: "Settings" },
 ];
 
 interface AdminSidebarProps {
-  role: string;
+  role:      string;
+  liveSlug?: string | null;
+  liveName?: string | null;
 }
 
-export function AdminSidebar({ role }: AdminSidebarProps) {
+export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
   const pathname = usePathname();
 
   function isActive(href: string) {
@@ -46,17 +40,36 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
   }
 
   return (
-    <aside className="w-60 min-h-screen bg-forest flex flex-col flex-shrink-0">
+    <aside className="w-56 bg-forest flex flex-col flex-shrink-0 border-r border-cream/5">
       {/* Logo */}
-      <div className="px-6 py-7 border-b border-cream/10">
+      <div className="px-5 py-6 border-b border-cream/8">
         <Link href="/admin/dashboard" className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-gold/20 flex items-center justify-center">
-            <Leaf size={14} className="text-gold" />
+            <Leaf size={13} className="text-gold" />
           </div>
-          <span className="text-cream font-semibold text-sm">The Green House</span>
+          <div>
+            <span className="text-cream font-semibold text-sm block leading-none">The Green House</span>
+            <span className="text-cream/30 text-[9px] mt-0.5 block">Admin</span>
+          </div>
         </Link>
-        <span className="text-cream/30 text-[10px] mt-1 block pl-9">Admin</span>
       </div>
+
+      {/* Live event banner */}
+      {liveSlug && (
+        <div className="mx-3 mt-3 rounded-xl bg-green-600/20 border border-green-500/25 px-3 py-2.5">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <Radio size={10} className="text-green-400 animate-pulse" />
+            <span className="text-[9px] font-bold text-green-400 uppercase tracking-wider">Live now</span>
+          </div>
+          {liveName && <p className="text-[10px] text-cream/55 truncate mb-1.5">{liveName}</p>}
+          <Link
+            href={`/live/${liveSlug}/control`}
+            className="flex items-center gap-1 text-[10px] font-semibold text-green-300 hover:text-green-200 transition-colors"
+          >
+            Control panel <ExternalLink size={9} />
+          </Link>
+        </div>
+      )}
 
       {/* Main nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
@@ -65,51 +78,50 @@ export function AdminSidebar({ role }: AdminSidebarProps) {
             key={href}
             href={href}
             className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150",
+              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
               isActive(href)
-                ? "bg-gold/15 text-gold font-semibold"
-                : "text-cream/60 hover:text-cream hover:bg-cream/5"
+                ? "bg-gold/20 text-gold"
+                : "text-cream/75 hover:text-cream hover:bg-cream/10"
             )}
           >
-            <Icon size={16} />
-            {label}
+            <Icon size={16} className="flex-shrink-0" />
+            <span>{label}</span>
           </Link>
         ))}
 
-        {/* System — super_admin only */}
         {role === "super_admin" && (
           <>
-            <div className="px-3 pt-5 pb-1">
-              <span className="text-[9px] label-caps text-cream/25">System</span>
+            <div className="px-3 pt-5 pb-2">
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-cream/35">System</span>
             </div>
             {SYSTEM_NAV.map(({ href, icon: Icon, label }) => (
               <Link
                 key={href}
                 href={href}
                 className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all duration-150",
+                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
                   isActive(href)
-                    ? "bg-gold/15 text-gold font-semibold"
-                    : "text-cream/50 hover:text-cream hover:bg-cream/5"
+                    ? "bg-gold/20 text-gold"
+                    : "text-cream/60 hover:text-cream hover:bg-cream/10"
                 )}
               >
-                <Icon size={16} />
-                {label}
+                <Icon size={16} className="flex-shrink-0" />
+                <span>{label}</span>
               </Link>
             ))}
           </>
         )}
       </nav>
 
-      {/* View site link */}
-      <div className="px-4 py-4 border-t border-cream/10">
+      {/* View site */}
+      <div className="px-3 py-3 border-t border-cream/8">
         <Link
           href="/"
           target="_blank"
-          className="flex items-center gap-2 text-xs text-cream/40 hover:text-cream/70 transition-colors px-3 py-2"
+          className="flex items-center gap-2.5 text-[11px] text-cream/35 hover:text-cream/65 transition-colors px-3 py-2 rounded-xl hover:bg-cream/5"
         >
-          <span>↗</span>
-          <span>View site</span>
+          <ExternalLink size={12} />
+          <span>View public site</span>
         </Link>
       </div>
     </aside>

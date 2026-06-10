@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   DndContext,
   closestCenter,
@@ -16,28 +16,32 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { GripVertical, Plus, Trash2, ChevronDown, ChevronUp, Music, Loader2 } from "lucide-react";
+import {
+  GripVertical, Plus, Trash2, ChevronDown, ChevronUp,
+  Music2, Loader2, Mic, BookOpen, Heart, Zap, Headphones,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
 
 type Song = { id: string; title: string; artist: string | null; lyrics: string | null };
 type SessionSong = { id: string; sort_order: number; songs: Song };
 type Session = {
-  id: string;
-  title: string;
-  type: string;
-  duration_min: number | null;
-  notes: string | null;
-  sort_order: number;
-  session_songs: SessionSong[];
+  id: string; title: string; type: string;
+  duration_min: number | null; notes: string | null;
+  sort_order: number; session_songs: SessionSong[];
 };
 
-const SESSION_TYPES = [
-  { value: "worship",   label: "Worship" },
-  { value: "prayer",    label: "Prayer" },
-  { value: "sharing",   label: "Sharing" },
-  { value: "teaching",  label: "Teaching" },
-  { value: "open_mic",  label: "Open Mic" },
-  { value: "other",     label: "Other" },
+const SESSION_TYPES: Array<{ value: string; label: string; icon: React.ElementType; color: string }> = [
+  { value: "worship",   label: "Worship",   icon: Music2,     color: "bg-forest/15 text-forest" },
+  { value: "prayer",    label: "Prayer",    icon: Heart,      color: "bg-gold/15 text-amber-700" },
+  { value: "sharing",   label: "Sharing",   icon: Mic,        color: "bg-blue-50 text-blue-600" },
+  { value: "teaching",  label: "Teaching",  icon: BookOpen,   color: "bg-purple-50 text-purple-600" },
+  { value: "open_mic",  label: "Open Mic",  icon: Headphones, color: "bg-pink-50 text-pink-600" },
+  { value: "other",     label: "Other",     icon: Zap,        color: "bg-charcoal/6 text-charcoal/60" },
 ];
+
+function getTypeInfo(type: string) {
+  return SESSION_TYPES.find(t => t.value === type) ?? SESSION_TYPES[SESSION_TYPES.length - 1];
+}
 
 interface Props {
   eventId: string;
@@ -45,12 +49,12 @@ interface Props {
 }
 
 export function SessionManager({ eventId, initialSessions }: Props) {
-  const [sessions, setSessions] = useState<Session[]>(initialSessions);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-  const [saving, setSaving]     = useState(false);
-  const [addingSession, setAddingSession] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newType,  setNewType]  = useState("worship");
+  const [sessions,       setSessions]       = useState<Session[]>(initialSessions);
+  const [expanded,       setExpanded]       = useState<Set<string>>(new Set());
+  const [saving,         setSaving]         = useState(false);
+  const [addingSession,  setAddingSession]  = useState(false);
+  const [newTitle,       setNewTitle]       = useState("");
+  const [newType,        setNewType]        = useState("worship");
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -91,7 +95,7 @@ export function SessionManager({ eventId, initialSessions }: Props) {
   }
 
   async function deleteSession(id: string) {
-    if (!confirm("Delete this session?")) return;
+    if (!confirm("Remove this session?")) return;
     await fetch(`/api/admin/events/${eventId}/sessions/${id}`, { method: "DELETE" });
     setSessions(prev => prev.filter(s => s.id !== id));
   }
@@ -121,6 +125,14 @@ export function SessionManager({ eventId, initialSessions }: Props) {
     }
   }
 
+  async function updateSongLyrics(sessionId: string, songId: string, lyrics: string) {
+    await fetch(`/api/admin/events/${eventId}/sessions/${sessionId}/songs/${songId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lyrics }),
+    });
+  }
+
   async function removeSong(sessionId: string, sessionSongId: string) {
     await fetch(`/api/admin/events/${eventId}/sessions/${sessionId}/songs/${sessionSongId}`, { method: "DELETE" });
     setSessions(prev => prev.map(s =>
@@ -138,50 +150,55 @@ export function SessionManager({ eventId, initialSessions }: Props) {
     });
   }
 
+  const totalSongs = sessions.reduce((n, s) => n + s.session_songs.length, 0);
+
   return (
-    <div>
-      {/* Header actions */}
-      <div className="flex items-center justify-between mb-4">
-        <span className="text-sm text-charcoal/50">{sessions.length} session{sessions.length !== 1 ? "s" : ""}</span>
-        <div className="flex items-center gap-3">
+    <div className="flex flex-col h-full gap-4">
+      {/* Header */}
+      <div className="flex items-center justify-between flex-shrink-0">
+        <div>
+          <p className="text-sm text-charcoal/50">
+            {sessions.length} section{sessions.length !== 1 ? "s" : ""}
+            {totalSongs > 0 && <> · {totalSongs} song{totalSongs !== 1 ? "s" : ""}</>}
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
           {saving && (
             <span className="flex items-center gap-1.5 text-xs text-charcoal/40">
-              <Loader2 size={12} className="animate-spin" /> Saving…
+              <Loader2 size={11} className="animate-spin" /> Saving
             </span>
           )}
           <button
             onClick={() => setAddingSession(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-forest text-cream text-sm font-medium hover:bg-moss transition-colors"
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-forest text-cream text-xs font-semibold hover:bg-moss transition-colors"
           >
-            <Plus size={15} />
-            Add session
+            <Plus size={13} /> Add section
           </button>
         </div>
       </div>
 
-      {/* New session form */}
+      {/* Add session inline form */}
       {addingSession && (
-        <div className="bg-white rounded-2xl border border-forest/20 p-4 mb-4">
-          <h3 className="text-sm font-semibold text-forest mb-3">New session</h3>
+        <div className="bg-white rounded-2xl border border-forest/20 p-4 flex-shrink-0">
+          <p className="text-xs font-semibold text-forest mb-3">New section</p>
           <div className="grid sm:grid-cols-2 gap-3 mb-3">
             <div>
-              <label className="block text-xs font-medium text-charcoal/60 mb-1">Title *</label>
+              <label className="block text-[10px] font-semibold text-charcoal/50 mb-1.5 uppercase tracking-wider">Title</label>
               <input
                 autoFocus
-                type="text"
                 value={newTitle}
                 onChange={e => setNewTitle(e.target.value)}
                 onKeyDown={e => e.key === "Enter" && addSession()}
-                className="w-full px-3 py-2 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest"
+                className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest transition-colors"
                 placeholder="Opening Worship"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-charcoal/60 mb-1">Type</label>
+              <label className="block text-[10px] font-semibold text-charcoal/50 mb-1.5 uppercase tracking-wider">Type</label>
               <select
                 value={newType}
                 onChange={e => setNewType(e.target.value)}
-                className="w-full px-3 py-2 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest"
+                className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest transition-colors"
               >
                 {SESSION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
@@ -191,13 +208,13 @@ export function SessionManager({ eventId, initialSessions }: Props) {
             <button
               onClick={addSession}
               disabled={!newTitle.trim() || saving}
-              className="px-4 py-2 rounded-xl bg-forest text-cream text-sm font-medium disabled:opacity-50"
+              className="px-4 py-2 rounded-full bg-forest text-cream text-xs font-semibold disabled:opacity-50"
             >
-              Add
+              {saving ? <Loader2 size={12} className="animate-spin" /> : "Add"}
             </button>
             <button
               onClick={() => { setAddingSession(false); setNewTitle(""); }}
-              className="px-4 py-2 rounded-xl border border-mist text-sm text-charcoal/60"
+              className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
             >
               Cancel
             </button>
@@ -205,57 +222,76 @@ export function SessionManager({ eventId, initialSessions }: Props) {
         </div>
       )}
 
+      {/* Sessions list */}
       {sessions.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-mist p-12 text-center">
-          <Music size={24} className="mx-auto text-charcoal/20 mb-3" />
-          <p className="text-sm text-charcoal/50 mb-1">No sessions yet</p>
-          <p className="text-xs text-charcoal/30">Add sessions to build the order of service</p>
+        <div className="bg-white rounded-2xl border border-mist p-12 text-center flex-1">
+          <div className="w-14 h-14 rounded-2xl bg-forest/6 flex items-center justify-center mx-auto mb-4">
+            <Music2 size={22} className="text-forest/40" />
+          </div>
+          <p className="text-sm font-medium text-charcoal/50 mb-1">No program yet</p>
+          <p className="text-xs text-charcoal/30 mb-5">Add sections to build the order of service</p>
+          <button
+            onClick={() => setAddingSession(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
+          >
+            <Plus size={14} /> Add first section
+          </button>
         </div>
       ) : (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-          <SortableContext items={sessions.map(s => s.id)} strategy={verticalListSortingStrategy}>
-            <div className="space-y-3">
-              {sessions.map((session, idx) => (
-                <SortableSessionRow
-                  key={session.id}
-                  session={session}
-                  index={idx}
-                  expanded={expanded.has(session.id)}
-                  onToggle={() => toggleExpand(session.id)}
-                  onUpdate={patch => updateSession(session.id, patch)}
-                  onDelete={() => deleteSession(session.id)}
-                  onAddSong={(title, artist, lyrics) => addSong(session.id, title, artist, lyrics)}
-                  onRemoveSong={(ssId) => removeSong(session.id, ssId)}
-                />
-              ))}
-            </div>
-          </SortableContext>
-        </DndContext>
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <SortableContext items={sessions.map(s => s.id)} strategy={verticalListSortingStrategy}>
+              <div className="space-y-2 pb-4">
+                {sessions.map((session, idx) => (
+                  <SortableSessionCard
+                    key={session.id}
+                    session={session}
+                    index={idx}
+                    expanded={expanded.has(session.id)}
+                    onToggle={() => toggleExpand(session.id)}
+                    onUpdate={patch => updateSession(session.id, patch)}
+                    onDelete={() => deleteSession(session.id)}
+                    onAddSong={(title, artist, lyrics) => addSong(session.id, title, artist, lyrics)}
+                    onRemoveSong={ssId => removeSong(session.id, ssId)}
+                    onUpdateLyrics={(songId, lyrics) => updateSongLyrics(session.id, songId, lyrics)}
+                  />
+                ))}
+              </div>
+            </SortableContext>
+          </DndContext>
+        </div>
       )}
     </div>
   );
 }
 
-interface RowProps {
-  session: Session;
-  index: number;
-  expanded: boolean;
-  onToggle: () => void;
-  onUpdate: (patch: Partial<Session>) => void;
-  onDelete: () => void;
-  onAddSong: (title: string, artist: string, lyrics: string) => void;
-  onRemoveSong: (ssId: string) => void;
+interface CardProps {
+  session:        Session;
+  index:          number;
+  expanded:       boolean;
+  onToggle:       () => void;
+  onUpdate:       (patch: Partial<Session>) => void;
+  onDelete:       () => void;
+  onAddSong:      (title: string, artist: string, lyrics: string) => void;
+  onRemoveSong:   (ssId: string) => void;
+  onUpdateLyrics: (songId: string, lyrics: string) => void;
 }
 
-function SortableSessionRow({ session, index, expanded, onToggle, onUpdate, onDelete, onAddSong, onRemoveSong }: RowProps) {
+function SortableSessionCard({
+  session, index, expanded, onToggle, onUpdate, onDelete, onAddSong, onRemoveSong, onUpdateLyrics,
+}: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: session.id });
-  const [addingSong, setAddingSong] = useState(false);
-  const [songTitle, setSongTitle]   = useState("");
-  const [songArtist, setSongArtist] = useState("");
-  const [songLyrics, setSongLyrics] = useState("");
-  const [editingLyrics, setEditingLyrics] = useState<string | null>(null);
+  const [addingSong,    setAddingSong]    = useState(false);
+  const [songTitle,     setSongTitle]     = useState("");
+  const [songArtist,    setSongArtist]    = useState("");
+  const [songLyrics,    setSongLyrics]    = useState("");
+  const [expandedSong,  setExpandedSong]  = useState<string | null>(null);
+  const [editingSong,   setEditingSong]   = useState<string | null>(null);
+  const lyricsRefs = useRef<Record<string, HTMLTextAreaElement | null>>({});
 
   const style = { transform: CSS.Transform.toString(transform), transition };
+  const typeInfo = getTypeInfo(session.type);
+  const TypeIcon = typeInfo.icon;
 
   function submitSong() {
     if (!songTitle.trim()) return;
@@ -263,176 +299,251 @@ function SortableSessionRow({ session, index, expanded, onToggle, onUpdate, onDe
     setSongTitle(""); setSongArtist(""); setSongLyrics(""); setAddingSong(false);
   }
 
+  function handleLyricsBlur(songId: string) {
+    const val = lyricsRefs.current[songId]?.value;
+    if (val !== undefined) onUpdateLyrics(songId, val);
+  }
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-white rounded-2xl border transition-shadow ${isDragging ? "border-forest/40 shadow-lg" : "border-mist"}`}
+      className={cn(
+        "rounded-2xl overflow-hidden border transition-all duration-150",
+        isDragging ? "border-forest/40 shadow-xl scale-[1.01]" : "border-mist shadow-sm"
+      )}
     >
-      {/* Row header */}
-      <div className="flex items-center gap-3 p-4">
+      {/* Session header — dark forest */}
+      <div className="bg-[#1b3a2a] flex items-center gap-3 px-4 py-3.5">
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-charcoal/20 hover:text-charcoal/50 transition-colors touch-none"
+          className="cursor-grab active:cursor-grabbing text-cream/20 hover:text-cream/50 transition-colors touch-none flex-shrink-0"
         >
-          <GripVertical size={16} />
+          <GripVertical size={15} />
         </button>
 
-        <span className="w-6 h-6 rounded-full bg-forest/8 flex items-center justify-center text-xs font-semibold text-forest flex-shrink-0">
+        <span className="w-6 h-6 rounded-full bg-cream/10 flex items-center justify-center text-[10px] font-bold text-cream/60 flex-shrink-0">
           {index + 1}
         </span>
 
-        <div className="flex-1 min-w-0">
+        {/* Editable title */}
+        <input
+          type="text"
+          value={session.title}
+          onChange={e => onUpdate({ title: e.target.value })}
+          onBlur={e => onUpdate({ title: e.target.value })}
+          className="flex-1 min-w-0 bg-transparent text-cream text-sm font-semibold border-none outline-none placeholder:text-cream/30"
+          placeholder="Section title"
+        />
+
+        {/* Type badge */}
+        <span className={cn("hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold flex-shrink-0", typeInfo.color)}>
+          <TypeIcon size={10} />
+          {typeInfo.label}
+        </span>
+
+        {/* Duration */}
+        <div className="flex items-center gap-1 flex-shrink-0">
           <input
-            type="text"
-            value={session.title}
-            onChange={e => onUpdate({ title: e.target.value })}
-            onBlur={e => onUpdate({ title: e.target.value })}
-            className="text-sm font-medium text-forest bg-transparent border-none outline-none w-full"
+            type="number"
+            value={session.duration_min ?? ""}
+            onChange={e => onUpdate({ duration_min: e.target.value ? Number(e.target.value) : null })}
+            className="w-10 bg-transparent text-cream/50 text-xs border-none outline-none text-right"
+            placeholder="—"
+            min="1"
           />
-          <div className="flex items-center gap-3 mt-0.5">
-            <select
-              value={session.type}
-              onChange={e => onUpdate({ type: e.target.value })}
-              className="text-xs text-charcoal/50 bg-transparent border-none outline-none"
-            >
-              {SESSION_TYPES.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
-            </select>
-            <span className="text-charcoal/20">·</span>
-            <input
-              type="number"
-              value={session.duration_min ?? ""}
-              onChange={e => onUpdate({ duration_min: e.target.value ? Number(e.target.value) : null })}
-              className="text-xs text-charcoal/50 bg-transparent border-none outline-none w-12"
-              placeholder="min"
-            />
-            {session.session_songs.length > 0 && (
-              <>
-                <span className="text-charcoal/20">·</span>
-                <span className="text-xs text-charcoal/40 flex items-center gap-1">
-                  <Music size={10} /> {session.session_songs.length} song{session.session_songs.length !== 1 ? "s" : ""}
-                </span>
-              </>
-            )}
-          </div>
+          <span className="text-cream/30 text-[10px]">min</span>
         </div>
 
-        <div className="flex items-center gap-1">
+        {/* Song count chip */}
+        {session.session_songs.length > 0 && (
+          <span className="flex items-center gap-1 text-[10px] text-cream/40 flex-shrink-0">
+            <Music2 size={10} />
+            {session.session_songs.length}
+          </span>
+        )}
+
+        <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={onToggle}
-            className="p-1.5 rounded-lg text-charcoal/30 hover:text-forest hover:bg-forest/5 transition-colors"
+            className="p-1.5 rounded-lg text-cream/40 hover:text-cream hover:bg-cream/10 transition-colors"
           >
-            {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+            {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
           <button
             onClick={onDelete}
-            className="p-1.5 rounded-lg text-charcoal/20 hover:text-red-500 hover:bg-red-50 transition-colors"
+            className="p-1.5 rounded-lg text-cream/20 hover:text-red-400 hover:bg-red-500/10 transition-colors"
           >
-            <Trash2 size={14} />
+            <Trash2 size={13} />
           </button>
         </div>
       </div>
 
-      {/* Expanded content */}
+      {/* Expanded body */}
       {expanded && (
-        <div className="border-t border-mist px-4 pb-4 pt-3 space-y-4">
+        <div className="bg-white">
           {/* Notes */}
-          <div>
-            <label className="block text-xs font-medium text-charcoal/50 mb-1">Notes (internal)</label>
+          <div className="px-4 pt-4 pb-3">
+            <label className="block text-[10px] font-semibold text-charcoal/40 uppercase tracking-wider mb-1.5">
+              Internal notes
+            </label>
             <textarea
               value={session.notes ?? ""}
               onChange={e => onUpdate({ notes: e.target.value || null })}
               rows={2}
-              className="w-full px-3 py-2 rounded-xl border border-mist text-sm text-charcoal/70 focus:outline-none focus:border-forest resize-none"
-              placeholder="Add notes visible only to admins…"
+              className="w-full px-3 py-2 rounded-xl border border-mist text-sm text-charcoal/70 focus:outline-none focus:border-forest resize-none placeholder:text-charcoal/25"
+              placeholder="Notes visible only to admins…"
             />
           </div>
 
-          {/* Songs */}
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <label className="text-xs font-medium text-charcoal/50">Songs</label>
+          {/* Songs — Spotify-style dark panel */}
+          <div className="mx-4 mb-4 rounded-xl overflow-hidden border border-[#1b3a2a]/15">
+            {/* Tracks header */}
+            <div className="bg-[#1b3a2a]/5 px-4 py-2 flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-semibold text-charcoal/40 w-5 text-center">#</span>
+                <span className="text-[10px] font-semibold text-charcoal/40 uppercase tracking-wider">Song</span>
+              </div>
               <button
                 onClick={() => setAddingSong(true)}
-                className="text-xs text-forest hover:underline flex items-center gap-1"
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-forest hover:underline"
               >
                 <Plus size={11} /> Add song
               </button>
             </div>
 
-            {session.session_songs.length > 0 && (
-              <div className="space-y-2 mb-3">
-                {session.session_songs.map(ss => (
-                  <div key={ss.id} className="bg-off-white rounded-xl p-3">
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-forest truncate">{ss.songs.title}</p>
-                        {ss.songs.artist && <p className="text-xs text-charcoal/50">{ss.songs.artist}</p>}
+            {session.session_songs.length === 0 && !addingSong ? (
+              <div className="px-4 py-6 text-center">
+                <Music2 size={18} className="text-charcoal/15 mx-auto mb-1.5" />
+                <p className="text-[11px] text-charcoal/35">No songs in this section yet</p>
+              </div>
+            ) : (
+              <div className="divide-y divide-[#1b3a2a]/8">
+                {session.session_songs.map((ss, i) => (
+                  <div key={ss.id}>
+                    {/* Track row */}
+                    <div
+                      className={cn(
+                        "px-4 py-2.5 flex items-center gap-3 group hover:bg-[#1b3a2a]/4 transition-colors cursor-pointer",
+                        expandedSong === ss.id && "bg-[#1b3a2a]/6"
+                      )}
+                      onClick={() => setExpandedSong(expandedSong === ss.id ? null : ss.id)}
+                    >
+                      <span className="text-[11px] text-charcoal/30 w-5 text-center tabular-nums flex-shrink-0">
+                        {i + 1}
+                      </span>
+                      <div className="w-7 h-7 rounded-lg bg-[#1b3a2a]/8 flex items-center justify-center flex-shrink-0">
+                        <Music2 size={12} className="text-forest/60" />
                       </div>
-                      <div className="flex gap-1 flex-shrink-0">
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-charcoal truncate">{ss.songs.title}</p>
+                        {ss.songs.artist && (
+                          <p className="text-[11px] text-charcoal/45 truncate">{ss.songs.artist}</p>
+                        )}
+                      </div>
+                      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
                         <button
-                          onClick={() => setEditingLyrics(editingLyrics === ss.id ? null : ss.id)}
-                          className="text-xs text-charcoal/40 hover:text-forest px-2 py-1 rounded-lg hover:bg-forest/5 transition-colors"
+                          onClick={(e) => { e.stopPropagation(); setEditingSong(editingSong === ss.id ? null : ss.id); }}
+                          className="text-[10px] font-semibold text-forest hover:underline px-2 py-1"
                         >
-                          {editingLyrics === ss.id ? "Close" : "Lyrics"}
+                          Lyrics
                         </button>
                         <button
-                          onClick={() => onRemoveSong(ss.id)}
-                          className="p-1 rounded-lg text-charcoal/20 hover:text-red-500 hover:bg-red-50 transition-colors"
+                          onClick={(e) => { e.stopPropagation(); onRemoveSong(ss.id); }}
+                          className="p-1 rounded-lg text-charcoal/25 hover:text-red-500 hover:bg-red-50 transition-colors"
                         >
                           <Trash2 size={12} />
                         </button>
                       </div>
-                    </div>
-                    {editingLyrics === ss.id && (
-                      <textarea
-                        defaultValue={ss.songs.lyrics ?? ""}
-                        rows={8}
-                        className="mt-2 w-full px-3 py-2 rounded-lg border border-mist text-xs font-mono text-charcoal/70 focus:outline-none focus:border-forest resize-y"
-                        placeholder="Paste lyrics here…"
+                      <ChevronDown
+                        size={13}
+                        className={cn("text-charcoal/25 transition-transform flex-shrink-0", expandedSong === ss.id && "rotate-180")}
                       />
+                    </div>
+
+                    {/* Lyrics panel */}
+                    {(expandedSong === ss.id || editingSong === ss.id) && (
+                      <div className="bg-[#0f1f15] px-4 py-4">
+                        <div className="flex items-center justify-between mb-2">
+                          <p className="text-[10px] font-semibold text-gold/60 uppercase tracking-wider">{ss.songs.title}</p>
+                          {editingSong === ss.id ? (
+                            <button
+                              onClick={() => { handleLyricsBlur(ss.id); setEditingSong(null); }}
+                              className="text-[11px] text-forest/70 hover:text-gold font-semibold"
+                            >
+                              Done
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => setEditingSong(ss.id)}
+                              className="text-[11px] text-cream/30 hover:text-cream transition-colors"
+                            >
+                              Edit
+                            </button>
+                          )}
+                        </div>
+                        {editingSong === ss.id ? (
+                          <textarea
+                            ref={el => { lyricsRefs.current[ss.id] = el; }}
+                            defaultValue={ss.songs.lyrics ?? ""}
+                            rows={10}
+                            onBlur={() => handleLyricsBlur(ss.id)}
+                            className="w-full bg-transparent text-cream/70 text-sm leading-loose resize-y outline-none placeholder:text-cream/20 font-mono"
+                            placeholder={"Verse 1:\n...\n\nChorus:\n..."}
+                          />
+                        ) : (
+                          <pre className="text-cream/55 text-sm leading-loose whitespace-pre-wrap font-sans min-h-[60px]">
+                            {ss.songs.lyrics || <span className="text-cream/20 italic text-xs">No lyrics yet — click Edit to add</span>}
+                          </pre>
+                        )}
+                        <p className="text-[10px] text-cream/20 mt-3">
+                          Separate verses/sections with a blank line. The display screen advances one section at a time.
+                        </p>
+                      </div>
                     )}
                   </div>
                 ))}
               </div>
             )}
 
+            {/* Add song inline form */}
             {addingSong && (
-              <div className="bg-off-white rounded-xl p-3 space-y-2">
-                <input
-                  autoFocus
-                  type="text"
-                  value={songTitle}
-                  onChange={e => setSongTitle(e.target.value)}
-                  placeholder="Song title *"
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest"
-                />
-                <input
-                  type="text"
-                  value={songArtist}
-                  onChange={e => setSongArtist(e.target.value)}
-                  placeholder="Artist / songwriter"
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest"
-                />
+              <div className="border-t border-[#1b3a2a]/15 bg-off-white px-4 py-3 space-y-2">
+                <div className="grid sm:grid-cols-2 gap-2">
+                  <input
+                    autoFocus
+                    value={songTitle}
+                    onChange={e => setSongTitle(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && submitSong()}
+                    placeholder="Song title *"
+                    className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
+                  />
+                  <input
+                    value={songArtist}
+                    onChange={e => setSongArtist(e.target.value)}
+                    placeholder="Artist / songwriter"
+                    className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
+                  />
+                </div>
                 <textarea
                   value={songLyrics}
                   onChange={e => setSongLyrics(e.target.value)}
-                  placeholder="Lyrics (optional)"
+                  placeholder={"Verse 1:\n...\n\nChorus:\n..."}
                   rows={5}
-                  className="w-full px-2.5 py-1.5 rounded-lg border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-y"
+                  className="w-full px-3 py-2 rounded-xl border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-y placeholder:text-charcoal/25"
                 />
-                <div className="flex gap-2">
+                <div className="flex gap-2 pt-1">
                   <button
                     onClick={submitSong}
                     disabled={!songTitle.trim()}
-                    className="px-3 py-1.5 rounded-xl bg-forest text-cream text-xs font-medium disabled:opacity-50"
+                    className="px-4 py-2 rounded-full bg-forest text-cream text-xs font-semibold disabled:opacity-50"
                   >
-                    Add
+                    Add song
                   </button>
                   <button
                     onClick={() => { setAddingSong(false); setSongTitle(""); setSongArtist(""); setSongLyrics(""); }}
-                    className="px-3 py-1.5 rounded-xl border border-mist text-xs text-charcoal/60"
+                    className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
                   >
                     Cancel
                   </button>

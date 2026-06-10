@@ -1,0 +1,93 @@
+import { notFound } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/server";
+import { CheckinLinkPanel } from "@/components/admin/checkin-link-panel";
+import { QrSharePanel } from "@/components/admin/qr-share-panel";
+import { CommsSendDialog } from "@/components/admin/comms-send-dialog";
+import Link from "next/link";
+import { ExternalLink, Download, Tv2 } from "lucide-react";
+
+export const dynamic = "force-dynamic";
+
+type Props = { params: Promise<{ id: string }> };
+
+export default async function EventToolsPage({ params }: Props) {
+  const { id } = await params;
+  const supabase = createAdminClient();
+
+  const { data: event } = await supabase
+    .from("events")
+    .select("id, title, slug, status, checkin_token")
+    .eq("id", id)
+    .is("deleted_at", null)
+    .single();
+
+  if (!event) notFound();
+
+  const isPreviewOnly = event.status !== "live" && event.status !== "published";
+
+  return (
+    <div className="max-w-3xl space-y-6">
+
+      {/* Live display — always visible to admins; labelled as preview when not yet published */}
+      <div className="bg-white rounded-2xl border border-mist p-5">
+        <div className="flex items-start justify-between mb-1">
+          <h3 className="text-sm font-semibold text-charcoal">Projection Display</h3>
+          {isPreviewOnly && (
+            <span className="text-[10px] font-semibold uppercase tracking-wide bg-gold/15 text-gold/80 px-2 py-0.5 rounded-full">Preview mode</span>
+          )}
+        </div>
+        <p className="text-xs text-charcoal/50 mb-4">
+          {isPreviewOnly
+            ? "Event is not yet published. These links are available for testing — the display and control panel will work as normal."
+            : "Open the display screen on a projector and use the control panel on your phone to manage scenes, lyrics, and messages in real time."}
+        </p>
+        <div className="flex flex-wrap gap-3">
+          <Link
+            href={`/live/${event.slug}/display`}
+            target="_blank"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
+          >
+            <Tv2 size={14} /> Open display screen
+          </Link>
+          <Link
+            href={`/live/${event.slug}/control`}
+            target="_blank"
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-forest/30 text-forest text-sm font-semibold hover:bg-forest/5 transition-colors"
+          >
+            <ExternalLink size={14} /> Control panel
+          </Link>
+        </div>
+      </div>
+
+      {/* Check-in + QR */}
+      <div className="grid sm:grid-cols-2 gap-4">
+        <CheckinLinkPanel eventId={id} eventSlug={event.slug} checkinToken={event.checkin_token} />
+        <QrSharePanel eventId={id} eventSlug={event.slug} />
+      </div>
+
+      {/* Export & broadcast */}
+      <div className="bg-white rounded-2xl border border-mist p-5 space-y-4">
+        <h3 className="text-sm font-semibold text-charcoal">Export & Communicate</h3>
+
+        <div className="flex flex-wrap gap-3">
+          <a
+            href={`/api/admin/events/${id}/export?format=csv`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/70 font-medium hover:border-forest/30 hover:text-forest transition-all"
+          >
+            <Download size={14} /> Download CSV
+          </a>
+          <a
+            href={`/api/admin/events/${id}/export?format=pdf`}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/70 font-medium hover:border-forest/30 hover:text-forest transition-all"
+          >
+            <Download size={14} /> Download PDF list
+          </a>
+        </div>
+
+        <div className="pt-2 border-t border-mist">
+          <CommsSendDialog events={[{ id, title: event.title }]} />
+        </div>
+      </div>
+    </div>
+  );
+}
