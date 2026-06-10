@@ -3,110 +3,185 @@ import {
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
-  Font,
 } from "@react-pdf/renderer";
 
-Font.register({
-  family: "sans",
-  src: "https://fonts.gstatic.com/s/dmsans/v15/rP2Hp2ywxg089UriCZOIHQ.woff2",
-});
+const F = "#1b3a2a";   // forest
+const G = "#c9a24a";   // gold
+const C = "#f7f2e8";   // cream
+const CH = "#1a1a18";  // charcoal
 
 const styles = StyleSheet.create({
   page: {
-    backgroundColor: "#f7f2e8",
+    backgroundColor: C,
     fontFamily: "Helvetica",
     padding: 0,
+    fontSize: 10,
   },
+
+  // ── Header (dark stub) ───────────────────────────────
   header: {
-    backgroundColor: "#1b3a2a",
-    padding: "32 40",
+    backgroundColor: F,
+    paddingTop: 32,
+    paddingBottom: 32,
+    paddingLeft: 40,
+    paddingRight: 40,
   },
-  logoText: {
-    color: "#c9a24a",
-    fontSize: 9,
-    letterSpacing: 3,
-    textTransform: "uppercase",
-  },
-  eventTitle: {
-    color: "#f7f2e8",
-    fontSize: 22,
+  brandLabel: {
+    color: G,
+    fontSize: 8,
+    letterSpacing: 3.5,
     fontFamily: "Helvetica-Bold",
-    marginTop: 12,
-    lineHeight: 1.2,
   },
+  sessionTitle: {
+    color: C,
+    fontSize: 24,
+    fontFamily: "Helvetica-Bold",
+    marginTop: 10,
+    lineHeight: 1.15,
+  },
+  themeLabel: {
+    color: "#c9a24a99",
+    fontSize: 11,
+    marginTop: 6,
+    fontFamily: "Helvetica-Oblique",
+  },
+
+  // ── Tear line ────────────────────────────────────────
+  tearLine: {
+    borderTop: `1.5 dashed ${G}40`,
+    marginHorizontal: 20,
+    marginVertical: 0,
+  },
+  tearWrap: {
+    paddingVertical: 10,
+    backgroundColor: C,
+  },
+
+  // ── Body ─────────────────────────────────────────────
   body: {
-    padding: "28 40",
+    paddingTop: 24,
+    paddingBottom: 20,
+    paddingLeft: 40,
+    paddingRight: 40,
   },
-  greeting: {
-    fontSize: 13,
-    color: "#1a1a18",
-    marginBottom: 20,
+
+  registeredLabel: {
+    fontSize: 8,
+    letterSpacing: 2,
+    fontFamily: "Helvetica-Bold",
+    color: `${CH}50`,
+    marginBottom: 4,
   },
-  row: {
+  attendeeName: {
+    fontSize: 26,
+    fontFamily: "Helvetica-Bold",
+    color: F,
+    lineHeight: 1.1,
+    marginBottom: 22,
+  },
+
+  // ── Details grid ─────────────────────────────────────
+  detailsGrid: {
     flexDirection: "row",
-    alignItems: "flex-start",
-    marginBottom: 10,
-    gap: 10,
+    flexWrap: "wrap",
+    backgroundColor: `${F}0D`,
+    borderRadius: 8,
+    padding: "14 18",
+    marginBottom: 20,
+    gap: 0,
   },
-  iconBox: {
-    width: 28,
-    height: 28,
-    backgroundColor: "#1b3a2a1a",
-    borderRadius: 6,
+  detailCell: {
+    width: "50%",
+    marginBottom: 12,
+  },
+  detailCellFull: {
+    width: "100%",
+    marginBottom: 8,
+  },
+  detailLabel: {
+    fontSize: 7.5,
+    letterSpacing: 1.8,
+    fontFamily: "Helvetica-Bold",
+    color: `${CH}55`,
+    marginBottom: 3,
+  },
+  detailValue: {
+    fontSize: 12,
+    fontFamily: "Helvetica-Bold",
+    color: CH,
+  },
+
+  // ── Bottom row: ref + QR ─────────────────────────────
+  bottomRow: {
+    flexDirection: "row",
+    gap: 14,
+    alignItems: "stretch",
+  },
+  refBox: {
+    flex: 1,
+    backgroundColor: F,
+    borderRadius: 8,
+    padding: "14 16",
     alignItems: "center",
     justifyContent: "center",
   },
-  label: {
-    fontSize: 8,
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    color: "#1a1a1860",
+  refLabel: {
+    fontSize: 7.5,
+    letterSpacing: 2.5,
     fontFamily: "Helvetica-Bold",
+    color: `${G}99`,
+    marginBottom: 8,
   },
-  value: {
-    fontSize: 13,
-    color: "#1a1a18",
+  refValue: {
+    fontSize: 22,
+    letterSpacing: 6,
     fontFamily: "Helvetica-Bold",
-    marginTop: 2,
+    color: C,
   },
-  divider: {
-    borderBottom: "1 solid #e8e3d8",
-    marginVertical: 20,
-  },
-  tokenBox: {
-    backgroundColor: "#1b3a2a10",
-    borderRadius: 10,
-    padding: "14 20",
+
+  qrBox: {
+    width: 90,
+    backgroundColor: C,
+    borderRadius: 8,
+    border: `1 solid ${F}22`,
+    padding: 6,
     alignItems: "center",
+    justifyContent: "center",
   },
-  tokenLabel: {
-    fontSize: 9,
-    letterSpacing: 2,
-    textTransform: "uppercase",
-    color: "#1a1a1860",
+  qrImage: {
+    width: 76,
+    height: 76,
   },
-  token: {
-    fontSize: 20,
-    letterSpacing: 5,
-    color: "#1b3a2a",
-    fontFamily: "Helvetica-Bold",
-    marginTop: 6,
+  qrCaption: {
+    fontSize: 7,
+    color: `${CH}50`,
+    marginTop: 4,
+    letterSpacing: 0.5,
   },
+
+  // ── Notice + footer ──────────────────────────────────
   notice: {
-    fontSize: 10,
-    color: "#1a1a1870",
+    fontSize: 9.5,
+    color: `${CH}60`,
     textAlign: "center",
-    marginTop: 20,
-    lineHeight: 1.5,
+    marginTop: 18,
+    lineHeight: 1.6,
   },
   footer: {
     marginTop: "auto",
-    padding: "20 40",
-    borderTop: "1 solid #e8e3d8",
-    fontSize: 9,
-    color: "#1a1a1850",
-    textAlign: "center",
+    paddingVertical: 14,
+    paddingHorizontal: 40,
+    borderTop: `1 solid ${F}18`,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  footerText: {
+    fontSize: 8,
+    color: `${CH}40`,
+    letterSpacing: 0.5,
   },
 });
 
@@ -117,72 +192,95 @@ interface TicketPdfProps {
   eventDate:   string;
   eventTime:   string;
   venueName:   string | null;
+  dressCode:   string | null;
+  themeTitle:  string | null;
   ticketToken: string;
+  qrDataUrl:   string;
   siteName?:   string;
   siteUrl?:    string;
 }
 
 export function TicketPdf(p: TicketPdfProps) {
-  const ref = p.ticketToken.slice(0, 8).toUpperCase();
+  const ref          = p.ticketToken.slice(0, 8).toUpperCase();
+  const sessionLabel = p.eventTitle.replace(/^The Green House\s*[—–-]\s*/i, "");
+  const domain       = (p.siteUrl ?? "greenhousews.co.ke").replace(/^https?:\/\//, "");
 
   return (
     <Document
       title={`Ticket — ${p.eventTitle}`}
-      author="The Green House"
-      creator="The Green House"
+      author={p.siteName ?? "The Green House"}
+      creator={p.siteName ?? "The Green House"}
     >
       <Page size="A5" style={styles.page}>
-        {/* Header */}
+
+        {/* ── Dark header stub ── */}
         <View style={styles.header}>
-          <Text style={styles.logoText}>{p.siteName ?? "The Green House"}</Text>
-          <Text style={styles.eventTitle}>{p.eventTitle}</Text>
+          <Text style={styles.brandLabel}>{(p.siteName ?? "The Green House").toUpperCase()}</Text>
+          <Text style={styles.sessionTitle}>{sessionLabel}</Text>
+          {p.themeTitle && <Text style={styles.themeLabel}>{p.themeTitle}</Text>}
         </View>
 
-        {/* Body */}
+        {/* ── Tear-line ── */}
+        <View style={styles.tearWrap}>
+          <View style={styles.tearLine} />
+        </View>
+
+        {/* ── Body ── */}
         <View style={styles.body}>
-          <Text style={styles.greeting}>
-            {p.firstName} {p.lastName} — your spot is confirmed.
-          </Text>
 
-          <View style={styles.row}>
-            <View>
-              <Text style={styles.label}>Date</Text>
-              <Text style={styles.value}>{p.eventDate}</Text>
+          {/* Attendee name */}
+          <Text style={styles.registeredLabel}>REGISTERED TO</Text>
+          <Text style={styles.attendeeName}>{p.firstName} {p.lastName}</Text>
+
+          {/* Details grid */}
+          <View style={styles.detailsGrid}>
+            <View style={styles.detailCell}>
+              <Text style={styles.detailLabel}>DATE</Text>
+              <Text style={styles.detailValue}>{p.eventDate}</Text>
             </View>
-          </View>
-
-          <View style={styles.row}>
-            <View>
-              <Text style={styles.label}>Time</Text>
-              <Text style={styles.value}>{p.eventTime}pm</Text>
+            <View style={styles.detailCell}>
+              <Text style={styles.detailLabel}>TIME</Text>
+              <Text style={styles.detailValue}>{p.eventTime} pm</Text>
             </View>
-          </View>
-
-          {p.venueName && (
-            <View style={styles.row}>
-              <View>
-                <Text style={styles.label}>Venue</Text>
-                <Text style={styles.value}>{p.venueName}</Text>
+            {p.venueName && (
+              <View style={styles.detailCell}>
+                <Text style={styles.detailLabel}>VENUE</Text>
+                <Text style={styles.detailValue}>{p.venueName}</Text>
               </View>
+            )}
+            {p.dressCode && (
+              <View style={p.venueName ? styles.detailCell : styles.detailCellFull}>
+                <Text style={styles.detailLabel}>DRESS CODE</Text>
+                <Text style={styles.detailValue}>{p.dressCode}</Text>
+              </View>
+            )}
+          </View>
+
+          {/* Ticket ref + QR side by side */}
+          <View style={styles.bottomRow}>
+            <View style={styles.refBox}>
+              <Text style={styles.refLabel}>TICKET REFERENCE</Text>
+              <Text style={styles.refValue}>{ref}</Text>
             </View>
-          )}
-
-          <View style={styles.divider} />
-
-          <View style={styles.tokenBox}>
-            <Text style={styles.tokenLabel}>Ticket Reference</Text>
-            <Text style={styles.token}>{ref}</Text>
+            <View style={styles.qrBox}>
+              {/* eslint-disable-next-line jsx-a11y/alt-text */}
+              <Image src={p.qrDataUrl} style={styles.qrImage} />
+              <Text style={styles.qrCaption}>Live program</Text>
+            </View>
           </View>
 
           <Text style={styles.notice}>
-            Entry is free. Present this ticket at the door.{"\n"}
-            Doors open 30 minutes before the session.
+            Entry is free · Present this ticket at the door{"\n"}
+            Doors open 30 minutes before the session
           </Text>
         </View>
 
+        {/* ── Footer ── */}
         <View style={styles.footer}>
-          <Text>{(p.siteUrl ?? "thegreenhouseke.com").replace(/^https?:\/\//, "")}</Text>
+          <Text style={styles.footerText}>{domain}</Text>
+          <Text style={styles.footerText}>Free event · All are welcome</Text>
         </View>
+
       </Page>
     </Document>
   );

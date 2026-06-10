@@ -8,19 +8,32 @@ interface Props {
   slug: string;
 }
 
-const MAX_MB   = 2;
+const MAX_MB    = 2;
 const MAX_BYTES = MAX_MB * 1024 * 1024;
+const MAX_PHOTOS = 3;
+
+function getUploadCount(slug: string): number {
+  try { return parseInt(localStorage.getItem(`photo_uploads_${slug}`) ?? "0", 10) || 0; }
+  catch { return 0; }
+}
+function incrementUploadCount(slug: string) {
+  try { localStorage.setItem(`photo_uploads_${slug}`, String(getUploadCount(slug) + 1)); }
+  catch { /* ignore */ }
+}
 
 export function AttendeePhotoShare({ slug }: Props) {
-  const [open,      setOpen]      = useState(false);
-  const [file,      setFile]      = useState<File | null>(null);
-  const [preview,   setPreview]   = useState<string | null>(null);
-  const [caption,   setCaption]   = useState("");
-  const [name,      setName]      = useState("");
-  const [uploading, setUploading] = useState(false);
-  const [success,   setSuccess]   = useState(false);
-  const [error,     setError]     = useState<string | null>(null);
+  const [open,        setOpen]        = useState(false);
+  const [file,        setFile]        = useState<File | null>(null);
+  const [preview,     setPreview]     = useState<string | null>(null);
+  const [caption,     setCaption]     = useState("");
+  const [name,        setName]        = useState("");
+  const [uploading,   setUploading]   = useState(false);
+  const [success,     setSuccess]     = useState(false);
+  const [error,       setError]       = useState<string | null>(null);
+  const [uploadCount, setUploadCount] = useState(() => getUploadCount(slug));
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const atLimit = uploadCount >= MAX_PHOTOS;
 
   function pickFile(f: File) {
     setError(null);
@@ -49,6 +62,8 @@ export function AttendeePhotoShare({ slug }: Props) {
 
     const res = await fetch(`/api/live/${slug}/photos`, { method: "POST", body: form });
     if (res.ok) {
+      incrementUploadCount(slug);
+      setUploadCount(getUploadCount(slug));
       setSuccess(true);
     } else {
       const data = await res.json().catch(() => ({}));
@@ -65,15 +80,30 @@ export function AttendeePhotoShare({ slug }: Props) {
   if (!open) {
     return (
       <button
-        onClick={() => setOpen(true)}
-        className="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-forest/6 hover:bg-forest/10 border border-forest/15 transition-all"
+        onClick={() => { if (!atLimit) setOpen(true); }}
+        disabled={atLimit}
+        className={cn(
+          "w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all",
+          atLimit
+            ? "bg-charcoal/4 border-mist cursor-not-allowed"
+            : "bg-forest/6 hover:bg-forest/10 border-forest/15"
+        )}
       >
-        <div className="w-9 h-9 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0">
-          <Camera size={16} className="text-forest" />
+        <div className={cn(
+          "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0",
+          atLimit ? "bg-charcoal/8" : "bg-forest/10"
+        )}>
+          <Camera size={16} className={atLimit ? "text-charcoal/30" : "text-forest"} />
         </div>
-        <div className="text-left">
-          <p className="text-sm font-semibold text-forest">Share a photo from tonight</p>
-          <p className="text-xs text-charcoal/50 mt-0.5">Got a great shot? Drop it here</p>
+        <div className="text-left flex-1">
+          <p className={cn("text-sm font-semibold", atLimit ? "text-charcoal/40" : "text-forest")}>
+            Share a photo from tonight
+          </p>
+          <p className="text-xs text-charcoal/50 mt-0.5">
+            {atLimit
+              ? `You've shared ${MAX_PHOTOS} photos — limit reached`
+              : `Got a great shot? Drop it here · ${MAX_PHOTOS - uploadCount} remaining`}
+          </p>
         </div>
       </button>
     );
@@ -100,12 +130,16 @@ export function AttendeePhotoShare({ slug }: Props) {
             </div>
             <p className="text-sm font-semibold text-charcoal">Photo shared!</p>
             <p className="text-xs text-charcoal/50">Thanks for sharing the moment.</p>
-            <button
-              onClick={reset}
-              className="mt-1 px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60 hover:border-forest/30 hover:text-forest transition-colors"
-            >
-              Share another
-            </button>
+            {uploadCount < MAX_PHOTOS ? (
+              <button
+                onClick={reset}
+                className="mt-1 px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60 hover:border-forest/30 hover:text-forest transition-colors"
+              >
+                Share another · {MAX_PHOTOS - uploadCount} left
+              </button>
+            ) : (
+              <p className="text-xs text-charcoal/35 mt-1">You&apos;ve reached the {MAX_PHOTOS}-photo limit</p>
+            )}
           </div>
         ) : (
           <>

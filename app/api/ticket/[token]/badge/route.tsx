@@ -35,25 +35,21 @@ export async function GET(req: NextRequest, { params }: Props) {
   });
   const cleanUrl = SITE_URL.replace(/^https?:\/\//, "");
 
-  // Load Cormorant Garamond (serif) for display text
+  // Load Cormorant Garamond (woff v1 — @vercel/og does not support woff2)
   let cormorantData: ArrayBuffer | undefined;
   let cormorantBoldData: ArrayBuffer | undefined;
-  let dmSansData: ArrayBuffer | undefined;
   try {
-    const [r1, r2, r3] = await Promise.all([
+    const [r1, r2] = await Promise.all([
       fetch("https://fonts.gstatic.com/s/cormorantgaramond/v22/co3WmX5slCNuHLi8bLeY9MK7whWMhyjQAllvuQ.woff"),
       fetch("https://fonts.gstatic.com/s/cormorantgaramond/v22/co3YmX5slCNuHLi8bLeY9MK7whWMhyjQblC9BNM.woff"),
-      fetch("https://fonts.gstatic.com/s/dmsans/v15/rP2Hp2ywxg089UriCZOIHQ.woff2"),
     ]);
     cormorantData     = r1.ok ? await r1.arrayBuffer() : undefined;
     cormorantBoldData = r2.ok ? await r2.arrayBuffer() : undefined;
-    dmSansData        = r3.ok ? await r3.arrayBuffer() : undefined;
   } catch { /* use system fonts as fallback */ }
 
   const fonts: { name: string; data: ArrayBuffer; weight: 400 | 700; style: "normal" }[] = [];
   if (cormorantData)     fonts.push({ name: "Cormorant", data: cormorantData,     weight: 400, style: "normal" });
   if (cormorantBoldData) fonts.push({ name: "Cormorant", data: cormorantBoldData, weight: 700, style: "normal" });
-  if (dmSansData)        fonts.push({ name: "DM Sans",   data: dmSansData,        weight: 400, style: "normal" });
 
   const GOLD   = "#c9a24a";
   const CREAM  = "#f7f2e8";
@@ -72,7 +68,7 @@ export async function GET(req: NextRequest, { params }: Props) {
           background:     `linear-gradient(145deg, #163022 0%, #0d1f15 55%, #1b3a2a 100%)`,
           position:       "relative",
           overflow:       "hidden",
-          fontFamily:     dmSansData ? "DM Sans" : "sans-serif",
+          fontFamily:     "sans-serif",
         }}
       >
         {/* Outer decorative ring (top-right) */}
@@ -166,7 +162,7 @@ export async function GET(req: NextRequest, { params }: Props) {
               letterSpacing: 5,
               textTransform: "uppercase",
               color:         "rgba(201,162,74,0.65)",
-              fontFamily:    dmSansData ? "DM Sans" : "sans-serif",
+              fontFamily:    "sans-serif",
             }}>
               {SITE_NAME}
             </span>
@@ -241,7 +237,7 @@ export async function GET(req: NextRequest, { params }: Props) {
           <span style={{
             fontSize:    20,
             color:       "rgba(247,242,232,0.38)",
-            fontFamily:  dmSansData ? "DM Sans" : "sans-serif",
+            fontFamily:  "sans-serif",
           }}>
             {shortDate}
           </span>
@@ -260,7 +256,7 @@ export async function GET(req: NextRequest, { params }: Props) {
             fontSize:      12,
             letterSpacing: 2,
             color:         "rgba(247,242,232,0.2)",
-            fontFamily:    dmSansData ? "DM Sans" : "sans-serif",
+            fontFamily:    "sans-serif",
           }}>
             {cleanUrl}
           </span>

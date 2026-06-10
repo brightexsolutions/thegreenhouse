@@ -4,6 +4,8 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { ExportPdf } from "@/lib/pdf/export-pdf";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Props) {

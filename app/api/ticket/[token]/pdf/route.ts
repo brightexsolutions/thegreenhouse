@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
+import QRCode from "qrcode";
 import { createAdminClient } from "@/lib/supabase/server";
 import { TicketPdf } from "@/lib/pdf/ticket-pdf";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
@@ -15,7 +16,7 @@ export async function GET(_req: NextRequest, { params }: Props) {
   const supabase = createAdminClient();
   const { data: ticket } = await supabase
     .from("registrations")
-    .select("*, events(title, event_date, event_time, venue_name)")
+    .select("*, events(title, event_date, event_time, venue_name, slug, dress_code, theme_title)")
     .eq("ticket_token", token)
     .is("deleted_at", null)
     .single();
@@ -24,12 +25,25 @@ export async function GET(_req: NextRequest, { params }: Props) {
     return NextResponse.json({ error: "Ticket not found" }, { status: 404 });
   }
 
-  const event = (ticket as { events: { title: string; event_date: string; event_time: string; venue_name: string | null } }).events;
+  const event = (ticket as {
+    events: {
+      title:       string;
+      event_date:  string;
+      event_time:  string;
+      venue_name:  string | null;
+      slug:        string;
+      dress_code:  string | null;
+      theme_title: string | null;
+    };
+  }).events;
 
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
   const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
+
+  const liveUrl   = `${SITE_URL}/live/${event.slug}`;
+  const qrDataUrl = await QRCode.toDataURL(liveUrl, { width: 200, margin: 1, color: { dark: "#1b3a2a", light: "#f7f2e8" } });
 
   try {
     const pdfBuffer = await renderToBuffer(
@@ -41,7 +55,10 @@ export async function GET(_req: NextRequest, { params }: Props) {
         eventDate:   formattedDate,
         eventTime:   formattedTime,
         venueName:   event.venue_name,
+        dressCode:   event.dress_code,
+        themeTitle:  event.theme_title,
         ticketToken: (ticket as { ticket_token: string }).ticket_token,
+        qrDataUrl,
         siteName:    SITE_NAME,
         siteUrl:     SITE_URL,
       })
