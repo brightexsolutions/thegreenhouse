@@ -15,14 +15,29 @@ export default async function EventToolsPage({ params }: Props) {
   const { id } = await params;
   const supabase = createAdminClient();
 
-  const { data: event } = await supabase
-    .from("events")
-    .select("id, title, slug, status, checkin_token, song_submission_token")
-    .eq("id", id)
-    .is("deleted_at", null)
-    .single();
+  const [{ data: event }, { count: registrantCount }] = await Promise.all([
+    supabase
+      .from("events")
+      .select("id, title, slug, status, checkin_token")
+      .eq("id", id)
+      .is("deleted_at", null)
+      .single(),
+    supabase
+      .from("registrations")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", id)
+      .is("deleted_at", null),
+  ]);
 
   if (!event) notFound();
+
+  // Fetch song_submission_token separately — gracefully handles pre-migration state
+  const { data: tokenRow } = await supabase
+    .from("events")
+    .select("song_submission_token")
+    .eq("id", id)
+    .single();
+  const songSubmissionToken = (tokenRow as { song_submission_token?: string } | null)?.song_submission_token ?? null;
 
   const isPreviewOnly = event.status !== "live" && event.status !== "published";
 
@@ -67,31 +82,49 @@ export default async function EventToolsPage({ params }: Props) {
       </div>
 
       {/* Song contributions */}
-      {event.song_submission_token && (
+      {songSubmissionToken && (
         <SongContributionPanel
           eventId={id}
           eventTitle={event.title}
-          songSubmissionToken={event.song_submission_token}
+          songSubmissionToken={songSubmissionToken}
         />
       )}
 
       {/* Export & broadcast */}
       <div className="bg-white rounded-2xl border border-mist p-5 space-y-4">
-        <h3 className="text-sm font-semibold text-charcoal">Export & Communicate</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-sm font-semibold text-charcoal">Export & Communicate</h3>
+          {(registrantCount ?? 0) === 0 && (
+            <span className="text-[10px] text-charcoal/35 bg-charcoal/5 px-2 py-0.5 rounded-full">No registrants yet</span>
+          )}
+        </div>
 
         <div className="flex flex-wrap gap-3">
-          <a
-            href={`/api/admin/events/${id}/export?format=csv`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/70 font-medium hover:border-forest/30 hover:text-forest transition-all"
-          >
-            <Download size={14} /> Download CSV
-          </a>
-          <a
-            href={`/api/admin/events/${id}/export?format=pdf`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/70 font-medium hover:border-forest/30 hover:text-forest transition-all"
-          >
-            <Download size={14} /> Download PDF list
-          </a>
+          {(registrantCount ?? 0) > 0 ? (
+            <>
+              <a
+                href={`/api/admin/events/${id}/export?format=csv`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/70 font-medium hover:border-forest/30 hover:text-forest transition-all"
+              >
+                <Download size={14} /> Download CSV
+              </a>
+              <a
+                href={`/api/admin/events/${id}/export?format=pdf`}
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/70 font-medium hover:border-forest/30 hover:text-forest transition-all"
+              >
+                <Download size={14} /> Download PDF list
+              </a>
+            </>
+          ) : (
+            <>
+              <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/25 font-medium cursor-not-allowed">
+                <Download size={14} /> Download CSV
+              </span>
+              <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/25 font-medium cursor-not-allowed">
+                <Download size={14} /> Download PDF list
+              </span>
+            </>
+          )}
         </div>
 
         <div className="pt-2 border-t border-mist">
