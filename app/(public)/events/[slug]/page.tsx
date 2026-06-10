@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
