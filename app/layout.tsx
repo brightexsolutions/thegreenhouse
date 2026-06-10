@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { MobileScrollFix } from "@/components/mobile-scroll-fix";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { GOOGLE_SITE_VERIFICATION } from "@/lib/constants";
 
 const displayFont = Cormorant_Garamond({
   variable: "--font-display",
@@ -23,8 +24,11 @@ const bodyFont = DM_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegreenhousekws.co.ke"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://greenhousews.co.ke"
   ),
+  verification: {
+    google: GOOGLE_SITE_VERIFICATION,
+  },
   title: {
     default: "Green House Worship Community",
     template: "%s | Green House Worship Community",
