@@ -44,7 +44,7 @@ export default async function CheckinPage({ params, searchParams }: Props) {
 
   const { data: registrants } = await supabase
     .from("registrations")
-    .select("id, first_name, last_name, email, phone, role, checked_in")
+    .select("id, first_name, last_name, email, phone, role, ticket_token, checked_in")
     .eq("event_id", (event as { id: string }).id)
     .is("deleted_at", null)
     .order("first_name", { ascending: true });
@@ -56,6 +56,7 @@ export default async function CheckinPage({ params, searchParams }: Props) {
     email: string | null;
     phone: string | null;
     role: string;
+    ticket_token: string | null;
     checked_in: boolean;
   }>) ?? [];
 

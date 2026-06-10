@@ -21,7 +21,18 @@ export async function GET(_req: NextRequest, { params }: Props) {
     .order("created_at", { ascending: false });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ photos: data ?? [] });
+
+  // Private bucket — generate 1-hour signed URLs for each photo
+  const photos = await Promise.all(
+    (data ?? []).map(async (photo) => {
+      const { data: signed } = await supabase.storage
+        .from("attendee-photos")
+        .createSignedUrl((photo as { storage_path: string }).storage_path, 3600);
+      return { ...photo, signed_url: signed?.signedUrl ?? null };
+    })
+  );
+
+  return NextResponse.json({ photos });
 }
 
 export async function PATCH(req: NextRequest, { params }: Props) {

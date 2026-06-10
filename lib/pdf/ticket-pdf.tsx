@@ -118,6 +118,8 @@ interface TicketPdfProps {
   eventTime:   string;
   venueName:   string | null;
   ticketToken: string;
+  siteName?:   string;
+  siteUrl?:    string;
 }
 
 export function TicketPdf(p: TicketPdfProps) {
@@ -132,7 +134,7 @@ export function TicketPdf(p: TicketPdfProps) {
       <Page size="A5" style={styles.page}>
         {/* Header */}
         <View style={styles.header}>
-          <Text style={styles.logoText}>The Green House</Text>
+          <Text style={styles.logoText}>{p.siteName ?? "The Green House"}</Text>
           <Text style={styles.eventTitle}>{p.eventTitle}</Text>
         </View>
 
@@ -179,7 +181,7 @@ export function TicketPdf(p: TicketPdfProps) {
         </View>
 
         <View style={styles.footer}>
-          <Text>thegreenhouseke.com</Text>
+          <Text>{(p.siteUrl ?? "thegreenhouseke.com").replace(/^https?:\/\//, "")}</Text>
         </View>
       </Page>
     </Document>

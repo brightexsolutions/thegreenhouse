@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import {
   Tv2, Music, ChevronLeft, ChevronRight, ChevronDown, Clock, Users,
@@ -16,6 +16,7 @@ type DisplayState = {
   event_id:                 string;
   scene:                    string;
   song_id:                  string | null;
+  session_song_id:          string | null;
   verse_index:              number;
   custom_text:              string | null;
   theme:                    string;
@@ -25,6 +26,14 @@ type DisplayState = {
 };
 
 type Song = { id: string; title: string; artist: string | null; lyrics: string | null };
+
+type SessionItem = {
+  id:        string;
+  vocalist:  string | null;
+  item_type: string;
+  item_text: string | null;
+  songs:     Song | null;
+};
 
 type EventData = {
   id:          string;
@@ -36,7 +45,7 @@ type EventData = {
     title:        string;
     sort_order:   number;
     deleted_at:   string | null;
-    session_songs: Array<{ vocalist: string | null; songs: Song | null }>;
+    session_songs: Array<SessionItem>;
   }>;
 };
 
@@ -100,25 +109,35 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     supabase.auth.getUser().then(({ data: { user } }) => setAuthed(!!user));
   }, []);
 
+  // Shared event loader
+  const loadEvent = useCallback(async (isInitial: boolean) => {
+    const { data } = await supabase
+      .from("events")
+      .select("id, title, event_date, slug, event_sessions(id, title, sort_order, deleted_at, session_songs(id, vocalist, item_type, item_text, songs(id, title, artist, lyrics)))")
+      .eq("slug", slug)
+      .single();
+    if (!data) return;
+    const ev = data as unknown as EventData;
+    ev.event_sessions = ev.event_sessions.filter(s => !s.deleted_at);
+    setEvent(ev);
+    if (isInitial) {
+      const res = await supabase.from("display_state").select("*").eq("event_id", ev.id).maybeSingle();
+      if (res?.data) setDisplay(res.data as DisplayState);
+    }
+  }, [slug]);
+
   // Load event data once authed
   useEffect(() => {
     if (authed !== true) return;
-    supabase
-      .from("events")
-      .select("id, title, event_date, slug, event_sessions(id, title, sort_order, deleted_at, session_songs(vocalist, songs(id, title, artist, lyrics)))")
-      .eq("slug", slug)
-      .single()
-      .then(({ data }) => {
-        if (!data) return;
-        const ev = data as unknown as EventData;
-        ev.event_sessions = ev.event_sessions.filter(s => !s.deleted_at);
-        setEvent(ev);
-        return supabase.from("display_state").select("*").eq("event_id", ev.id).maybeSingle();
-      })
-      .then(res => {
-        if (res?.data) setDisplay(res.data as DisplayState);
-      });
-  }, [slug, authed]);
+    loadEvent(true);
+  }, [slug, authed, loadEvent]);
+
+  // Re-fetch event every 15s to pick up song/section additions from session manager
+  useEffect(() => {
+    if (!event) return;
+    const id = setInterval(() => loadEvent(false), 15000);
+    return () => clearInterval(id);
+  }, [event?.id, loadEvent]);
 
   // Realtime subscription for display_state
   useEffect(() => {
@@ -179,6 +198,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       event_id:                 event.id,
       scene:                    updated.scene,
       song_id:                  updated.song_id,
+      session_song_id:          updated.session_song_id ?? null,
       verse_index:              updated.verse_index,
       custom_text:              updated.custom_text,
       theme:                    updated.theme ?? "dark",
@@ -209,7 +229,21 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   }
 
   async function setScene(scene: SceneKey)   { await upsertDisplay({ scene, verse_index: 0 }); }
-  async function setSong(songId: string)      { await upsertDisplay({ song_id: songId, verse_index: 0, scene: "lyrics" }); }
+  async function setSong(songId: string, sessionSongId: string) {
+    if (display?.session_song_id === sessionSongId) {
+      await upsertDisplay({ song_id: null, session_song_id: null, verse_index: 0 });
+    } else {
+      await upsertDisplay({ song_id: songId, session_song_id: sessionSongId, verse_index: 0, scene: "lyrics" });
+    }
+  }
+
+  async function setTextItem(sessionSongId: string, text: string) {
+    if (display?.session_song_id === sessionSongId) {
+      await upsertDisplay({ session_song_id: null, custom_text: null });
+    } else {
+      await upsertDisplay({ session_song_id: sessionSongId, song_id: null, custom_text: text, scene: "custom", verse_index: 0 });
+    }
+  }
   async function nextVerse() {
     const verses = getLyricsVerses(activeSong?.lyrics ?? null);
     await upsertDisplay({ verse_index: Math.min((display?.verse_index ?? 0) + 1, verses.length - 1) });
@@ -342,7 +376,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                 {[...event.event_sessions]
                   .sort((a, b) => a.sort_order - b.sort_order)
                   .map(sess => {
-                    const sessIsActive = sess.session_songs.some(ss => ss.songs?.id === display.song_id);
+                    const sessIsActive = sess.session_songs.some(ss => ss.id === display.session_song_id);
                     return (
                       <div key={sess.id} className={`rounded-2xl overflow-hidden border transition-all ${
                         sessIsActive ? "border-gold/40" : "border-cream/10"
@@ -355,18 +389,44 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                           {sess.title}
                           {sessIsActive && <span className="ml-auto text-[9px] uppercase tracking-wider text-gold/70">active</span>}
                         </div>
-                        {/* Songs in session */}
+                        {/* Program items in session */}
                         {sess.session_songs.length === 0 ? (
-                          <div className="px-3 py-2 text-[10px] text-cream/20">No songs</div>
+                          <div className="px-3 py-2 text-[10px] text-cream/20">No items</div>
                         ) : (
                           sess.session_songs.map((ss) => {
+                            const isActive = ss.id === display.session_song_id;
+                            const isTextItem = ss.item_type !== "song";
+
+                            if (isTextItem) {
+                              return (
+                                <button
+                                  key={ss.id}
+                                  onClick={() => setTextItem(ss.id, ss.item_text ?? "")}
+                                  disabled={saving || !ss.item_text}
+                                  className={`w-full flex items-center gap-3 px-3 py-2.5 transition-all text-left border-t border-cream/5 ${
+                                    isActive ? "bg-blue-400/20 text-blue-200" : "text-cream/60 hover:bg-cream/10 hover:text-cream"
+                                  }`}
+                                >
+                                  <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                                    isActive ? "bg-blue-400/40" : "bg-cream/10"
+                                  }`}>
+                                    <MessageSquare size={9} className={isActive ? "text-blue-200" : "text-cream/30"} />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-medium truncate">{ss.item_text}</p>
+                                    <p className="text-[10px] text-cream/30 capitalize">{ss.item_type}</p>
+                                  </div>
+                                  {isActive && <span className="text-[9px] text-blue-300/70 uppercase tracking-wide flex-shrink-0">on</span>}
+                                </button>
+                              );
+                            }
+
                             const song = ss.songs;
                             if (!song) return null;
-                            const isActive = song.id === display.song_id;
                             return (
                               <button
-                                key={song.id}
-                                onClick={() => setSong(song.id)}
+                                key={ss.id}
+                                onClick={() => setSong(song.id, ss.id)}
                                 disabled={saving}
                                 className={`w-full flex items-center gap-3 px-3 py-2.5 transition-all text-left border-t border-cream/5 ${
                                   isActive ? "bg-gold/20 text-gold" : "text-cream/70 hover:bg-cream/10 hover:text-cream"

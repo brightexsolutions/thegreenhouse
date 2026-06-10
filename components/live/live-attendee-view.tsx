@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from "react";
 import { createBrowserClient } from "@supabase/ssr";
 import {
   Music2, BookOpen, Heart, ChevronDown, MessageSquare,
-  Smile, ThumbsUp, Sparkles,
+  Smile, ThumbsUp, Sparkles, Mic,
 } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { FeedbackForm } from "./feedback-form";
@@ -22,6 +22,9 @@ type Session = {
   session_songs: Array<{
     id:         string;
     sort_order: number;
+    vocalist:   string | null;
+    item_type:  string;
+    item_text:  string | null;
     songs:      Song | null;
   }>;
 };
@@ -162,7 +165,7 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
                   <p className="text-sm font-semibold text-charcoal">{session.title}</p>
                   <p className="text-[11px] text-charcoal/40 capitalize mt-0.5">
                     {session.type}{session.duration_min ? ` · ${session.duration_min} min` : ""}
-                    {hasSongs ? ` · ${session.session_songs.length} song${session.session_songs.length > 1 ? "s" : ""}` : ""}
+                    {hasSongs ? ` · ${session.session_songs.length} item${session.session_songs.length > 1 ? "s" : ""}` : ""}
                   </p>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
@@ -191,19 +194,36 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
                     <div className="border-t border-mist">
                       {[...session.session_songs]
                         .sort((a, b) => a.sort_order - b.sort_order)
-                        .map((ss) => ss.songs ? (
-                          <SongRow
-                            key={ss.id}
-                            song={ss.songs}
-                            isOpen={openSong === ss.songs.id}
-                            isActive={ss.songs.id === activeSongId}
-                            onToggle={() => {
-                              const next = openSong === ss.songs!.id ? null : ss.songs!.id;
-                              setOpenSong(next);
-                              if (next) onEngaged();
-                            }}
-                          />
-                        ) : null)}
+                        .map((ss) => {
+                          if (ss.item_type !== "song") {
+                            return (
+                              <div key={ss.id} className="px-5 py-3 flex items-start gap-3 border-b border-mist/60 last:border-b-0">
+                                <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                  <MessageSquare size={13} className="text-blue-400" />
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-sm text-charcoal/80 leading-snug">{ss.item_text}</p>
+                                  <p className="text-[10px] text-charcoal/35 capitalize mt-1">{ss.item_type}</p>
+                                </div>
+                              </div>
+                            );
+                          }
+                          if (!ss.songs) return null;
+                          return (
+                            <SongRow
+                              key={ss.id}
+                              song={ss.songs}
+                              vocalist={ss.vocalist}
+                              isOpen={openSong === ss.songs.id}
+                              isActive={ss.songs.id === activeSongId}
+                              onToggle={() => {
+                                const next = openSong === ss.songs!.id ? null : ss.songs!.id;
+                                setOpenSong(next);
+                                if (next) onEngaged();
+                              }}
+                            />
+                          );
+                        })}
                     </div>
                   </motion.div>
                 )}
@@ -304,11 +324,13 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
 
 function SongRow({
   song,
+  vocalist,
   isOpen,
   isActive,
   onToggle,
 }: {
   song:     Song;
+  vocalist: string | null;
   isOpen:   boolean;
   isActive: boolean;
   onToggle: () => void;
@@ -333,14 +355,28 @@ function SongRow({
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border border-white" />
           )}
         </div>
-        <span className={cn(
-          "text-sm font-medium flex-1",
-          isActive ? "text-forest font-semibold" : "text-charcoal"
-        )}>
-          {song.title}
-          {isActive && <span className="ml-2 text-[10px] font-normal text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">now</span>}
-        </span>
-        {song.artist && <span className="text-[11px] text-charcoal/35">{song.artist}</span>}
+        <div className="flex-1 min-w-0">
+          <span className={cn(
+            "text-sm font-medium block truncate",
+            isActive ? "text-forest font-semibold" : "text-charcoal"
+          )}>
+            {song.title}
+            {isActive && <span className="ml-2 text-[10px] font-normal text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">now</span>}
+          </span>
+          <div className="flex items-center gap-1.5 mt-0.5">
+            {song.artist && <span className="text-[11px] text-charcoal/35 truncate">{song.artist}</span>}
+            {song.artist && vocalist && <span className="text-[9px] text-charcoal/20">·</span>}
+            {vocalist && (
+              <span className={cn(
+                "text-[11px] flex items-center gap-1",
+                isActive ? "text-forest/70 font-medium" : "text-charcoal/40"
+              )}>
+                <Mic size={9} />
+                {vocalist}
+              </span>
+            )}
+          </div>
+        </div>
         {verses.length > 0 && (
           <ChevronDown
             size={15}

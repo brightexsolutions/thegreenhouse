@@ -1,18 +1,19 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Search, CheckCircle2, Circle, Mail, Phone, UserPlus, X, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Registrant {
-  id:         string;
-  first_name: string;
-  last_name:  string;
-  email:      string | null;
-  phone:      string | null;
-  role:       string;
-  checked_in: boolean;
-  is_walkin?: boolean;
+  id:           string;
+  first_name:   string;
+  last_name:    string;
+  email:        string | null;
+  phone:        string | null;
+  role:         string;
+  ticket_token: string | null;
+  checked_in:   boolean;
+  is_walkin?:   boolean;
 }
 
 interface CheckinListProps {
@@ -33,13 +34,35 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
   const [walkInSaving, setWalkInSaving] = useState(false);
   const [walkInError,  setWalkInError]  = useState<string | null>(null);
 
+  // Poll checkin statuses every 6s to sync across devices
+  useEffect(() => {
+    let cancelled = false;
+    async function sync() {
+      try {
+        const res = await fetch(`/api/checkin/${eventSlug}/statuses?t=${encodeURIComponent(checkinToken)}`);
+        if (!res.ok || cancelled) return;
+        const data = await res.json() as { statuses: Array<{ id: string; checked_in: boolean }> };
+        setItems(prev => prev.map(r => {
+          const s = data.statuses.find(x => x.id === r.id);
+          return s ? { ...r, checked_in: s.checked_in } : r;
+        }));
+      } catch { /* ignore */ }
+    }
+    const id = setInterval(sync, 6000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [eventSlug, checkinToken]);
+
+  const q = query.trim().toLowerCase();
   const filtered = items.filter((r) => {
-    const matchName   = `${r.first_name} ${r.last_name}`.toLowerCase().includes(query.toLowerCase());
+    const matchName = `${r.first_name} ${r.last_name}`.toLowerCase().includes(q);
+    const matchRef  = r.ticket_token
+      ? r.ticket_token.slice(0, 8).toUpperCase().includes(q.toUpperCase())
+      : false;
     const matchFilter =
       filter === "all" ||
       (filter === "present" && r.checked_in) ||
       (filter === "absent"  && !r.checked_in);
-    return matchName && matchFilter;
+    return (matchName || matchRef) && matchFilter;
   });
 
   const toggle = useCallback(async (id: string, current: boolean) => {
@@ -98,7 +121,7 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search name…"
+            placeholder="Search name or ticket ref…"
             className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-mist bg-white text-sm placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
           />
         </div>
@@ -201,18 +224,23 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
                       {r.first_name} {r.last_name}
                     </p>
                     {r.is_walkin && (
-                      <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-gold/12 text-gold/80 font-medium">Walk-in</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/12 text-gold/80 font-medium">Walk-in</span>
                     )}
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     {r.email && (
-                      <span className="flex items-center gap-1 text-[9px] text-charcoal/30">
-                        <Mail size={8} /> {r.email}
+                      <span className="flex items-center gap-1 text-[11px] text-charcoal/40">
+                        <Mail size={9} /> {r.email}
                       </span>
                     )}
                     {!r.email && r.phone && (
-                      <span className="flex items-center gap-1 text-[9px] text-charcoal/30">
-                        <Phone size={8} /> {r.phone}
+                      <span className="flex items-center gap-1 text-[11px] text-charcoal/40">
+                        <Phone size={9} /> {r.phone}
+                      </span>
+                    )}
+                    {r.ticket_token && (
+                      <span className="text-[11px] font-mono text-charcoal/35">
+                        #{r.ticket_token.slice(0, 8).toUpperCase()}
                       </span>
                     )}
                   </div>

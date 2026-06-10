@@ -15,22 +15,49 @@ export async function POST(req: NextRequest, { params }: Props) {
 
   const { sessionId } = await params;
   const body = await req.json() as {
-    songId?: string;         // link an existing song from library
-    title?: string;
-    artist?: string;
-    lyrics?: string;
+    songId?:    string;
+    title?:     string;
+    artist?:    string;
+    lyrics?:    string;
+    item_type?: string;
+    item_text?: string;
   };
 
+  // ── Text / quote / topic item ─────────────────────────────────────────────
+  if (body.item_type && body.item_type !== "song") {
+    const text = body.item_text?.trim();
+    if (!text) return NextResponse.json({ error: "item_text required" }, { status: 400 });
+
+    const { count } = await supabase
+      .from("session_songs")
+      .select("id", { count: "exact", head: true })
+      .eq("session_id", sessionId);
+
+    const { data: ss, error } = await supabase
+      .from("session_songs")
+      .insert({
+        session_id: sessionId,
+        song_id:    null,
+        item_type:  body.item_type,
+        item_text:  text,
+        sort_order: count ?? 0,
+      })
+      .select("id, sort_order, item_type, item_text, vocalist")
+      .single();
+
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ sessionSong: { ...ss, songs: null } }, { status: 201 });
+  }
+
+  // ── Song item (existing flow) ─────────────────────────────────────────────
   let songId: string;
 
   if (body.songId) {
-    // Linking an existing song directly
     songId = body.songId;
   } else {
     const { title, artist, lyrics } = body;
     if (!title) return NextResponse.json({ error: "title required" }, { status: 400 });
 
-    // Upsert: find existing by title (case-insensitive) + artist
     const { data: existing } = await supabase
       .from("songs")
       .select("id")
@@ -53,7 +80,6 @@ export async function POST(req: NextRequest, { params }: Props) {
     }
   }
 
-  // Prevent duplicate in same session
   const { data: dup } = await supabase
     .from("session_songs")
     .select("id")
@@ -69,8 +95,8 @@ export async function POST(req: NextRequest, { params }: Props) {
 
   const { data: ss, error: ssErr } = await supabase
     .from("session_songs")
-    .insert({ session_id: sessionId, song_id: songId, sort_order: count ?? 0 })
-    .select("id, sort_order, songs(id, title, artist, lyrics)")
+    .insert({ session_id: sessionId, song_id: songId, item_type: "song", sort_order: count ?? 0 })
+    .select("id, sort_order, item_type, item_text, vocalist, songs(id, title, artist, lyrics)")
     .single();
 
   if (ssErr) return NextResponse.json({ error: ssErr.message }, { status: 500 });

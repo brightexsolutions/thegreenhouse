@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import { LiveAttendeeView } from "@/components/live/live-attendee-view";
-import { PreEventView } from "@/components/live/pre-event-view";
+// import { PreEventView } from "@/components/live/pre-event-view"; // re-enable with status gate before go-live
 import { Wifi } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 
@@ -55,6 +55,9 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
       session_songs: Array<{
         id:         string;
         sort_order: number;
+        vocalist:   string | null;
+        item_type:  string;
+        item_text:  string | null;
         songs:      { id: string; title: string; artist: string | null; lyrics: string | null } | null;
       }>;
     }>;

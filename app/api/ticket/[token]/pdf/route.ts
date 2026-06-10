@@ -3,6 +3,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { TicketPdf } from "@/lib/pdf/ticket-pdf";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -41,6 +42,8 @@ export async function GET(_req: NextRequest, { params }: Props) {
         eventTime:   formattedTime,
         venueName:   event.venue_name,
         ticketToken: (ticket as { ticket_token: string }).ticket_token,
+        siteName:    SITE_NAME,
+        siteUrl:     SITE_URL,
       })
     );
 

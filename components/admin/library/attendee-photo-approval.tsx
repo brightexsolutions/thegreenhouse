@@ -13,6 +13,7 @@ interface Event {
 interface Photo {
   id:           string;
   storage_path: string;
+  signed_url:   string | null;
   caption:      string | null;
   submitted_by: string | null;
   file_size_kb: number | null;
@@ -23,12 +24,6 @@ interface Photo {
 
 interface Props {
   events: Event[];
-}
-
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-
-function photoUrl(path: string) {
-  return `${SUPABASE_URL}/storage/v1/object/public/attendee-photos/${path}?width=400&quality=75`;
 }
 
 export function AttendeePhotoApproval({ events }: Props) {
@@ -203,11 +198,17 @@ function PhotoCard({
       {/* Image */}
       <div className="relative rounded-2xl overflow-hidden bg-charcoal/5 aspect-square">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photoUrl(photo.storage_path)}
-          alt={photo.caption ?? "Attendee photo"}
-          className="w-full h-full object-cover"
-        />
+        {photo.signed_url ? (
+          <img
+            src={photo.signed_url}
+            alt={photo.caption ?? "Attendee photo"}
+            className="w-full h-full object-cover"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center">
+            <Camera size={24} className="text-charcoal/20" />
+          </div>
+        )}
         {photo.is_approved && (
           <div className={cn(
             "absolute top-2 right-2 text-[9px] font-semibold px-1.5 py-0.5 rounded-full",

@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { Maximize2, Minimize2 } from "lucide-react";
+import { Maximize2, Minimize2, Music2 } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 
@@ -256,26 +256,26 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
   const [galleryUrls,  setGalleryUrls] = useState<string[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Load event + initial display state
-  useEffect(() => {
-    async function load() {
-      const { data: ev } = await supabase
-        .from("events")
-        .select("id, title, subtitle, event_date, event_time, theme_title, theme_scripture, theme_description, venue_name, cover_image, slug, event_sessions(id, title, type, sort_order, deleted_at, session_songs(vocalist, songs(id, title, artist, lyrics))), event_images(id, path, sort_order)")
-        .eq("slug", slug)
-        .single();
-      if (!ev) return;
-      const evTyped = ev as unknown as EventData;
-      evTyped.event_sessions = evTyped.event_sessions.filter(s => !s.deleted_at);
-      setEvent(evTyped);
+  // Shared event loader — called on mount and periodically to pick up song/session changes
+  async function loadEvent(eventId?: string) {
+    const { data: ev } = await supabase
+      .from("events")
+      .select("id, title, subtitle, event_date, event_time, theme_title, theme_scripture, theme_description, venue_name, cover_image, slug, event_sessions(id, title, type, sort_order, deleted_at, session_songs(vocalist, songs(id, title, artist, lyrics))), event_images(id, path, sort_order)")
+      .eq("slug", slug)
+      .single();
+    if (!ev) return;
+    const evTyped = ev as unknown as EventData;
+    evTyped.event_sessions = evTyped.event_sessions.filter(s => !s.deleted_at);
+    setEvent(evTyped);
 
-      // Build gallery URLs from event images
-      const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-      const imgs = [...(evTyped.event_images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
-      if (imgs.length > 0) {
-        setGalleryUrls(imgs.map(img => `${baseUrl}/storage/v1/object/public/event-images/${img.path}`));
-      }
+    const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+    const imgs = [...(evTyped.event_images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
+    if (imgs.length > 0) {
+      setGalleryUrls(imgs.map(img => `${baseUrl}/storage/v1/object/public/event-images/${img.path}`));
+    }
 
+    // Only load display_state on first call (no eventId means initial load)
+    if (!eventId) {
       const { data: ds } = await supabase
         .from("display_state")
         .select("*")
@@ -283,8 +283,19 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
         .maybeSingle();
       if (ds) setDisplay(ds as DisplayState);
     }
-    load();
+  }
+
+  // Load event + initial display state
+  useEffect(() => {
+    loadEvent();
   }, [slug]);
+
+  // Re-fetch event data every 12s so song/session removals are detected on the display
+  useEffect(() => {
+    if (!event) return;
+    const id = setInterval(() => loadEvent(event.id), 12000);
+    return () => clearInterval(id);
+  }, [event?.id]);
 
   // Realtime subscription — listens to any change on display_state
   useEffect(() => {
@@ -380,6 +391,8 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
   const scene = display.scene;
   const verses = getLinesFromLyrics(activeSong?.lyrics ?? null);
   const currentVerse = verses[display.verse_index] ?? "";
+  // True when display_state references a song that's no longer in the session list
+  const songRemoved = !!display.song_id && !activeSong;
   const siteUrl  = process.env.NEXT_PUBLIC_SITE_URL ?? "https://greenhousews.co.ke";
   const liveUrl  = `${siteUrl}/live/${event.slug}`;
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
@@ -443,7 +456,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
                 <CountdownScene eventDate={event.event_date} eventTime={event.event_time} t={t} />
               )}
 
-              {scene === "now_playing" && activeSong && (
+              {scene === "now_playing" && (activeSong ? (
                 <div className="text-center">
                   <p className="text-sm uppercase tracking-[0.45em] mb-8 font-semibold" style={{ color: t.goldSub }}>Now Playing</p>
                   <h1 className="font-display text-6xl md:text-8xl font-semibold" style={{ color: t.text }}>{activeSong.title}</h1>
@@ -460,9 +473,24 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
                     </div>
                   )}
                 </div>
-              )}
+              ) : songRemoved ? (
+                <SongRemovedMessage t={t} />
+              ) : null)}
 
-              {scene === "lyrics" && (
+              {scene === "lyrics" && (songRemoved ? (
+                <SongRemovedMessage t={t} />
+              ) : !activeSong ? (
+                /* No song selected yet */
+                <div className="text-center flex flex-col items-center gap-6">
+                  <Music2 size={72} style={{ color: t.border, opacity: 0.4 }} />
+                  <p className="font-display text-3xl md:text-4xl font-medium" style={{ color: t.sub }}>
+                    No song loaded
+                  </p>
+                  <p className="text-base" style={{ color: t.sub, opacity: 0.45 }}>
+                    Select a song from the control panel
+                  </p>
+                </div>
+              ) : (
                 <div className="text-center max-w-5xl w-full">
                   {activeSong && (
                     <div className="mb-10 flex flex-col items-center gap-2">
@@ -501,7 +529,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
                     </div>
                   )}
                 </div>
-              )}
+              ))}
 
               {scene === "program" && (
                 <div className="w-full max-w-3xl">
@@ -702,6 +730,23 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
         style={{ color: t.sub, opacity: 0.2 }}>
         {scene}
       </div>
+    </div>
+  );
+}
+
+function SongRemovedMessage({ t }: { t: typeof THEMES[ThemeKey] }) {
+  return (
+    <div className="text-center flex flex-col items-center gap-6">
+      <div className="w-16 h-16 rounded-full flex items-center justify-center"
+        style={{ border: `1px solid ${t.border}`, animation: "spin 18s linear infinite" }}>
+        <div className="w-2.5 h-2.5 rounded-full" style={{ background: t.gold, opacity: 0.5 }} />
+      </div>
+      <p className="font-display text-4xl md:text-6xl font-medium" style={{ color: t.text }}>
+        Stay with us.
+      </p>
+      <p className="text-lg md:text-xl" style={{ color: t.sub }}>
+        We&apos;ll be back with you shortly.
+      </p>
     </div>
   );
 }
