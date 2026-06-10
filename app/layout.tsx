@@ -22,7 +22,7 @@ const bodyFont = DM_Sans({
 
 export const metadata: Metadata = {
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegreenhousews.co.ke"
+    process.env.NEXT_PUBLIC_SITE_URL ?? "https://greenhousews.co.ke"
   ),
   title: {
     default: "The Green House",

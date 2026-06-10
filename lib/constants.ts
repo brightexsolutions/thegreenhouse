@@ -1,8 +1,8 @@
 export const SITE_NAME        = "The Green House";
-export const SITE_URL         = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegreenhouseke.com";
+export const SITE_URL         = process.env.NEXT_PUBLIC_SITE_URL ?? "https://greenhousews.co.ke";
 export const SESSION_FREQUENCY = "quarterly";
 
-export const CONTACT_EMAIL    = "hello@thegreenhouseke.com";
+export const CONTACT_EMAIL    = "hello@greenhousews.co.ke";
 export const CONTACT_WHATSAPP = "254700000000"; // update with real number
 
 export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";

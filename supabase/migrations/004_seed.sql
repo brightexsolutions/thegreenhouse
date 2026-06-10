@@ -37,8 +37,8 @@ INSERT INTO public.events (
 -- ─── Seed: Site settings defaults ────────────────────────────────────────────
 INSERT INTO public.site_settings (key, value) VALUES
   ('site_name',       'The Green House'),
-  ('contact_email',   'hello@thegreenhouseke.com'),
-  ('whatsapp_number', '254700000000'),
+  ('contact_email',   'hello@thegreenhousews.co.ke'),
+  ('whatsapp_number', '254717645180'),
   ('instagram_handle',''),
   ('twitter_handle',  '')
 ON CONFLICT (key) DO NOTHING;

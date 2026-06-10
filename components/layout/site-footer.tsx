@@ -139,10 +139,20 @@ export function SiteFooter() {
         {/* Bottom bar */}
         <div className={cn(
           "mt-12 pt-6 border-t border-cream/10",
-          "flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-cream/40"
+          "flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-cream/40"
         )}>
           <span>© {year} {SITE_NAME}. All rights reserved.</span>
-          <span>Nairobi, Kenya</span>
+          <span className="flex items-center gap-1.5">
+            Built by{" "}
+            <a
+              href="https://brightexsolutions.co.ke"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-cream/55 hover:text-gold transition-colors underline-offset-2 hover:underline"
+            >
+              Brightex Solutions
+            </a>
+          </span>
         </div>
       </div>
     </footer>
