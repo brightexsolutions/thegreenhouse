@@ -32,7 +32,7 @@ export default async function AdminRegistrantsPage() {
   const eventList = (events as Array<{ id: string; title: string }>) ?? [];
 
   return (
-    <div className="flex flex-col h-full gap-5">
+    <div className="flex flex-col gap-5">
       <PageHeader
         title="Registrants"
         description={`${registrants.length} total across all sessions`}

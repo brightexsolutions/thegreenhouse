@@ -61,9 +61,9 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
   function reset() { setPage(1); }
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 gap-3">
+    <div className="flex flex-col gap-3">
       {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 flex-shrink-0">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative flex-1 w-full sm:max-w-xs">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
           <input
@@ -106,15 +106,22 @@ export function AllRegistrantsTable({ registrants, events }: Props) {
       </div>
 
       {/* Table */}
-      <div className="flex-1 min-h-0 bg-white rounded-2xl border border-mist overflow-hidden flex flex-col">
+      <div className="bg-white rounded-2xl border border-mist overflow-hidden">
         {filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center flex-1 py-12">
-            <Users size={28} className="text-charcoal/15 mb-3" />
-            <p className="text-sm text-charcoal/35">No registrants found</p>
+          <div className="flex flex-col items-center justify-center py-16">
+            <div className="w-12 h-12 rounded-2xl bg-charcoal/5 flex items-center justify-center mb-3">
+              <Users size={20} className="text-charcoal/25" />
+            </div>
+            <p className="text-sm font-medium text-charcoal/40">No registrants found</p>
+            <p className="text-xs text-charcoal/25 mt-1">
+              {query || eventId !== "all" || attended !== "all"
+                ? "Try adjusting your filters"
+                : "Registrations for this session will appear here"}
+            </p>
           </div>
         ) : (
           <>
-            <div className="flex-1 overflow-y-auto min-h-0">
+            <div className="overflow-y-auto max-h-[560px]">
               <table className="w-full">
                 <thead className="sticky top-0 bg-white z-10">
                   <tr className="border-b border-mist">

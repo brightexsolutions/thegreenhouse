@@ -37,7 +37,7 @@ export default async function EventRegistrantsPage({ params }: Props) {
   const eventEntry = [{ id, title: event.title }];
 
   return (
-    <div className="flex flex-col h-full gap-3">
+    <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between flex-shrink-0">
         <p className="text-sm text-charcoal/50">{list.length} registrant{list.length !== 1 ? "s" : ""}</p>
         <div className="flex items-center gap-2">

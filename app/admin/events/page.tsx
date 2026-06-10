@@ -35,7 +35,7 @@ export default async function AdminEventsPage() {
   }>).map(e => ({ ...e, registrations: regCounts[e.id] ?? 0 }));
 
   return (
-    <div className="flex flex-col h-full gap-5">
+    <div className="flex flex-col gap-5">
       <PageHeader
         title="Events"
         description={`${events.length} session${events.length !== 1 ? "s" : ""} total`}

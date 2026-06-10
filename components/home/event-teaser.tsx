@@ -52,6 +52,8 @@ function Countdown({ targetDate }: { targetDate: string }) {
   );
 }
 
+const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+
 export function EventTeaser({ event }: { event: Event | null }) {
   if (!event) return null;
 
@@ -60,28 +62,31 @@ export function EventTeaser({ event }: { event: Event | null }) {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
   const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
+  const coverUrl = event.cover_image
+    ? `${SUPABASE_URL}/storage/v1/object/public/event-images/${event.cover_image}`
+    : null;
 
   return (
     <section className="relative py-20 md:py-28 overflow-hidden bg-forest">
-      {/* Background photo with dark overlay */}
+      {/* Background texture — more visible */}
       <div className="absolute inset-0">
         <Image
           src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1400&q=70"
           alt=""
           fill
-          className="object-cover opacity-20"
+          className="object-cover opacity-35"
           sizes="100vw"
           aria-hidden
         />
-        <div className="absolute inset-0 bg-gradient-to-br from-forest via-forest/95 to-moss/80" />
+        <div className="absolute inset-0 bg-gradient-to-br from-forest/95 via-forest/80 to-moss/60" />
       </div>
 
       {/* Radial glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_100%,rgba(201,162,74,0.10),transparent)]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_100%,rgba(201,162,74,0.12),transparent)]" />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
-          {/* Left */}
+          {/* Left — event details */}
           <FadeIn>
             <span className="label-caps text-gold/80">Next Session</span>
             <h2 className="font-display text-4xl md:text-5xl font-semibold text-cream mt-2 mb-4 leading-tight">
@@ -116,16 +121,33 @@ export function EventTeaser({ event }: { event: Event | null }) {
             </Link>
           </FadeIn>
 
-          {/* Right — countdown card */}
+          {/* Right — cover image + countdown */}
           <FadeIn delay={0.15} direction="right">
-            <div className="rounded-3xl border border-cream/15 bg-cream/8 backdrop-blur-sm p-8 lg:p-10">
-              <p className="label-caps text-cream/40 text-xs mb-5">Counting down to Session 02</p>
-              <Countdown targetDate={eventDateTime} />
-              <div className="mt-8 pt-6 border-t border-cream/15">
-                <p className="text-sm text-cream/40">
-                  {event.type === "free" ? "Free entry · All welcome" : `KES ${event.price_kes?.toLocaleString()} entry`}
-                  {event.capacity ? ` · ${event.capacity} spots` : ""}
-                </p>
+            <div className="flex flex-col gap-4">
+              {/* Cover image — shown when available */}
+              {coverUrl && (
+                <div className="relative aspect-[16/9] rounded-2xl overflow-hidden border border-cream/15">
+                  <Image
+                    src={coverUrl}
+                    alt={event.title}
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 1024px) 100vw, 50vw"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-forest/40 to-transparent" />
+                </div>
+              )}
+
+              {/* Countdown card */}
+              <div className="rounded-3xl border border-cream/15 bg-cream/8 backdrop-blur-sm p-8 lg:p-10">
+                <p className="label-caps text-cream/40 text-xs mb-5">Counting down to {event.title.split("—").pop()?.trim() ?? "the session"}</p>
+                <Countdown targetDate={eventDateTime} />
+                <div className="mt-8 pt-6 border-t border-cream/15">
+                  <p className="text-sm text-cream/40">
+                    {event.type === "free" ? "Free entry · All welcome" : `KES ${event.price_kes?.toLocaleString()} entry`}
+                    {event.capacity ? ` · ${event.capacity} spots` : ""}
+                  </p>
+                </div>
               </div>
             </div>
           </FadeIn>

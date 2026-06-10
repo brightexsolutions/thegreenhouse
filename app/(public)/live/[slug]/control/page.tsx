@@ -59,8 +59,7 @@ function getLyricsVerses(lyrics: string | null) {
   return lyrics.split(/\n{2,}/).map(v => v.trim()).filter(Boolean);
 }
 
-export default function ControlPage({ params }: { params: Promise<{ slug: string }> }) {
-  const [slug, setSlug]         = useState<string | null>(null);
+export default function ControlPage({ params }: { params: { slug: string } }) {
   const [authed, setAuthed]     = useState<boolean | null>(null);
   const [event, setEvent]       = useState<EventData | null>(null);
   const [display, setDisplay]   = useState<DisplayState | null>(null);
@@ -68,7 +67,7 @@ export default function ControlPage({ params }: { params: Promise<{ slug: string
   const [customText, setCustomText] = useState("");
   const [activeSong, setActiveSong] = useState<Song | null>(null);
 
-  useEffect(() => { params.then(p => setSlug(p.slug)); }, [params]);
+  const slug = params.slug;
 
   const supabase = useSupabase();
 
@@ -79,7 +78,7 @@ export default function ControlPage({ params }: { params: Promise<{ slug: string
 
   // Load event data
   useEffect(() => {
-    if (!slug || authed !== true) return;
+    if (authed !== true) return;
     supabase
       .from("events")
       .select("id, title, event_date, slug, event_sessions(id, title, sort_order, session_songs(songs(id, title, artist, lyrics)))")

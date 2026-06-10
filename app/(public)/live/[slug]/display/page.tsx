@@ -53,29 +53,24 @@ function getLinesFromLyrics(lyrics: string | null) {
   return lyrics.split(/\n{2,}/).map(v => v.trim()).filter(Boolean);
 }
 
-export default function DisplayPage({ params }: { params: Promise<{ slug: string }> }) {
-  const [slug, setSlug]           = useState<string | null>(null);
+export default function DisplayPage({ params }: { params: { slug: string } }) {
   const [event, setEvent]         = useState<EventData | null>(null);
   const [display, setDisplay]     = useState<DisplayState | null>(null);
   const [activeSong, setActiveSong] = useState<Song | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
-  // Resolve params
-  useEffect(() => {
-    params.then(p => setSlug(p.slug));
-  }, [params]);
+  const slug = params.slug;
 
   const supabase = useSupabase();
 
   // Load event + initial display state
   useEffect(() => {
-    if (!slug) return;
     async function load() {
       const { data: ev } = await supabase
         .from("events")
         .select("id, title, subtitle, event_date, event_time, theme_title, theme_scripture, theme_description, venue_name, event_sessions(id, title, type, sort_order, session_songs(songs(id, title, artist, lyrics)))")
-        .eq("slug", slug!)
+        .eq("slug", slug)
         .single();
       if (!ev) return;
       setEvent(ev as unknown as EventData);
