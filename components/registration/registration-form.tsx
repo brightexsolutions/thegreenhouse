@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, CheckCircle2, Leaf, Download, Mail, Sparkles } from "lucide-react";
+import { Loader2, CheckCircle2, Leaf, Download, Mail, Sparkles, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { normalisePhone } from "@/lib/phone";
 import type { Event } from "@/types/database";
@@ -54,6 +54,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
   const [ticketUrl,    setTicketUrl]    = useState<string | null>(null);
   const [waShareUrl,   setWaShareUrl]   = useState<string | null>(null);
   const [copied,       setCopied]       = useState(false);
+  const [apiError,     setApiError]     = useState<string | null>(null);
 
   async function copyTicketUrl() {
     if (!ticketUrl) return;
@@ -81,6 +82,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
   }
 
   async function onSubmit(data: FormData) {
+    setApiError(null);
     const res = await fetch("/api/register", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -89,7 +91,8 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
 
     if (!res.ok) {
       const body = await res.json().catch(() => ({}));
-      throw new Error(body?.error ?? "Something went wrong. Please try again.");
+      setApiError(body?.error ?? "Something went wrong. Please try again.");
+      return;
     }
 
     const body = await res.json().catch(() => ({}));
@@ -207,7 +210,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
 
   /* ── Form ───────────────────────────────────────────────── */
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3.5">
+    <form onSubmit={handleSubmit(onSubmit)} onChange={() => setApiError(null)} className="space-y-3.5">
       {/* Name row */}
       <div className="grid grid-cols-2 gap-2.5">
         <Field label="First name" error={errors.first_name?.message}>
@@ -304,6 +307,14 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
       <p className="text-[11px] text-charcoal/45 leading-relaxed border border-mist rounded-xl px-3.5 py-2.5 bg-off-white">
         Your details are stored securely to manage this event and never shared.
       </p>
+
+      {/* API error banner */}
+      {apiError && (
+        <div className="flex items-start gap-2.5 px-3.5 py-3 rounded-xl bg-red-50 border border-red-200">
+          <AlertCircle size={14} className="shrink-0 mt-0.5 text-red-500" />
+          <p className="text-sm text-red-700 leading-snug">{apiError}</p>
+        </div>
+      )}
 
       {/* Submit */}
       <button
