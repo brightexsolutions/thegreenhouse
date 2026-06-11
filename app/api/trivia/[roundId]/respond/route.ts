@@ -21,7 +21,7 @@ export async function POST(req: NextRequest, { params }: { params: { roundId: st
   // Fetch round + question to validate
   const { data: round } = await supabase
     .from("trivia_rounds")
-    .select("id, status, trivia_questions(type, correct_index)")
+    .select("id, status, trivia_questions(type, correct_index, correct_answer, answer_keywords)")
     .eq("id", roundId)
     .single();
 
