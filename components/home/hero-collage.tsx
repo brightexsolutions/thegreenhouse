@@ -92,6 +92,58 @@ export function HeroCollage() {
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16 lg:py-24">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
+          {/* Mobile image strip — visible only below sm, sits above the copy */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.9, delay: 0.25 }}
+            className="block sm:hidden relative h-52 -mx-4"
+            aria-hidden
+          >
+            {/* Worship card — large, left-leaning */}
+            <FloatCard
+              entranceDelay={0.3}
+              rotate={-5}
+              floatDuration={4.4}
+              floatDelay={0}
+              floatAmount={10}
+              className="absolute left-4 top-0 w-[54%] h-full"
+            >
+              <CardInner src={PHOTOS.worship} alt="Worship" label="Worship" borderRadius="1.75rem" />
+            </FloatCard>
+
+            {/* Connect card — smaller, right-offset, lower */}
+            <FloatCard
+              entranceDelay={0.44}
+              rotate={4}
+              floatDuration={3.8}
+              floatDelay={1.4}
+              floatAmount={8}
+              className="absolute right-4 top-[14%] w-[46%] h-[80%]"
+            >
+              <CardInner src={PHOTOS.connect} alt="Connect" label="Connect" borderRadius="1.5rem" />
+            </FloatCard>
+
+            {/* Session badge chip — floats between the two cards */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.4, delay: 0.7 }}
+              className="absolute left-[42%] top-[36%] -translate-x-1/2 bg-forest/85 backdrop-blur-sm border border-gold/35 rounded-xl px-3 py-2 shadow-lg z-10"
+            >
+              <span className="font-display text-lg font-semibold text-cream leading-none">02</span>
+              <p className="text-[10px] text-cream/65 mt-0.5 uppercase tracking-wider">Session</p>
+            </motion.div>
+
+            {/* Gold ring accent */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.4 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+              className="absolute right-[38%] bottom-4 w-7 h-7 rounded-full border-2 border-gold/50 pointer-events-none"
+            />
+          </motion.div>
+
           {/* Left — copy */}
           <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-6">
             <motion.div variants={item(0)} className="flex items-center gap-2">

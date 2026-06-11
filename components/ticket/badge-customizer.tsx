@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { Download, X, Share2, Loader2, ImagePlus, Check, ChevronRight } from "lucide-react";
+import QRCode from "qrcode";
 import { cn } from "@/lib/utils";
 
 const SIZE    = 1080;
@@ -94,8 +95,72 @@ function clipImgRotated(
   ctx.restore();
 }
 
+function loadImg(src: string): Promise<HTMLImageElement> {
+  return new Promise(resolve => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.src = src;
+  });
+}
+
+// Draw QR code + URL text in the bottom-right corner of the badge.
+// edgePad: distance from canvas edge to the pill (accounts for frames/borders).
+// isDark:  true for dark-background variants (cream text), false for light (forest text).
+function drawQRCorner(
+  ctx: CanvasRenderingContext2D,
+  W: number, H: number,
+  qrImg: HTMLImageElement | null,
+  isDark: boolean,
+  edgePad: number,
+) {
+  if (!qrImg) return;
+  const qSize  = W * 0.12;
+  const inner  = W * 0.013;
+  const gap    = W * 0.009;
+  const tSize  = W * 0.0145;
+  const tH     = tSize * 1.5;
+  const totalW = qSize + inner * 2;
+  const totalH = inner + qSize + gap + tH + inner;
+  const rx     = W - edgePad - totalW;
+  const ry     = H - edgePad - totalH;
+  const r      = W * 0.012;
+
+  // Pill background
+  ctx.save();
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(rx, ry, totalW, totalH, r);
+  else ctx.rect(rx, ry, totalW, totalH);
+  ctx.fillStyle = isDark ? "rgba(0,0,0,0.35)" : "rgba(27,58,42,0.07)";
+  ctx.fill();
+  ctx.strokeStyle = isDark ? "rgba(255,255,255,0.14)" : "rgba(27,58,42,0.18)";
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.restore();
+
+  // White backing + QR image
+  const qx = rx + inner;
+  const qy = ry + inner;
+  ctx.save();
+  ctx.beginPath();
+  if (ctx.roundRect) ctx.roundRect(qx - 2, qy - 2, qSize + 4, qSize + 4, r * 0.5);
+  else ctx.rect(qx - 2, qy - 2, qSize + 4, qSize + 4);
+  ctx.fillStyle = "#ffffff";
+  ctx.fill();
+  ctx.restore();
+  ctx.drawImage(qrImg, qx, qy, qSize, qSize);
+
+  // URL text
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.fillStyle = isDark ? "rgba(247,242,232,0.88)" : "rgba(27,58,42,0.80)";
+  ctx.font = `400 ${tSize}px sans-serif`;
+  ctx.letterSpacing = "0px";
+  ctx.fillText("greenhousews.co.ke", rx + totalW / 2, qy + qSize + gap + tSize);
+  ctx.restore();
+}
+
 // ─── Variant 1: Sanctuary ────────────────────────────────────────────────────
-function drawV1(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null) {
+function drawV1(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null, qrImg: HTMLImageElement | null) {
   const sf = serif();
   // BG
   const bg = ctx.createLinearGradient(W * 0.15, 0, W * 0.55, H);
@@ -159,12 +224,11 @@ function drawV1(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
     ctx.fillStyle = "rgba(201,162,74,0.45)"; ctx.font = `400 ${W * 0.017}px sans-serif`;
     ctx.letterSpacing = "2px"; ctx.fillText(p.venueName.toUpperCase(), cx, y); ctx.letterSpacing = "0px";
   }
-  ctx.fillStyle = "rgba(247,242,232,0.28)"; ctx.font = `300 ${W * 0.015}px sans-serif`;
-  ctx.letterSpacing = "3px"; ctx.fillText("www.greenhousews.co.ke", cx, H - W * 0.04); ctx.letterSpacing = "0px";
+  drawQRCorner(ctx, W, H, qrImg, true, W * 0.038);
 }
 
 // ─── Variant 2: Editorial ────────────────────────────────────────────────────
-function drawV2(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null) {
+function drawV2(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null, qrImg: HTMLImageElement | null) {
   const sf = serif();
   ctx.fillStyle = "#f7f2e8"; ctx.fillRect(0, 0, W, H);
   ctx.fillStyle = "rgba(27,58,42,0.022)";
@@ -219,8 +283,7 @@ function drawV2(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
     ctx.fillText(`${p.firstName} ${p.lastName}`, cx2, ty); ty += W * 0.042;
     ctx.fillStyle = "rgba(27,58,42,0.45)"; ctx.font = `400 ${W * 0.019}px sans-serif`;
     ctx.fillText(p.shortDate, cx2, ty);
-    ctx.textAlign = "right"; ctx.fillStyle = "rgba(27,58,42,0.28)"; ctx.font = `300 ${W * 0.014}px sans-serif`;
-    ctx.letterSpacing = "3px"; ctx.fillText((p.siteName ?? "THE GREEN HOUSE").toUpperCase(), W - pad - W * 0.04, H - pad - W * 0.035); ctx.letterSpacing = "0px";
+    drawQRCorner(ctx, W, H, qrImg, false, W * 0.068);
   } else {
     const cx = W / 2; let y = H * 0.3; ctx.textAlign = "center";
     ctx.fillStyle = "rgba(27,58,42,0.055)"; ctx.font = `700 ${W * 0.28}px ${sf}`;
@@ -234,13 +297,12 @@ function drawV2(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
     ctx.beginPath(); ctx.moveTo(cx - W * 0.07, y); ctx.lineTo(cx + W * 0.07, y); ctx.stroke(); y += W * 0.052;
     ctx.fillStyle = "#1b3a2a"; ctx.font = `400 ${W * 0.032}px ${sf}`; ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.046;
     ctx.fillStyle = "rgba(27,58,42,0.45)"; ctx.font = `400 ${W * 0.02}px sans-serif`; ctx.fillText(p.shortDate, cx, y);
-    ctx.fillStyle = "rgba(27,58,42,0.25)"; ctx.font = `300 ${W * 0.015}px sans-serif`;
-    ctx.letterSpacing = "3px"; ctx.fillText((p.siteName ?? "THE GREEN HOUSE").toUpperCase(), cx, H - pad - W * 0.035); ctx.letterSpacing = "0px";
+    drawQRCorner(ctx, W, H, qrImg, false, W * 0.068);
   }
 }
 
 // ─── Variant 3: Dusk ─────────────────────────────────────────────────────────
-function drawV3(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null) {
+function drawV3(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null, qrImg: HTMLImageElement | null) {
   const sf = serif();
   const bg = ctx.createLinearGradient(0, 0, W * 0.3, H);
   bg.addColorStop(0, "#1a1218"); bg.addColorStop(0.6, "#1b2d1e"); bg.addColorStop(1, "#1b3a2a");
@@ -295,12 +357,11 @@ function drawV3(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.047;
   ctx.fillStyle = "rgba(247,242,232,0.45)"; ctx.font = `400 ${W * 0.021}px sans-serif`;
   ctx.fillText(p.shortDate, cx, y);
-  ctx.fillStyle = "rgba(247,242,232,0.22)"; ctx.font = `300 ${W * 0.015}px sans-serif`;
-  ctx.letterSpacing = "3px"; ctx.fillText("www.greenhousews.co.ke", cx, H - W * 0.04); ctx.letterSpacing = "0px";
+  drawQRCorner(ctx, W, H, qrImg, true, W * 0.038);
 }
 
 // ─── Variant 4: Frame ────────────────────────────────────────────────────────
-function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null) {
+function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null, qrImg: HTMLImageElement | null) {
   const sf = serif();
   // Always dark background — photo goes in a tilted square, never fills the canvas
   ctx.fillStyle = "#0d1a12"; ctx.fillRect(0, 0, W, H);
@@ -327,10 +388,6 @@ function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
 
   const cx = W / 2;
 
-  // URL as a top brand watermark — just inside the gold frame, clear of all bottom content
-  ctx.textAlign = "center";
-  ctx.fillStyle = "rgba(247,242,232,0.22)"; ctx.font = `300 ${W * 0.013}px sans-serif`;
-  ctx.letterSpacing = "2px"; ctx.fillText("www.greenhousews.co.ke", cx, fi + W * 0.042); ctx.letterSpacing = "0px";
 
   let y = H * 0.34;
 
@@ -379,13 +436,15 @@ function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   ctx.fillStyle = "rgba(247,242,232,0.9)"; ctx.font = `400 ${W * 0.033}px ${sf}`;
   ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.05;
   ctx.fillStyle = "rgba(247,242,232,0.5)"; ctx.font = `400 ${W * 0.021}px sans-serif`; ctx.fillText(p.shortDate, cx, y);
+  // QR inside the gold frame — edgePad = fi + inner gap
+  drawQRCorner(ctx, W, H, qrImg, true, fi + W * 0.028);
 }
 
-function drawVariant(ctx: CanvasRenderingContext2D, W: number, H: number, v: VariantId, p: BadgeProps, photo: HTMLImageElement | null) {
-  if (v === 1) drawV1(ctx, W, H, p, photo);
-  else if (v === 2) drawV2(ctx, W, H, p, photo);
-  else if (v === 3) drawV3(ctx, W, H, p, photo);
-  else              drawV4(ctx, W, H, p, photo);
+function drawVariant(ctx: CanvasRenderingContext2D, W: number, H: number, v: VariantId, p: BadgeProps, photo: HTMLImageElement | null, qrImg: HTMLImageElement | null) {
+  if (v === 1) drawV1(ctx, W, H, p, photo, qrImg);
+  else if (v === 2) drawV2(ctx, W, H, p, photo, qrImg);
+  else if (v === 3) drawV3(ctx, W, H, p, photo, qrImg);
+  else              drawV4(ctx, W, H, p, photo, qrImg);
 }
 
 // ─── BadgeCustomizer modal ───────────────────────────────────────────────────
@@ -404,16 +463,25 @@ export function BadgeCustomizerModal({ open, onClose, ...props }: ModalProps) {
   const [generating, setGenerating] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
   const [shared,     setShared]     = useState(false);
+  const [qrImg,      setQrImg]      = useState<HTMLImageElement | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  // Pre-generate the QR code image once when the modal first opens
+  useEffect(() => {
+    if (!open || qrImg) return;
+    QRCode.toDataURL("https://greenhousews.co.ke", {
+      width: 220, margin: 1, color: { dark: "#1b3a2a", light: "#ffffff" },
+    }).then(dataUrl => loadImg(dataUrl).then(setQrImg)).catch(() => {});
+  }, [open, qrImg]);
 
   const renderPreview = useCallback(() => {
     const canvas = document.createElement("canvas");
     canvas.width = 540; canvas.height = 540;
     const ctx = canvas.getContext("2d")!;
     ctx.scale(0.5, 0.5);
-    drawVariant(ctx, SIZE, SIZE, variant, props, photoEl);
+    drawVariant(ctx, SIZE, SIZE, variant, props, photoEl, qrImg);
     setPreviewUrl(canvas.toDataURL("image/jpeg", 0.92));
-  }, [variant, photoEl, props]);
+  }, [variant, photoEl, props, qrImg]);
 
   useEffect(() => { if (open) renderPreview(); }, [open, renderPreview]);
 
@@ -439,7 +507,11 @@ export function BadgeCustomizerModal({ open, onClose, ...props }: ModalProps) {
     canvas.width = SIZE; canvas.height = SIZE;
     const ctx = canvas.getContext("2d")!;
     await document.fonts.ready;
-    drawVariant(ctx, SIZE, SIZE, variant, props, photoEl);
+    // Ensure QR is ready — generate on demand if state hasn't resolved yet
+    const qr = qrImg ?? await QRCode.toDataURL("https://greenhousews.co.ke", {
+      width: 220, margin: 1, color: { dark: "#1b3a2a", light: "#ffffff" },
+    }).then(loadImg).catch(() => null);
+    drawVariant(ctx, SIZE, SIZE, variant, props, photoEl, qr);
     return canvas;
   }
 
