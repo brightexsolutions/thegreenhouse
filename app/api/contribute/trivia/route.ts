@@ -65,15 +65,19 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Correct option must be selected" }, { status: 400 });
   }
 
+  // Normalize "open" → "open_input" (DB CHECK constraint requires 'open_input')
+  const dbType = body.type === "open" ? "open_input" : body.type;
+  const isOpen = dbType === "open_input";
+
   const { data, error } = await supabase
     .from("trivia_questions")
     .insert({
       event_id:       event.id,
       question:       body.question.trim(),
-      type:           body.type,
-      options:        body.type === "multiple_choice" ? body.options : null,
-      correct_index:  body.type === "multiple_choice" ? body.correct_index : null,
-      correct_answer: body.type === "open" ? (body.correct_answer?.trim() || null) : null,
+      type:           dbType,
+      options:        !isOpen ? body.options : null,
+      correct_index:  !isOpen ? body.correct_index : null,
+      correct_answer: isOpen ? (body.correct_answer?.trim() || null) : null,
       category:       body.category?.trim() || "General",
       points:         body.points ?? 1,
     })

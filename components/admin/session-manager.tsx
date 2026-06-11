@@ -53,6 +53,15 @@ const SESSION_TYPES: Array<{ value: string; label: string; icon: React.ElementTy
   { value: "other",     label: "Other",     icon: Zap,        color: "bg-charcoal/6 text-charcoal/60" },
 ];
 
+const SESSION_HINTS: Record<string, { items: string[]; tip: string }> = {
+  worship:  { items: ["Add each song from the setlist", "Assign vocalist names so they can filter in the contribute page", "Paste full lyrics so they show live on attendee screens"], tip: "Songs flow top→bottom in the control panel. Add them in set order." },
+  prayer:   { items: ["Add a 'Quote' item for each prayer prompt", "Add a 'Verse' item for any scripture anchor", "Leave notes for the prayer leader"], tip: "Use the Custom scene on the control panel to push live prompts to the display screen." },
+  sharing:  { items: ["Add a 'Topic' item as the discussion prompt", "Add 'Text' items for sub-questions or talking points", "Set a duration so the session stays on time"], tip: "Switch to the Community scene to show attendance count while sharing." },
+  teaching: { items: ["Add 'Verse' items for each scripture reference", "Add 'Text' items for outline points", "Paste full passage text so it appears on the display screen"], tip: "Use the Theme scene on the control panel to anchor the teaching title on screen." },
+  open_mic: { items: ["Add songs that participants may request", "Assign vocalist names as people sign up", "Use Trivia between sets to keep energy up"], tip: "Plan a trivia question for this section — it fills wait time well." },
+  other:    { items: ["Add songs, quotes, verses, or topics as needed", "Drag to reorder if the plan changes mid-session"], tip: "Any item type can be pushed live from the control panel." },
+};
+
 function getTypeInfo(type: string) {
   return SESSION_TYPES.find(t => t.value === type) ?? SESSION_TYPES[SESSION_TYPES.length - 1];
 }
@@ -543,6 +552,25 @@ function SortableSessionCard({
       {/* Expanded body */}
       {expanded && (
         <div className="bg-white">
+          {/* Program guide hints */}
+          {session.session_songs.length === 0 && (() => {
+            const hint = SESSION_HINTS[session.type] ?? SESSION_HINTS.other;
+            return (
+              <div className="mx-4 mt-4 mb-3 rounded-xl bg-forest/5 border border-forest/10 px-3.5 py-3">
+                <p className="text-[10px] font-semibold text-forest/60 uppercase tracking-wider mb-2">Program guide · {getTypeInfo(session.type).label}</p>
+                <ul className="space-y-1 mb-2">
+                  {hint.items.map((item, i) => (
+                    <li key={i} className="flex items-start gap-1.5 text-[11px] text-charcoal/55">
+                      <span className="text-forest/40 mt-0.5 flex-shrink-0">·</span>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+                <p className="text-[10px] text-charcoal/35 italic">{hint.tip}</p>
+              </div>
+            );
+          })()}
+
           {/* Notes */}
           <div className="px-4 pt-4 pb-3">
             <label className="block text-[11px] font-semibold text-charcoal/55 uppercase tracking-wider mb-1.5">

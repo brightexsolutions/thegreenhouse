@@ -5,6 +5,7 @@ import QRCode from "qrcode";
 import { createAdminClient } from "@/lib/supabase/server";
 import { TicketPdf } from "@/lib/pdf/ticket-pdf";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -73,7 +74,7 @@ export async function GET(_req: NextRequest, { params }: Props) {
       },
     });
   } catch (err) {
-    console.error("PDF generation failed:", err);
+    logger.error("pdf_generation_failed", { error: err instanceof Error ? err.message : String(err) });
     return NextResponse.json({ error: "Failed to generate PDF" }, { status: 500 });
   }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { createBrowserClient } from "@supabase/ssr";
 import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, Send, CheckCircle2, X, Loader2, Trophy, UserCheck, EyeOff } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -91,10 +92,11 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
     setMounted(true);
   }, []);
 
-  // Fetch round details
+  // Fetch round details + subscribe via Realtime for instant status changes
   useEffect(() => {
     let cancelled = false;
-    async function poll() {
+
+    async function fetchAll() {
       try {
         const [rRes, resRes] = await Promise.all([
           fetch(`/api/trivia/${roundId}`, { cache: "no-store" }),
@@ -105,9 +107,31 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
         if (resRes.ok) setResults(await resRes.json() as Results);
       } catch { /* ignore */ }
     }
-    poll();
-    const id = setInterval(poll, 3000);
-    return () => { cancelled = true; clearInterval(id); };
+
+    fetchAll();
+    // Poll every 4s as fallback in case Realtime misses an event
+    const pollId = setInterval(fetchAll, 4000);
+
+    // Realtime subscription on trivia_rounds for near-instant status changes
+    const supabase = createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    );
+    const channel = supabase
+      .channel(`trivia-round-${roundId}`)
+      .on("postgres_changes", {
+        event: "UPDATE", schema: "public", table: "trivia_rounds",
+        filter: `id=eq.${roundId}`,
+      }, (payload: { new: TriviaRound }) => {
+        if (!cancelled && payload.new) setRound(payload.new);
+      })
+      .subscribe();
+
+    return () => {
+      cancelled = true;
+      clearInterval(pollId);
+      supabase.removeChannel(channel);
+    };
   }, [roundId]);
 
   // Countdown timer
@@ -160,12 +184,18 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify(payload),
       });
-      if (res.ok) {
-        const data = await res.json() as { is_correct: boolean | null };
+      // 201 = success, 200 = already_submitted — both are OK
+      if (res.ok || res.status === 200) {
+        const data = await res.json() as { ok?: boolean; is_correct?: boolean | null; late?: boolean; already_submitted?: boolean };
         setSubmitted(true);
-        setIsCorrect(data.is_correct);
+        setIsCorrect(data.is_correct ?? null);
+      } else if (res.status === 409 || res.status === 410 || res.status === 400) {
+        // Round closed before answer recorded — show as submitted with no score
+        setSubmitted(true);
+        setIsCorrect(null);
       }
-    } catch { /* ignore */ }
+      // Ignore 500s silently — no feedback to attendee needed
+    } catch { /* ignore network errors */ }
     setSubmitting(false);
   }
 

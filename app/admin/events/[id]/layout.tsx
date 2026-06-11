@@ -21,9 +21,9 @@ export default async function EventDetailLayout({ params, children }: Props) {
   if (!event) notFound();
 
   return (
-    <div className="flex flex-col h-full gap-0 -m-6">
-      {/* Sticky event header + tabs */}
-      <div className="sticky top-0 z-10 bg-off-white border-b border-mist px-6 pt-6 pb-3">
+    <div className="flex flex-col h-full gap-0 -m-6 overflow-hidden">
+      {/* Pinned event header + tabs */}
+      <div className="flex-shrink-0 bg-off-white border-b border-mist px-6 pt-6 pb-3">
         <div className="flex items-center justify-between mb-0 pb-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="min-w-0">

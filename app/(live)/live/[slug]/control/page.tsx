@@ -121,13 +121,15 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   ));
   const supabase = supabaseRef.current;
 
-  const [authed,     setAuthed]     = useState<boolean | null>(null);
-  const [event,      setEvent]      = useState<EventData | null>(null);
-  const [display,    setDisplay]    = useState<DisplayState | null>(null);
-  const [saving,     setSaving]     = useState(false);
-  const [customText, setCustomText] = useState("");
-  const [focusTab,   setFocusTab]   = useState<"all" | "music" | "scenes" | "trivia" | "feedback">("all");
-  const [activeSong, setActiveSong] = useState<Song | null>(null);
+  const [authed,          setAuthed]         = useState<boolean | null>(null);
+  const [event,           setEvent]          = useState<EventData | null>(null);
+  const [display,         setDisplay]        = useState<DisplayState | null>(null);
+  const [saving,          setSaving]         = useState(false);
+  const [saveError,       setSaveError]      = useState(false);
+  const [customText,      setCustomText]     = useState("");
+  const [focusTab,        setFocusTab]       = useState<"all" | "music" | "scenes" | "trivia" | "feedback">("all");
+  const [activeSong,      setActiveSong]     = useState<Song | null>(null);
+  const [realtimeStatus,  setRealtimeStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
 
   // Feedback state
   const [feedback,         setFeedback]        = useState<Feedback[]>([]);
@@ -184,6 +186,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   // Realtime subscription for display_state
   useEffect(() => {
     if (!event) return;
+    setRealtimeStatus("connecting");
     const channel = supabase
       .channel(`control-${event.id}`)
       .on("postgres_changes", {
@@ -196,8 +199,22 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
           setDisplay(payload.new as DisplayState);
         }
       })
-      .subscribe();
+      .subscribe((status) => {
+        if (status === "SUBSCRIBED")    setRealtimeStatus("connected");
+        if (status === "CLOSED" || status === "CHANNEL_ERROR") setRealtimeStatus("disconnected");
+      });
     return () => { supabase.removeChannel(channel); };
+  }, [event?.id]);
+
+  // Polling fallback: keep display state fresh every 5s (critical when Realtime is disconnected)
+  useEffect(() => {
+    if (!event) return;
+    let cancelled = false;
+    const id = setInterval(async () => {
+      const { data } = await supabase.from("display_state").select("*").eq("event_id", event.id).maybeSingle();
+      if (!cancelled && data) setDisplay(data as DisplayState);
+    }, 5000);
+    return () => { cancelled = true; clearInterval(id); };
   }, [event?.id]);
 
   // Sync custom text when scene changes
@@ -370,8 +387,9 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   async function upsertDisplay(patch: Partial<DisplayState>) {
     if (!event || !display) return;
     setSaving(true);
+    setSaveError(false);
     const updated = { ...display, ...patch };
-    const { data } = await supabase.from("display_state").upsert({
+    const payload = {
       id:                       display.id,
       event_id:                 event.id,
       scene:                    updated.scene,
@@ -384,7 +402,25 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       featured_feedback:        updated.featured_feedback ?? null,
       featured_feedback_author: updated.featured_feedback_author ?? null,
       updated_at:               new Date().toISOString(),
-    }, { onConflict: "event_id" }).select("*").single();
+    };
+    let { data, error } = await supabase
+      .from("display_state")
+      .upsert(payload, { onConflict: "event_id" })
+      .select("*")
+      .single();
+    // Retry once on transient error
+    if (error) {
+      await new Promise(r => setTimeout(r, 800));
+      ({ data, error } = await supabase
+        .from("display_state")
+        .upsert(payload, { onConflict: "event_id" })
+        .select("*")
+        .single());
+    }
+    if (error) {
+      setSaveError(true);
+      setTimeout(() => setSaveError(false), 3000);
+    }
     if (data) setDisplay(data as DisplayState);
     setSaving(false);
   }
@@ -493,7 +529,24 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
           <h1 className="font-display text-xl font-semibold text-cream">{event.title}</h1>
         </div>
         <div className="flex items-center gap-2">
-          {saving && <Loader2 size={14} className="animate-spin text-cream/40" />}
+          {saveError && (
+            <span className="text-[10px] text-red-400 font-medium">Save failed</span>
+          )}
+          {saving && !saveError && <Loader2 size={14} className="animate-spin text-cream/40" />}
+          {/* Realtime connection indicator */}
+          <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-cream/10">
+            <span className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              realtimeStatus === "connected"    && "bg-green-400 animate-pulse",
+              realtimeStatus === "connecting"   && "bg-amber-400 animate-pulse",
+              realtimeStatus === "disconnected" && "bg-red-400",
+            )} />
+            <span className="text-[10px] text-cream/40">
+              {realtimeStatus === "connected"    ? "Live" :
+               realtimeStatus === "connecting"   ? "Sync..." :
+               "Offline"}
+            </span>
+          </div>
           <a href={`/live/${event.slug}/display`} target="_blank" rel="noopener"
             className="p-2 rounded-xl bg-cream/10 hover:bg-cream/20 transition-colors">
             <ExternalLink size={14} className="text-cream/60" />

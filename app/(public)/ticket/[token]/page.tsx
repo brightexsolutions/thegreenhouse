@@ -14,7 +14,7 @@ async function getTicket(token: string) {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("registrations")
-    .select("*, events(id, title, subtitle, event_date, event_time, venue_name, slug, dress_code, theme_title)")
+    .select("*, events(id, title, subtitle, event_date, event_time, venue_name, slug, dress_code, theme_title, theme_scripture)")
     .eq("ticket_token", token)
     .is("deleted_at", null)
     .single();
@@ -48,7 +48,8 @@ export default async function TicketPage({ params }: Props) {
       venue_name: string | null;
       slug: string;
       dress_code: string | null;
-      theme_title: string | null;
+      theme_title:      string | null;
+      theme_scripture:  string | null;
     };
   } | null;
 
@@ -226,6 +227,9 @@ export default async function TicketPage({ params }: Props) {
               sessionLabel={sessionLabel}
               shortDate={shortDate}
               themeTitle={event.theme_title}
+              themeScripture={event.theme_scripture}
+              venueName={event.venue_name}
+              siteName={SITE_NAME}
             />
           </div>
         </div>
@@ -317,6 +321,9 @@ export default async function TicketPage({ params }: Props) {
             sessionLabel={sessionLabel}
             shortDate={shortDate}
             themeTitle={event.theme_title}
+            themeScripture={event.theme_scripture}
+            venueName={event.venue_name}
+            siteName={SITE_NAME}
           />
           <p className="text-[10px]" style={{ color: "rgba(247,242,232,0.2)" }}>
             Share on Instagram, WhatsApp, or X

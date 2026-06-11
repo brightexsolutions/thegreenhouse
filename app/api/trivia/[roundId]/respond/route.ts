@@ -26,8 +26,22 @@ export async function POST(req: NextRequest, { params }: { params: { roundId: st
     .single();
 
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
-  if (round.status !== "active")
-    return NextResponse.json({ error: "Round is no longer accepting answers" }, { status: 409 });
+
+  // Check for an existing response from this attendee for this round (prevent duplicates)
+  if (attendee_name?.trim()) {
+    const { data: existing } = await supabase
+      .from("trivia_responses")
+      .select("id, is_correct")
+      .eq("round_id", roundId)
+      .eq("attendee_name", attendee_name.trim())
+      .maybeSingle();
+    if (existing) {
+      return NextResponse.json({ ok: true, is_correct: existing.is_correct, already_submitted: true });
+    }
+  }
+
+  // If the round is no longer active, still record the late answer but flag it
+  const isLate = round.status !== "active";
 
   const q = round.trivia_questions as unknown as {
     type: string;
@@ -66,11 +80,17 @@ export async function POST(req: NextRequest, { params }: { params: { roundId: st
       attendee_name: attendee_name?.trim() || null,
       answer_text:   answer_text.trim(),
       answer_index:  q?.type === "multiple_choice" ? (answer_index ?? null) : null,
-      is_correct:    isCorrect,
+      is_correct:    isLate ? null : isCorrect,  // late answers not auto-scored
     })
     .select("id, is_correct")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true, is_correct: data.is_correct }, { status: 201 });
+  if (error) {
+    // Unique violation (race condition duplicate) — return success silently
+    if (error.code === "23505") {
+      return NextResponse.json({ ok: true, is_correct: null, already_submitted: true });
+    }
+    return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+  return NextResponse.json({ ok: true, is_correct: data.is_correct, late: isLate }, { status: 201 });
 }

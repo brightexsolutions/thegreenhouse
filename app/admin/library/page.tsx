@@ -61,10 +61,10 @@ export default async function LibraryPage({ searchParams }: Props) {
   ] as const;
 
   return (
-    <div className="flex flex-col h-full -m-6">
+    <div className="flex flex-col h-full -m-6 overflow-hidden">
 
-      {/* ── Sticky header: title + tabs ── */}
-      <div className="sticky top-0 z-10 bg-off-white border-b border-mist px-6 pt-6 pb-3">
+      {/* ── Pinned header: title + tabs ── */}
+      <div className="flex-shrink-0 bg-off-white border-b border-mist px-6 pt-6 pb-3">
         <div className="mb-4">
           <h1 className="text-lg font-semibold text-charcoal leading-none">Library</h1>
           <p className="text-sm text-charcoal/40 mt-1">Manage songs, event photos, and themes</p>
