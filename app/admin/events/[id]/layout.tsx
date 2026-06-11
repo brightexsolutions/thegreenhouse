@@ -21,30 +21,30 @@ export default async function EventDetailLayout({ params, children }: Props) {
   if (!event) notFound();
 
   return (
-    <div className="flex flex-col h-full gap-0">
-      {/* Event header */}
-      <div className="flex items-center justify-between mb-0 pb-4 border-b border-mist flex-shrink-0">
-        <div className="flex items-center gap-3 min-w-0">
-          <div className="min-w-0">
-            <p className="text-[10px] text-charcoal/40 uppercase tracking-wider mb-0.5">Event</p>
-            <h1 className="text-lg font-semibold text-charcoal truncate">{event.title}</h1>
+    <div className="flex flex-col h-full gap-0 -m-6">
+      {/* Sticky event header + tabs */}
+      <div className="sticky top-0 z-10 bg-off-white border-b border-mist px-6 pt-6 pb-3">
+        <div className="flex items-center justify-between mb-0 pb-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="min-w-0">
+              <p className="text-[10px] text-charcoal/40 uppercase tracking-wider mb-0.5">Event</p>
+              <h1 className="text-lg font-semibold text-charcoal truncate">{event.title}</h1>
+            </div>
+            <StatusBadge status={event.status as EventStatus} />
           </div>
-          <StatusBadge status={event.status as EventStatus} />
+          <Link
+            href={`/events/${event.slug}`}
+            target="_blank"
+            className="text-xs text-charcoal/40 hover:text-forest transition-colors flex-shrink-0"
+          >
+            ↗ View public
+          </Link>
         </div>
-        <Link
-          href={`/events/${event.slug}`}
-          target="_blank"
-          className="text-xs text-charcoal/40 hover:text-forest transition-colors flex-shrink-0"
-        >
-          ↗ View public
-        </Link>
+        <EventTabBar eventId={id} />
       </div>
 
-      {/* Tab bar */}
-      <EventTabBar eventId={id} />
-
-      {/* Tab content */}
-      <div className="flex-1 min-h-0 overflow-y-auto pt-5">
+      {/* Tab content — scrollable */}
+      <div className="flex-1 overflow-y-auto px-6 pt-4 pb-0">
         {children}
       </div>
     </div>

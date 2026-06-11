@@ -1,5 +1,5 @@
 export const SITE_NAME        = "The Green House";
-export const SITE_URL         = process.env.NEXT_PUBLIC_SITE_URL ?? "https://greenhousews.co.ke";
+export const SITE_URL         = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.greenhousews.co.ke";
 export const SESSION_FREQUENCY = "quarterly";
 
 export const GOOGLE_SITE_VERIFICATION = "VF6ZtFBVZPyZxr2XDozrNRD_U1Tuy6B69pJp7gERino";

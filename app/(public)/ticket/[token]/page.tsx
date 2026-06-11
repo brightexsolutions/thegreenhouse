@@ -1,8 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Download, ArrowLeft, Share2 } from "lucide-react";
+import { Download, ArrowLeft } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { BadgeDownload } from "@/components/ticket/badge-download";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -113,7 +114,10 @@ export default async function TicketPage({ params }: Props) {
               {sessionLabel}
             </h1>
             {event.theme_title && (
-              <p className="text-gold/70 text-sm mt-1.5 font-display italic">{event.theme_title}</p>
+              <p className="font-display italic mt-2 tracking-wide"
+                style={{ color: "#e4c97e", fontSize: "clamp(1rem, 3.5vw, 1.2rem)" }}>
+                {event.theme_title}
+              </p>
             )}
           </div>
         </div>
@@ -216,15 +220,13 @@ export default async function TicketPage({ params }: Props) {
               <Download size={15} />
               Download PDF ticket
             </a>
-            <a
-              href={`/api/ticket/${ticket.ticket_token}/badge`}
-              download
-              className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-full border text-sm font-semibold transition-all duration-200"
-              style={{ borderColor: "rgba(27,58,42,0.25)", color: "#1b3a2a" }}
-            >
-              <Share2 size={15} />
-              Download sharing badge
-            </a>
+            <BadgeDownload
+              firstName={ticket.first_name}
+              lastName={ticket.last_name}
+              sessionLabel={sessionLabel}
+              shortDate={shortDate}
+              themeTitle={event.theme_title}
+            />
           </div>
         </div>
       </div>
@@ -275,24 +277,32 @@ export default async function TicketPage({ params }: Props) {
               I&apos;m attending
             </p>
             <p
-              className="font-display font-bold leading-tight mb-4"
+              className="font-display font-bold leading-tight mb-2"
               style={{ color: "#c9a24a", fontSize: "clamp(1.2rem,5vw,1.7rem)" }}
             >
               {sessionLabel}
             </p>
+            {event.theme_title && (
+              <p
+                className="font-display italic mb-3"
+                style={{ color: "rgba(228,201,126,0.85)", fontSize: "clamp(0.85rem,3vw,1.05rem)" }}
+              >
+                {event.theme_title}
+              </p>
+            )}
             <div
               className="h-px w-16 mb-4"
               style={{ background: "rgba(201,162,74,0.3)" }}
             />
             <p
-              className="font-display text-sm font-medium mb-2"
-              style={{ color: "rgba(247,242,232,0.7)" }}
+              className="font-display font-medium mb-2"
+              style={{ color: "rgba(247,242,232,0.8)", fontSize: "clamp(0.9rem,3.5vw,1.1rem)" }}
             >
               {ticket.first_name} {ticket.last_name}
             </p>
             <p
-              className="text-xs"
-              style={{ color: "rgba(247,242,232,0.4)" }}
+              className="text-sm"
+              style={{ color: "rgba(247,242,232,0.45)" }}
             >
               {shortDate}
             </p>
@@ -301,15 +311,13 @@ export default async function TicketPage({ params }: Props) {
 
         {/* Badge download CTA */}
         <div className="mt-4 text-center space-y-2">
-          <a
-            href={`/api/ticket/${ticket.ticket_token}/badge`}
-            download
-            className="inline-flex items-center justify-center gap-2 px-6 py-2.5 rounded-full text-sm font-semibold w-full"
-            style={{ background: "rgba(201,162,74,0.15)", border: "1px solid rgba(201,162,74,0.35)", color: "#c9a24a" }}
-          >
-            <Download size={14} />
-            Download badge (PNG)
-          </a>
+          <BadgeDownload
+            firstName={ticket.first_name}
+            lastName={ticket.last_name}
+            sessionLabel={sessionLabel}
+            shortDate={shortDate}
+            themeTitle={event.theme_title}
+          />
           <p className="text-[10px]" style={{ color: "rgba(247,242,232,0.2)" }}>
             Share on Instagram, WhatsApp, or X
           </p>
@@ -318,7 +326,7 @@ export default async function TicketPage({ params }: Props) {
 
       {/* Footer */}
       <p className="mt-10 text-[11px]" style={{ color: "rgba(247,242,232,0.2)" }}>
-        <a href={SITE_URL} className="hover:opacity-60 transition-opacity">{SITE_URL.replace(/^https?:\/\//, "")}</a>
+        <a href={SITE_URL} className="hover:opacity-60 transition-opacity">www.greenhousews.co.ke</a>
       </p>
     </main>
   );

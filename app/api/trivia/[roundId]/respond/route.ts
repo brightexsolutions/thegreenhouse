@@ -29,11 +29,35 @@ export async function POST(req: NextRequest, { params }: { params: { roundId: st
   if (round.status !== "active")
     return NextResponse.json({ error: "Round is no longer accepting answers" }, { status: 409 });
 
-  const q = round.trivia_questions as { type: string; correct_index: number | null } | null;
-  const isCorrect =
-    q?.type === "multiple_choice" && answer_index != null
-      ? answer_index === q.correct_index
-      : null; // open_input: no right/wrong
+  const q = round.trivia_questions as unknown as {
+    type: string;
+    correct_index: number | null;
+    correct_answer: string | null;
+    answer_keywords: string | null;
+  } | null;
+
+  let isCorrect: boolean | null = null;
+  if (q?.type === "multiple_choice" && answer_index != null) {
+    isCorrect = answer_index === q.correct_index;
+  } else if (q?.type === "open_input" && answer_text) {
+    // Keyword-based fuzzy match for open_input
+    const normalized = (s: string) => s.toLowerCase().replace(/[^\w\s]/g, "").trim();
+    const responseNorm = normalized(answer_text);
+    if (q.answer_keywords) {
+      const keywords = q.answer_keywords.split(",").map(k => normalized(k)).filter(Boolean);
+      if (keywords.length > 0) {
+        isCorrect = keywords.every(kw => responseNorm.includes(kw));
+      }
+    } else if (q.correct_answer) {
+      // Fallback: check if response contains ≥50% of words from correct answer
+      const answerWords = normalized(q.correct_answer).split(/\s+/).filter(w => w.length > 2);
+      if (answerWords.length > 0) {
+        const matchCount = answerWords.filter(w => responseNorm.includes(w)).length;
+        isCorrect = matchCount / answerWords.length >= 0.5;
+      }
+    }
+    // If no reference answer provided, leave isCorrect null (admin reviews manually)
+  }
 
   const { data, error } = await supabase
     .from("trivia_responses")

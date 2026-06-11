@@ -1,9 +1,9 @@
 import { createAdminClient } from "@/lib/supabase/server";
-import { PageHeader } from "@/components/admin/ui/page-header";
 import { SongsLibrary } from "@/components/admin/library/songs-library";
 import { EventPhotoUpload } from "@/components/admin/library/event-photo-upload";
 import { AttendeePhotoApproval } from "@/components/admin/library/attendee-photo-approval";
 import { TriviaLibrary } from "@/components/admin/library/trivia-library";
+import { ThemesLibrary } from "@/components/admin/library/themes-library";
 import Link from "next/link";
 import { Music2, Images, Palette, Camera, Sparkles } from "lucide-react";
 
@@ -21,7 +21,7 @@ export default async function LibraryPage({ searchParams }: Props) {
 
   const supabase = createAdminClient();
 
-  const [{ data: songs }, { data: events }] = await Promise.all([
+  const [{ data: songs }, { data: events }, { data: themes }] = await Promise.all([
     supabase
       .from("songs")
       .select("id, title, artist, lyrics, created_at")
@@ -29,15 +29,27 @@ export default async function LibraryPage({ searchParams }: Props) {
       .order("title", { ascending: true }),
     supabase
       .from("events")
-      .select("id, title, slug, event_date, theme_title, theme_scripture, theme_description")
+      .select("id, title, slug, event_date, theme_title, theme_scripture, theme_description, theme_id")
       .is("deleted_at", null)
       .order("event_date", { ascending: false }),
+    supabase
+      .from("themes")
+      .select("id, title, scripture, description, created_at")
+      .is("deleted_at", null)
+      .order("created_at", { ascending: false }),
   ]);
 
   const eventsForPhotos = (events ?? []).map(e => ({
     id:         (e as { id: string }).id,
     title:      (e as { title: string }).title,
     event_date: (e as { event_date: string }).event_date,
+  }));
+
+  const eventsForThemes = (events ?? []).map(e => ({
+    id:         (e as { id: string }).id,
+    title:      (e as { title: string }).title,
+    event_date: (e as { event_date: string }).event_date,
+    theme_id:   (e as { theme_id?: string | null }).theme_id ?? null,
   }));
 
   const TABS = [
@@ -49,79 +61,54 @@ export default async function LibraryPage({ searchParams }: Props) {
   ] as const;
 
   return (
-    <div className="flex flex-col gap-5">
-      <PageHeader
-        title="Library"
-        description="Manage songs, event photos, and themes"
-      />
+    <div className="flex flex-col h-full -m-6">
 
-      {/* Tab bar */}
-      <div className="flex items-center gap-1 bg-white rounded-2xl border border-mist p-1 w-fit">
-        {TABS.map(({ key, label, icon: Icon }) => (
-          <Link
-            key={key}
-            href={`/admin/library?tab=${key}`}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              activeTab === key ? "bg-forest text-cream shadow-sm" : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
-            }`}
-          >
-            <Icon size={14} />
-            {label}
-          </Link>
-        ))}
+      {/* ── Sticky header: title + tabs ── */}
+      <div className="sticky top-0 z-10 bg-off-white border-b border-mist px-6 pt-6 pb-3">
+        <div className="mb-4">
+          <h1 className="text-lg font-semibold text-charcoal leading-none">Library</h1>
+          <p className="text-sm text-charcoal/40 mt-1">Manage songs, event photos, and themes</p>
+        </div>
+
+        {/* Tab bar */}
+        <div className="flex items-center gap-1 bg-white rounded-2xl border border-mist p-1 w-fit">
+          {TABS.map(({ key, label, icon: Icon }) => (
+            <Link
+              key={key}
+              href={`/admin/library?tab=${key}`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                activeTab === key
+                  ? "bg-forest text-cream shadow-sm"
+                  : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
+              }`}
+            >
+              <Icon size={14} />
+              {label}
+            </Link>
+          ))}
+        </div>
+
       </div>
 
-      {activeTab === "songs" && (
-        <SongsLibrary initialSongs={(songs as unknown as Parameters<typeof SongsLibrary>[0]["initialSongs"]) ?? []} />
-      )}
-      {activeTab === "photos" && (
-        <EventPhotoUpload events={(events as unknown as Parameters<typeof EventPhotoUpload>[0]["events"]) ?? []} />
-      )}
-      {activeTab === "attendee-photos" && (
-        <AttendeePhotoApproval events={eventsForPhotos} />
-      )}
-      {activeTab === "trivia" && <TriviaLibrary />}
-      {activeTab === "themes" && (
-        <div className="space-y-3">
-          {(events ?? []).filter(e => (e as { theme_title?: string }).theme_title).map(ev => {
-            const e = ev as { id: string; title: string; slug: string; event_date: string; theme_title?: string; theme_scripture?: string; theme_description?: string };
-            return (
-              <div key={e.id} className="bg-white rounded-2xl border border-mist p-5">
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <p className="text-xs text-charcoal/40 mb-1">
-                      {new Date(e.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
-                      {" · "}{e.title.replace("The Green House — ", "")}
-                    </p>
-                    <h3 className="text-xl font-display font-semibold text-forest">{e.theme_title}</h3>
-                    {e.theme_scripture && (
-                      <p className="text-sm text-charcoal/50 mt-0.5 flex items-center gap-1.5">
-                        <Music2 size={12} /> {e.theme_scripture}
-                      </p>
-                    )}
-                    {e.theme_description && (
-                      <p className="text-sm text-charcoal/60 mt-2 leading-relaxed">{e.theme_description}</p>
-                    )}
-                  </div>
-                  <Link
-                    href={`/admin/events/${e.id}`}
-                    className="flex-shrink-0 text-xs text-forest bg-forest/8 hover:bg-forest/15 px-3 py-1.5 rounded-lg font-medium transition-colors"
-                  >
-                    Edit event
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-          {(events ?? []).filter(e => (e as { theme_title?: string }).theme_title).length === 0 && (
-            <div className="bg-white rounded-2xl border border-mist p-12 text-center">
-              <Palette size={24} className="text-charcoal/20 mx-auto mb-3" />
-              <p className="text-sm text-charcoal/40">No themes yet</p>
-              <p className="text-xs text-charcoal/25 mt-1">Add a theme when creating or editing an event</p>
-            </div>
-          )}
-        </div>
-      )}
+      {/* ── Scrollable content ── */}
+      <div className="flex-1 overflow-y-auto px-6 py-5">
+        {activeTab === "songs" && (
+          <SongsLibrary initialSongs={(songs as unknown as Parameters<typeof SongsLibrary>[0]["initialSongs"]) ?? []} />
+        )}
+        {activeTab === "photos" && (
+          <EventPhotoUpload events={(events as unknown as Parameters<typeof EventPhotoUpload>[0]["events"]) ?? []} />
+        )}
+        {activeTab === "attendee-photos" && (
+          <AttendeePhotoApproval events={eventsForPhotos} />
+        )}
+        {activeTab === "trivia" && <TriviaLibrary />}
+        {activeTab === "themes" && (
+          <ThemesLibrary
+            initialThemes={(themes as unknown as Parameters<typeof ThemesLibrary>[0]["initialThemes"]) ?? []}
+            events={eventsForThemes}
+          />
+        )}
+      </div>
     </div>
   );
 }

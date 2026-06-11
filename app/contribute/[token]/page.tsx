@@ -1,15 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Music2, ChevronDown, ChevronUp, Plus, Loader2, CheckCircle2, AlertCircle, Search } from "lucide-react";
+import { Music2, ChevronDown, ChevronUp, Plus, Loader2, CheckCircle2, AlertCircle, Search, Mic2, User, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Song {
-  id:         string;
-  title:      string;
-  artist:     string | null;
-  lyrics:     string | null;
-  created_at: string;
+  id:           string;
+  title:        string;
+  artist:       string | null;
+  lyrics:       string | null;
+  submitted_by: string | null;
+  created_at:   string;
 }
 
 interface EventInfo {
@@ -19,13 +20,21 @@ interface EventInfo {
   slug:       string;
 }
 
-function SongRow({ song }: { song: Song }) {
-  const [open, setOpen] = useState(false);
+const VOCALIST_KEY = "contribute_vocalist_name";
+const PAGE_SIZE    = 10;
 
+function getStoredVocalist(): string {
+  try { return localStorage.getItem(VOCALIST_KEY) ?? ""; } catch { return ""; }
+}
+function saveVocalist(name: string) {
+  try { localStorage.setItem(VOCALIST_KEY, name); } catch { /* ignore */ }
+}
+
+function SongRow({ song, isOpen, onToggle, showSubmitter }: { song: Song; isOpen: boolean; onToggle: () => void; showSubmitter?: boolean }) {
   return (
     <div className="border border-mist rounded-2xl overflow-hidden transition-all">
       <button
-        onClick={() => setOpen(v => !v)}
+        onClick={onToggle}
         className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-off-white transition-colors text-left"
       >
         <div className="w-8 h-8 rounded-full bg-forest/8 flex items-center justify-center flex-shrink-0">
@@ -33,7 +42,14 @@ function SongRow({ song }: { song: Song }) {
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-charcoal truncate">{song.title}</p>
-          {song.artist && <p className="text-xs text-charcoal/45 mt-0.5">{song.artist}</p>}
+          <div className="flex items-center gap-2 mt-0.5 flex-wrap">
+            {song.artist && <p className="text-xs text-charcoal/45">{song.artist}</p>}
+            {showSubmitter && song.submitted_by && (
+              <span className="text-[10px] text-charcoal/35 flex items-center gap-1">
+                <Mic2 size={9} className="inline" />{song.submitted_by}
+              </span>
+            )}
+          </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {song.lyrics ? (
@@ -41,11 +57,11 @@ function SongRow({ song }: { song: Song }) {
           ) : (
             <span className="text-[10px] text-charcoal/30 bg-charcoal/5 px-2 py-0.5 rounded-full">No lyrics</span>
           )}
-          {open ? <ChevronUp size={14} className="text-charcoal/30" /> : <ChevronDown size={14} className="text-charcoal/30" />}
+          {isOpen ? <ChevronUp size={14} className="text-charcoal/30" /> : <ChevronDown size={14} className="text-charcoal/30" />}
         </div>
       </button>
 
-      {open && (
+      {isOpen && (
         <div className="border-t border-mist px-4 py-4 bg-off-white">
           {song.lyrics ? (
             <pre className="text-sm text-charcoal/70 whitespace-pre-wrap font-sans leading-relaxed">
@@ -63,11 +79,19 @@ function SongRow({ song }: { song: Song }) {
 export default function ContributePage({ params }: { params: { token: string } }) {
   const { token } = params;
 
-  const [event,   setEvent]   = useState<EventInfo | null>(null);
-  const [songs,   setSongs]   = useState<Song[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [invalid, setInvalid] = useState(false);
-  const [query,   setQuery]   = useState("");
+  const [event,          setEvent]          = useState<EventInfo | null>(null);
+  const [songs,          setSongs]          = useState<Song[]>([]);
+  const [loading,        setLoading]        = useState(true);
+  const [invalid,        setInvalid]        = useState(false);
+  const [query,          setQuery]          = useState("");
+  const [tab,            setTab]            = useState<"all" | "mine">("all");
+  const [openSongId,     setOpenSongId]     = useState<string | null>(null);
+  const [visibleCount,   setVisibleCount]   = useState(PAGE_SIZE);
+
+  // Vocalist dialog
+  const [vocalistDialog, setVocalistDialog] = useState(false);
+  const [vocalistInput,  setVocalistInput]  = useState("");
+  const [vocalistName,   setVocalistName]   = useState<string | null>(null);
 
   // Form state
   const [title,    setTitle]    = useState("");
@@ -79,10 +103,32 @@ export default function ContributePage({ params }: { params: { token: string } }
   useEffect(() => {
     fetch(`/api/songs?token=${token}`)
       .then(r => r.ok ? r.json() : Promise.reject(r.status))
-      .then(({ event: ev, songs: s }) => { setEvent(ev); setSongs(s); })
+      .then(({ event: ev, songs: s }) => {
+        setEvent(ev);
+        setSongs(s);
+        // Show vocalist dialog after load — check stored name first
+        const stored = getStoredVocalist();
+        if (stored) {
+          setVocalistName(stored);
+        } else {
+          setTimeout(() => setVocalistDialog(true), 600);
+        }
+      })
       .catch(status => { if (status === 404) setInvalid(true); })
       .finally(() => setLoading(false));
   }, [token]);
+
+  function confirmVocalist() {
+    const name = vocalistInput.trim();
+    setVocalistName(name || null);
+    if (name) saveVocalist(name);
+    setVocalistDialog(false);
+  }
+
+  function dismissVocalist() {
+    setVocalistName(null);
+    setVocalistDialog(false);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -90,9 +136,9 @@ export default function ContributePage({ params }: { params: { token: string } }
     setSaving(true);
     setFeedback(null);
     const res = await fetch(`/api/songs?token=${token}`, {
-      method: "POST",
+      method:  "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ title, artist, lyrics }),
+      body:    JSON.stringify({ title, artist, lyrics, vocalist_name: vocalistName }),
     });
     const data = await res.json() as { song?: Song; error?: string; existing?: Song };
     setSaving(false);
@@ -108,10 +154,19 @@ export default function ContributePage({ params }: { params: { token: string } }
     }
   }
 
-  const filtered = songs.filter(s => {
+  const mySongs = vocalistName
+    ? songs.filter(s => s.submitted_by?.toLowerCase() === vocalistName.toLowerCase())
+    : [];
+
+  const baseList = tab === "mine" ? mySongs : songs;
+
+  const filtered = baseList.filter(s => {
     const q = query.toLowerCase();
     return !q || s.title.toLowerCase().includes(q) || (s.artist ?? "").toLowerCase().includes(q);
   });
+
+  const visibleSongs = filtered.slice(0, visibleCount);
+  const hasMore      = filtered.length > visibleCount;
 
   const formattedDate = event
     ? new Date(event.event_date).toLocaleDateString("en-KE", { weekday: "long", day: "numeric", month: "long", year: "numeric" })
@@ -141,6 +196,61 @@ export default function ContributePage({ params }: { params: { token: string } }
 
   return (
     <div className="min-h-screen bg-off-white">
+
+      {/* ── Vocalist dialog ── */}
+      {vocalistDialog && (
+        <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-9 h-9 rounded-xl bg-forest/8 flex items-center justify-center">
+                  <Mic2 size={16} className="text-forest" />
+                </div>
+                <h2 className="text-sm font-semibold text-charcoal">Will you be singing?</h2>
+              </div>
+              <button onClick={dismissVocalist} className="w-7 h-7 rounded-xl bg-charcoal/5 hover:bg-charcoal/10 flex items-center justify-center transition-colors">
+                <X size={13} className="text-charcoal/40" />
+              </button>
+            </div>
+
+            <p className="text-sm text-charcoal/60 mb-4 leading-relaxed">
+              Are you a vocalist for <span className="font-semibold text-charcoal">{event?.title.replace("The Green House — ", "")}</span>?
+              Add your name so your songs are credited to you on the program.
+            </p>
+
+            <div className="mb-4">
+              <label className="text-xs font-semibold text-charcoal/60 mb-1.5 block">Your preferred name</label>
+              <div className="relative">
+                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+                <input
+                  value={vocalistInput}
+                  onChange={e => setVocalistInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") confirmVocalist(); }}
+                  placeholder="e.g. Sarah M."
+                  autoFocus
+                  className="w-full pl-9 pr-4 py-3 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
+                />
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={confirmVocalist}
+                className="flex-1 py-3 rounded-xl bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
+              >
+                {vocalistInput.trim() ? "I'm a vocalist" : "Yes, I am"}
+              </button>
+              <button
+                onClick={dismissVocalist}
+                className="flex-1 py-3 rounded-xl border border-mist text-sm text-charcoal/60 hover:text-charcoal hover:border-charcoal/20 transition-colors"
+              >
+                Just browsing
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <div className="bg-forest text-cream px-4 py-6 md:px-6">
         <div className="max-w-xl mx-auto">
@@ -152,6 +262,29 @@ export default function ContributePage({ params }: { params: { token: string } }
           </div>
           <h1 className="font-display text-2xl font-semibold text-cream mt-2">{event?.title}</h1>
           <p className="text-sm text-cream/70 mt-0.5">{formattedDate}</p>
+          {vocalistName && (
+            <div className="flex items-center gap-2 mt-3">
+              <div className="flex items-center gap-1.5 bg-gold/15 text-gold px-3 py-1.5 rounded-full text-xs font-semibold">
+                <Mic2 size={11} />
+                Vocalist: {vocalistName}
+              </div>
+              <button
+                onClick={() => { setVocalistInput(vocalistName); setVocalistDialog(true); }}
+                className="text-[10px] text-cream/35 hover:text-cream/60 transition-colors"
+              >
+                Change
+              </button>
+            </div>
+          )}
+          {!vocalistName && !vocalistDialog && (
+            <button
+              onClick={() => { setVocalistInput(""); setVocalistDialog(true); }}
+              className="mt-3 flex items-center gap-1.5 text-xs text-cream/40 hover:text-cream/70 transition-colors"
+            >
+              <Mic2 size={11} />
+              Are you a vocalist? Tap to add your name
+            </button>
+          )}
           <p className="text-sm text-cream/55 mt-3">
             Add the songs you&apos;ll be singing. Others can see the full list and read lyrics.
           </p>
@@ -198,6 +331,13 @@ export default function ContributePage({ params }: { params: { token: string } }
               />
             </div>
 
+            {vocalistName && (
+              <p className="text-xs text-forest/70 bg-forest/5 px-3 py-2 rounded-xl flex items-center gap-1.5">
+                <Mic2 size={11} />
+                This song will be credited to <span className="font-semibold">{vocalistName}</span>
+              </p>
+            )}
+
             {feedback && (
               <div className={cn(
                 "flex items-start gap-2 px-3 py-2.5 rounded-xl text-xs",
@@ -231,32 +371,96 @@ export default function ContributePage({ params }: { params: { token: string } }
             </h2>
           </div>
 
-          {songs.length > 4 && (
+          {/* Tabs */}
+          <div className="flex gap-1 p-1 bg-charcoal/5 rounded-xl mb-3">
+            <button
+              onClick={() => { setTab("all"); setVisibleCount(PAGE_SIZE); setOpenSongId(null); }}
+              className={cn(
+                "flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                tab === "all" ? "bg-white text-charcoal shadow-sm" : "text-charcoal/45 hover:text-charcoal/70"
+              )}
+            >
+              All songs
+              {songs.length > 0 && <span className="ml-1 text-[10px] opacity-60">({songs.length})</span>}
+            </button>
+            <button
+              onClick={() => { setTab("mine"); setVisibleCount(PAGE_SIZE); setOpenSongId(null); }}
+              className={cn(
+                "flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all",
+                tab === "mine" ? "bg-white text-charcoal shadow-sm" : "text-charcoal/45 hover:text-charcoal/70"
+              )}
+            >
+              Mine
+              {mySongs.length > 0 && <span className="ml-1 text-[10px] opacity-60">({mySongs.length})</span>}
+            </button>
+          </div>
+
+          {/* "Mine" tab with no vocalist set */}
+          {tab === "mine" && !vocalistName && (
+            <div className="flex flex-col items-center py-8 bg-white rounded-2xl border border-mist mb-3">
+              <Mic2 size={20} className="text-charcoal/20 mb-2" />
+              <p className="text-sm text-charcoal/50 font-medium">Set your vocalist name first</p>
+              <button
+                onClick={() => { setVocalistInput(""); setVocalistDialog(true); }}
+                className="mt-3 px-4 py-2 rounded-xl bg-forest text-cream text-xs font-semibold hover:bg-moss transition-colors"
+              >
+                Add my name
+              </button>
+            </div>
+          )}
+
+          {/* Search — always visible when there are songs or a query */}
+          {(tab === "all" || vocalistName) && (
             <div className="relative mb-3">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
               <input
                 value={query}
-                onChange={e => setQuery(e.target.value)}
+                onChange={e => { setQuery(e.target.value); setVisibleCount(PAGE_SIZE); }}
                 placeholder="Search songs…"
-                className="w-full pl-9 pr-4 py-2 rounded-xl border border-mist bg-white text-sm placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-mist bg-white text-sm placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
               />
             </div>
           )}
 
-          {filtered.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-mist">
-              <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center mb-3">
-                <Music2 size={16} className="text-charcoal/20" />
+          {(tab === "all" || vocalistName) && (
+            visibleSongs.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-mist">
+                <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center mb-3">
+                  <Music2 size={16} className="text-charcoal/20" />
+                </div>
+                <p className="text-sm text-charcoal/40 font-medium">
+                  {query
+                    ? "No songs match your search"
+                    : tab === "mine"
+                    ? "You haven't submitted any songs yet"
+                    : "No songs submitted yet"}
+                </p>
+                {!query && tab === "all" && <p className="text-xs text-charcoal/25 mt-1">Be the first to add one above</p>}
               </div>
-              <p className="text-sm text-charcoal/40 font-medium">
-                {query ? "No songs match your search" : "No songs submitted yet"}
-              </p>
-              <p className="text-xs text-charcoal/25 mt-1">Be the first to add one above</p>
-            </div>
-          ) : (
-            <div className="space-y-2">
-              {filtered.map(song => <SongRow key={song.id} song={song} />)}
-            </div>
+            ) : (
+              <>
+                <div className="space-y-2">
+                  {visibleSongs.map(song => (
+                    <SongRow
+                      key={song.id}
+                      song={song}
+                      isOpen={openSongId === song.id}
+                      onToggle={() => setOpenSongId(prev => prev === song.id ? null : song.id)}
+                      showSubmitter={tab === "all"}
+                    />
+                  ))}
+                </div>
+
+                {hasMore && (
+                  <button
+                    onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
+                    className="w-full mt-3 py-3 rounded-xl border border-mist text-sm text-charcoal/50 hover:text-forest hover:border-forest/20 transition-all"
+                  >
+                    Load more ({filtered.length - visibleCount} remaining)
+                  </button>
+                )}
+              </>
+            )
           )}
         </div>
       </div>

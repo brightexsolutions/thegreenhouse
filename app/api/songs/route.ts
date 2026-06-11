@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 
   const { data: songs } = await supabase
     .from("songs")
-    .select("id, title, artist, lyrics, created_at")
+    .select("id, title, artist, lyrics, submitted_by, created_at")
     .is("deleted_at", null)
     .order("created_at", { ascending: false });
 
@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
 
   if (!event) return NextResponse.json({ error: "Invalid or expired link" }, { status: 404 });
 
-  const body = await req.json() as { title?: string; artist?: string; lyrics?: string };
+  const body = await req.json() as { title?: string; artist?: string; lyrics?: string; vocalist_name?: string };
   const title = body.title?.trim();
   if (!title) return NextResponse.json({ error: "Song title is required" }, { status: 400 });
 
@@ -62,8 +62,9 @@ export async function POST(req: NextRequest) {
     .from("songs")
     .insert({
       title,
-      artist: body.artist?.trim() || null,
-      lyrics: body.lyrics?.trim() || null,
+      artist:       body.artist?.trim() || null,
+      lyrics:       body.lyrics?.trim() || null,
+      submitted_by: body.vocalist_name?.trim() || null,
     })
     .select("id, title, artist, lyrics, created_at")
     .single();

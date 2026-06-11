@@ -15,7 +15,7 @@ export async function GET(_: NextRequest, { params }: { params: { roundId: strin
 
   if (error || !round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
 
-  const q = round.trivia_questions as {
+  const q = round.trivia_questions as unknown as {
     question: string; type: string; options: string[] | null;
     correct_index: number | null; hint: string | null; category: string; points: number;
   } | null;

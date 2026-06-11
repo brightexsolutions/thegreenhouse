@@ -1,17 +1,19 @@
 import { SITE_NAME, SITE_URL, CONTACT_EMAIL } from "./constants";
 
 interface TicketEmailData {
-  firstName:   string;
-  lastName:    string;
-  eventTitle:  string;
-  eventDate:   string;
-  eventTime:   string;
-  venueName:   string | null;
-  ticketToken: string;
-  ticketUrl:   string;
-  liveUrl?:    string | null;
-  isFree?:     boolean;
-  priceKes?:   number | null;
+  firstName:      string;
+  lastName:       string;
+  eventTitle:     string;
+  eventDate:      string;
+  eventTime:      string;
+  venueName:      string | null;
+  themeTitle?:    string | null;
+  themeScripture?: string | null;
+  ticketToken:    string;
+  ticketUrl:      string;
+  liveUrl?:       string | null;
+  isFree?:        boolean;
+  priceKes?:      number | null;
 }
 
 export function ticketEmailHtml(d: TicketEmailData): string {
@@ -33,6 +35,9 @@ export function ticketEmailHtml(d: TicketEmailData): string {
   .header h1 { color: #f7f2e8; font-size: 30px; font-weight: 700; margin: 14px 0 0; line-height: 1.2; }
   .body { background: #ffffff; border-radius: 0 0 16px 16px; padding: 32px 40px 40px; }
   .greeting { font-size: 16px; color: #1a1a18; line-height: 1.6; margin-bottom: 28px; }
+  .theme-block { background: linear-gradient(135deg,#1b3a2a,#0d2218); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+  .theme-title { color: #c9a24a; font-size: 19px; font-weight: 700; font-style: italic; margin: 0 0 4px; }
+  .theme-verse { color: rgba(247,242,232,0.6); font-size: 13px; margin: 0; }
   .detail-row { margin-bottom: 16px; }
   .detail-row table { border-collapse: collapse; width: 100%; }
   .detail-icon { width: 40px; height: 40px; background: #edf4f0; border-radius: 10px; text-align: center; vertical-align: top; font-size: 18px; line-height: 40px; padding: 0; }
@@ -59,6 +64,12 @@ export function ticketEmailHtml(d: TicketEmailData): string {
   </div>
   <div class="body">
     <p class="greeting">Your registration is confirmed. Here are the details for the evening — your PDF ticket is attached.</p>
+
+    ${d.themeTitle ? `
+    <div class="theme-block">
+      <p class="theme-title">${d.themeTitle}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+    </div>` : ""}
 
     <div class="detail-row">
       <table><tr>
@@ -126,7 +137,7 @@ export function ticketEmailText(d: TicketEmailData): string {
 Hi ${d.firstName},
 
 Your spot at ${d.eventTitle} is confirmed.
-
+${d.themeTitle ? `\nSession theme: ${d.themeTitle}${d.themeScripture ? ` — ${d.themeScripture}` : ""}\n` : ""}
 Date:  ${d.eventDate}
 Time:  ${d.eventTime}pm${d.venueName ? `\nVenue: ${d.venueName}` : ""}
 

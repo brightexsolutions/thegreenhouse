@@ -16,7 +16,7 @@ export function EventTabBar({ eventId }: { eventId: string }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex items-center gap-1 pt-3 -mb-px flex-shrink-0">
+    <div className="flex items-center gap-1 bg-white rounded-2xl border border-mist p-1 w-fit flex-shrink-0 mt-3">
       {TABS.map(({ href, label, icon: Icon, exact }) => {
         const to     = href(eventId);
         const active = exact ? pathname === to : pathname.startsWith(to);
@@ -25,10 +25,10 @@ export function EventTabBar({ eventId }: { eventId: string }) {
             key={to}
             href={to}
             className={cn(
-              "flex items-center gap-2 px-4 py-2.5 rounded-t-xl text-xs font-medium transition-all border-b-2 -mb-px",
+              "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
               active
-                ? "bg-white border-forest text-forest shadow-sm"
-                : "border-transparent text-charcoal/50 hover:text-charcoal hover:bg-white/60"
+                ? "bg-forest text-cream shadow-sm"
+                : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
             )}
           >
             <Icon size={13} />

@@ -193,8 +193,9 @@ interface TicketPdfProps {
   eventTime:   string;
   venueName:   string | null;
   dressCode:   string | null;
-  themeTitle:  string | null;
-  ticketToken: string;
+  themeTitle:      string | null;
+  themeScripture?: string | null;
+  ticketToken:     string;
   qrDataUrl:   string;
   siteName?:   string;
   siteUrl?:    string;

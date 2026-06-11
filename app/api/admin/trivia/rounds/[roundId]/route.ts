@@ -42,16 +42,51 @@ export async function GET(_: NextRequest, { params }: Params) {
   });
 }
 
-// PATCH /api/admin/trivia/rounds/[roundId] — reveal or close the round
+// PATCH /api/admin/trivia/rounds/[roundId] — reveal, close, dismiss, or finalize
 export async function PATCH(req: NextRequest, { params }: Params) {
   const supabase = createAdminClient();
   const { roundId } = params;
-  const { action } = await req.json() as { action: "reveal" | "close" };
+  const body = await req.json() as { action: "reveal" | "close" | "dismiss" | "finalize"; event_id?: string };
+  const { action } = body;
 
-  if (!["reveal", "close"].includes(action))
-    return NextResponse.json({ error: "action must be reveal or close" }, { status: 400 });
+  if (!["reveal", "close", "dismiss", "finalize"].includes(action))
+    return NextResponse.json({ error: "action must be reveal, close, dismiss, or finalize" }, { status: 400 });
 
   const now = new Date().toISOString();
+
+  // "dismiss" — clear trivia from display, go back to branding (next question flow)
+  if (action === "dismiss") {
+    const { data: round } = await supabase
+      .from("trivia_rounds")
+      .select("id, event_id")
+      .eq("id", roundId)
+      .single();
+    if (round?.event_id) {
+      await supabase
+        .from("display_state")
+        .update({ scene: "branding", trivia_round_id: null, custom_text: null, updated_at: now })
+        .eq("event_id", round.event_id);
+    }
+    return NextResponse.json({ ok: true });
+  }
+
+  // "finalize" — show aggregate final leaderboard on display
+  if (action === "finalize") {
+    const eventId = body.event_id;
+    if (eventId) {
+      await supabase
+        .from("display_state")
+        .update({ scene: "trivia", trivia_round_id: null, custom_text: "__final_leaderboard__", updated_at: now })
+        .eq("event_id", eventId);
+    }
+    // Also close the current round
+    await supabase
+      .from("trivia_rounds")
+      .update({ status: "closed", closed_at: now })
+      .eq("id", roundId);
+    return NextResponse.json({ ok: true });
+  }
+
   const patch =
     action === "reveal"
       ? { status: "revealing", revealed_at: now }
@@ -66,20 +101,9 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // On close: clear trivia_round_id from display_state + go back to branding
-  if (action === "close" && round?.event_id) {
-    await supabase
-      .from("display_state")
-      .update({
-        scene:           "branding",
-        trivia_round_id: null,
-        updated_at:      now,
-      })
-      .eq("event_id", round.event_id);
-  }
-
-  // On reveal: bump display_state updated_at so Realtime fires to attendees
-  if (action === "reveal" && round?.event_id) {
+  // On close: keep trivia scene + trivia_round_id so leaderboard stays on display
+  // Just bump updated_at so Realtime fires and the display knows round is now closed
+  if ((action === "reveal" || action === "close") && round?.event_id) {
     await supabase
       .from("display_state")
       .update({ updated_at: now })

@@ -73,10 +73,17 @@ type TriviaRound = {
   hint:          string | null;
 };
 
+type Respondent = {
+  name:         string | null;
+  submitted_at: string;
+  is_correct:   boolean | null;
+};
+
 type TriviaResults = {
-  total:   number;
-  correct: number;
-  tally:   Record<number, number>;
+  total:       number;
+  correct:     number;
+  tally:       Record<number, number>;
+  respondents: Respondent[];
 };
 
 const THEMES = {
@@ -158,6 +165,17 @@ function Particles({ color }: { color: string }) {
         @keyframes galleryFloat {
           0%, 100% { transform: translateY(0px); }
           50%       { transform: translateY(-14px); }
+        }
+        @keyframes correctPulse {
+          0%, 100% { box-shadow: 0 0 14px rgba(78,195,120,0.35), 0 4px 14px rgba(0,0,0,0.28); }
+          50%       { box-shadow: 0 0 38px rgba(78,195,120,0.70), 0 4px 14px rgba(0,0,0,0.28); }
+        }
+        @keyframes wrongShake {
+          0%, 100% { transform: translateX(0); }
+          20%       { transform: translateX(-5px); }
+          40%       { transform: translateX(5px); }
+          60%       { transform: translateX(-3px); }
+          80%       { transform: translateX(3px); }
         }
       `}</style>
       {PARTICLE_DATA.map(p => (
@@ -488,6 +506,60 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
         )}
       </AnimatePresence>
 
+      {/* Trivia: answered-avatar cloud floating in the left/right margins */}
+      <AnimatePresence>
+        {scene === "trivia" && triviaRound?.status === "active" && (triviaResults?.respondents?.length ?? 0) > 0 && (
+          <div key="trivia-cloud" className="absolute inset-0 overflow-hidden pointer-events-none" style={{ zIndex: 5 }} aria-hidden>
+            {triviaResults!.respondents.slice(0, 14).map((r, i) => {
+              const pos   = triviaAvatarPos(i);
+              const label = r.name ?? "G";
+              const [bg, fg] = avatarColor(r.name ?? `anon-${i}`);
+              const isLeft   = pos.x < 50;
+              return (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.3, y: 28 }}
+                  animate={{ opacity: 0.88, scale: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.3 }}
+                  transition={{ type: "spring", stiffness: 280, damping: 22, delay: i * 0.07 }}
+                  className="absolute"
+                  style={{ left: `${pos.x}%`, top: `${pos.y}%`, transform: "translate(-50%,-50%)" }}
+                >
+                  <div style={{ animation: `galleryFloat ${pos.floatDur}s ${pos.floatDel}s ease-in-out infinite` }}>
+                    <div className="flex items-center gap-1.5" style={{ flexDirection: isLeft ? "row" : "row-reverse" }}>
+                      {/* Avatar */}
+                      <div
+                        className="rounded-full flex items-center justify-center font-bold flex-shrink-0"
+                        style={{
+                          width: pos.size, height: pos.size,
+                          background: bg, color: fg,
+                          fontSize: Math.round(pos.size * 0.38),
+                          boxShadow: "0 4px 18px rgba(0,0,0,0.32)",
+                          border: "2px solid rgba(255,255,255,0.10)",
+                        }}
+                      >
+                        {label.charAt(0).toUpperCase()}
+                      </div>
+                      {/* Chat bubble */}
+                      <div
+                        className="rounded-full text-[9px] font-bold whitespace-nowrap px-2 py-0.5"
+                        style={{
+                          background: "rgba(78,195,120,0.18)",
+                          border: "1px solid rgba(78,195,120,0.38)",
+                          color: "#4ec378",
+                        }}
+                      >
+                        ✓ in
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
+        )}
+      </AnimatePresence>
+
       {/* Scene content (all non-gallery scenes, with padding) */}
       <div className="relative z-10 w-full h-full flex items-center justify-center p-12 md:p-20">
         <AnimatePresence mode="wait">
@@ -657,7 +729,8 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
                   results={triviaResults}
                   liveUrl={liveUrl}
                   t={t}
-                  themeKey={themeKey}
+                  isFinalLeaderboard={display.custom_text === "__final_leaderboard__" && !display.trivia_round_id}
+                  eventId={event?.id ?? null}
                 />
               )}
             </motion.div>
@@ -773,6 +846,9 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
             <QRCodeSVG value={liveUrl} size={160} bgColor={t.qrBg} fgColor={t.qrFg} level="M" />
             <p className="text-[10px] uppercase tracking-widest text-center" style={{ color: t.qrFg, opacity: 0.55 }}>
               Open on your phone
+            </p>
+            <p className="text-[11px] font-bold text-center tracking-wide" style={{ color: t.qrFg, opacity: 0.85 }}>
+              {liveUrl.replace(/^https?:\/\//, "")}
             </p>
             <p className="text-[9px] font-mono" style={{ color: t.qrFg, opacity: 0.3 }}>
               Program · Lyrics · Feedback
@@ -909,6 +985,20 @@ function avatarPos(i: number, total: number) {
 function bubbleDelay(i: number) { return 2 + (i * 4.7) % 18; }
 function bubbleDur(i: number)   { return 3.5 + (i * 1.3) % 3; }
 
+// Scatter positions for trivia "answered" avatars — left + right margins only
+function triviaAvatarPos(i: number) {
+  const isLeft  = i % 2 === 0;
+  const sideI   = Math.floor(i / 2);
+  const x       = isLeft
+    ? 2  + (sideI % 5) * 3.5          // 2 → 16% from left edge
+    : 83 + (sideI % 4) * 3.8;         // 83 → 95% (right edge)
+  const y       = 8 + ((sideI * 22) + (isLeft ? 0 : 11)) % 74;
+  const size    = 40 + (i % 4) * 8;   // 40–64 px
+  const floatDur = 4 + (i % 5) * 0.9;
+  const floatDel = (i * 0.6) % 4.2;
+  return { x, y, size, floatDur, floatDel };
+}
+
 const OPTION_COLORS_DISPLAY = [
   { bg: "rgba(201,162,74,0.18)",  border: "rgba(201,162,74,0.55)",  text: "#c9a24a",  fill: "#c9a24a"  },
   { bg: "rgba(78,195,120,0.15)",  border: "rgba(78,195,120,0.5)",   text: "#4ec378",  fill: "#4ec378"  },
@@ -917,16 +1007,22 @@ const OPTION_COLORS_DISPLAY = [
 ];
 
 function TriviaScene({
-  round, results, liveUrl, t, themeKey,
+  round, results, liveUrl, t, isFinalLeaderboard, eventId,
 }: {
-  round:     TriviaRound | null;
-  results:   TriviaResults | null;
-  liveUrl:   string;
-  t:         typeof THEMES[ThemeKey];
-  themeKey:  ThemeKey;
+  round:               TriviaRound | null;
+  results:             TriviaResults | null;
+  liveUrl:             string;
+  t:                   typeof THEMES[ThemeKey];
+  isFinalLeaderboard?: boolean;
+  eventId?:            string | null;
 }) {
   const [elapsed, setElapsed] = useState(0);
   const [showConfetti, setShowConfetti] = useState(false);
+  const [finalData, setFinalData] = useState<{
+    rankings: { name: string; correct: number; rank: number }[];
+    totalPlayers: number;
+    totalRounds: number;
+  } | null>(null);
 
   // Timer counting up from start
   useEffect(() => {
@@ -936,16 +1032,42 @@ function TriviaScene({
     return () => clearInterval(id);
   }, [round?.started_at]);
 
-  // Confetti burst on reveal
+  // Confetti burst on reveal or close
   useEffect(() => {
-    if (round?.status === "revealing") { setShowConfetti(true); setTimeout(() => setShowConfetti(false), 4000); }
+    if (round?.status === "revealing" || round?.status === "closed") {
+      setShowConfetti(true);
+      setTimeout(() => setShowConfetti(false), 5000);
+    }
   }, [round?.status]);
 
+  // Fetch aggregate data when final leaderboard is triggered
+  useEffect(() => {
+    if (!isFinalLeaderboard || !eventId) return;
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 6000);
+    fetch(`/api/trivia/final?event_id=${eventId}`)
+      .then(r => r.json())
+      .then(d => setFinalData(d))
+      .catch(() => {});
+  }, [isFinalLeaderboard, eventId]);
+
   const isRevealing  = round?.status === "revealing";
+  const isClosed     = round?.status === "closed";
   const totalVotes   = results?.total ?? 0;
   const tally        = results?.tally ?? {};
   const timerLeft    = round?.timer_seconds ? Math.max(0, round.timer_seconds - elapsed) : null;
   const timerPct     = round?.timer_seconds ? (timerLeft! / round.timer_seconds) * 100 : null;
+
+  // Final leaderboard — aggregate across all rounds
+  if (isFinalLeaderboard) {
+    return (
+      <TriviaFinalLeaderboard
+        data={finalData}
+        t={t}
+        showConfetti={showConfetti}
+      />
+    );
+  }
 
   if (!round) {
     return (
@@ -953,6 +1075,18 @@ function TriviaScene({
         <Sparkles size={60} style={{ color: t.gold, opacity: 0.3 }} />
         <p className="font-display text-4xl font-medium" style={{ color: t.sub }}>Trivia loading…</p>
       </div>
+    );
+  }
+
+  // When round is closed → per-question leaderboard celebration
+  if (isClosed) {
+    return (
+      <TriviaLeaderboardCelebration
+        respondents={results?.respondents ?? []}
+        results={results}
+        t={t}
+        showConfetti={showConfetti}
+      />
     );
   }
 
@@ -1108,29 +1242,28 @@ function TriviaScene({
             <p className="text-base md:text-lg font-display font-medium" style={{ color: t.sub }}>
               Haven&apos;t joined yet?
             </p>
-            <p className="text-sm" style={{ color: t.sub, opacity: 0.5 }}>
+            <p className="text-sm mb-3" style={{ color: t.sub, opacity: 0.5 }}>
               Scan the QR or visit the live page<br />to participate in trivia
+            </p>
+            <p className="text-xs mb-1" style={{ color: t.sub, opacity: 0.45 }}>
+              Or type the link below on your browser:
+            </p>
+            <p className="text-sm font-bold tracking-wide break-all"
+              style={{ color: t.sub, opacity: 0.9 }}>
+              {liveUrl.replace(/^https?:\/\//, "")}
             </p>
           </div>
         </div>
       )}
 
-      {/* Reveal celebration */}
-      {isRevealing && round.type === "multiple_choice" && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 20 }}
-          className="text-center"
-        >
-          <p className="font-display text-3xl md:text-4xl font-bold" style={{ color: "#4ec378" }}>
-            {results?.correct === 0
-              ? "Tough one! 🤔"
-              : results!.correct === totalVotes
-              ? "Everyone got it! 🎉"
-              : `${results?.correct} out of ${totalVotes} nailed it! 🎉`}
-          </p>
-        </motion.div>
+      {/* Reveal: top-5 podium + summary counts */}
+      {isRevealing && round && (
+        <TriviaRevealPodium
+          respondents={results?.respondents ?? []}
+          results={results}
+          round={round}
+          t={t}
+        />
       )}
     </div>
   );
@@ -1165,6 +1298,501 @@ function ConfettiBurst({ color }: { color: string }) {
             animation: `confettiFall ${p.dur}s ${p.del}s linear forwards`,
           }} />
       ))}
+    </div>
+  );
+}
+
+const RANK_COLORS = [
+  "#c9a24a",                    // 1st — gold
+  "rgba(200,208,216,0.85)",     // 2nd — silver
+  "rgba(180,125,70,0.85)",      // 3rd — bronze
+  "rgba(255,255,255,0.18)",     // 4th
+  "rgba(255,255,255,0.18)",     // 5th
+];
+const RANK_TEXT = ["#1b3a2a", "#1b3a2a", "#1b3a2a", "rgba(247,242,232,0.5)", "rgba(247,242,232,0.5)"];
+
+function TriviaRevealPodium({
+  respondents, results, round, t,
+}: {
+  respondents: Respondent[];
+  results:     TriviaResults | null;
+  round:       TriviaRound;
+  t:           typeof THEMES[ThemeKey];
+}) {
+  const top5       = respondents.slice(0, 5);
+  const totalVotes = results?.total ?? 0;
+  const isMC       = round.type === "multiple_choice";
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 14 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: 0.28, duration: 0.5, ease: "easeOut" }}
+      className="w-full space-y-5"
+    >
+      {/* "First to answer" label */}
+      {top5.length > 0 && (
+        <motion.p
+          initial={{ opacity: 0, letterSpacing: "0.05em" }}
+          animate={{ opacity: 1, letterSpacing: "0.38em" }}
+          transition={{ delay: 0.32, duration: 0.6 }}
+          className="text-center text-[10px] uppercase font-bold"
+          style={{ color: t.goldSub }}
+        >
+          ⚡ First to answer
+        </motion.p>
+      )}
+
+      {/* Avatar row */}
+      <div className="flex justify-center items-end gap-5 md:gap-8">
+        {top5.map((r, i) => {
+          const label   = r.name || "Guest";
+          const [bg, fg] = avatarColor(r.name ?? `anon-${i}`);
+          const sz       = i === 0 ? 68 : i < 3 ? 56 : 46;
+          const correct  = r.is_correct;
+          const isWrong  = isMC && correct === false;
+          const isRight  = isMC && correct === true;
+
+          return (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, scale: 0.25, y: 36 }}
+              animate={isWrong
+                ? { opacity: 0.42, scale: 1, y: 0, x: [0, -6, 6, -4, 4, 0] }
+                : {
+                    opacity: 1,
+                    scale:   [0.25, 1.18, 0.92, 1.06, 1],
+                    y:       0,
+                  }
+              }
+              transition={isWrong
+                ? { delay: 0.5 + i * 0.13, duration: 0.45, ease: "easeOut" }
+                : {
+                    delay:    0.5 + i * 0.13,
+                    duration: 0.62,
+                    times:    [0, 0.5, 0.72, 0.88, 1],
+                    ease:     "easeOut",
+                  }
+              }
+              className="flex flex-col items-center gap-1.5"
+            >
+              {/* Rank chip */}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.5 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.56 + i * 0.13, type: "spring", stiffness: 420, damping: 22 }}
+                className="rounded-full flex items-center justify-center font-bold"
+                style={{
+                  width: 20, height: 20, fontSize: 9,
+                  background: RANK_COLORS[i],
+                  color:      RANK_TEXT[i],
+                  boxShadow:  i === 0 ? `0 0 12px ${t.gold}88` : "none",
+                }}
+              >
+                {i + 1}
+              </motion.div>
+
+              {/* Avatar circle */}
+              <div
+                className="relative rounded-full flex items-center justify-center font-bold"
+                style={{
+                  width:     sz,
+                  height:    sz,
+                  background: isWrong ? "rgba(40,40,40,0.75)" : bg,
+                  color:      isWrong ? "rgba(255,255,255,0.3)" : fg,
+                  fontSize:   Math.round(sz * 0.36),
+                  border:     i === 0 && !isWrong
+                    ? `2.5px solid ${t.gold}`
+                    : "2px solid rgba(255,255,255,0.10)",
+                  animation:  isRight
+                    ? `correctPulse 2.6s ${0.82 + i * 0.13}s ease-in-out infinite`
+                    : isWrong
+                    ? `wrongShake 0.45s ${0.5 + i * 0.13}s ease-out 1`
+                    : undefined,
+                  boxShadow:  isRight
+                    ? `0 0 28px rgba(78,195,120,0.45), 0 4px 14px rgba(0,0,0,0.3)`
+                    : i === 0
+                    ? `0 0 20px ${t.gold}44, 0 4px 14px rgba(0,0,0,0.3)`
+                    : "0 4px 12px rgba(0,0,0,0.25)",
+                }}
+              >
+                {label.charAt(0).toUpperCase()}
+
+                {/* ✓ / ✗ badge (MC only) */}
+                {isMC && correct !== null && (
+                  <motion.div
+                    initial={{ scale: 0, rotate: -50 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.8 + i * 0.13, type: "spring", stiffness: 480, damping: 18 }}
+                    className="absolute -bottom-1 -right-1 rounded-full flex items-center justify-center font-bold"
+                    style={{
+                      width:      22,
+                      height:     22,
+                      fontSize:   12,
+                      background: correct ? "#4ec378" : "#ef4444",
+                      border:     "1.5px solid rgba(0,0,0,0.22)",
+                      color:      "#fff",
+                    }}
+                  >
+                    {correct ? "✓" : "✗"}
+                  </motion.div>
+                )}
+              </div>
+
+              {/* Name label */}
+              <motion.p
+                initial={{ opacity: 0 }}
+                animate={{ opacity: isWrong ? 0.38 : 1 }}
+                transition={{ delay: 0.68 + i * 0.13 }}
+                className="text-center font-medium leading-tight"
+                style={{ color: t.text, fontSize: i === 0 ? 13 : 11, maxWidth: 76 }}
+              >
+                {label.length > 10 ? `${label.slice(0, 9)}…` : label}
+              </motion.p>
+            </motion.div>
+          );
+        })}
+      </div>
+
+      {/* Correct / wrong summary counts */}
+      <motion.div
+        initial={{ opacity: 0, y: 8 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.96 }}
+        className="flex items-center justify-center gap-5"
+      >
+        {isMC ? (
+          <>
+            <div
+              className="flex items-center gap-2.5 px-5 py-2.5 rounded-2xl"
+              style={{ background: "rgba(78,195,120,0.15)", border: "1px solid rgba(78,195,120,0.32)" }}
+            >
+              <span className="text-3xl md:text-4xl font-bold tabular-nums" style={{ color: "#4ec378" }}>
+                {results?.correct ?? 0}
+              </span>
+              <span className="text-sm md:text-base font-semibold" style={{ color: "#4ec378", opacity: 0.88 }}>
+                correct
+              </span>
+            </div>
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: t.border, opacity: 0.5 }} />
+            <div
+              className="flex items-center gap-2.5 px-5 py-2.5 rounded-2xl"
+              style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.26)" }}
+            >
+              <span className="text-3xl md:text-4xl font-bold tabular-nums" style={{ color: "#f87171" }}>
+                {totalVotes - (results?.correct ?? 0)}
+              </span>
+              <span className="text-sm md:text-base font-semibold" style={{ color: "#f87171", opacity: 0.88 }}>
+                wrong
+              </span>
+            </div>
+          </>
+        ) : (
+          <p className="text-xl md:text-2xl font-display font-semibold" style={{ color: t.sub }}>
+            {totalVotes} response{totalVotes !== 1 ? "s" : ""} shared
+          </p>
+        )}
+      </motion.div>
+    </motion.div>
+  );
+}
+
+const RANK_MEDALS = ["🥇", "🥈", "🥉", "4th", "5th"];
+const RANK_SIZES  = [128, 104, 96, 80, 80];
+
+function TriviaFinalLeaderboard({
+  data, t, showConfetti,
+}: {
+  data:         { rankings: { name: string; correct: number; rank: number }[]; totalPlayers: number; totalRounds: number } | null;
+  t:            typeof THEMES[ThemeKey];
+  showConfetti: boolean;
+}) {
+  const rankings = data?.rankings ?? [];
+  return (
+    <div className="relative w-full flex flex-col items-center gap-8 px-4">
+      {showConfetti && (
+        <>
+          <ConfettiBurst color={t.gold} />
+          <ConfettiBurst color="#4ec378" />
+          <ConfettiBurst color="#f7f2e8" />
+        </>
+      )}
+
+      {/* Stars */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        {Array.from({ length: 20 }).map((_, i) => (
+          <div
+            key={i}
+            className="absolute text-2xl animate-[floatUp_3s_ease-in-out_infinite]"
+            style={{
+              left:             `${5 + (i * 4.8) % 90}%`,
+              top:              `${10 + (i * 7.3) % 70}%`,
+              animationDelay:   `${(i * 0.35) % 3}s`,
+              animationDuration:`${2.5 + (i % 3) * 0.5}s`,
+              opacity:          0.18,
+            }}
+          >
+            {["🌟", "✨", "⭐", "💫"][i % 4]}
+          </div>
+        ))}
+      </div>
+
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center"
+      >
+        <div className="text-5xl md:text-7xl mb-3">🏆</div>
+        <p className="font-display text-4xl md:text-6xl font-bold" style={{ color: t.gold }}>Trivia Over!</p>
+        {data && (
+          <p className="text-base md:text-lg mt-2" style={{ color: t.sub }}>
+            {data.totalRounds} question{data.totalRounds !== 1 ? "s" : ""} · {data.totalPlayers} player{data.totalPlayers !== 1 ? "s" : ""}
+          </p>
+        )}
+      </motion.div>
+
+      {/* Rankings */}
+      {rankings.length === 0 ? (
+        <p className="text-xl font-display" style={{ color: t.sub }}>No correct answers yet</p>
+      ) : (
+        <div className="w-full max-w-2xl space-y-3">
+          {rankings.map((r, i) => (
+            <motion.div
+              key={r.name}
+              initial={{ opacity: 0, x: -30 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: i * 0.1 + 0.3, type: "spring", stiffness: 200 }}
+              className="flex items-center gap-4 px-5 py-4 rounded-2xl"
+              style={{
+                background: i === 0 ? "rgba(201,162,74,0.18)" : "rgba(255,255,255,0.06)",
+                border:     i === 0 ? `1px solid ${t.gold}55` : "1px solid rgba(255,255,255,0.08)",
+              }}
+            >
+              <span className="text-2xl w-8 text-center flex-shrink-0">{RANK_MEDALS[i] ?? `${i + 1}.`}</span>
+              <p className="flex-1 font-display text-xl md:text-2xl font-semibold truncate" style={{ color: i === 0 ? t.gold : t.text }}>
+                {r.name}
+              </p>
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                <span className="text-2xl md:text-3xl font-bold tabular-nums" style={{ color: i === 0 ? t.gold : "#4ec378" }}>
+                  {r.correct}
+                </span>
+                <span className="text-sm" style={{ color: t.sub }}>correct</span>
+              </div>
+            </motion.div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function TriviaLeaderboardCelebration({
+  respondents, results, t, showConfetti,
+}: {
+  respondents: Respondent[];
+  results:     TriviaResults | null;
+  t:           typeof THEMES[ThemeKey];
+  showConfetti: boolean;
+}) {
+  const top5       = respondents.slice(0, 5);
+  const totalVotes = results?.total ?? 0;
+  const correct    = results?.correct ?? 0;
+  const wrong      = totalVotes - correct;
+
+  return (
+    <div className="relative w-full h-full flex flex-col items-center justify-center gap-0 overflow-hidden">
+      {/* Multi-source confetti */}
+      {showConfetti && (
+        <>
+          <ConfettiBurst color={t.gold} />
+          <ConfettiBurst color="#4ec378" />
+          <ConfettiBurst color="#f7f2e8" />
+        </>
+      )}
+
+      {/* Floating stars background */}
+      <style>{`
+        @keyframes floatUp {
+          0%   { opacity: 0; transform: translateY(0) scale(0.5) rotate(0deg); }
+          20%  { opacity: 1; }
+          100% { opacity: 0; transform: translateY(-80vh) scale(1.2) rotate(360deg); }
+        }
+        @keyframes celebPulse {
+          0%, 100% { transform: scale(1); box-shadow: 0 0 30px rgba(201,162,74,0.5); }
+          50%       { transform: scale(1.06); box-shadow: 0 0 55px rgba(201,162,74,0.8); }
+        }
+      `}</style>
+      {Array.from({ length: 18 }).map((_, i) => (
+        <div key={i} className="absolute pointer-events-none select-none text-xl"
+          style={{
+            left:      `${5 + (i * 5.8) % 92}%`,
+            bottom:    `${(i * 37) % 30}%`,
+            opacity:   0,
+            animation: `floatUp ${3 + (i % 4)}s ${(i * 0.4) % 3}s ease-in-out infinite`,
+          }}>
+          {["✨", "⭐", "🌟", "💫"][i % 4]}
+        </div>
+      ))}
+
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: -24 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.55, ease: "easeOut" }}
+        className="flex flex-col items-center gap-2 mb-8"
+      >
+        <div className="flex items-center gap-3 px-5 py-2.5 rounded-full"
+          style={{ background: `${t.gold}22`, border: `1.5px solid ${t.gold}55` }}>
+          <span className="text-2xl">🏆</span>
+          <span className="font-bold uppercase tracking-[0.25em] text-lg md:text-xl"
+            style={{ color: t.gold }}>Round Over!</span>
+          <span className="text-2xl">🏆</span>
+        </div>
+        {top5.length > 0 && (
+          <motion.p
+            initial={{ opacity: 0, letterSpacing: "0.04em" }}
+            animate={{ opacity: 1, letterSpacing: "0.35em" }}
+            transition={{ delay: 0.35, duration: 0.6 }}
+            className="text-sm uppercase font-semibold"
+            style={{ color: t.goldSub }}
+          >
+            ⚡ First to get it right
+          </motion.p>
+        )}
+      </motion.div>
+
+      {/* Leaderboard avatar row */}
+      {top5.length > 0 ? (
+        <div className="flex justify-center items-end gap-6 md:gap-10 mb-8">
+          {top5.map((r, i) => {
+            const label      = r.name || "Guest";
+            const [bg, fg]   = avatarColor(r.name ?? `anon-${i}`);
+            const sz         = RANK_SIZES[i];
+            const isChampion = i === 0;
+
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.2, y: 60 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                transition={{
+                  delay:    0.3 + i * 0.18,
+                  duration: 0.7,
+                  type:     "spring",
+                  stiffness: 260,
+                  damping:  18,
+                }}
+                className="flex flex-col items-center gap-3"
+              >
+                {/* Medal / rank */}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.5 + i * 0.18, type: "spring", stiffness: 400, damping: 20 }}
+                  className="text-2xl md:text-3xl"
+                  style={{ lineHeight: 1 }}
+                >
+                  {RANK_MEDALS[i]}
+                </motion.div>
+
+                {/* Avatar */}
+                <div
+                  className="relative rounded-full flex items-center justify-center font-bold flex-shrink-0"
+                  style={{
+                    width:     sz,
+                    height:    sz,
+                    background: bg,
+                    color:      fg,
+                    fontSize:   Math.round(sz * 0.38),
+                    border:     isChampion
+                      ? `4px solid ${t.gold}`
+                      : i < 3
+                      ? `3px solid rgba(255,255,255,0.25)`
+                      : `2px solid rgba(255,255,255,0.12)`,
+                    animation: isChampion ? "celebPulse 2.2s 1.2s ease-in-out infinite" : undefined,
+                    boxShadow: isChampion
+                      ? `0 0 40px rgba(201,162,74,0.6), 0 8px 24px rgba(0,0,0,0.4)`
+                      : i < 3
+                      ? `0 6px 20px rgba(0,0,0,0.35)`
+                      : `0 4px 12px rgba(0,0,0,0.25)`,
+                  }}
+                >
+                  {label.charAt(0).toUpperCase()}
+
+                  {/* ✓ badge */}
+                  <motion.div
+                    initial={{ scale: 0, rotate: -60 }}
+                    animate={{ scale: 1, rotate: 0 }}
+                    transition={{ delay: 0.75 + i * 0.18, type: "spring", stiffness: 500, damping: 20 }}
+                    className="absolute -bottom-1 -right-1 rounded-full flex items-center justify-center font-bold"
+                    style={{
+                      width: Math.round(sz * 0.28), height: Math.round(sz * 0.28),
+                      fontSize: Math.round(sz * 0.15),
+                      background: "#4ec378",
+                      border: "2px solid rgba(0,0,0,0.2)",
+                      color: "#fff",
+                    }}
+                  >✓</motion.div>
+                </div>
+
+                {/* Name */}
+                <motion.p
+                  initial={{ opacity: 0, y: 6 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.62 + i * 0.18 }}
+                  className="text-center font-semibold leading-tight"
+                  style={{
+                    color:    t.text,
+                    fontSize: isChampion ? "clamp(0.85rem,1.8vw,1.1rem)" : "clamp(0.72rem,1.5vw,0.95rem)",
+                    maxWidth: sz + 20,
+                  }}
+                >
+                  {label.length > 14 ? `${label.slice(0, 13)}…` : label}
+                </motion.p>
+              </motion.div>
+            );
+          })}
+        </div>
+      ) : (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.5 }}
+          className="mb-8 flex flex-col items-center gap-3"
+        >
+          <span className="text-5xl">🤔</span>
+          <p className="font-display text-2xl md:text-3xl" style={{ color: t.sub }}>
+            No correct answers this round
+          </p>
+        </motion.div>
+      )}
+
+      {/* Summary counts */}
+      <motion.div
+        initial={{ opacity: 0, y: 16 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.85 }}
+        className="flex items-center gap-3 md:gap-6"
+      >
+        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl"
+          style={{ background: `${t.surface}`, border: `1px solid ${t.border}` }}>
+          <span className="text-3xl md:text-4xl font-bold tabular-nums" style={{ color: t.sub }}>{totalVotes}</span>
+          <span className="text-sm md:text-base font-semibold" style={{ color: t.sub, opacity: 0.65 }}>played</span>
+        </div>
+        <div className="w-2 h-2 rounded-full" style={{ background: t.border, opacity: 0.4 }} />
+        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl"
+          style={{ background: "rgba(78,195,120,0.15)", border: "1px solid rgba(78,195,120,0.32)" }}>
+          <span className="text-3xl md:text-4xl font-bold tabular-nums" style={{ color: "#4ec378" }}>{correct}</span>
+          <span className="text-sm md:text-base font-semibold" style={{ color: "#4ec378", opacity: 0.88 }}>correct</span>
+        </div>
+        <div className="w-2 h-2 rounded-full" style={{ background: t.border, opacity: 0.4 }} />
+        <div className="flex items-center gap-3 px-5 py-3 rounded-2xl"
+          style={{ background: "rgba(239,68,68,0.12)", border: "1px solid rgba(239,68,68,0.26)" }}>
+          <span className="text-3xl md:text-4xl font-bold tabular-nums" style={{ color: "#f87171" }}>{wrong}</span>
+          <span className="text-sm md:text-base font-semibold" style={{ color: "#f87171", opacity: 0.88 }}>wrong</span>
+        </div>
+      </motion.div>
     </div>
   );
 }

@@ -7,7 +7,7 @@ import {
   Tv2, Music, ChevronLeft, ChevronRight, ChevronDown, Clock, Users,
   BookOpen, Heart, Zap, AlignLeft, MessageSquare, Loader2,
   ExternalLink, QrCode, Sun, Moon, Leaf, Images,
-  CheckCircle2, X, Sparkles, Play, Eye, Square,
+  CheckCircle2, X, Sparkles, Play, Eye, Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -38,8 +38,16 @@ type TriviaQuestion = {
 };
 
 type TriviaRound = {
-  id:     string;
-  status: "active" | "revealing" | "closed";
+  id:            string;
+  status:        "active" | "revealing" | "closed";
+  question?:     string;
+  type?:         "multiple_choice" | "open_input";
+  options?:      string[] | null;
+  correct_index?: number | null;
+  points?:       number;
+  hint?:         string | null;
+  timer_seconds?: number | null;
+  started_at?:   string;
 };
 
 type Song = { id: string; title: string; artist: string | null; lyrics: string | null };
@@ -118,6 +126,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const [display,    setDisplay]    = useState<DisplayState | null>(null);
   const [saving,     setSaving]     = useState(false);
   const [customText, setCustomText] = useState("");
+  const [focusTab,   setFocusTab]   = useState<"all" | "music" | "scenes" | "trivia" | "feedback">("all");
   const [activeSong, setActiveSong] = useState<Song | null>(null);
 
   // Feedback state
@@ -295,16 +304,66 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ action }),
     });
-    if (res.ok && action === "close" && event) {
-      // Don't wait for Realtime — clear trivia state immediately so launch controls reappear
-      setTriviaRound(null);
-      setTriviaCount(0);
-      setTriviaCorrect(0);
-      const { data } = await supabase.from("display_state").select("*").eq("event_id", event.id).maybeSingle();
-      if (data) setDisplay(data as DisplayState);
-      // Refresh used question history
-      loadUsedQIds(event.id);
+    if (res.ok) {
+      // Refresh round state so control reflects new status
+      const { data: rd } = await supabase
+        .from("trivia_rounds")
+        .select("id, status, question_id, trivia_questions(question, type, options, correct_index, points, hint)")
+        .eq("id", roundId)
+        .single();
+      if (rd) {
+        type TQ = { question: string; type: string; options: string[] | null; correct_index: number | null; points: number; hint: string | null };
+        const tq = (Array.isArray(rd.trivia_questions) ? rd.trivia_questions[0] : rd.trivia_questions) as TQ | null;
+        setTriviaRound({
+        id:            rd.id,
+        status:        rd.status as "active" | "revealing" | "closed",
+        question:      tq?.question ?? "",
+        type:          (tq?.type ?? "multiple_choice") as "multiple_choice" | "open_input",
+        options:       tq?.options ?? null,
+        correct_index: tq?.correct_index ?? null,
+        points:        tq?.points ?? 10,
+        hint:          tq?.hint ?? null,
+        timer_seconds: null,
+        started_at:    "",
+        });
+      }
     }
+    setTriviaLoading(false);
+  }
+
+  async function dismissTrivia() {
+    const roundId = display?.trivia_round_id ?? triviaRound?.id;
+    if (!roundId || !event) return;
+    setTriviaLoading(true);
+    await fetch(`/api/admin/trivia/rounds/${roundId}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ action: "dismiss" }),
+    });
+    setTriviaRound(null);
+    setTriviaCount(0);
+    setTriviaCorrect(0);
+    const { data } = await supabase.from("display_state").select("*").eq("event_id", event.id).maybeSingle();
+    if (data) setDisplay(data as DisplayState);
+    loadUsedQIds(event.id);
+    setTriviaLoading(false);
+  }
+
+  async function finalizeTrivia() {
+    const roundId = display?.trivia_round_id ?? triviaRound?.id;
+    if (!roundId || !event) return;
+    setTriviaLoading(true);
+    await fetch(`/api/admin/trivia/rounds/${roundId}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ action: "finalize", event_id: event.id }),
+    });
+    setTriviaRound(null);
+    setTriviaCount(0);
+    setTriviaCorrect(0);
+    const { data } = await supabase.from("display_state").select("*").eq("event_id", event.id).maybeSingle();
+    if (data) setDisplay(data as DisplayState);
+    loadUsedQIds(event.id);
     setTriviaLoading(false);
   }
 
@@ -443,9 +502,36 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       </div>
 
       {/* Current scene chip */}
-      <div className="bg-cream/10 rounded-2xl px-4 py-3 mb-5 flex items-center justify-between">
+      <div className="bg-cream/10 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between">
         <span className="text-xs text-cream/50">Current scene</span>
         <span className="text-sm font-semibold text-gold uppercase tracking-wider">{display?.scene ?? "—"}</span>
+      </div>
+
+      {/* Focus tabs — each person can focus on their area */}
+      <div className="flex items-center gap-1 mb-5 bg-cream/8 rounded-2xl p-1">
+        {([
+          { key: "all",      label: "General",  badge: false },
+          { key: "music",    label: "Music",    badge: false },
+          { key: "scenes",   label: "Scenes",   badge: false },
+          { key: "trivia",   label: "Trivia",   badge: triviaRound?.status === "active" },
+          { key: "feedback", label: "Feedback", badge: feedback.length > 0 },
+        ] as const).map(({ key, label, badge }) => (
+          <button
+            key={key}
+            onClick={() => setFocusTab(key)}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition-all",
+              focusTab === key
+                ? "bg-gold text-forest shadow-sm"
+                : "text-cream/45 hover:text-cream/70"
+            )}
+          >
+            {label}
+            {badge && focusTab !== key && (
+              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+            )}
+          </button>
+        ))}
       </div>
 
       {/* Active feedback chip */}
@@ -470,6 +556,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       {display && (
         <>
           {/* Scene switcher */}
+          {(focusTab === "all" || focusTab === "scenes") && (
           <section className="mb-5">
             <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Scenes</h2>
             <div className="grid grid-cols-3 gap-2">
@@ -484,8 +571,10 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               ))}
             </div>
           </section>
+          )}
 
           {/* Program — session + song navigation */}
+          {(focusTab === "all" || focusTab === "music") && (
           <section className="mb-5">
             <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Program</h2>
             {event.event_sessions.length === 0 ? (
@@ -603,8 +692,10 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               </div>
             )}
           </section>
+          )}
 
           {/* Custom text */}
+          {(focusTab === "all" || focusTab === "scenes") && (
           <section className="mb-5">
             <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Custom text</h2>
             <textarea value={customText} onChange={e => setCustomText(e.target.value)} rows={3}
@@ -615,34 +706,44 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               Push to display
             </button>
           </section>
+          )}
 
-          {/* Attendee feedback — collapsible */}
+          {/* Attendee feedback */}
+          {(focusTab === "all" || focusTab === "feedback") && (
           <section className="mb-5">
-            <button
-              onClick={() => setFeedbackOpen(o => !o)}
-              className="w-full flex items-center justify-between mb-3 group"
-            >
-              <h2 className="text-xs text-cream/40 uppercase tracking-wider">Attendee feedback</h2>
-              <div className="flex items-center gap-2">
-                {loadingFeedback && <Loader2 size={12} className="animate-spin text-cream/30" />}
-                {!loadingFeedback && feedback.length > 0 && (
-                  <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">{feedback.length}</span>
-                )}
-                <ChevronDown
-                  size={13}
-                  className={`text-cream/30 transition-transform duration-200 ${feedbackOpen ? "rotate-180" : ""}`}
-                />
+            {focusTab === "all" ? (
+              <button
+                onClick={() => setFeedbackOpen(o => !o)}
+                className="w-full flex items-center justify-between mb-3 group"
+              >
+                <h2 className="text-xs text-cream/40 uppercase tracking-wider">Attendee feedback</h2>
+                <div className="flex items-center gap-2">
+                  {loadingFeedback && <Loader2 size={12} className="animate-spin text-cream/30" />}
+                  {!loadingFeedback && feedback.length > 0 && (
+                    <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">{feedback.length}</span>
+                  )}
+                  <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${feedbackOpen ? "rotate-180" : ""}`} />
+                </div>
+              </button>
+            ) : (
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-xs text-cream/40 uppercase tracking-wider">Attendee feedback</h2>
+                <div className="flex items-center gap-2">
+                  {loadingFeedback && <Loader2 size={12} className="animate-spin text-cream/30" />}
+                  {!loadingFeedback && feedback.length > 0 && (
+                    <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">{feedback.length}</span>
+                  )}
+                </div>
               </div>
-            </button>
+            )}
 
-            {feedbackOpen && (
+            {(focusTab === "feedback" || feedbackOpen) && (
               feedback.length === 0 ? (
                 <p className="text-cream/25 text-xs text-center py-4">No feedback yet</p>
               ) : (
-                <div className="space-y-2 max-h-60 overflow-y-auto">
+                <div className={`space-y-2 overflow-y-auto ${focusTab === "feedback" ? "" : "max-h-60"}`}>
                   {feedback.map((fb) => (
-                    <div key={fb.id}
-                      className="bg-cream/8 rounded-xl p-3 flex items-start gap-2.5">
+                    <div key={fb.id} className="bg-cream/8 rounded-xl p-3 flex items-start gap-2.5">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-cream/80 leading-relaxed">&ldquo;{fb.message}&rdquo;</p>
                         {fb.author_name && (
@@ -684,8 +785,10 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               )
             )}
           </section>
+          )}
 
           {/* Trivia */}
+          {(focusTab === "all" || focusTab === "trivia") && (
           <section className="mb-5">
             <button
               onClick={() => setTriviaOpen(o => !o)}
@@ -702,14 +805,47 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                 {triviaRound && triviaRound.status === "revealing" && (
                   <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">Revealing</span>
                 )}
+                {triviaRound && triviaRound.status === "closed" && (
+                  <span className="text-[10px] text-gold font-bold bg-gold/20 px-2 py-0.5 rounded-full">🏆 Leaderboard</span>
+                )}
                 <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${triviaOpen ? "rotate-180" : ""}`} />
               </div>
             </button>
 
             {triviaOpen && (
               <div className="space-y-3">
-                {/* Active round controls */}
-                {triviaRound && ["active", "revealing"].includes(triviaRound.status) ? (
+                {/* Active / revealing round controls */}
+                {triviaRound && triviaRound.status === "closed" ? (
+                  /* Leaderboard showing — next question or end trivia */
+                  <div className="bg-gold/10 border border-gold/25 rounded-2xl p-3 space-y-3">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🏆</span>
+                      <div>
+                        <p className="text-xs font-semibold text-gold">Round complete</p>
+                        <p className="text-[10px] text-cream/40 mt-0.5">
+                          {triviaCount} played · {triviaCorrect} correct
+                        </p>
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={dismissTrivia}
+                        disabled={triviaLoading}
+                        className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-cream/15 text-cream/70 hover:bg-cream/25 text-xs font-semibold transition-colors disabled:opacity-50"
+                      >
+                        <Play size={12} /> Next question
+                      </button>
+                      <button
+                        onClick={finalizeTrivia}
+                        disabled={triviaLoading}
+                        className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gold text-forest hover:bg-gold-light text-xs font-semibold transition-colors disabled:opacity-50"
+                      >
+                        {triviaLoading ? <Loader2 size={12} className="animate-spin" /> : <Trophy size={12} />}
+                        Final leaderboard
+                      </button>
+                    </div>
+                  </div>
+                ) : triviaRound && ["active", "revealing"].includes(triviaRound.status) ? (
                   <div className="bg-cream/8 rounded-2xl p-3 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
@@ -737,9 +873,14 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                       <button
                         onClick={() => patchTriviaRound("close")}
                         disabled={triviaLoading}
-                        className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-cream/10 text-cream/60 hover:bg-cream/20 text-xs font-medium transition-colors disabled:opacity-50 col-span-1"
+                        className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 ${
+                          triviaRound.status === "active"
+                            ? "bg-green-500/20 text-green-300 hover:bg-green-500/30"
+                            : "col-span-2 bg-gold text-forest hover:bg-gold-light"
+                        }`}
                       >
-                        <Square size={12} /> End round
+                        <Trophy size={12} />
+                        {triviaRound.status === "active" ? "End & show results" : "Show leaderboard"}
                       </button>
                     </div>
                   </div>
@@ -839,8 +980,10 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               </div>
             )}
           </section>
+          )}
 
           {/* Display theme */}
+          {(focusTab === "all" || focusTab === "scenes") && (
           <section className="mb-5">
             <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Display theme</h2>
             <div className="grid grid-cols-3 gap-2">
@@ -858,32 +1001,30 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               ))}
             </div>
           </section>
+          )}
 
-          {/* QR code toggle */}
-          <section className="mb-6">
-            <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">QR Code</h2>
-            <button onClick={toggleQr} disabled={saving}
-              className={`w-full py-3 rounded-xl flex items-center justify-center gap-2 text-sm font-medium transition-all border ${
-                display.show_qr
-                  ? "bg-gold/20 border-gold/40 text-gold"
-                  : "bg-cream/10 border-cream/10 text-cream/60 hover:bg-cream/20"
-              }`}>
-              <QrCode size={15} />
-              {display.show_qr ? "Hide QR code" : "Show QR code on display"}
-            </button>
-            <p className="text-[10px] text-cream/25 mt-1.5 text-center">Links to the live program page</p>
-          </section>
 
         </>
       )}
 
-      {/* Panic button — fixed floating bar always visible at the bottom */}
+      {/* FAB bar — panic + QR toggle always visible at bottom */}
       <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-        <div className="max-w-md mx-auto px-4 pb-4 pt-6 bg-gradient-to-t from-forest via-forest/95 to-transparent pointer-events-auto">
+        <div className="max-w-md mx-auto px-4 pb-4 pt-6 bg-gradient-to-t from-forest via-forest/95 to-transparent pointer-events-auto flex items-center gap-2">
           <button onClick={panic} disabled={saving}
-            className="w-full py-3.5 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-300 text-sm font-semibold hover:bg-red-500/30 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg">
+            className="flex-1 py-3.5 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-300 text-sm font-semibold hover:bg-red-500/30 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg">
             ⚡ Back to branding
           </button>
+          {display && (
+            <button onClick={toggleQr} disabled={saving}
+              title={display.show_qr ? "Hide QR" : "Show QR on display"}
+              className={`flex-shrink-0 px-4 py-3.5 rounded-2xl border text-sm font-semibold transition-all disabled:opacity-50 shadow-lg flex items-center gap-1.5 ${
+                display.show_qr
+                  ? "bg-gold/25 border-gold/40 text-gold"
+                  : "bg-cream/10 border-cream/15 text-cream/55 hover:bg-cream/20"
+              }`}>
+              <QrCode size={15} />
+            </button>
+          )}
         </div>
       </div>
     </div>

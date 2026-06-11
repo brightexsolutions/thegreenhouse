@@ -88,28 +88,32 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
     }
   }
 
-  // Subscribe to display_state to know the currently active song
+  // Subscribe to display_state and poll as a fallback so trivia + song state
+  // always reflects the current DB row, even when Realtime events are delayed.
   useEffect(() => {
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     );
 
-    // Fetch current state first
-    supabase
-      .from("display_state")
-      .select("song_id, scene, trivia_round_id")
-      .eq("event_id", eventId)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (data) {
-          const row = data as { song_id: string | null; scene: string | null; trivia_round_id: string | null };
-          setActiveSongId(row.song_id);
-          setDisplayScene(row.scene);
-          setTriviaRoundId(row.trivia_round_id);
-        }
-      });
+    async function syncDisplayState() {
+      const { data } = await supabase
+        .from("display_state")
+        .select("song_id, scene, trivia_round_id")
+        .eq("event_id", eventId)
+        .maybeSingle();
+      if (data) {
+        const row = data as { song_id: string | null; scene: string | null; trivia_round_id: string | null };
+        setActiveSongId(row.song_id);
+        setDisplayScene(row.scene);
+        setTriviaRoundId(row.trivia_round_id);
+      }
+    }
 
+    // Initial fetch
+    syncDisplayState();
+
+    // Realtime subscription — delivers changes instantly when publication is configured
     const channel = supabase
       .channel(`attendee-display-${eventId}`)
       .on("postgres_changes", {
@@ -119,7 +123,8 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
         filter: `event_id=eq.${eventId}`,
       }, (payload) => {
         const row = payload.new as { song_id?: string | null; scene?: string | null; trivia_round_id?: string | null };
-        if (row) {
+        // Guard against empty payload (e.g. DELETE or RLS-blocked event)
+        if (row && Object.keys(row).length > 0) {
           setActiveSongId(row.song_id ?? null);
           setDisplayScene(row.scene ?? null);
           setTriviaRoundId(row.trivia_round_id ?? null);
@@ -127,7 +132,13 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
       })
       .subscribe();
 
-    return () => { supabase.removeChannel(channel); };
+    // Polling fallback — catches any Realtime gaps every 5 s
+    const poll = setInterval(syncDisplayState, 5000);
+
+    return () => {
+      supabase.removeChannel(channel);
+      clearInterval(poll);
+    };
   }, [eventId]);
 
   // Auto-expand the session containing the active song

@@ -203,8 +203,8 @@ function PhotoCard({
     <div className="flex flex-col gap-2">
       {/* Image */}
       <div className="relative rounded-2xl overflow-hidden bg-charcoal/5 aspect-square">
-        {/* eslint-disable-next-line @next/next/no-img-element */}
         {photo.signed_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={photo.signed_url}
             alt={photo.caption ?? "Attendee photo"}

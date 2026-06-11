@@ -105,7 +105,7 @@ export function EventPhotoUpload({ events }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       {/* Event selector */}
       <div className="bg-white rounded-2xl border border-mist p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
         <div className="flex-1 min-w-0">

@@ -10,18 +10,20 @@ function getResend() {
 }
 
 export interface SendTicketParams {
-  to:          string;
-  firstName:   string;
-  lastName:    string;
-  eventTitle:  string;
-  eventDate:   string;
-  eventTime:   string;
-  venueName:   string | null;
-  ticketToken: string;
-  eventSlug?:  string;
-  isFree?:     boolean;
-  priceKes?:   number | null;
-  pdfBuffer:   Buffer;
+  to:              string;
+  firstName:       string;
+  lastName:        string;
+  eventTitle:      string;
+  eventDate:       string;
+  eventTime:       string;
+  venueName:       string | null;
+  themeTitle?:     string | null;
+  themeScripture?: string | null;
+  ticketToken:     string;
+  eventSlug?:      string;
+  isFree?:         boolean;
+  priceKes?:       number | null;
+  pdfBuffer:       Buffer;
 }
 
 export interface SendResult {

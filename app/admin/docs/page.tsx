@@ -665,52 +665,62 @@ const SECTIONS = [
 
 export default function AdminDocsPage() {
   return (
-    <div className="max-w-4xl">
-      {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <div className="w-9 h-9 rounded-xl bg-forest/8 flex items-center justify-center">
-            <BookOpen size={16} className="text-forest" />
-          </div>
-          <h1 className="text-xl font-semibold text-charcoal">Platform Documentation</h1>
-        </div>
-        <p className="text-sm text-charcoal/50 ml-12">
-          Full reference for running The Green House platform — from creating a gathering to deploying the site and getting it on Google.
-        </p>
-      </div>
+    <div className="flex gap-8 items-start -mr-6">
 
-      {/* Quick nav */}
-      <div className="bg-white rounded-2xl border border-mist p-4 mb-8">
-        <p className="text-[10px] font-semibold text-charcoal/40 uppercase tracking-wider mb-3">Jump to section</p>
-        <div className="flex flex-wrap gap-2">
-          {SECTIONS.map(({ id, title }) => (
-            <a
-              key={id}
-              href={`#${id}`}
-              className="text-xs text-charcoal/60 hover:text-forest bg-charcoal/4 hover:bg-forest/8 px-3 py-1.5 rounded-full transition-colors"
-            >
-              {title}
-            </a>
+      {/* ── Main content ── */}
+      <div className="flex-1 min-w-0 pb-12">
+        {/* Header */}
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="w-9 h-9 rounded-xl bg-forest/8 flex items-center justify-center">
+              <BookOpen size={16} className="text-forest" />
+            </div>
+            <h1 className="text-xl font-semibold text-charcoal">Platform Documentation</h1>
+          </div>
+          <p className="text-sm text-charcoal/50 ml-12">
+            Full reference for running The Green House platform — from creating a gathering to deploying the site and getting it on Google.
+          </p>
+        </div>
+
+        {/* Sections */}
+        <div className="space-y-6">
+          {SECTIONS.map(({ id, icon: Icon, title, color, content }) => (
+            <div key={id} id={id} className="bg-white rounded-2xl border border-mist overflow-hidden scroll-mt-4">
+              <div className="flex items-center gap-3 px-5 py-4 border-b border-mist bg-off-white/50">
+                <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
+                  <Icon size={15} />
+                </div>
+                <h2 className="text-sm font-semibold text-charcoal">{title}</h2>
+              </div>
+              <div className="px-5 py-4">
+                {content}
+              </div>
+            </div>
           ))}
         </div>
       </div>
 
-      {/* Sections */}
-      <div className="space-y-6 pb-12">
-        {SECTIONS.map(({ id, icon: Icon, title, color, content }) => (
-          <div key={id} id={id} className="bg-white rounded-2xl border border-mist overflow-hidden">
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-mist bg-off-white/50">
-              <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>
-                <Icon size={15} />
-              </div>
-              <h2 className="text-sm font-semibold text-charcoal">{title}</h2>
-            </div>
-            <div className="px-5 py-4">
-              {content}
-            </div>
+      {/* ── Fixed right sidebar: Jump to section ── */}
+      <div className="w-52 flex-shrink-0">
+        <nav className="sticky top-0 pt-1">
+          <p className="text-[10px] font-bold text-charcoal/35 uppercase tracking-widest mb-3 pl-1">Jump to section</p>
+          <div className="space-y-0.5">
+            {SECTIONS.map(({ id, icon: Icon, title, color }) => (
+              <a
+                key={id}
+                href={`#${id}`}
+                className="group flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-charcoal/55 hover:text-forest hover:bg-forest/5 transition-all"
+              >
+                <div className={`w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 ${color} opacity-70 group-hover:opacity-100 transition-opacity`}>
+                  <Icon size={10} />
+                </div>
+                <span className="leading-tight">{title}</span>
+              </a>
+            ))}
           </div>
-        ))}
+        </nav>
       </div>
+
     </div>
   );
 }

@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   // Fetch event
   const { data: event, error: eventErr } = await supabase
     .from("events")
-    .select("id, slug, title, event_date, event_time, venue_name, dress_code, theme_title, status, capacity, type, price_kes")
+    .select("id, slug, title, event_date, event_time, venue_name, dress_code, theme_title, theme_scripture, status, capacity, type, price_kes")
     .eq("id", data.event_id)
     .is("deleted_at", null)
     .single();
@@ -143,7 +143,8 @@ export async function POST(req: NextRequest) {
         eventTime:   formattedTime,
         venueName:   event.venue_name,
         dressCode:   (event as { dress_code: string | null }).dress_code,
-        themeTitle:  (event as { theme_title: string | null }).theme_title,
+        themeTitle:     (event as { theme_title: string | null }).theme_title,
+        themeScripture: (event as { theme_scripture: string | null }).theme_scripture,
         ticketToken: reg.ticket_token,
         qrDataUrl,
         siteName:    SITE_NAME,
@@ -163,7 +164,9 @@ export async function POST(req: NextRequest) {
       eventTitle:  event.title,
       eventDate:   formattedDate,
       eventTime:   formattedTime,
-      venueName:   event.venue_name,
+      venueName:      event.venue_name,
+      themeTitle:     (event as { theme_title: string | null }).theme_title,
+      themeScripture: (event as { theme_scripture: string | null }).theme_scripture,
       ticketToken: reg.ticket_token,
       eventSlug:   (event as { slug: string }).slug,
       isFree:      (event as { type: string }).type === "free",

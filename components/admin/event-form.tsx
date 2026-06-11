@@ -109,7 +109,9 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col min-h-full">
+
+      <div className="flex-1 space-y-6 pb-5">
 
       {/* Cover image */}
       <div className="bg-white rounded-2xl border border-mist p-6 space-y-4">
@@ -255,8 +257,10 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         </Field>
       </div>
 
-      {/* Sticky action bar — always visible while scrolling */}
-      <div className="sticky bottom-0 -mx-6 px-6 py-4 bg-off-white/95 backdrop-blur-sm border-t border-mist flex items-center justify-between gap-3 z-10">
+      </div>{/* end flex-1 cards */}
+
+      {/* Action bar — fixed at bottom of scroll container */}
+      <div className="sticky bottom-0 -mx-6 px-6 py-2 bg-off-white border-t border-mist flex items-center justify-between gap-3 z-10 mt-auto">
         <div className="flex items-center gap-3">
           <button
             type="submit"

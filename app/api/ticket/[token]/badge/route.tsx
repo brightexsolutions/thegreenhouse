@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { createAdminClient } from "@/lib/supabase/server";
-import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { SITE_NAME } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -33,7 +33,7 @@ export async function GET(req: NextRequest, { params }: Props) {
   const shortDate    = new Date(t.events.event_date).toLocaleDateString("en-KE", {
     day: "numeric", month: "long", year: "numeric",
   });
-  const cleanUrl = SITE_URL.replace(/^https?:\/\//, "");
+  const cleanUrl = "www.greenhousews.co.ke";
 
   // Load Cormorant Garamond (woff v1 — @vercel/og does not support woff2)
   // 4s timeout so a slow/blocked font CDN doesn't hang the request
@@ -206,9 +206,9 @@ export async function GET(req: NextRequest, { params }: Props) {
           {/* Theme (if any) */}
           {t.events.theme_title && (
             <span style={{
-              fontSize:    22,
+              fontSize:    30,
               fontFamily:  cormorantData ? "Cormorant" : "serif",
-              color:       "rgba(247,242,232,0.45)",
+              color:       "rgba(228,201,126,0.85)",
               fontStyle:   "italic",
               marginBottom: 32,
             }}>
@@ -239,8 +239,8 @@ export async function GET(req: NextRequest, { params }: Props) {
 
           {/* Date */}
           <span style={{
-            fontSize:    20,
-            color:       "rgba(247,242,232,0.38)",
+            fontSize:    24,
+            color:       "rgba(247,242,232,0.55)",
             fontFamily:  "sans-serif",
           }}>
             {shortDate}
@@ -257,9 +257,9 @@ export async function GET(req: NextRequest, { params }: Props) {
         }}>
           <div style={{ width: 24, height: 1, background: "rgba(201,162,74,0.25)", display: "flex" }} />
           <span style={{
-            fontSize:      12,
-            letterSpacing: 2,
-            color:         "rgba(247,242,232,0.2)",
+            fontSize:      16,
+            letterSpacing: 3,
+            color:         "rgba(247,242,232,0.35)",
             fontFamily:    "sans-serif",
           }}>
             {cleanUrl}

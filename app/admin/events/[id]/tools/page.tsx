@@ -4,6 +4,7 @@ import { CheckinLinkPanel } from "@/components/admin/checkin-link-panel";
 import { QrSharePanel } from "@/components/admin/qr-share-panel";
 import { CommsSendDialog } from "@/components/admin/comms-send-dialog";
 import { SongContributionPanel } from "@/components/admin/song-contribution-panel";
+import { ContributionLinkPanel } from "@/components/admin/contribution-link-panel";
 import Link from "next/link";
 import { ExternalLink, Download, Tv2 } from "lucide-react";
 
@@ -31,13 +32,16 @@ export default async function EventToolsPage({ params }: Props) {
 
   if (!event) notFound();
 
-  // Fetch song_submission_token separately — gracefully handles pre-migration state
+  // Fetch contribution tokens — gracefully handles pre-migration state
   const { data: tokenRow } = await supabase
     .from("events")
-    .select("song_submission_token")
+    .select("song_submission_token, theme_contribution_token, trivia_contribution_token")
     .eq("id", id)
     .single();
-  const songSubmissionToken = (tokenRow as { song_submission_token?: string } | null)?.song_submission_token ?? null;
+  const tokens = tokenRow as { song_submission_token?: string; theme_contribution_token?: string; trivia_contribution_token?: string } | null;
+  const songSubmissionToken      = tokens?.song_submission_token      ?? null;
+  const themeContributionToken   = tokens?.theme_contribution_token   ?? null;
+  const triviaContributionToken  = tokens?.trivia_contribution_token  ?? null;
 
   const isPreviewOnly = event.status !== "live" && event.status !== "published";
 
@@ -89,6 +93,13 @@ export default async function EventToolsPage({ params }: Props) {
           songSubmissionToken={songSubmissionToken}
         />
       )}
+
+      {/* Theme + Trivia contributions */}
+      <ContributionLinkPanel
+        eventTitle={event.title}
+        themeContributionToken={themeContributionToken}
+        triviaContributionToken={triviaContributionToken}
+      />
 
       {/* Export & broadcast */}
       <div className="bg-white rounded-2xl border border-mist p-5 space-y-4">
