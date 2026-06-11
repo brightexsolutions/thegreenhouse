@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
+import QRCode from "qrcode";
 import { registrationSchema } from "@/lib/validations/registration";
 import { createAdminClient } from "@/lib/supabase/server";
 import { registerLimiter } from "@/lib/rate-limit";
 import { sendTicketEmail } from "@/lib/communications/email";
 import { waTicketShareUrl } from "@/lib/communications/whatsapp";
-import { SITE_URL } from "@/lib/constants";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { TicketPdf } from "@/lib/pdf/ticket-pdf";
 import { logger } from "@/lib/logger";
 
@@ -47,7 +48,7 @@ export async function POST(req: NextRequest) {
   // Fetch event
   const { data: event, error: eventErr } = await supabase
     .from("events")
-    .select("id, slug, title, event_date, event_time, venue_name, status, capacity, type, price_kes")
+    .select("id, slug, title, event_date, event_time, venue_name, dress_code, theme_title, status, capacity, type, price_kes")
     .eq("id", data.event_id)
     .is("deleted_at", null)
     .single();
@@ -130,6 +131,8 @@ export async function POST(req: NextRequest) {
   // Generate PDF
   let pdfBuffer: Buffer | null = null;
   try {
+    const liveUrl   = `${SITE_URL}/live/${(event as { slug: string }).slug}`;
+    const qrDataUrl = await QRCode.toDataURL(liveUrl, { width: 200, margin: 1, color: { dark: "#1b3a2a", light: "#f7f2e8" } });
     pdfBuffer = await renderToBuffer(
       // @ts-expect-error react-pdf uses a different JSX type
       createElement(TicketPdf, {
@@ -139,7 +142,12 @@ export async function POST(req: NextRequest) {
         eventDate:   formattedDate,
         eventTime:   formattedTime,
         venueName:   event.venue_name,
+        dressCode:   (event as { dress_code: string | null }).dress_code,
+        themeTitle:  (event as { theme_title: string | null }).theme_title,
         ticketToken: reg.ticket_token,
+        qrDataUrl,
+        siteName:    SITE_NAME,
+        siteUrl:     SITE_URL,
       })
     );
   } catch (err) {

@@ -36,16 +36,20 @@ export async function GET(req: NextRequest, { params }: Props) {
   const cleanUrl = SITE_URL.replace(/^https?:\/\//, "");
 
   // Load Cormorant Garamond (woff v1 — @vercel/og does not support woff2)
+  // 4s timeout so a slow/blocked font CDN doesn't hang the request
   let cormorantData: ArrayBuffer | undefined;
   let cormorantBoldData: ArrayBuffer | undefined;
   try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 4000);
     const [r1, r2] = await Promise.all([
-      fetch("https://fonts.gstatic.com/s/cormorantgaramond/v22/co3WmX5slCNuHLi8bLeY9MK7whWMhyjQAllvuQ.woff"),
-      fetch("https://fonts.gstatic.com/s/cormorantgaramond/v22/co3YmX5slCNuHLi8bLeY9MK7whWMhyjQblC9BNM.woff"),
+      fetch("https://fonts.gstatic.com/s/cormorantgaramond/v22/co3WmX5slCNuHLi8bLeY9MK7whWMhyjQAllvuQ.woff", { signal: ctrl.signal }),
+      fetch("https://fonts.gstatic.com/s/cormorantgaramond/v22/co3YmX5slCNuHLi8bLeY9MK7whWMhyjQblC9BNM.woff", { signal: ctrl.signal }),
     ]);
+    clearTimeout(timer);
     cormorantData     = r1.ok ? await r1.arrayBuffer() : undefined;
     cormorantBoldData = r2.ok ? await r2.arrayBuffer() : undefined;
-  } catch { /* use system fonts as fallback */ }
+  } catch { /* use system serif fallback if fonts unavailable */ }
 
   const fonts: { name: string; data: ArrayBuffer; weight: 400 | 700; style: "normal" }[] = [];
   if (cormorantData)     fonts.push({ name: "Cormorant", data: cormorantData,     weight: 400, style: "normal" });
@@ -269,7 +273,7 @@ export async function GET(req: NextRequest, { params }: Props) {
       height: SIZE,
       fonts,
       headers: {
-        "Content-Disposition": `attachment; filename="badge-${t.ticket_token.slice(0, 8)}.png"`,
+        "Content-Disposition": `attachment; filename="badge-${t.first_name.toLowerCase()}-${t.last_name.toLowerCase()}.png"`,
         "Cache-Control":       "no-store",
       },
     }

@@ -48,6 +48,18 @@ const SECTIONS = [
       { key: "default_capacity",   label: "Default event capacity",     placeholder: "150",  type: "number" },
     ],
   },
+  {
+    key: "giving",
+    icon: Sliders,
+    title: "Financial Support",
+    description: "Payment details shown to people who want to give financially. Leave blank to hide that field.",
+    fields: [
+      { key: "giving_paybill",  label: "M-Pesa Paybill number",  placeholder: "400200",      type: "text" },
+      { key: "giving_account",  label: "Paybill account name",   placeholder: "GREENHOUSE",  type: "text" },
+      { key: "giving_till",     label: "Buy Goods till number",  placeholder: "5551234",     type: "text" },
+      { key: "giving_phone",    label: "Send Money phone",       placeholder: "0706609085",  type: "tel" },
+    ],
+  },
 ] as const;
 
 export default function SettingsPage() {

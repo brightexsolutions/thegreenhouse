@@ -45,7 +45,7 @@ const SOURCE_OPTIONS = [
 
 interface RegistrationFormProps {
   event: Pick<Event, "id" | "slug" | "title" | "event_date" | "venue_name">;
-  onSuccess?: () => void;
+  onSuccess?: (hasEmail: boolean) => void;
 }
 
 export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
@@ -97,7 +97,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
     setTicketUrl(body.ticketUrl ?? null);
     setWaShareUrl(body.waShareUrl ?? null);
     setSubmitted(true);
-    onSuccess?.();
+    onSuccess?.(!!data.email?.trim());
   }
 
   /* ── Success screen ─────────────────────────────────────── */

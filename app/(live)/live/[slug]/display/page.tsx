@@ -852,6 +852,10 @@ function avatarPos(i: number, total: number) {
   return { cx, cy, size, floatDur, floatDel };
 }
 
+// Which avatars get a bubble — every 3rd one, staggered so they don't all show at once
+function bubbleDelay(i: number) { return 2 + (i * 4.7) % 18; }
+function bubbleDur(i: number)   { return 3.5 + (i * 1.3) % 3; }
+
 function CommunityScene({ attendees, t }: {
   attendees: Array<{ id: string; first_name: string; last_name: string }>;
   t: typeof THEMES[ThemeKey];
@@ -860,32 +864,90 @@ function CommunityScene({ attendees, t }: {
 
   return (
     <div className="relative w-full h-full flex items-center justify-center">
+      <style>{`
+        @keyframes bubblePop {
+          0%   { opacity: 0; transform: scale(0.7) translateY(6px); }
+          12%  { opacity: 1; transform: scale(1.05) translateY(-2px); }
+          20%  { transform: scale(1) translateY(0); }
+          75%  { opacity: 1; }
+          100% { opacity: 0; transform: scale(0.9) translateY(-4px); }
+        }
+      `}</style>
+
       {/* Floating avatar cloud */}
       {count > 0 && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
           {attendees.map((a, i) => {
             const { cx, cy, size, floatDur, floatDel } = avatarPos(i, count);
             const [bg, fg] = avatarColor(a.first_name + a.last_name);
+            const showBubble = i % 3 === 0;
+            // Bubble appears to the right for avatars in left half, left for right half
+            const bubbleRight = cx < 50;
             return (
               <div
                 key={a.id}
-                className="absolute flex items-center justify-center rounded-full font-semibold"
+                className="absolute"
                 style={{
-                  left:       `${cx}%`,
-                  top:        `${cy}%`,
-                  transform:  "translate(-50%, -50%)",
-                  width:      `${size}px`,
-                  height:     `${size}px`,
-                  background: bg,
-                  color:      fg,
-                  fontSize:   `${size * 0.35}px`,
-                  opacity:    0.55 + (i % 4) * 0.1,
-                  animation:  `galleryFloat ${floatDur}s ${floatDel}s ease-in-out infinite`,
-                  boxShadow:  `0 4px 16px rgba(0,0,0,0.25)`,
-                  border:     `2px solid rgba(255,255,255,0.08)`,
+                  left:      `${cx}%`,
+                  top:       `${cy}%`,
+                  transform: "translate(-50%, -50%)",
+                  animation: `galleryFloat ${floatDur}s ${floatDel}s ease-in-out infinite`,
                 }}
               >
-                {initials(a.first_name, a.last_name)}
+                {/* Avatar circle */}
+                <div
+                  className="flex items-center justify-center rounded-full font-semibold"
+                  style={{
+                    width:      `${size}px`,
+                    height:     `${size}px`,
+                    background: bg,
+                    color:      fg,
+                    fontSize:   `${size * 0.35}px`,
+                    opacity:    0.6 + (i % 4) * 0.1,
+                    boxShadow:  `0 4px 16px rgba(0,0,0,0.25)`,
+                    border:     `2px solid rgba(255,255,255,0.10)`,
+                  }}
+                >
+                  {initials(a.first_name, a.last_name)}
+                </div>
+
+                {/* Speech bubble — appears periodically for select avatars */}
+                {showBubble && (
+                  <div
+                    style={{
+                      position:    "absolute",
+                      top:         "50%",
+                      [bubbleRight ? "left" : "right"]: `${size + 6}px`,
+                      transform:   "translateY(-50%)",
+                      background:  "rgba(255,255,255,0.12)",
+                      backdropFilter: "blur(8px)",
+                      border:      `1px solid rgba(255,255,255,0.18)`,
+                      borderRadius: "20px",
+                      padding:     "5px 11px",
+                      whiteSpace:  "nowrap",
+                      fontSize:    "12px",
+                      fontFamily:  "var(--font-sans, sans-serif)",
+                      color:       "rgba(247,242,232,0.9)",
+                      animation:   `bubblePop ${bubbleDur(i)}s ${bubbleDelay(i)}s ease-in-out infinite`,
+                      pointerEvents: "none",
+                    }}
+                  >
+                    {a.first_name} is here ✦
+                    {/* Tail */}
+                    <span style={{
+                      position:   "absolute",
+                      top:        "50%",
+                      [bubbleRight ? "left" : "right"]: "-5px",
+                      transform:  "translateY(-50%)",
+                      width:      0,
+                      height:     0,
+                      borderTop:  "5px solid transparent",
+                      borderBottom: "5px solid transparent",
+                      [bubbleRight ? "borderRight" : "borderLeft"]: "6px solid rgba(255,255,255,0.12)",
+                      display:    "block",
+                    }} />
+                  </div>
+                )}
               </div>
             );
           })}
@@ -898,7 +960,7 @@ function CommunityScene({ attendees, t }: {
         {count > 0 ? (
           <>
             <p className="font-display text-8xl md:text-[10rem] font-bold leading-none" style={{ color: t.text }}>{count}</p>
-            <p className="mt-4 text-xl md:text-2xl" style={{ color: t.sub }}>people from across Nairobi</p>
+            <p className="mt-4 text-xl md:text-2xl" style={{ color: t.sub }}>people gathered here tonight</p>
           </>
         ) : (
           <p className="font-display text-4xl" style={{ color: t.sub }}>—</p>

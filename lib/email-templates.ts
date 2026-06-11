@@ -33,8 +33,9 @@ export function ticketEmailHtml(d: TicketEmailData): string {
   .header h1 { color: #f7f2e8; font-size: 30px; font-weight: 700; margin: 14px 0 0; line-height: 1.2; }
   .body { background: #ffffff; border-radius: 0 0 16px 16px; padding: 32px 40px 40px; }
   .greeting { font-size: 16px; color: #1a1a18; line-height: 1.6; margin-bottom: 28px; }
-  .detail-row { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 16px; }
-  .detail-icon { width: 36px; height: 36px; background: #edf4f0; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
+  .detail-row { margin-bottom: 16px; }
+  .detail-row table { border-collapse: collapse; width: 100%; }
+  .detail-icon { width: 40px; height: 40px; background: #edf4f0; border-radius: 10px; text-align: center; vertical-align: top; font-size: 18px; line-height: 40px; padding: 0; }
   .detail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #6b7280; font-weight: 600; margin-bottom: 3px; }
   .detail-value { font-size: 15px; color: #1a1a18; font-weight: 600; }
   .divider { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
@@ -60,26 +61,32 @@ export function ticketEmailHtml(d: TicketEmailData): string {
     <p class="greeting">Your registration is confirmed. Here are the details for the evening — your PDF ticket is attached.</p>
 
     <div class="detail-row">
-      <div class="detail-icon">📅</div>
-      <div>
-        <div class="detail-label">Date</div>
-        <div class="detail-value">${d.eventDate}</div>
-      </div>
+      <table><tr>
+        <td class="detail-icon" width="40">📅</td>
+        <td style="padding-left:14px;vertical-align:top">
+          <div class="detail-label">Date</div>
+          <div class="detail-value">${d.eventDate}</div>
+        </td>
+      </tr></table>
     </div>
     <div class="detail-row">
-      <div class="detail-icon">🕖</div>
-      <div>
-        <div class="detail-label">Time</div>
-        <div class="detail-value">${d.eventTime}pm</div>
-      </div>
+      <table><tr>
+        <td class="detail-icon" width="40">🕖</td>
+        <td style="padding-left:14px;vertical-align:top">
+          <div class="detail-label">Time</div>
+          <div class="detail-value">${d.eventTime}pm</div>
+        </td>
+      </tr></table>
     </div>
     ${d.venueName ? `
     <div class="detail-row">
-      <div class="detail-icon">📍</div>
-      <div>
-        <div class="detail-label">Venue</div>
-        <div class="detail-value">${d.venueName}</div>
-      </div>
+      <table><tr>
+        <td class="detail-icon" width="40">📍</td>
+        <td style="padding-left:14px;vertical-align:top">
+          <div class="detail-label">Venue</div>
+          <div class="detail-value">${d.venueName}</div>
+        </td>
+      </tr></table>
     </div>` : ""}
 
     <hr class="divider" />

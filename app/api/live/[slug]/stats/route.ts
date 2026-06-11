@@ -30,7 +30,8 @@ export async function GET(_req: NextRequest, { params }: Props) {
   return NextResponse.json({
     total:     all.length,
     present:   present.length,
-    attendees: all.map(r => ({ id: r.id, first_name: r.first_name, last_name: r.last_name })),
+    // Only checked-in attendees shown in the community scene
+    attendees: present.map(r => ({ id: r.id, first_name: r.first_name, last_name: r.last_name })),
   }, {
     headers: { "Cache-Control": "no-store" },
   });

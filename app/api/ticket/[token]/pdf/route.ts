@@ -68,7 +68,7 @@ export async function GET(_req: NextRequest, { params }: Props) {
       status: 200,
       headers: {
         "Content-Type":        "application/pdf",
-        "Content-Disposition": `attachment; filename="ticket-${token.slice(0, 8)}.pdf"`,
+        "Content-Disposition": `attachment; filename="ticket-${(ticket as { first_name: string }).first_name.toLowerCase()}-${(ticket as { last_name: string }).last_name.toLowerCase()}.pdf"`,
         "Cache-Control":       "no-store",
       },
     });

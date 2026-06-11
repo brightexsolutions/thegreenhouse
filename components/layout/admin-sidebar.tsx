@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, CalendarDays, Users, MessageSquare,
@@ -34,10 +35,18 @@ interface AdminSidebarProps {
 
 export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
   const pathname = usePathname();
+  const [pending, setPending] = useState<string | null>(null);
+
+  // Clear pending state once the pathname actually changes
+  useEffect(() => { setPending(null); }, [pathname]);
 
   function isActive(href: string) {
     if (href === "/admin/dashboard") return pathname === href;
     return pathname.startsWith(href);
+  }
+
+  function handleNav(href: string) {
+    if (!isActive(href)) setPending(href);
   }
 
   return (
@@ -74,42 +83,56 @@ export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
 
       {/* Main nav */}
       <nav className="flex-1 px-3 py-4 space-y-0.5 overflow-y-auto">
-        {NAV.map(({ href, icon: Icon, label }) => (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
-              isActive(href)
-                ? "bg-gold/20 text-gold"
-                : "text-cream/75 hover:text-cream hover:bg-cream/10"
-            )}
-          >
-            <Icon size={16} className="flex-shrink-0" />
-            <span>{label}</span>
-          </Link>
-        ))}
+        {NAV.map(({ href, icon: Icon, label }) => {
+          const active  = isActive(href);
+          const loading = pending === href;
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={() => handleNav(href)}
+              className={cn(
+                "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                active   ? "bg-gold/20 text-gold"
+                : loading ? "bg-cream/15 text-cream"
+                :           "text-cream/75 hover:text-cream hover:bg-cream/10"
+              )}
+            >
+              {loading
+                ? <span className="w-4 h-4 rounded-full border-2 border-cream/30 border-t-cream animate-spin flex-shrink-0" />
+                : <Icon size={16} className="flex-shrink-0" />}
+              <span>{label}</span>
+            </Link>
+          );
+        })}
 
         {role === "super_admin" && (
           <>
             <div className="px-3 pt-5 pb-2">
               <span className="text-[10px] font-semibold uppercase tracking-widest text-cream/35">System</span>
             </div>
-            {SYSTEM_NAV.map(({ href, icon: Icon, label }) => (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
-                  isActive(href)
-                    ? "bg-gold/20 text-gold"
-                    : "text-cream/60 hover:text-cream hover:bg-cream/10"
-                )}
-              >
-                <Icon size={16} className="flex-shrink-0" />
-                <span>{label}</span>
-              </Link>
-            ))}
+            {SYSTEM_NAV.map(({ href, icon: Icon, label }) => {
+              const active  = isActive(href);
+              const loading = pending === href;
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  onClick={() => handleNav(href)}
+                  className={cn(
+                    "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
+                    active   ? "bg-gold/20 text-gold"
+                    : loading ? "bg-cream/15 text-cream"
+                    :           "text-cream/60 hover:text-cream hover:bg-cream/10"
+                  )}
+                >
+                  {loading
+                    ? <span className="w-4 h-4 rounded-full border-2 border-cream/30 border-t-cream animate-spin flex-shrink-0" />
+                    : <Icon size={16} className="flex-shrink-0" />}
+                  <span>{label}</span>
+                </Link>
+              );
+            })}
           </>
         )}
       </nav>
