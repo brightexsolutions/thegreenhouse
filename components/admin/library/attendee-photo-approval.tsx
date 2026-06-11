@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { CheckCircle2, XCircle, Eye, EyeOff, Trash2, Loader2, Camera, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -33,9 +33,16 @@ export function AttendeePhotoApproval({ events }: Props) {
   const [loaded,  setLoaded]  = useState<string | null>(null);
   const [pending, setPending] = useState<Record<string, boolean>>({});
 
+  // Auto-load on mount and whenever the selected event changes
+  useEffect(() => {
+    if (selectedEventId) loadPhotos(selectedEventId);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedEventId]);
+
   async function loadPhotos(eventId: string) {
     if (!eventId) return;
     setLoading(true);
+    setPhotos([]);
     setLoaded(eventId);
     const res = await fetch(`/api/admin/events/${eventId}/attendee-photos`);
     if (res.ok) {
@@ -87,7 +94,6 @@ export function AttendeePhotoApproval({ events }: Props) {
             value={selectedEventId}
             onChange={e => {
               setSelectedEventId(e.target.value);
-              setPhotos([]);
               setLoaded(null);
             }}
             className="w-full px-3 py-2 rounded-xl border border-mist text-sm text-charcoal focus:outline-none focus:border-forest transition-colors"

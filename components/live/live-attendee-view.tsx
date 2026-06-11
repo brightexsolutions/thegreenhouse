@@ -54,13 +54,36 @@ const FEEDBACK_PROMPTS = [
   { icon: Sparkles, text: "Got a thought or a question? Share it." },
 ];
 
+// Nudge toast appears after 12 minutes, once per page load, dismissed per session
+const NUDGE_DELAY_MS = 12 * 60 * 1000;
+
 export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
   const [openSong,       setOpenSong]     = useState<string | null>(null);
   const [openSession,    setOpenSession]  = useState<string | null>(null);
   const [showFeedback,   setShowFeedback] = useState(false);
   const [engagedCount,   setEngagedCount] = useState(0);
   const [activeSongId,   setActiveSongId] = useState<string | null>(null);
+  const [showNudge,      setShowNudge]    = useState(false);
   const promptRef = useRef<HTMLDivElement>(null);
+
+  // Time-based nudge — fires after NUDGE_DELAY_MS, once per session storage key
+  useEffect(() => {
+    const key = `nudge_dismissed_${eventId}`;
+    if (typeof sessionStorage !== "undefined" && sessionStorage.getItem(key)) return;
+    const t = setTimeout(() => setShowNudge(true), NUDGE_DELAY_MS);
+    return () => clearTimeout(t);
+  }, [eventId]);
+
+  function dismissNudge(andOpen?: boolean) {
+    setShowNudge(false);
+    if (typeof sessionStorage !== "undefined") {
+      sessionStorage.setItem(`nudge_dismissed_${eventId}`, "1");
+    }
+    if (andOpen) {
+      setShowFeedback(true);
+      setTimeout(() => promptRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 80);
+    }
+  }
 
   // Subscribe to display_state to know the currently active song
   useEffect(() => {
@@ -318,6 +341,51 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
 
       {/* Photo sharing */}
       <AttendeePhotoShare slug={slug} />
+
+      {/* Time-based floating nudge toast */}
+      <AnimatePresence>
+        {showNudge && (
+          <motion.div
+            key="time-nudge"
+            initial={{ opacity: 0, y: 80, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0,  scale: 1 }}
+            exit={{   opacity: 0, y: 80, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 340, damping: 28 }}
+            className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[calc(100vw-2rem)] max-w-sm z-50"
+          >
+            <div className="bg-forest rounded-3xl shadow-2xl shadow-forest/30 overflow-hidden border border-forest/20">
+              {/* Header strip */}
+              <div className="flex items-center justify-between px-5 pt-4 pb-0">
+                <span className="text-[9px] font-bold uppercase tracking-widest text-gold/70">Your thoughts matter</span>
+                <button
+                  onClick={() => dismissNudge()}
+                  className="w-6 h-6 rounded-full bg-cream/10 flex items-center justify-center hover:bg-cream/20 transition-colors text-cream/50 hover:text-cream/80 text-xs"
+                  aria-label="Dismiss"
+                >✕</button>
+              </div>
+
+              {/* Body */}
+              <div className="px-5 pt-2.5 pb-4">
+                <p className="text-cream font-semibold text-sm leading-snug mb-0.5">
+                  {FEEDBACK_PROMPTS[0].text}
+                </p>
+                <p className="text-cream/45 text-xs">
+                  Takes 10 seconds. Helps us make every session better.
+                </p>
+              </div>
+
+              {/* CTA */}
+              <button
+                onClick={() => dismissNudge(true)}
+                className="w-full flex items-center justify-center gap-2 px-5 py-3.5 bg-gold hover:bg-gold-light transition-colors"
+              >
+                <MessageSquare size={13} className="text-forest" />
+                <span className="text-xs font-bold text-forest">Share a thought</span>
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Upload, Trash2, ImageIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -39,6 +39,12 @@ export function EventPhotoUpload({ events }: Props) {
   const [loaded,    setLoaded]    = useState<string | null>(null);
   const [dragOver,  setDragOver]  = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto-load photos for the first event on mount
+  useEffect(() => {
+    if (events[0]?.id) loadPhotos(events[0].id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   async function loadPhotos(eventId: string) {
     if (!eventId) return;
@@ -119,14 +125,6 @@ export function EventPhotoUpload({ events }: Props) {
             ))}
           </select>
         </div>
-        {loaded !== selectedEventId && !loading && (
-          <button
-            onClick={() => loadPhotos(selectedEventId)}
-            className="px-4 py-2 rounded-xl bg-forest text-cream text-sm font-medium hover:bg-moss transition-colors flex-shrink-0"
-          >
-            Load photos
-          </button>
-        )}
         {loading && (
           <div className="flex items-center gap-2 text-xs text-charcoal/40">
             <Loader2 size={13} className="animate-spin" /> Loading…
