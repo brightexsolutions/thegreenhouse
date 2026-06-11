@@ -8,6 +8,10 @@ export const CONTACT_EMAIL    = "hello@greenhousews.co.ke";
 export const REPLY_TO_EMAIL   = "thegreenhouse.contact01@gmail.com";
 export const CONTACT_WHATSAPP = "254706609085";
 
+// Resend FROM addresses — tickets get their own mailbox, everything else goes through hello
+export const TICKET_FROM_EMAIL = () => process.env.RESEND_TICKET_FROM  ?? `The Green House <tickets@greenhousews.co.ke>`;
+export const COMMS_FROM_EMAIL  = () => process.env.RESEND_COMMS_FROM   ?? `The Green House <hello@greenhousews.co.ke>`;
+
 export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
 export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";
 export const SOCIAL_YOUTUBE   = "https://youtube.com/@thegreenhouseke";

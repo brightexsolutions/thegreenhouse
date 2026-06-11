@@ -219,31 +219,28 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
 
                 {/* Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium text-charcoal">
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <p className="text-sm font-medium text-charcoal truncate">
                       {r.first_name} {r.last_name}
                     </p>
                     {r.is_walkin && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/12 text-gold/80 font-medium">Walk-in</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/12 text-gold/80 font-medium flex-shrink-0">Walk-in</span>
                     )}
                   </div>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    {r.email && (
-                      <span className="flex items-center gap-1 text-[11px] text-charcoal/40">
-                        <Mail size={9} /> {r.email}
-                      </span>
-                    )}
-                    {!r.email && r.phone && (
-                      <span className="flex items-center gap-1 text-[11px] text-charcoal/40">
-                        <Phone size={9} /> {r.phone}
-                      </span>
-                    )}
-                    {r.ticket_token && (
-                      <span className="text-[11px] font-mono text-charcoal/35">
-                        #{r.ticket_token.slice(0, 8).toUpperCase()}
-                      </span>
-                    )}
-                  </div>
+                  {/* Contact on its own truncated line */}
+                  {(r.email || r.phone) && (
+                    <p className="flex items-center gap-1 text-[11px] text-charcoal/40 mt-0.5 min-w-0">
+                      {r.email
+                        ? <><Mail size={9} className="flex-shrink-0" /><span className="truncate">{r.email}</span></>
+                        : <><Phone size={9} className="flex-shrink-0" /><span className="truncate">{r.phone}</span></>}
+                    </p>
+                  )}
+                  {/* Ticket token on its own line so it never hides behind the button */}
+                  {r.ticket_token && (
+                    <p className="text-[10px] font-mono text-charcoal/35 mt-0.5">
+                      #{r.ticket_token.slice(0, 8).toUpperCase()}
+                    </p>
+                  )}
                 </div>
 
                 {/* Mark button */}

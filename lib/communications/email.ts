@@ -1,6 +1,6 @@
 import { Resend } from "resend";
 import { ticketEmailHtml, ticketEmailText } from "@/lib/email-templates";
-import { SITE_NAME, SITE_URL, REPLY_TO_EMAIL } from "@/lib/constants";
+import { SITE_URL, REPLY_TO_EMAIL, TICKET_FROM_EMAIL, COMMS_FROM_EMAIL } from "@/lib/constants";
 import { logger } from "@/lib/logger";
 
 let _resend: Resend | null = null;
@@ -8,7 +8,6 @@ function getResend() {
   if (!_resend) _resend = new Resend(process.env.RESEND_API_KEY ?? "placeholder");
   return _resend;
 }
-const FROM = () => process.env.RESEND_FROM_EMAIL ?? `${SITE_NAME} <tickets@greenhousews.co.ke>`;
 
 export interface SendTicketParams {
   to:          string;
@@ -39,7 +38,7 @@ export async function sendTicketEmail(p: SendTicketParams): Promise<SendResult> 
     const text = ticketEmailText({ ...p, ticketUrl, liveUrl, isFree: p.isFree, priceKes: p.priceKes });
 
     const result = await getResend().emails.send({
-      from:     FROM(),
+      from:     TICKET_FROM_EMAIL(),
       to:       [p.to],
       replyTo: REPLY_TO_EMAIL,
       subject:  `Your ticket — ${p.eventTitle}`,
@@ -80,7 +79,7 @@ export async function sendBroadcastEmail(p: BroadcastEmailParams): Promise<SendR
   for (const recipient of p.to) {
     try {
       const result = await getResend().emails.send({
-        from:     FROM(),
+        from:     COMMS_FROM_EMAIL(),
         to:       [recipient],
         replyTo: REPLY_TO_EMAIL,
         subject:  p.subject,

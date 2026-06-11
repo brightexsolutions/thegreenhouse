@@ -9,6 +9,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import { FeedbackForm } from "./feedback-form";
 import { AttendeePhotoShare } from "./attendee-photo-share";
+import { TriviaAttendeeCard } from "./trivia-attendee-card";
 import { cn } from "@/lib/utils";
 
 type Song = { id: string; title: string; artist: string | null; lyrics: string | null };
@@ -64,6 +65,8 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
   const [engagedCount,   setEngagedCount] = useState(0);
   const [activeSongId,   setActiveSongId] = useState<string | null>(null);
   const [showNudge,      setShowNudge]    = useState(false);
+  const [displayScene,   setDisplayScene] = useState<string | null>(null);
+  const [triviaRoundId,  setTriviaRoundId] = useState<string | null>(null);
   const promptRef = useRef<HTMLDivElement>(null);
 
   // Time-based nudge — fires after NUDGE_DELAY_MS, once per session storage key
@@ -95,11 +98,16 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
     // Fetch current state first
     supabase
       .from("display_state")
-      .select("song_id")
+      .select("song_id, scene, trivia_round_id")
       .eq("event_id", eventId)
       .maybeSingle()
       .then(({ data }) => {
-        if (data) setActiveSongId((data as { song_id: string | null }).song_id);
+        if (data) {
+          const row = data as { song_id: string | null; scene: string | null; trivia_round_id: string | null };
+          setActiveSongId(row.song_id);
+          setDisplayScene(row.scene);
+          setTriviaRoundId(row.trivia_round_id);
+        }
       });
 
     const channel = supabase
@@ -110,8 +118,12 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
         table:  "display_state",
         filter: `event_id=eq.${eventId}`,
       }, (payload) => {
-        const row = payload.new as { song_id?: string | null };
-        if (row) setActiveSongId(row.song_id ?? null);
+        const row = payload.new as { song_id?: string | null; scene?: string | null; trivia_round_id?: string | null };
+        if (row) {
+          setActiveSongId(row.song_id ?? null);
+          setDisplayScene(row.scene ?? null);
+          setTriviaRoundId(row.trivia_round_id ?? null);
+        }
       })
       .subscribe();
 
@@ -139,6 +151,13 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-3 pb-16">
+
+      {/* Active trivia — floats above everything else when live */}
+      <AnimatePresence>
+        {displayScene === "trivia" && triviaRoundId && (
+          <TriviaAttendeeCard key={triviaRoundId} roundId={triviaRoundId} />
+        )}
+      </AnimatePresence>
 
       {/* Sessions */}
       {sessions.length === 0 ? (

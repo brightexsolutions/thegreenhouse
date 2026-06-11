@@ -3,7 +3,7 @@ import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { normalisePhone } from "@/lib/phone";
 import { logger } from "@/lib/logger";
-import { SITE_NAME, SITE_URL, CONTACT_EMAIL, REPLY_TO_EMAIL } from "@/lib/constants";
+import { SITE_NAME, SITE_URL, CONTACT_EMAIL, REPLY_TO_EMAIL, COMMS_FROM_EMAIL } from "@/lib/constants";
 
 const schema = z.object({
   full_name:    z.string().min(2).max(120).transform(s => s.trim()),
@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   try {
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY ?? "placeholder");
-    const from   = process.env.RESEND_FROM_EMAIL ?? `${SITE_NAME} <hello@greenhousews.co.ke>`;
+    const from   = COMMS_FROM_EMAIL();
 
     // Notification to team
     await resend.emails.send({

@@ -7,7 +7,7 @@ import {
   Tv2, Music, ChevronLeft, ChevronRight, ChevronDown, Clock, Users,
   BookOpen, Heart, Zap, AlignLeft, MessageSquare, Loader2,
   ExternalLink, QrCode, Sun, Moon, Leaf, Images,
-  CheckCircle2, X,
+  CheckCircle2, X, Sparkles, Play, Eye, Square,
 } from "lucide-react";
 import Link from "next/link";
 
@@ -23,6 +23,22 @@ type DisplayState = {
   show_qr:                  boolean;
   featured_feedback:        string | null;
   featured_feedback_author: string | null;
+  trivia_round_id:          string | null;
+};
+
+type TriviaQuestion = {
+  id:            string;
+  question:      string;
+  type:          "multiple_choice" | "open_input";
+  options:       string[] | null;
+  correct_index: number | null;
+  category:      string;
+  points:        number;
+};
+
+type TriviaRound = {
+  id:     string;
+  status: "active" | "revealing" | "closed";
 };
 
 type Song = { id: string; title: string; artist: string | null; lyrics: string | null };
@@ -67,6 +83,7 @@ const SCENES = [
   { key: "community",   label: "Community",   icon: Users     },
   { key: "gallery",     label: "Gallery",     icon: Images    },
   { key: "custom",      label: "Custom",      icon: MessageSquare },
+  { key: "trivia",      label: "Trivia",      icon: Sparkles  },
 ] as const;
 
 type SceneKey = typeof SCENES[number]["key"];
@@ -103,6 +120,16 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const [loadingFeedback,  setLoadingFeedback] = useState(false);
   const [projecting,       setProjecting]      = useState<string | null>(null);
   const [feedbackOpen,     setFeedbackOpen]    = useState(true);
+
+  // Trivia state
+  const [triviaQuestions,  setTriviaQuestions] = useState<TriviaQuestion[]>([]);
+  const [triviaOpen,       setTriviaOpen]      = useState(true);
+  const [selectedQId,      setSelectedQId]     = useState<string>("");
+  const [triviaRound,      setTriviaRound]     = useState<TriviaRound | null>(null);
+  const [triviaCount,      setTriviaCount]     = useState(0);
+  const [triviaCorrect,    setTriviaCorrect]   = useState(0);
+  const [triviaTimer,      setTriviaTimer]     = useState<number | null>(null);
+  const [triviaLoading,    setTriviaLoading]   = useState(false);
 
   // Auth check
   useEffect(() => {
@@ -188,6 +215,71 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     const id = setInterval(loadFeedback, 10000);
     return () => clearInterval(id);
   }, [event?.id]);
+
+  // Load trivia question library once authed
+  useEffect(() => {
+    if (authed !== true) return;
+    fetch("/api/admin/trivia")
+      .then(r => r.json())
+      .then((d: { questions: TriviaQuestion[] }) => {
+        setTriviaQuestions(d.questions ?? []);
+        if (d.questions?.[0]) setSelectedQId(d.questions[0].id);
+      })
+      .catch(() => {});
+  }, [authed]);
+
+  // Sync trivia round from display_state + poll results
+  useEffect(() => {
+    const roundId = display?.trivia_round_id;
+    if (!roundId) { setTriviaRound(null); setTriviaCount(0); setTriviaCorrect(0); return; }
+    let cancelled = false;
+    async function pollRound() {
+      const [rRes, resRes] = await Promise.all([
+        fetch(`/api/trivia/${roundId}`),
+        fetch(`/api/trivia/${roundId}/results`),
+      ]);
+      if (cancelled) return;
+      if (rRes.ok)   setTriviaRound(await rRes.json() as TriviaRound);
+      if (resRes.ok) {
+        const d = await resRes.json() as { total: number; correct: number };
+        setTriviaCount(d.total);
+        setTriviaCorrect(d.correct);
+      }
+    }
+    pollRound();
+    const id = setInterval(pollRound, 4000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [display?.trivia_round_id]);
+
+  async function startTriviaRound() {
+    if (!event || !selectedQId) return;
+    setTriviaLoading(true);
+    const res = await fetch("/api/admin/trivia/rounds", {
+      method:  "POST",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ event_id: event.id, question_id: selectedQId, timer_seconds: triviaTimer }),
+    });
+    if (res.ok) {
+      const data = await res.json() as { round: TriviaRound };
+      setTriviaRound(data.round);
+      // Realtime will update display; also refresh locally
+      await new Promise(r => setTimeout(r, 200));
+      await loadEvent(false);
+    }
+    setTriviaLoading(false);
+  }
+
+  async function patchTriviaRound(action: "reveal" | "close") {
+    const roundId = display?.trivia_round_id ?? triviaRound?.id;
+    if (!roundId) return;
+    setTriviaLoading(true);
+    await fetch(`/api/admin/trivia/rounds/${roundId}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({ action }),
+    });
+    setTriviaLoading(false);
+  }
 
   async function upsertDisplay(patch: Partial<DisplayState>) {
     if (!event || !display) return;
@@ -563,6 +655,119 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                   ))}
                 </div>
               )
+            )}
+          </section>
+
+          {/* Trivia */}
+          <section className="mb-5">
+            <button
+              onClick={() => setTriviaOpen(o => !o)}
+              className="w-full flex items-center justify-between mb-3 group"
+            >
+              <h2 className="text-xs text-cream/40 uppercase tracking-wider">Trivia</h2>
+              <div className="flex items-center gap-2">
+                {triviaRound && triviaRound.status === "active" && (
+                  <span className="flex items-center gap-1 text-[10px] text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">
+                    <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                    Live · {triviaCount}
+                  </span>
+                )}
+                {triviaRound && triviaRound.status === "revealing" && (
+                  <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">Revealing</span>
+                )}
+                <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${triviaOpen ? "rotate-180" : ""}`} />
+              </div>
+            </button>
+
+            {triviaOpen && (
+              <div className="space-y-3">
+                {/* Active round controls */}
+                {triviaRound && ["active", "revealing"].includes(triviaRound.status) ? (
+                  <div className="bg-cream/8 rounded-2xl p-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-semibold text-gold">Round in progress</p>
+                        <p className="text-[10px] text-cream/40 mt-0.5">
+                          {triviaCount} answered · {triviaCorrect} correct
+                        </p>
+                      </div>
+                      <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
+                        triviaRound.status === "active" ? "bg-green-500/20 text-green-300" : "bg-gold/20 text-gold"
+                      }`}>
+                        {triviaRound.status}
+                      </span>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      {triviaRound.status === "active" && (
+                        <button
+                          onClick={() => patchTriviaRound("reveal")}
+                          disabled={triviaLoading}
+                          className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gold/20 text-gold hover:bg-gold/30 text-xs font-semibold transition-colors disabled:opacity-50"
+                        >
+                          <Eye size={12} /> Reveal answer
+                        </button>
+                      )}
+                      <button
+                        onClick={() => patchTriviaRound("close")}
+                        disabled={triviaLoading}
+                        className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-cream/10 text-cream/60 hover:bg-cream/20 text-xs font-medium transition-colors disabled:opacity-50 col-span-1"
+                      >
+                        <Square size={12} /> End round
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  /* Launch controls */
+                  <div className="space-y-2">
+                    {triviaQuestions.length === 0 ? (
+                      <p className="text-[11px] text-cream/30 text-center py-3">
+                        No trivia questions yet — add some in Library → Trivia
+                      </p>
+                    ) : (
+                      <>
+                        <select
+                          value={selectedQId}
+                          onChange={e => setSelectedQId(e.target.value)}
+                          className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-xs text-cream focus:outline-none focus:border-gold"
+                        >
+                          {triviaQuestions.map(q => (
+                            <option key={q.id} value={q.id} className="bg-forest text-cream">
+                              [{q.category}] {q.question.length > 55 ? q.question.slice(0, 55) + "…" : q.question}
+                            </option>
+                          ))}
+                        </select>
+
+                        {/* Optional timer */}
+                        <div className="flex items-center gap-2">
+                          <select
+                            value={triviaTimer ?? ""}
+                            onChange={e => setTriviaTimer(e.target.value ? parseInt(e.target.value) : null)}
+                            className="flex-1 bg-cream/10 border border-cream/10 rounded-xl px-3 py-2 text-xs text-cream focus:outline-none focus:border-gold"
+                          >
+                            <option value="">No timer</option>
+                            <option value="30">30 seconds</option>
+                            <option value="45">45 seconds</option>
+                            <option value="60">1 minute</option>
+                            <option value="90">90 seconds</option>
+                            <option value="120">2 minutes</option>
+                          </select>
+                          <button
+                            onClick={startTriviaRound}
+                            disabled={triviaLoading || !selectedQId}
+                            className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gold text-forest text-xs font-bold hover:bg-gold-light transition-colors disabled:opacity-50"
+                          >
+                            {triviaLoading ? <Loader2 size={12} className="animate-spin" /> : <Play size={12} />}
+                            Launch
+                          </button>
+                        </div>
+                        <p className="text-[10px] text-cream/20 leading-relaxed">
+                          Launching switches the display to Trivia scene and opens answering for attendees.
+                        </p>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
             )}
           </section>
 

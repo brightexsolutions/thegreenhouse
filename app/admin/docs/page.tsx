@@ -3,7 +3,7 @@ import {
   BookOpen, Calendar, Users, MessageSquare, Monitor,
   Music, Settings2, Radio, QrCode, CheckSquare,
   ChevronRight, Info, Leaf, Zap, Shield, Images,
-  Rocket, Globe, Mail, Server, SearchCode,
+  Rocket, Globe, Mail, Server, SearchCode, Sparkles,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -451,6 +451,56 @@ const SECTIONS = [
             <JourneyStep>Send a thank-you broadcast from Tools → Comms.</JourneyStep>
             <JourneyStep>Review attendance rate on the Dashboard.</JourneyStep>
           </JourneyPhase>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id:    "trivia",
+    icon:  Sparkles,
+    title: "Trivia — live interactive questions",
+    color: "bg-amber-50 text-amber-700",
+    content: (
+      <div className="space-y-4 text-sm text-charcoal/70 leading-relaxed">
+        <p>
+          Trivia lets you run live interactive question rounds during a session. Attendees answer on their phones via the live page — no extra app or account needed. The projection display shows the question, a real-time response count, and a QR code to invite latecomers to join.
+        </p>
+
+        <div className="bg-amber-50 border border-amber-200/60 rounded-xl px-4 py-3 space-y-1">
+          <p className="text-xs font-semibold text-amber-700">Two question types</p>
+          <ul className="text-xs text-charcoal/60 space-y-1 pl-3 list-disc">
+            <li><strong className="text-charcoal">Multiple choice</strong> — 2–4 options, one marked as correct. Results shown as percentage bars on reveal. Attendees see if they got it right.</li>
+            <li><strong className="text-charcoal">Open response</strong> — Free-text input. No right/wrong — good for reflections, opinions, or ice-breakers.</li>
+          </ul>
+        </div>
+
+        <div className="space-y-3 pl-1">
+          <Step n={1} title="Build your question library">
+            Go to <strong>Library → Trivia</strong>. Click <strong>New question</strong>. Write the question, choose a type, add options (MC), mark the correct answer by tapping the letter, set a category and point value, and optionally add a hint. Questions are reusable across all events.
+          </Step>
+          <Step n={2} title="Launch a round during the event">
+            Open the <strong>control panel</strong> on your phone. Scroll to the <strong>Trivia</strong> section. Pick a question from the dropdown. Optionally set a countdown timer (30 s – 2 min). Tap <strong>Launch</strong>. The display switches instantly to the Trivia scene and the attendee live page shows the question card.
+          </Step>
+          <Step n={3} title="Attendees answer">
+            Attendees on the live page (<code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">/live/[slug]</code>) see a dark interactive card slide in at the top. They can optionally enter their name (stored on-device for the session — no re-typing for the next round). For MC, they tap an option and press <strong>Lock in answer</strong>. For open response, they type and submit.
+          </Step>
+          <Step n={4} title="Reveal the answer">
+            When you're ready, tap <strong>Reveal answer</strong> on the control panel. The display animates the correct option (glows green), shows percentage bars for all choices, and displays how many got it right. Attendees on their phones see whether they were correct with a celebration or sympathetic animation.
+          </Step>
+          <Step n={5} title="End the round">
+            Tap <strong>End round</strong>. The display returns to Branding and the trivia card disappears from the attendee page. You can launch another question immediately.
+          </Step>
+        </div>
+
+        <div className="bg-forest/6 border border-forest/15 rounded-xl px-4 py-3 space-y-2">
+          <p className="text-xs font-semibold text-forest">Tips</p>
+          <ul className="text-xs text-charcoal/60 space-y-1 pl-3 list-disc">
+            <li>Use trivia during transitions — between worship sets, before the teaching, or as an ice-breaker while guests arrive.</li>
+            <li>The <strong>Community category</strong> questions build connection (e.g., "What one word describes tonight?").</li>
+            <li>The <strong>Scripture category</strong> works well paired with the theme — quiz people on the key verse.</li>
+            <li>Attendee names are remembered in their browser for the full session — they only need to type once.</li>
+            <li>Only one round can be active at a time. Launching a new round automatically closes any open one.</li>
+          </ul>
         </div>
       </div>
     ),

@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { Maximize2, Minimize2, Music2 } from "lucide-react";
+import { Maximize2, Minimize2, Music2, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 
@@ -16,6 +16,7 @@ type DisplayState = {
   show_qr:                  boolean;
   featured_feedback:        string | null;
   featured_feedback_author: string | null;
+  trivia_round_id:          string | null;
   updated_at:               string;
 };
 
@@ -57,6 +58,25 @@ type EventData = {
   slug:               string;
   event_sessions:     Session[];
   event_images:       EventImage[];
+};
+
+type TriviaRound = {
+  id:            string;
+  status:        "active" | "revealing" | "closed";
+  question:      string;
+  type:          "multiple_choice" | "open_input";
+  options:       string[] | null;
+  correct_index: number | null;
+  timer_seconds: number | null;
+  started_at:    string;
+  points:        number;
+  hint:          string | null;
+};
+
+type TriviaResults = {
+  total:   number;
+  correct: number;
+  tally:   Record<number, number>;
 };
 
 const THEMES = {
@@ -255,6 +275,8 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [galleryUrls,  setGalleryUrls] = useState<string[]>([]);
   const [communityAttendees, setCommunityAttendees] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
+  const [triviaRound,  setTriviaRound] = useState<TriviaRound | null>(null);
+  const [triviaResults, setTriviaResults] = useState<TriviaResults | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
 
   // Shared event loader — called on mount and periodically to pick up song/session changes
@@ -332,6 +354,27 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
     const id = setInterval(pollAttendees, 4000);
     return () => { cancelled = true; clearInterval(id); };
   }, [slug]);
+
+  // Poll trivia round + results every 5s when scene = trivia
+  useEffect(() => {
+    let cancelled = false;
+    async function pollTrivia() {
+      const roundId = display?.trivia_round_id;
+      if (!roundId || display?.scene !== "trivia") { setTriviaRound(null); setTriviaResults(null); return; }
+      try {
+        const [roundRes, resultsRes] = await Promise.all([
+          fetch(`/api/trivia/${roundId}`, { cache: "no-store" }),
+          fetch(`/api/trivia/${roundId}/results`, { cache: "no-store" }),
+        ]);
+        if (cancelled) return;
+        if (roundRes.ok)   setTriviaRound(await roundRes.json() as TriviaRound);
+        if (resultsRes.ok) setTriviaResults(await resultsRes.json() as TriviaResults);
+      } catch { /* ignore */ }
+    }
+    pollTrivia();
+    const id = setInterval(pollTrivia, 5000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [display?.trivia_round_id, display?.scene]);
 
   // Polling fallback every 3s — ensures display stays in sync even if Realtime drops
   useEffect(() => {
@@ -607,6 +650,16 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
                   </div>
                 </div>
               )}
+
+              {scene === "trivia" && (
+                <TriviaScene
+                  round={triviaRound}
+                  results={triviaResults}
+                  liveUrl={liveUrl}
+                  t={t}
+                  themeKey={themeKey}
+                />
+              )}
             </motion.div>
           )}
         </AnimatePresence>
@@ -855,6 +908,266 @@ function avatarPos(i: number, total: number) {
 // Which avatars get a bubble — every 3rd one, staggered so they don't all show at once
 function bubbleDelay(i: number) { return 2 + (i * 4.7) % 18; }
 function bubbleDur(i: number)   { return 3.5 + (i * 1.3) % 3; }
+
+const OPTION_COLORS_DISPLAY = [
+  { bg: "rgba(201,162,74,0.18)",  border: "rgba(201,162,74,0.55)",  text: "#c9a24a",  fill: "#c9a24a"  },
+  { bg: "rgba(78,195,120,0.15)",  border: "rgba(78,195,120,0.5)",   text: "#4ec378",  fill: "#4ec378"  },
+  { bg: "rgba(99,179,237,0.15)",  border: "rgba(99,179,237,0.5)",   text: "#63b3ed",  fill: "#63b3ed"  },
+  { bg: "rgba(245,101,101,0.15)", border: "rgba(245,101,101,0.5)",  text: "#f56565",  fill: "#f56565"  },
+];
+
+function TriviaScene({
+  round, results, liveUrl, t, themeKey,
+}: {
+  round:     TriviaRound | null;
+  results:   TriviaResults | null;
+  liveUrl:   string;
+  t:         typeof THEMES[ThemeKey];
+  themeKey:  ThemeKey;
+}) {
+  const [elapsed, setElapsed] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  // Timer counting up from start
+  useEffect(() => {
+    if (!round?.started_at) return;
+    const start = new Date(round.started_at).getTime();
+    const id = setInterval(() => setElapsed(Math.floor((Date.now() - start) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, [round?.started_at]);
+
+  // Confetti burst on reveal
+  useEffect(() => {
+    if (round?.status === "revealing") { setShowConfetti(true); setTimeout(() => setShowConfetti(false), 4000); }
+  }, [round?.status]);
+
+  const isRevealing  = round?.status === "revealing";
+  const totalVotes   = results?.total ?? 0;
+  const tally        = results?.tally ?? {};
+  const timerLeft    = round?.timer_seconds ? Math.max(0, round.timer_seconds - elapsed) : null;
+  const timerPct     = round?.timer_seconds ? (timerLeft! / round.timer_seconds) * 100 : null;
+
+  if (!round) {
+    return (
+      <div className="text-center flex flex-col items-center gap-5">
+        <Sparkles size={60} style={{ color: t.gold, opacity: 0.3 }} />
+        <p className="font-display text-4xl font-medium" style={{ color: t.sub }}>Trivia loading…</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="w-full max-w-5xl flex flex-col items-center gap-8">
+      {/* Confetti burst on reveal */}
+      {showConfetti && <ConfettiBurst color={t.gold} />}
+
+      {/* Header */}
+      <div className="flex items-center justify-between w-full">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+            style={{ background: `${t.gold}22`, border: `1px solid ${t.gold}44` }}>
+            <Sparkles size={12} style={{ color: t.gold }} />
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: t.gold }}>Trivia</span>
+          </div>
+          {!isRevealing && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+              style={{ background: "rgba(78,195,120,0.15)", border: "1px solid rgba(78,195,120,0.3)" }}>
+              <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
+              <span className="text-xs font-semibold" style={{ color: "#4ec378" }}>
+                {totalVotes} answered
+              </span>
+            </div>
+          )}
+          {isRevealing && (
+            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
+              style={{ background: "rgba(201,162,74,0.15)", border: "1px solid rgba(201,162,74,0.3)" }}>
+              <span className="text-xs font-bold" style={{ color: t.gold }}>
+                {results?.correct ?? 0} / {totalVotes} got it right
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* Timer bar */}
+        {timerLeft !== null && !isRevealing && (
+          <div className="flex items-center gap-3">
+            <div className="w-32 h-2 rounded-full overflow-hidden" style={{ background: t.surface }}>
+              <div className="h-full rounded-full transition-all duration-1000"
+                style={{ width: `${timerPct}%`, background: timerPct! > 30 ? t.gold : "#f56565" }} />
+            </div>
+            <span className="text-lg font-bold tabular-nums" style={{ color: timerPct! > 30 ? t.gold : "#f56565" }}>
+              {timerLeft}s
+            </span>
+          </div>
+        )}
+      </div>
+
+      {/* Question */}
+      <div className="text-center px-4">
+        <h1 className="font-display font-semibold leading-tight"
+          style={{ color: t.text, fontSize: "clamp(1.8rem,4.5vw,4rem)" }}>
+          {round.question}
+        </h1>
+        {round.hint && !isRevealing && (
+          <p className="mt-3 text-sm md:text-base italic" style={{ color: t.sub, opacity: 0.55 }}>
+            Hint: {round.hint}
+          </p>
+        )}
+      </div>
+
+      {/* Options grid — MC */}
+      {round.type === "multiple_choice" && round.options && (
+        <div className="grid grid-cols-2 gap-4 w-full">
+          {round.options.map((opt, i) => {
+            const col        = OPTION_COLORS_DISPLAY[i % 4];
+            const isCorrect  = isRevealing && i === round.correct_index;
+            const isWrong    = isRevealing && i !== round.correct_index;
+            const votes      = tally[i] ?? 0;
+            const pct        = totalVotes > 0 ? Math.round((votes / totalVotes) * 100) : 0;
+            const LABELS     = ["A", "B", "C", "D"];
+
+            return (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: isWrong ? 0.3 : 1, scale: 1 }}
+                transition={{ delay: i * 0.08, duration: 0.4 }}
+                className="relative rounded-2xl overflow-hidden flex items-center gap-4 px-5 py-4"
+                style={{
+                  background:  isCorrect ? "rgba(78,195,120,0.2)" : col.bg,
+                  border:      `2px solid ${isCorrect ? "#4ec378" : col.border}`,
+                  boxShadow:   isCorrect ? "0 0 40px rgba(78,195,120,0.3)" : "none",
+                  transition:  "all 0.5s ease",
+                }}
+              >
+                {/* Result bar */}
+                {isRevealing && (
+                  <div className="absolute inset-0 rounded-2xl overflow-hidden pointer-events-none">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${pct}%` }}
+                      transition={{ delay: 0.4, duration: 0.8, ease: "easeOut" }}
+                      className="absolute inset-y-0 left-0"
+                      style={{ background: isCorrect ? "rgba(78,195,120,0.15)" : "rgba(255,255,255,0.04)" }}
+                    />
+                  </div>
+                )}
+
+                <div className="w-10 h-10 md:w-12 md:h-12 rounded-xl flex items-center justify-center font-bold text-lg flex-shrink-0 relative z-10"
+                  style={{
+                    background: isCorrect ? "#4ec378" : col.bg,
+                    color:      isCorrect ? "#fff" : col.text,
+                    border:     `1.5px solid ${isCorrect ? "#4ec378" : col.border}`,
+                  }}>
+                  {isCorrect ? "✓" : LABELS[i]}
+                </div>
+
+                <p className="font-display text-xl md:text-2xl font-medium flex-1 relative z-10"
+                  style={{ color: isCorrect ? "#4ec378" : t.text }}>
+                  {opt}
+                </p>
+
+                {isRevealing && (
+                  <span className="text-base md:text-lg font-bold tabular-nums relative z-10"
+                    style={{ color: isCorrect ? "#4ec378" : t.sub }}>
+                    {pct}%
+                  </span>
+                )}
+              </motion.div>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Open input — just show "answer on your phone" */}
+      {round.type === "open_input" && (
+        <div className="flex flex-col items-center gap-4">
+          <p className="text-xl md:text-2xl font-display" style={{ color: t.sub }}>
+            Open your phone and share your answer
+          </p>
+          {isRevealing && (
+            <p className="text-2xl md:text-3xl font-display font-semibold" style={{ color: t.gold }}>
+              {totalVotes} response{totalVotes !== 1 ? "s" : ""} received
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* QR + scan prompt */}
+      {!isRevealing && (
+        <div className="flex items-center gap-6 mt-2">
+          <div className="flex flex-col items-center gap-2 rounded-2xl p-4"
+            style={{ background: t.qrBg, border: `1px solid ${t.border}` }}>
+            <QRCodeSVG value={liveUrl} size={110} bgColor={t.qrBg} fgColor={t.qrFg} level="M" />
+            <p className="text-[9px] uppercase tracking-widest text-center font-medium"
+              style={{ color: t.qrFg, opacity: 0.55 }}>
+              Scan to answer
+            </p>
+          </div>
+          <div>
+            <p className="text-base md:text-lg font-display font-medium" style={{ color: t.sub }}>
+              Haven&apos;t joined yet?
+            </p>
+            <p className="text-sm" style={{ color: t.sub, opacity: 0.5 }}>
+              Scan the QR or visit the live page<br />to participate in trivia
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Reveal celebration */}
+      {isRevealing && round.type === "multiple_choice" && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ delay: 0.6, type: "spring", stiffness: 300, damping: 20 }}
+          className="text-center"
+        >
+          <p className="font-display text-3xl md:text-4xl font-bold" style={{ color: "#4ec378" }}>
+            {results?.correct === 0
+              ? "Tough one! 🤔"
+              : results!.correct === totalVotes
+              ? "Everyone got it! 🎉"
+              : `${results?.correct} out of ${totalVotes} nailed it! 🎉`}
+          </p>
+        </motion.div>
+      )}
+    </div>
+  );
+}
+
+function ConfettiBurst({ color }: { color: string }) {
+  const pieces = Array.from({ length: 24 }, (_, i) => ({
+    id: i,
+    x: Math.random() * 100,
+    angle: Math.random() * 360,
+    dur: 1.5 + Math.random() * 1.5,
+    del: Math.random() * 0.6,
+    size: 6 + Math.random() * 10,
+  }));
+  return (
+    <div className="absolute inset-0 pointer-events-none overflow-hidden z-20">
+      <style>{`
+        @keyframes confettiFall {
+          0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+      `}</style>
+      {pieces.map(p => (
+        <div key={p.id} className="absolute rounded-sm"
+          style={{
+            left:      `${p.x}%`,
+            top:       0,
+            width:     `${p.size}px`,
+            height:    `${p.size * 0.5}px`,
+            background: p.id % 3 === 0 ? color : p.id % 3 === 1 ? "#4ec378" : "#f7f2e8",
+            transform: `rotate(${p.angle}deg)`,
+            animation: `confettiFall ${p.dur}s ${p.del}s linear forwards`,
+          }} />
+      ))}
+    </div>
+  );
+}
 
 function CommunityScene({ attendees, t }: {
   attendees: Array<{ id: string; first_name: string; last_name: string }>;

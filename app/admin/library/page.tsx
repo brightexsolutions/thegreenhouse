@@ -3,12 +3,13 @@ import { PageHeader } from "@/components/admin/ui/page-header";
 import { SongsLibrary } from "@/components/admin/library/songs-library";
 import { EventPhotoUpload } from "@/components/admin/library/event-photo-upload";
 import { AttendeePhotoApproval } from "@/components/admin/library/attendee-photo-approval";
+import { TriviaLibrary } from "@/components/admin/library/trivia-library";
 import Link from "next/link";
-import { Music2, Images, Palette, Camera } from "lucide-react";
+import { Music2, Images, Palette, Camera, Sparkles } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
-type Tab = "songs" | "photos" | "themes" | "attendee-photos";
+type Tab = "songs" | "photos" | "themes" | "attendee-photos" | "trivia";
 
 interface Props {
   searchParams: Promise<{ tab?: string }>;
@@ -16,7 +17,7 @@ interface Props {
 
 export default async function LibraryPage({ searchParams }: Props) {
   const { tab = "songs" } = await searchParams;
-  const activeTab = (["songs", "photos", "themes", "attendee-photos"].includes(tab) ? tab : "songs") as Tab;
+  const activeTab = (["songs", "photos", "themes", "attendee-photos", "trivia"].includes(tab) ? tab : "songs") as Tab;
 
   const supabase = createAdminClient();
 
@@ -43,7 +44,8 @@ export default async function LibraryPage({ searchParams }: Props) {
     { key: "songs",           label: "Songs",           icon: Music2  },
     { key: "photos",          label: "Event Photos",    icon: Images  },
     { key: "attendee-photos", label: "Attendee Photos", icon: Camera  },
-    { key: "themes",          label: "Themes",          icon: Palette },
+    { key: "themes",          label: "Themes",          icon: Palette  },
+    { key: "trivia",          label: "Trivia",           icon: Sparkles },
   ] as const;
 
   return (
@@ -78,6 +80,7 @@ export default async function LibraryPage({ searchParams }: Props) {
       {activeTab === "attendee-photos" && (
         <AttendeePhotoApproval events={eventsForPhotos} />
       )}
+      {activeTab === "trivia" && <TriviaLibrary />}
       {activeTab === "themes" && (
         <div className="space-y-3">
           {(events ?? []).filter(e => (e as { theme_title?: string }).theme_title).map(ev => {

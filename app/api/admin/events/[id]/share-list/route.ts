@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
-import { SITE_NAME } from "@/lib/constants";
+import { COMMS_FROM_EMAIL } from "@/lib/constants";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest, { params }: Props) {
   const eventDate  = new Date((event as { title: string; event_date: string } | null)?.event_date ?? "").toLocaleDateString("en-KE");
 
   await resend.emails.send({
-    from:    `${SITE_NAME} <admin@thegreenhouseke.com>`,
+    from:    COMMS_FROM_EMAIL(),
     to:      [email],
     subject: `Registrant list — ${eventTitle}`,
     text:    `Attached is the registrant list for ${eventTitle} (${eventDate}). ${registrants.length} registrant(s).`,
