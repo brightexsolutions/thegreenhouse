@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { Download, X, Share2, Loader2, ImagePlus, Check, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -401,10 +402,13 @@ export function BadgeCustomizerModal({ open, onClose, ...props }: ModalProps) {
     } catch { setGenerating(false); }
   }
 
-  if (!open) return null;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+  if (!open || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center">
       {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
@@ -526,7 +530,8 @@ export function BadgeCustomizerModal({ open, onClose, ...props }: ModalProps) {
           </p>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
@@ -539,9 +544,13 @@ interface PromptProps extends BadgeProps {
 }
 
 export function BadgePromptDialog({ open, onClose, onCustomize }: PromptProps) {
-  if (!open) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center">
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!open || !mounted) return null;
+
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center">
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
       <div className="relative z-10 w-full sm:max-w-sm mx-4 sm:mx-auto bg-[#1b3a2a] rounded-t-3xl sm:rounded-3xl overflow-hidden shadow-2xl">
         {/* Gold glow */}
@@ -570,6 +579,7 @@ export function BadgePromptDialog({ open, onClose, onCustomize }: PromptProps) {
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
