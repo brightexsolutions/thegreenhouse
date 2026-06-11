@@ -69,6 +69,31 @@ function clipImg(ctx: CanvasRenderingContext2D, img: HTMLImageElement, dx: numbe
   ctx.restore();
 }
 
+// Draw image center-cropped into a rotated square/rect, centered at (cx,cy)
+function clipImgRotated(
+  ctx: CanvasRenderingContext2D,
+  img: HTMLImageElement,
+  cx: number, cy: number,
+  w: number, h: number,
+  angle: number,
+  r = 0
+) {
+  const ia = img.naturalWidth / img.naturalHeight;
+  const ta = w / h;
+  let sx = 0, sy = 0, sw = img.naturalWidth, sh = img.naturalHeight;
+  if (ia > ta) { sw = sh * ta; sx = (img.naturalWidth - sw) / 2; }
+  else          { sh = sw / ta; sy = (img.naturalHeight - sh) / 2; }
+  ctx.save();
+  ctx.translate(cx, cy);
+  ctx.rotate(angle);
+  ctx.beginPath();
+  if (r > 0 && ctx.roundRect) ctx.roundRect(-w / 2, -h / 2, w, h, r);
+  else ctx.rect(-w / 2, -h / 2, w, h);
+  ctx.clip();
+  ctx.drawImage(img, sx, sy, sw, sh, -w / 2, -h / 2, w, h);
+  ctx.restore();
+}
+
 // ─── Variant 1: Sanctuary ────────────────────────────────────────────────────
 function drawV1(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null) {
   const sf = serif();
@@ -93,28 +118,29 @@ function drawV1(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   let y = H * 0.13;
 
   if (photo) {
-    const r = W * 0.185;
-    const cy = H * 0.30;
+    // Smaller circle + higher position so text below still fits within the canvas
+    const r = W * 0.155;
+    const cy = H * 0.25;
     clipImg(ctx, photo, cx - r, cy - r, r * 2, r * 2, "circle");
     ctx.beginPath(); ctx.arc(cx, cy, r + 5, 0, Math.PI * 2);
     ctx.strokeStyle = "rgba(201,162,74,0.55)"; ctx.lineWidth = 3; ctx.stroke();
-    y = cy + r + H * 0.06;
+    y = cy + r + H * 0.04;
   }
 
   ctx.textAlign = "center";
   ctx.fillStyle = "rgba(201,162,74,0.6)"; ctx.font = `300 ${W * 0.013}px sans-serif`; ctx.letterSpacing = "5px";
   ctx.fillText((p.siteName ?? "THE GREEN HOUSE").toUpperCase(), cx, y); ctx.letterSpacing = "0px"; y += W * 0.056;
   ctx.fillStyle = "rgba(247,242,232,0.55)"; ctx.font = `400 ${W * 0.032}px ${sf}`;
-  ctx.fillText("I'm attending", cx, y); y += W * 0.092;
-  ctx.fillStyle = "#c9a24a"; ctx.font = `700 ${W * 0.076}px ${sf}`;
-  y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.74, W * 0.086);
+  ctx.fillText("I'll be attending", cx, y); y += W * 0.076;
+  ctx.fillStyle = "#c9a24a"; ctx.font = `700 ${W * 0.064}px ${sf}`;
+  y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.76, W * 0.074);
   if (p.themeTitle) {
     y += W * 0.01;
-    ctx.fillStyle = "rgba(228,201,126,0.82)"; ctx.font = `italic 400 ${W * 0.029}px ${sf}`;
-    ctx.fillText(p.themeTitle, cx, y); y += W * 0.04;
+    ctx.fillStyle = "rgba(228,201,126,0.82)"; ctx.font = `italic 400 ${W * 0.027}px ${sf}`;
+    ctx.fillText(`Theme: ${p.themeTitle}`, cx, y); y += W * 0.038;
     if (p.themeScripture) {
       ctx.fillStyle = "rgba(247,242,232,0.38)"; ctx.font = `400 ${W * 0.019}px sans-serif`;
-      ctx.letterSpacing = "1px"; ctx.fillText(p.themeScripture, cx, y); ctx.letterSpacing = "0px"; y += W * 0.04;
+      ctx.letterSpacing = "1px"; ctx.fillText(p.themeScripture, cx, y); ctx.letterSpacing = "0px"; y += W * 0.038;
     }
   } else { y += W * 0.022; }
 
@@ -152,31 +178,47 @@ function drawV2(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
     .forEach(([x2, y2, sx, sy]) => { ctx.beginPath(); ctx.moveTo(x2, y2 + sy * ca); ctx.lineTo(x2, y2); ctx.lineTo(x2 + sx * ca, y2); ctx.stroke(); });
 
   if (photo) {
-    const photoW = W * 0.38, photoH = H - pad * 2 - W * 0.1, photoX = pad + W * 0.04, photoY = pad + W * 0.05;
-    clipImg(ctx, photo, photoX, photoY, photoW, photoH, "rect", W * 0.025);
-    ctx.strokeStyle = "rgba(201,162,74,0.35)"; ctx.lineWidth = 2;
+    // Tilted square frame, upper-center
+    const sqSize = W * 0.42;
+    const sqCx = W / 2, sqCy = H * 0.25;
+    const angle = Math.PI / 22;
+    clipImgRotated(ctx, photo, sqCx, sqCy, sqSize, sqSize, angle, sqSize * 0.05);
+    // Outer gold accent ring
+    ctx.save(); ctx.translate(sqCx, sqCy); ctx.rotate(angle);
+    ctx.strokeStyle = "#c9a24a"; ctx.lineWidth = 3;
     ctx.beginPath();
-    if (ctx.roundRect) ctx.roundRect(photoX, photoY, photoW, photoH, W * 0.025); else ctx.rect(photoX, photoY, photoW, photoH);
+    if (ctx.roundRect) ctx.roundRect(-sqSize / 2 - 4, -sqSize / 2 - 4, sqSize + 8, sqSize + 8, sqSize * 0.055);
+    else ctx.rect(-sqSize / 2 - 4, -sqSize / 2 - 4, sqSize + 8, sqSize + 8);
     ctx.stroke();
+    // Inner forest border
+    ctx.strokeStyle = "rgba(27,58,42,0.4)"; ctx.lineWidth = 6;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(-sqSize / 2, -sqSize / 2, sqSize, sqSize, sqSize * 0.05);
+    else ctx.rect(-sqSize / 2, -sqSize / 2, sqSize, sqSize);
+    ctx.stroke();
+    ctx.restore();
 
-    const tx = photoX + photoW + W * 0.055, tw = W - tx - pad - W * 0.04;
-    let ty = H * 0.30; ctx.textAlign = "left";
-    ctx.fillStyle = "rgba(27,58,42,0.35)"; ctx.font = `500 ${W * 0.013}px sans-serif`;
-    ctx.letterSpacing = "4px"; ctx.fillText("I'M ATTENDING", tx, ty); ctx.letterSpacing = "0px"; ty += W * 0.065;
+    // Text below, center-aligned
+    const cx2 = W / 2; let ty = sqCy + sqSize / 2 + H * 0.05; ctx.textAlign = "center";
+    ctx.fillStyle = "rgba(27,58,42,0.4)"; ctx.font = `500 ${W * 0.013}px sans-serif`;
+    ctx.letterSpacing = "4px"; ctx.fillText("I'LL BE ATTENDING", cx2, ty); ctx.letterSpacing = "0px"; ty += W * 0.062;
     ctx.fillStyle = "#1b3a2a"; ctx.font = `700 ${W * 0.063}px ${sf}`;
-    const words = p.sessionLabel.split(" "); let line = "", aty = ty;
-    for (const w of words) { const t = line ? `${line} ${w}` : w; if (ctx.measureText(t).width > tw && line) { ctx.fillText(line, tx, aty); line = w; aty += W * 0.072; } else line = t; }
-    if (line) { ctx.fillText(line, tx, aty); aty += W * 0.072; } ty = aty + W * 0.01;
+    ty = wrapText(ctx, p.sessionLabel, cx2, ty, W * 0.76, W * 0.072);
     ctx.strokeStyle = "#c9a24a"; ctx.lineWidth = 1.5;
-    ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(tx + tw * 0.5, ty); ctx.stroke(); ty += W * 0.04;
+    ctx.beginPath(); ctx.moveTo(cx2 - W * 0.07, ty); ctx.lineTo(cx2 + W * 0.07, ty); ctx.stroke(); ty += W * 0.042;
     if (p.themeTitle) {
       ctx.fillStyle = "rgba(27,58,42,0.65)"; ctx.font = `italic 400 ${W * 0.026}px ${sf}`;
-      ctx.fillText(p.themeTitle, tx, ty); ty += W * 0.038;
+      ctx.fillText(`Theme: ${p.themeTitle}`, cx2, ty); ty += W * 0.036;
+      if (p.themeScripture) {
+        ctx.fillStyle = "rgba(27,58,42,0.4)"; ctx.font = `400 ${W * 0.019}px sans-serif`;
+        ctx.fillText(p.themeScripture, cx2, ty); ty += W * 0.032;
+      }
+      ty += W * 0.008;
     }
-    ctx.fillStyle = "#1b3a2a"; ctx.font = `400 ${W * 0.028}px ${sf}`;
-    ctx.fillText(`${p.firstName} ${p.lastName}`, tx, ty); ty += W * 0.042;
+    ctx.fillStyle = "#1b3a2a"; ctx.font = `400 ${W * 0.032}px ${sf}`;
+    ctx.fillText(`${p.firstName} ${p.lastName}`, cx2, ty); ty += W * 0.042;
     ctx.fillStyle = "rgba(27,58,42,0.45)"; ctx.font = `400 ${W * 0.019}px sans-serif`;
-    ctx.fillText(p.shortDate, tx, ty);
+    ctx.fillText(p.shortDate, cx2, ty);
     ctx.textAlign = "right"; ctx.fillStyle = "rgba(27,58,42,0.28)"; ctx.font = `300 ${W * 0.014}px sans-serif`;
     ctx.letterSpacing = "3px"; ctx.fillText((p.siteName ?? "THE GREEN HOUSE").toUpperCase(), W - pad - W * 0.04, H - pad - W * 0.035); ctx.letterSpacing = "0px";
   } else {
@@ -184,10 +226,10 @@ function drawV2(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
     ctx.fillStyle = "rgba(27,58,42,0.055)"; ctx.font = `700 ${W * 0.28}px ${sf}`;
     ctx.fillText("GH", cx, H * 0.66);
     ctx.fillStyle = "rgba(27,58,42,0.3)"; ctx.font = `500 ${W * 0.013}px sans-serif`;
-    ctx.letterSpacing = "5px"; ctx.fillText("I'M ATTENDING", cx, y); ctx.letterSpacing = "0px"; y += W * 0.072;
+    ctx.letterSpacing = "5px"; ctx.fillText("I'LL BE ATTENDING", cx, y); ctx.letterSpacing = "0px"; y += W * 0.072;
     ctx.fillStyle = "#1b3a2a"; ctx.font = `700 ${W * 0.075}px ${sf}`;
     y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.75, W * 0.083);
-    if (p.themeTitle) { y += W * 0.006; ctx.fillStyle = "rgba(201,162,74,0.85)"; ctx.font = `italic 400 ${W * 0.028}px ${sf}`; ctx.fillText(p.themeTitle, cx, y); y += W * 0.042; }
+    if (p.themeTitle) { y += W * 0.006; ctx.fillStyle = "rgba(201,162,74,0.85)"; ctx.font = `italic 400 ${W * 0.028}px ${sf}`; ctx.fillText(`Theme: ${p.themeTitle}`, cx, y); y += W * 0.042; }
     ctx.strokeStyle = "#c9a24a"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(cx - W * 0.07, y); ctx.lineTo(cx + W * 0.07, y); ctx.stroke(); y += W * 0.052;
     ctx.fillStyle = "#1b3a2a"; ctx.font = `400 ${W * 0.032}px ${sf}`; ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.046;
@@ -203,40 +245,56 @@ function drawV3(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   const bg = ctx.createLinearGradient(0, 0, W * 0.3, H);
   bg.addColorStop(0, "#1a1218"); bg.addColorStop(0.6, "#1b2d1e"); bg.addColorStop(1, "#1b3a2a");
   ctx.fillStyle = bg; ctx.fillRect(0, 0, W, H);
-  const glow = ctx.createRadialGradient(W * 0.1, H * 0.85, 0, W * 0.1, H * 0.85, W * 0.55);
-  glow.addColorStop(0, "rgba(201,162,74,0.18)"); glow.addColorStop(1, "transparent");
+  const glow = ctx.createRadialGradient(W * 0.5, 0, 0, W * 0.5, 0, W * 0.6);
+  glow.addColorStop(0, "rgba(201,162,74,0.16)"); glow.addColorStop(1, "transparent");
   ctx.fillStyle = glow; ctx.fillRect(0, 0, W, H);
 
-  const splitY = H * 0.44;
+  const cx = W / 2;
+  let y = H * 0.09;
+
   if (photo) {
-    clipImg(ctx, photo, 0, splitY, W, H - splitY, "rect");
-    const scrim = ctx.createLinearGradient(0, splitY - H * 0.1, 0, H);
-    scrim.addColorStop(0, "rgba(26,18,24,1)"); scrim.addColorStop(0.28, "rgba(26,18,24,0.25)"); scrim.addColorStop(1, "rgba(26,18,24,0.6)");
-    ctx.fillStyle = scrim; ctx.fillRect(0, splitY - H * 0.1, W, H - splitY + H * 0.1);
+    // Circle frame with double gold ring — photo sits on top of the dark background
+    const pr = W * 0.165;
+    const pcy = H * 0.25;
+    clipImg(ctx, photo, cx - pr, pcy - pr, pr * 2, pr * 2, "circle");
+    // Outer glow ring
+    ctx.beginPath(); ctx.arc(cx, pcy, pr + 14, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(201,162,74,0.15)"; ctx.lineWidth = 10; ctx.stroke();
+    // Gold ring
+    ctx.beginPath(); ctx.arc(cx, pcy, pr + 5, 0, Math.PI * 2);
+    ctx.strokeStyle = "#c9a24a"; ctx.lineWidth = 3; ctx.stroke();
+    // Inner accent ring
+    ctx.beginPath(); ctx.arc(cx, pcy, pr + 12, 0, Math.PI * 2);
+    ctx.strokeStyle = "rgba(201,162,74,0.22)"; ctx.lineWidth = 1.5; ctx.stroke();
+    y = pcy + pr + H * 0.045;
   }
 
-  const lg = ctx.createLinearGradient(0, splitY, W, splitY);
-  lg.addColorStop(0, "transparent"); lg.addColorStop(0.3, "rgba(201,162,74,0.55)"); lg.addColorStop(0.7, "rgba(201,162,74,0.55)"); lg.addColorStop(1, "transparent");
-  ctx.strokeStyle = lg; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(0, splitY); ctx.lineTo(W, splitY); ctx.stroke();
-
-  const cx = W / 2; let y = H * 0.09; ctx.textAlign = "center";
+  ctx.textAlign = "center";
   ctx.fillStyle = "rgba(201,162,74,0.5)"; ctx.font = `300 ${W * 0.013}px sans-serif`;
-  ctx.letterSpacing = "5px"; ctx.fillText((p.siteName ?? "THE GREEN HOUSE").toUpperCase(), cx, y); ctx.letterSpacing = "0px"; y += W * 0.062;
+  ctx.letterSpacing = "5px"; ctx.fillText((p.siteName ?? "THE GREEN HOUSE").toUpperCase(), cx, y); ctx.letterSpacing = "0px"; y += W * 0.055;
   ctx.fillStyle = "rgba(247,242,232,0.45)"; ctx.font = `300 ${W * 0.025}px ${sf}`;
-  ctx.fillText("I'm attending", cx, y); y += W * 0.088;
-  ctx.fillStyle = "#f7f2e8"; ctx.font = `700 ${W * 0.08}px ${sf}`;
-  y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.82, W * 0.09);
+  ctx.fillText("I'll be attending", cx, y); y += W * 0.074;
+  ctx.fillStyle = "#f7f2e8"; ctx.font = `700 ${W * 0.065}px ${sf}`;
+  y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.82, W * 0.075);
   if (p.themeTitle) {
-    y += W * 0.01; ctx.fillStyle = "#c9a24a"; ctx.font = `italic 400 ${W * 0.031}px ${sf}`;
-    ctx.fillText(p.themeTitle, cx, y); y += W * 0.042;
+    y += W * 0.01; ctx.fillStyle = "#c9a24a"; ctx.font = `italic 400 ${W * 0.027}px ${sf}`;
+    ctx.fillText(`Theme: ${p.themeTitle}`, cx, y); y += W * 0.038;
+    if (p.themeScripture) {
+      ctx.fillStyle = "rgba(247,242,232,0.45)"; ctx.font = `400 ${W * 0.02}px sans-serif`;
+      ctx.letterSpacing = "1px"; ctx.fillText(p.themeScripture, cx, y); ctx.letterSpacing = "0px"; y += W * 0.036;
+    }
   }
 
-  const nameY = photo ? splitY + H * 0.24 : H * 0.76;
+  const dv = W * 0.07;
+  const dvg = ctx.createLinearGradient(cx - dv, y, cx + dv, y);
+  dvg.addColorStop(0, "transparent"); dvg.addColorStop(0.5, "rgba(201,162,74,0.4)"); dvg.addColorStop(1, "transparent");
+  ctx.strokeStyle = dvg; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(cx - dv, y); ctx.lineTo(cx + dv, y); ctx.stroke(); y += W * 0.045;
+
   ctx.fillStyle = "rgba(247,242,232,0.88)"; ctx.font = `400 ${W * 0.033}px ${sf}`;
-  ctx.fillText(`${p.firstName} ${p.lastName}`, cx, nameY);
+  ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.047;
   ctx.fillStyle = "rgba(247,242,232,0.45)"; ctx.font = `400 ${W * 0.021}px sans-serif`;
-  ctx.fillText(p.shortDate, cx, nameY + W * 0.05);
+  ctx.fillText(p.shortDate, cx, y);
   ctx.fillStyle = "rgba(247,242,232,0.22)"; ctx.font = `300 ${W * 0.015}px sans-serif`;
   ctx.letterSpacing = "3px"; ctx.fillText("www.greenhousews.co.ke", cx, H - W * 0.04); ctx.letterSpacing = "0px";
 }
@@ -244,49 +302,74 @@ function drawV3(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
 // ─── Variant 4: Frame ────────────────────────────────────────────────────────
 function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgeProps, photo: HTMLImageElement | null) {
   const sf = serif();
-  if (photo) {
-    clipImg(ctx, photo, 0, 0, W, H, "rect");
-    ctx.fillStyle = "rgba(0,0,0,0.58)"; ctx.fillRect(0, 0, W, H);
-    const tint = ctx.createRadialGradient(W / 2, H, 0, W / 2, H, W * 0.7);
-    tint.addColorStop(0, "rgba(27,58,42,0.35)"); tint.addColorStop(1, "transparent");
-    ctx.fillStyle = tint; ctx.fillRect(0, 0, W, H);
-  } else {
-    ctx.fillStyle = "#0d1a12"; ctx.fillRect(0, 0, W, H);
-    ctx.strokeStyle = "rgba(201,162,74,0.09)"; ctx.lineWidth = 1.5;
-    for (let r = W * 0.15; r < W * 1.6; r += W * 0.115) { ctx.beginPath(); ctx.arc(W, H, r, 0, Math.PI * 2); ctx.stroke(); }
-    ctx.fillStyle = "rgba(201,162,74,0.055)";
-    for (let x = 0; x < W; x += 28) for (let y = 0; y < H; y += 28) { ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill(); }
-    const g = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.46);
-    g.addColorStop(0, "rgba(201,162,74,0.12)"); g.addColorStop(1, "transparent");
-    ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
-  }
+  // Always dark background — photo goes in a tilted square, never fills the canvas
+  ctx.fillStyle = "#0d1a12"; ctx.fillRect(0, 0, W, H);
+  ctx.strokeStyle = "rgba(201,162,74,0.07)"; ctx.lineWidth = 1.5;
+  for (let rc = W * 0.15; rc < W * 1.6; rc += W * 0.115) { ctx.beginPath(); ctx.arc(W, H, rc, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.fillStyle = "rgba(201,162,74,0.04)";
+  for (let xd = 0; xd < W; xd += 28) for (let yd = 0; yd < H; yd += 28) { ctx.beginPath(); ctx.arc(xd, yd, 1.5, 0, Math.PI * 2); ctx.fill(); }
+  const gRad = ctx.createRadialGradient(W / 2, H / 2, 0, W / 2, H / 2, W * 0.46);
+  gRad.addColorStop(0, "rgba(201,162,74,0.1)"); gRad.addColorStop(1, "transparent");
+  ctx.fillStyle = gRad; ctx.fillRect(0, 0, W, H);
 
   const fi = W * 0.04;
-  ctx.strokeStyle = "rgba(201,162,74,0.65)"; ctx.lineWidth = 2; ctx.strokeRect(fi, fi, W - fi * 2, H - fi * 2);
-  ctx.strokeStyle = "rgba(201,162,74,0.2)"; ctx.lineWidth = 1;
+  // Outer gold frame
+  ctx.strokeStyle = "rgba(201,162,74,0.55)"; ctx.lineWidth = 2; ctx.strokeRect(fi, fi, W - fi * 2, H - fi * 2);
+  ctx.strokeStyle = "rgba(201,162,74,0.18)"; ctx.lineWidth = 1;
   const fi2 = fi + W * 0.018; ctx.strokeRect(fi2, fi2, W - fi2 * 2, H - fi2 * 2);
-
   [[fi, fi], [W - fi, fi], [fi, H - fi], [W - fi, H - fi]].forEach(([x2, y2], i) => {
     ctx.save(); ctx.translate(x2, y2); ctx.rotate(Math.PI / 4);
-    ctx.fillStyle = "rgba(201,162,74,0.6)"; ctx.fillRect(-5, -5, 10, 10); ctx.restore();
+    ctx.fillStyle = "rgba(201,162,74,0.55)"; ctx.fillRect(-5, -5, 10, 10); ctx.restore();
     ctx.beginPath(); ctx.arc(x2, y2, 18, 0, Math.PI * 2);
-    ctx.strokeStyle = "rgba(201,162,74,0.3)"; ctx.lineWidth = 1; ctx.stroke();
+    ctx.strokeStyle = "rgba(201,162,74,0.25)"; ctx.lineWidth = 1; ctx.stroke();
     void i;
   });
 
-  const cx = W / 2; let y = H * 0.34; ctx.textAlign = "center";
+  const cx = W / 2;
+  let y = H * 0.34;
+
+  if (photo) {
+    // Tilted square, upper center — photo sits on dark bg as a decorative element
+    const sqSize = W * 0.44;
+    const sqCy = H * 0.27;
+    const angle = Math.PI / 20;
+    clipImgRotated(ctx, photo, cx, sqCy, sqSize, sqSize, angle, sqSize * 0.055);
+    // Gold glow shadow behind the square
+    ctx.save(); ctx.translate(cx, sqCy); ctx.rotate(angle);
+    ctx.shadowColor = "rgba(201,162,74,0.35)"; ctx.shadowBlur = 30;
+    ctx.strokeStyle = "#c9a24a"; ctx.lineWidth = 4;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(-sqSize / 2, -sqSize / 2, sqSize, sqSize, sqSize * 0.055);
+    else ctx.rect(-sqSize / 2, -sqSize / 2, sqSize, sqSize);
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+    // Inner fine border
+    ctx.strokeStyle = "rgba(201,162,74,0.3)"; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    if (ctx.roundRect) ctx.roundRect(-sqSize / 2 + 7, -sqSize / 2 + 7, sqSize - 14, sqSize - 14, sqSize * 0.04);
+    else ctx.rect(-sqSize / 2 + 7, -sqSize / 2 + 7, sqSize - 14, sqSize - 14);
+    ctx.stroke();
+    ctx.restore();
+    y = sqCy + sqSize / 2 + H * 0.048;
+  }
+
+  ctx.textAlign = "center";
   ctx.fillStyle = "rgba(201,162,74,0.7)"; ctx.font = `300 ${W * 0.013}px sans-serif`;
-  ctx.letterSpacing = "5px"; ctx.fillText("I'M ATTENDING", cx, y); ctx.letterSpacing = "0px"; y += W * 0.077;
-  ctx.fillStyle = "#f7f2e8"; ctx.font = `700 ${W * 0.077}px ${sf}`;
-  y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.78, W * 0.085);
+  ctx.letterSpacing = "5px"; ctx.fillText("I'LL BE ATTENDING", cx, y); ctx.letterSpacing = "0px"; y += W * 0.067;
+  ctx.fillStyle = "#f7f2e8"; ctx.font = `700 ${W * 0.065}px ${sf}`;
+  y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.78, W * 0.074);
   if (p.themeTitle) {
     y += W * 0.01; ctx.fillStyle = "#c9a24a"; ctx.font = `italic 400 ${W * 0.029}px ${sf}`;
-    ctx.fillText(p.themeTitle, cx, y); y += W * 0.042;
+    ctx.fillText(`Theme: ${p.themeTitle}`, cx, y); y += W * 0.040;
+    if (p.themeScripture) {
+      ctx.fillStyle = "rgba(247,242,232,0.45)"; ctx.font = `400 ${W * 0.019}px sans-serif`;
+      ctx.letterSpacing = "1px"; ctx.fillText(p.themeScripture, cx, y); ctx.letterSpacing = "0px"; y += W * 0.036;
+    }
   }
-  const dg = ctx.createLinearGradient(cx - W * 0.14, y, cx + W * 0.14, y);
-  dg.addColorStop(0, "transparent"); dg.addColorStop(0.5, "rgba(201,162,74,0.6)"); dg.addColorStop(1, "transparent");
+  const dg = ctx.createLinearGradient(cx - W * 0.1, y, cx + W * 0.1, y);
+  dg.addColorStop(0, "transparent"); dg.addColorStop(0.5, "rgba(201,162,74,0.55)"); dg.addColorStop(1, "transparent");
   ctx.strokeStyle = dg; ctx.lineWidth = 1;
-  ctx.beginPath(); ctx.moveTo(cx - W * 0.14, y); ctx.lineTo(cx + W * 0.14, y); ctx.stroke(); y += W * 0.052;
+  ctx.beginPath(); ctx.moveTo(cx - W * 0.1, y); ctx.lineTo(cx + W * 0.1, y); ctx.stroke(); y += W * 0.048;
   ctx.fillStyle = "rgba(247,242,232,0.9)"; ctx.font = `400 ${W * 0.033}px ${sf}`;
   ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.05;
   ctx.fillStyle = "rgba(247,242,232,0.5)"; ctx.font = `400 ${W * 0.021}px sans-serif`; ctx.fillText(p.shortDate, cx, y);
@@ -385,7 +468,7 @@ export function BadgeCustomizerModal({ open, onClose, ...props }: ModalProps) {
           try {
             await navigator.share({
               files: [file],
-              title: `I'm attending ${props.sessionLabel}`,
+              title: `I'll be attending ${props.sessionLabel}`,
               text:  `Join me at ${props.siteName ?? "The Green House"} 🌿`,
             });
             setShared(true); setTimeout(() => setShared(false), 3000);
