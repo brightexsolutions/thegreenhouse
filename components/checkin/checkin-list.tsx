@@ -241,7 +241,7 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
                   </div>
                   {/* Contact on its own truncated line */}
                   {(r.email || r.phone) && (
-                    <p className="flex items-center gap-1 text-[11px] text-charcoal/40 mt-0.5 min-w-0">
+                    <p className="flex items-center gap-1 text-[11px] text-charcoal/40 mt-0.5 min-w-0 overflow-hidden">
                       {r.email
                         ? <><Mail size={9} className="flex-shrink-0" /><span className="truncate">{r.email}</span></>
                         : <><Phone size={9} className="flex-shrink-0" /><span className="truncate">{r.phone}</span></>}
