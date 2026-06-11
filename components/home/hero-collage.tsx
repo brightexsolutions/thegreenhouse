@@ -268,7 +268,7 @@ export function HeroCollage() {
         </div>
       </div>
 
-      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-40">
+      <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex-col items-center gap-2 opacity-40 pointer-events-none hidden sm:flex">
         <span className="label-caps text-cream/60 text-xs">Scroll</span>
         <div className="w-px h-8 bg-gradient-to-b from-cream/60 to-transparent" />
       </div>

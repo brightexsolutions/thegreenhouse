@@ -113,7 +113,8 @@ export async function POST(req: NextRequest) {
       role:            data.role,
       source:          data.source ?? null,
       notes:           data.notes ?? null,
-      whatsapp_opt_in: data.whatsapp_opt_in,
+      whatsapp_opt_in:  data.whatsapp_opt_in,
+      photo_consent:    data.photo_consent ?? false,
     })
     .select("id, ticket_token")
     .single();

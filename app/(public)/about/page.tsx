@@ -68,7 +68,7 @@ export default function AboutPage() {
                       "A space to exhale spiritually",
                       "Cross-church and non-denominational",
                       "Led by rotating worship teams",
-                      "~60 minutes of worship, prayer and sharing",
+                      "2–3 hours of worship, prayer and sharing",
                       "Open to everyone — believer or curious",
                     ].map((item) => (
                       <li key={item} className="flex items-start gap-3 text-sm text-charcoal/70">

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useEffect } from "react";
-import { Search, CheckCircle2, Circle, Mail, Phone, UserPlus, X, Loader2 } from "lucide-react";
+import { Search, CheckCircle2, Circle, Mail, Phone, UserPlus, X, Loader2, Camera, CameraOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Registrant {
@@ -11,9 +11,10 @@ interface Registrant {
   email:        string | null;
   phone:        string | null;
   role:         string;
-  ticket_token: string | null;
-  checked_in:   boolean;
-  is_walkin?:   boolean;
+  ticket_token:  string | null;
+  checked_in:    boolean;
+  is_walkin?:    boolean;
+  photo_consent: boolean;
 }
 
 interface CheckinListProps {
@@ -34,21 +35,19 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
   const [walkInSaving, setWalkInSaving] = useState(false);
   const [walkInError,  setWalkInError]  = useState<string | null>(null);
 
-  // Poll checkin statuses every 6s to sync across devices
+  // Poll full registrant list every 5s — replaces local state so all devices stay in sync
+  // and walk-ins added on another device appear automatically.
   useEffect(() => {
     let cancelled = false;
     async function sync() {
       try {
         const res = await fetch(`/api/checkin/${eventSlug}/statuses?t=${encodeURIComponent(checkinToken)}`);
         if (!res.ok || cancelled) return;
-        const data = await res.json() as { statuses: Array<{ id: string; checked_in: boolean }> };
-        setItems(prev => prev.map(r => {
-          const s = data.statuses.find(x => x.id === r.id);
-          return s ? { ...r, checked_in: s.checked_in } : r;
-        }));
+        const data = await res.json() as { registrants: Registrant[] };
+        if (data.registrants) setItems(data.registrants);
       } catch { /* ignore */ }
     }
-    const id = setInterval(sync, 6000);
+    const id = setInterval(sync, 5000);
     return () => { cancelled = true; clearInterval(id); };
   }, [eventSlug, checkinToken]);
 
@@ -226,6 +225,19 @@ export function CheckinList({ registrants, eventSlug, checkinToken }: CheckinLis
                     {r.is_walkin && (
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/12 text-gold/80 font-medium flex-shrink-0">Walk-in</span>
                     )}
+                    <span
+                      title={r.photo_consent ? "Consented to photography" : "No photo consent"}
+                      className={cn(
+                        "flex items-center gap-0.5 text-[10px] px-1.5 py-0.5 rounded-full font-medium flex-shrink-0",
+                        r.photo_consent
+                          ? "bg-emerald-50 text-emerald-600"
+                          : "bg-charcoal/6 text-charcoal/35"
+                      )}
+                    >
+                      {r.photo_consent
+                        ? <Camera size={9} />
+                        : <CameraOff size={9} />}
+                    </span>
                   </div>
                   {/* Contact on its own truncated line */}
                   {(r.email || r.phone) && (

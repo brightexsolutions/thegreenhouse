@@ -37,7 +37,13 @@ export default async function HomePage() {
 
       {/* Thin identity strip */}
       <MarqueeStrip />
-      <StatsStrip />
+      <StatsStrip entryDisplay={
+        nextEvent
+          ? nextEvent.type === "paid" && nextEvent.price_kes
+            ? `KES ${nextEvent.price_kes.toLocaleString()}`
+            : nextEvent.type === "paid" ? "Paid" : "Free"
+          : "Free"
+      } />
 
       {/* 2 — What a session feels like (image + text) */}
       <WhatHappens />

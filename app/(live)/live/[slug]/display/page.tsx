@@ -166,6 +166,13 @@ function Particles({ color }: { color: string }) {
           0%, 100% { transform: translateY(0px); }
           50%       { transform: translateY(-14px); }
         }
+        @keyframes galleryDrift {
+          0%   { transform: translateY(0px)   translateX(0px); }
+          20%  { transform: translateY(-10px) translateX(7px); }
+          45%  { transform: translateY(-16px) translateX(2px); }
+          70%  { transform: translateY(-8px)  translateX(-7px); }
+          100% { transform: translateY(0px)   translateX(0px); }
+        }
         @keyframes correctPulse {
           0%, 100% { box-shadow: 0 0 14px rgba(78,195,120,0.35), 0 4px 14px rgba(0,0,0,0.28); }
           50%       { box-shadow: 0 0 38px rgba(78,195,120,0.70), 0 4px 14px rgba(0,0,0,0.28); }
@@ -222,9 +229,30 @@ function GalleryScene({ imageUrls, t }: { imageUrls: string[]; t: typeof THEMES[
   const urls = (imageUrls.length > 0 ? [...imageUrls] : [...GALLERY_PRESETS]).slice(0, 5);
   while (urls.length < 5) urls.push(GALLERY_PRESETS[urls.length % GALLERY_PRESETS.length]);
 
+  const [spotlight, setSpotlight] = useState<number | null>(null);
+  const cycleRef   = useRef(0);
+
+  useEffect(() => {
+    if (urls.length === 0) return;
+    let cancelled = false;
+
+    function showNext() {
+      if (cancelled) return;
+      const idx = cycleRef.current % urls.length;
+      cycleRef.current++;
+      setSpotlight(idx);
+      setTimeout(() => { if (!cancelled) setSpotlight(null); }, 3800);
+    }
+
+    const first    = setTimeout(showNext, 5000);
+    const interval = setInterval(showNext, 10000);
+    return () => { cancelled = true; clearTimeout(first); clearInterval(interval); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [urls.length]);
+
   return (
     <div className="absolute inset-0 overflow-hidden">
-      {/* Radial vignette to keep center readable */}
+      {/* Radial vignette */}
       <div className="absolute inset-0 z-10 pointer-events-none"
         style={{ background: `radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, ${t.bg}BB 100%)` }} />
 
@@ -232,12 +260,11 @@ function GalleryScene({ imageUrls, t }: { imageUrls: string[]; t: typeof THEMES[
         <motion.div
           key={i}
           initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: slot.del + 0.1, duration: 0.9, ease: "easeOut" }}
+          animate={{ opacity: spotlight !== null && spotlight !== i ? 0.18 : 1, scale: 1 }}
+          transition={{ delay: spotlight === null ? slot.del + 0.1 : 0, duration: 0.5, ease: "easeOut" }}
           style={{ position: "absolute", top: slot.top, left: slot.left, width: slot.w }}
         >
-          {/* Float wrapper — separate from motion so transforms don't conflict */}
-          <div style={{ animation: `galleryFloat ${slot.floatDur}s ${slot.del}s ease-in-out infinite` }}>
+          <div style={{ animation: `galleryDrift ${slot.floatDur}s ${slot.del}s ease-in-out infinite` }}>
             <div
               className="rounded-2xl overflow-hidden shadow-2xl"
               style={{ transform: `rotate(${slot.rotate}deg)` }}
@@ -256,6 +283,43 @@ function GalleryScene({ imageUrls, t }: { imageUrls: string[]; t: typeof THEMES[
           </div>
         </motion.div>
       ))}
+
+      {/* Spotlight overlay — one image springs to center, holds, then exits */}
+      <AnimatePresence>
+        {spotlight !== null && (
+          <motion.div
+            key={`sp-${spotlight}`}
+            className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
+            style={{ background: "rgba(0,0,0,0.58)" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.35 }}
+          >
+            <motion.div
+              className="rounded-3xl overflow-hidden"
+              style={{
+                width: "38vw",
+                maxWidth: "560px",
+                boxShadow: "0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px rgba(0,0,0,0.75)",
+              }}
+              initial={{ scale: 0.55, rotate: GALLERY_SLOTS[spotlight]?.rotate ?? 0, opacity: 0 }}
+              animate={{ scale: 1,    rotate: 0,                                        opacity: 1 }}
+              exit={{    scale: 0.65,                                                    opacity: 0 }}
+              transition={{ type: "spring", stiffness: 170, damping: 22 }}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={urls[spotlight]}
+                alt=""
+                className="w-full object-cover"
+                style={{ aspectRatio: "3/4", display: "block" }}
+                draggable={false}
+              />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Centered label */}
       <div className="absolute inset-x-0 bottom-12 text-center z-20">

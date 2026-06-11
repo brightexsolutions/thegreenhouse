@@ -12,6 +12,7 @@ export const registrationSchema = z
     source:          z.enum(["friend", "whatsapp", "instagram", "church", "website", "other"]).optional(),
     notes:           z.string().max(500).optional(),
     whatsapp_opt_in: z.boolean().default(false),
+    photo_consent:   z.boolean().default(false),
   })
   .transform((data) => ({
     ...data,
