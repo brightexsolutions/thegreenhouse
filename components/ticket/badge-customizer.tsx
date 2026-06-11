@@ -326,6 +326,12 @@ function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   });
 
   const cx = W / 2;
+
+  // URL as a top brand watermark — just inside the gold frame, clear of all bottom content
+  ctx.textAlign = "center";
+  ctx.fillStyle = "rgba(247,242,232,0.22)"; ctx.font = `300 ${W * 0.013}px sans-serif`;
+  ctx.letterSpacing = "2px"; ctx.fillText("www.greenhousews.co.ke", cx, fi + W * 0.042); ctx.letterSpacing = "0px";
+
   let y = H * 0.34;
 
   if (photo) {
@@ -373,8 +379,6 @@ function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   ctx.fillStyle = "rgba(247,242,232,0.9)"; ctx.font = `400 ${W * 0.033}px ${sf}`;
   ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.05;
   ctx.fillStyle = "rgba(247,242,232,0.5)"; ctx.font = `400 ${W * 0.021}px sans-serif`; ctx.fillText(p.shortDate, cx, y);
-  ctx.fillStyle = "rgba(247,242,232,0.25)"; ctx.font = `300 ${W * 0.015}px sans-serif`;
-  ctx.letterSpacing = "3px"; ctx.fillText("www.greenhousews.co.ke", cx, H - fi - W * 0.042); ctx.letterSpacing = "0px";
 }
 
 function drawVariant(ctx: CanvasRenderingContext2D, W: number, H: number, v: VariantId, p: BadgeProps, photo: HTMLImageElement | null) {
