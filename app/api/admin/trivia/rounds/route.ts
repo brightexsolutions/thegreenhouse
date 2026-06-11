@@ -54,15 +54,15 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  // Update display_state: set scene to trivia + trivia_round_id
+  // Upsert display_state: creates the row if it doesn't exist yet (UPDATE alone is a no-op on missing rows)
   await supabase
     .from("display_state")
-    .update({
+    .upsert({
+      event_id,
       scene:           "trivia",
       trivia_round_id: round.id,
       updated_at:      new Date().toISOString(),
-    })
-    .eq("event_id", event_id);
+    }, { onConflict: "event_id" });
 
   return NextResponse.json({ round }, { status: 201 });
 }

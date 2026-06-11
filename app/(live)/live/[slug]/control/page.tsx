@@ -271,10 +271,11 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [authed, event?.id]);
 
-  // Sync trivia round from display_state + poll results
+  // Poll trivia results — uses triviaRound.id (set immediately on start) with
+  // display?.trivia_round_id as fallback so polling works even before Realtime fires.
   useEffect(() => {
-    const roundId = display?.trivia_round_id;
-    if (!roundId) { setTriviaRound(null); setTriviaCount(0); setTriviaCorrect(0); return; }
+    const roundId = triviaRound?.id ?? display?.trivia_round_id;
+    if (!roundId) { setTriviaCount(0); setTriviaCorrect(0); return; }
     let cancelled = false;
     async function pollRound() {
       const [rRes, resRes] = await Promise.all([
@@ -292,7 +293,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     pollRound();
     const id = setInterval(pollRound, 4000);
     return () => { cancelled = true; clearInterval(id); };
-  }, [display?.trivia_round_id]);
+  }, [triviaRound?.id, display?.trivia_round_id]);
 
   async function startTriviaRound() {
     if (!event || !selectedQId) return;

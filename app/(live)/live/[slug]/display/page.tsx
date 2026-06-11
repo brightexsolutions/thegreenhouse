@@ -369,7 +369,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
       } catch { /* ignore */ }
     }
     pollAttendees();
-    const id = setInterval(pollAttendees, 4000);
+    const id = setInterval(pollAttendees, 2000);
     return () => { cancelled = true; clearInterval(id); };
   }, [slug]);
 
@@ -1821,7 +1821,7 @@ function CommunityScene({ attendees, t }: {
           {attendees.map((a, i) => {
             const { cx, cy, size, floatDur, floatDel } = avatarPos(i, count);
             const [bg, fg] = avatarColor(a.first_name + a.last_name);
-            const showBubble = i % 3 === 0;
+            const showBubble = true; // every avatar gets an animated name bubble (staggered by delay)
             // Bubble appears to the right for avatars in left half, left for right half
             const bubbleRight = cx < 50;
             return (
