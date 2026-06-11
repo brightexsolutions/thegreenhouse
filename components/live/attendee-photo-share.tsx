@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Camera, Upload, X, CheckCircle2, Loader2, ImageIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -30,7 +30,10 @@ export function AttendeePhotoShare({ slug }: Props) {
   const [uploading,   setUploading]   = useState(false);
   const [success,     setSuccess]     = useState(false);
   const [error,       setError]       = useState<string | null>(null);
-  const [uploadCount, setUploadCount] = useState(() => getUploadCount(slug));
+  const [uploadCount, setUploadCount] = useState(0);
+
+  // Hydrate from localStorage after mount to avoid SSR/client mismatch
+  useEffect(() => { setUploadCount(getUploadCount(slug)); }, [slug]);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const atLimit = uploadCount >= MAX_PHOTOS;
