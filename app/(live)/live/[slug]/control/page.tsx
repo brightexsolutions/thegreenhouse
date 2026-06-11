@@ -426,7 +426,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const verses = getLyricsVerses(activeSong?.lyrics ?? null);
 
   return (
-    <div className="min-h-screen bg-forest text-cream max-w-md mx-auto px-4 py-5 pb-16">
+    <div className="min-h-screen bg-forest text-cream max-w-md mx-auto px-4 py-5 pb-28">
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
@@ -874,13 +874,18 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
             <p className="text-[10px] text-cream/25 mt-1.5 text-center">Links to the live program page</p>
           </section>
 
-          {/* Panic button */}
-          <button onClick={panic} disabled={saving}
-            className="w-full py-3.5 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-300 text-sm font-semibold hover:bg-red-500/30 transition-colors disabled:opacity-50">
-            ⚡ Back to branding
-          </button>
         </>
       )}
+
+      {/* Panic button — fixed floating bar always visible at the bottom */}
+      <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
+        <div className="max-w-md mx-auto px-4 pb-4 pt-6 bg-gradient-to-t from-forest via-forest/95 to-transparent pointer-events-auto">
+          <button onClick={panic} disabled={saving}
+            className="w-full py-3.5 rounded-2xl bg-red-500/20 border border-red-500/30 text-red-300 text-sm font-semibold hover:bg-red-500/30 active:scale-[0.98] transition-all disabled:opacity-50 shadow-lg">
+            ⚡ Back to branding
+          </button>
+        </div>
+      </div>
     </div>
   );
 }

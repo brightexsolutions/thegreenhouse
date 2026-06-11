@@ -109,7 +109,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 max-w-2xl">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
 
       {/* Cover image */}
       <div className="bg-white rounded-2xl border border-mist p-6 space-y-4">
@@ -255,25 +255,27 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         </Field>
       </div>
 
-      {submitError && (
-        <p className="text-sm text-red-500 text-center">{submitError}</p>
-      )}
-
-      <div className="flex items-center gap-3">
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="flex items-center gap-2 px-6 py-3 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-all disabled:opacity-60"
-        >
-          {isSubmitting ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : isNew ? "Create event" : "Save changes"}
-        </button>
-        <button
-          type="button"
-          onClick={() => router.back()}
-          className="px-5 py-3 rounded-full border border-mist text-charcoal/60 text-sm hover:border-charcoal/20 transition-colors"
-        >
-          Cancel
-        </button>
+      {/* Sticky action bar — always visible while scrolling */}
+      <div className="sticky bottom-0 -mx-6 px-6 py-4 bg-off-white/95 backdrop-blur-sm border-t border-mist flex items-center justify-between gap-3 z-10">
+        <div className="flex items-center gap-3">
+          <button
+            type="submit"
+            disabled={isSubmitting}
+            className="flex items-center gap-2 px-6 py-2.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-all disabled:opacity-60 shadow-sm"
+          >
+            {isSubmitting ? <><Loader2 size={14} className="animate-spin" /> Saving…</> : isNew ? "Create event" : "Save changes"}
+          </button>
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="px-5 py-2.5 rounded-full border border-mist text-charcoal/60 text-sm hover:border-charcoal/20 transition-colors"
+          >
+            Cancel
+          </button>
+        </div>
+        {submitError && (
+          <p className="text-sm text-red-500 text-right">{submitError}</p>
+        )}
       </div>
     </form>
   );
