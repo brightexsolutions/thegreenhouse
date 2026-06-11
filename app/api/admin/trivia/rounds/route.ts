@@ -3,6 +3,22 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+// GET /api/admin/trivia/rounds?event_id=... — history of rounds for an event
+export async function GET(req: NextRequest) {
+  const event_id = req.nextUrl.searchParams.get("event_id");
+  if (!event_id) return NextResponse.json({ error: "event_id required" }, { status: 400 });
+
+  const supabase = createAdminClient();
+  const { data, error } = await supabase
+    .from("trivia_rounds")
+    .select("id, question_id, status, started_at, closed_at")
+    .eq("event_id", event_id)
+    .order("started_at", { ascending: false });
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ rounds: data ?? [] });
+}
+
 // POST /api/admin/trivia/rounds — start a new trivia round
 // Closes any existing active/revealing round for this event first
 export async function POST(req: NextRequest) {

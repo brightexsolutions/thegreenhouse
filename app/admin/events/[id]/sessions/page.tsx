@@ -12,7 +12,7 @@ async function getEventWithSessions(id: string) {
     supabase.from("events").select("id, title, status").eq("id", id).single(),
     supabase
       .from("event_sessions")
-      .select("id, title, type, duration_min, notes, sort_order, session_songs(id, sort_order, vocalist, item_type, item_text, songs(id, title, artist, lyrics))")
+      .select("id, title, type, duration_min, notes, sort_order, trivia_question_id, trivia_questions(id, question, category), session_songs(id, sort_order, vocalist, item_type, item_text, songs(id, title, artist, lyrics))")
       .eq("event_id", id)
       .is("deleted_at", null)
       .order("sort_order", { ascending: true }),

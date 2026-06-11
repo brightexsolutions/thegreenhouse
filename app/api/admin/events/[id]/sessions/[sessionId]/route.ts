@@ -16,7 +16,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
   const { sessionId } = await params;
   const patch = await req.json();
 
-  const allowed = ["title", "type", "duration_min", "notes", "sort_order"] as const;
+  const allowed = ["title", "type", "duration_min", "notes", "sort_order", "trivia_question_id"] as const;
   type AllowedKey = typeof allowed[number];
   const safe = Object.fromEntries(
     Object.entries(patch).filter(([k]) => (allowed as readonly string[]).includes(k))

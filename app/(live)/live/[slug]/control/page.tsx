@@ -10,6 +10,7 @@ import {
   CheckCircle2, X, Sparkles, Play, Eye, Square,
 } from "lucide-react";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 type DisplayState = {
   id:                       string;
@@ -51,17 +52,21 @@ type SessionItem = {
   songs:     Song | null;
 };
 
+type PlannedTrivia = { id: string; question: string; category: string };
+
 type EventData = {
   id:          string;
   title:       string;
   event_date:  string;
   slug:        string;
   event_sessions: Array<{
-    id:           string;
-    title:        string;
-    sort_order:   number;
-    deleted_at:   string | null;
-    session_songs: Array<SessionItem>;
+    id:                 string;
+    title:              string;
+    sort_order:         number;
+    deleted_at:         string | null;
+    trivia_question_id: string | null;
+    trivia_questions:   PlannedTrivia | null;
+    session_songs:      Array<SessionItem>;
   }>;
 };
 
@@ -130,6 +135,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const [triviaCorrect,    setTriviaCorrect]   = useState(0);
   const [triviaTimer,      setTriviaTimer]     = useState<number | null>(null);
   const [triviaLoading,    setTriviaLoading]   = useState(false);
+  const [usedQIds,         setUsedQIds]        = useState<Set<string>>(new Set());
 
   // Auth check
   useEffect(() => {
@@ -140,7 +146,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const loadEvent = useCallback(async (isInitial: boolean) => {
     const { data } = await supabase
       .from("events")
-      .select("id, title, event_date, slug, event_sessions(id, title, sort_order, deleted_at, session_songs(id, vocalist, item_type, item_text, songs(id, title, artist, lyrics)))")
+      .select("id, title, event_date, slug, event_sessions(id, title, sort_order, deleted_at, trivia_question_id, trivia_questions(id, question, category), session_songs(id, vocalist, item_type, item_text, songs(id, title, artist, lyrics)))")
       .eq("slug", slug)
       .single();
     if (!data) return;
@@ -216,9 +222,18 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     return () => clearInterval(id);
   }, [event?.id]);
 
-  // Load trivia question library once authed
+  const loadUsedQIds = useCallback(async (eventId: string) => {
+    try {
+      const res = await fetch(`/api/admin/trivia/rounds?event_id=${eventId}`);
+      if (!res.ok) return;
+      const d = await res.json() as { rounds: Array<{ question_id: string }> };
+      setUsedQIds(new Set(d.rounds.map(r => r.question_id)));
+    } catch { /* ignore */ }
+  }, []);
+
+  // Load trivia question library + used question history once authed
   useEffect(() => {
-    if (authed !== true) return;
+    if (authed !== true || !event) return;
     fetch("/api/admin/trivia")
       .then(r => r.json())
       .then((d: { questions: TriviaQuestion[] }) => {
@@ -226,7 +241,9 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
         if (d.questions?.[0]) setSelectedQId(d.questions[0].id);
       })
       .catch(() => {});
-  }, [authed]);
+    loadUsedQIds(event.id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authed, event?.id]);
 
   // Sync trivia round from display_state + poll results
   useEffect(() => {
@@ -273,11 +290,21 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     const roundId = display?.trivia_round_id ?? triviaRound?.id;
     if (!roundId) return;
     setTriviaLoading(true);
-    await fetch(`/api/admin/trivia/rounds/${roundId}`, {
+    const res = await fetch(`/api/admin/trivia/rounds/${roundId}`, {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ action }),
     });
+    if (res.ok && action === "close" && event) {
+      // Don't wait for Realtime — clear trivia state immediately so launch controls reappear
+      setTriviaRound(null);
+      setTriviaCount(0);
+      setTriviaCorrect(0);
+      const { data } = await supabase.from("display_state").select("*").eq("event_id", event.id).maybeSingle();
+      if (data) setDisplay(data as DisplayState);
+      // Refresh used question history
+      loadUsedQIds(event.id);
+    }
     setTriviaLoading(false);
   }
 
@@ -730,12 +757,19 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                           onChange={e => setSelectedQId(e.target.value)}
                           className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-xs text-cream focus:outline-none focus:border-gold"
                         >
-                          {triviaQuestions.map(q => (
-                            <option key={q.id} value={q.id} className="bg-forest text-cream">
-                              [{q.category}] {q.question.length > 55 ? q.question.slice(0, 55) + "…" : q.question}
-                            </option>
-                          ))}
+                          {triviaQuestions.map(q => {
+                            const played = usedQIds.has(q.id);
+                            const label  = q.question.length > 50 ? q.question.slice(0, 50) + "…" : q.question;
+                            return (
+                              <option key={q.id} value={q.id} className="bg-forest text-cream">
+                                {played ? "✓ " : ""}{label} [{q.category}]
+                              </option>
+                            );
+                          })}
                         </select>
+                        {selectedQId && usedQIds.has(selectedQId) && (
+                          <p className="text-[10px] text-gold/50">This question was already played this event.</p>
+                        )}
 
                         {/* Optional timer */}
                         <div className="flex items-center gap-2">
@@ -763,6 +797,41 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                         <p className="text-[10px] text-cream/20 leading-relaxed">
                           Launching switches the display to Trivia scene and opens answering for attendees.
                         </p>
+
+                        {/* Planned trivia per section */}
+                        {event && event.event_sessions.some(s => s.trivia_question_id) && (
+                          <div className="mt-3 pt-3 border-t border-cream/10">
+                            <p className="text-[10px] text-cream/35 uppercase tracking-wider mb-2">Planned for this event</p>
+                            <div className="space-y-1.5">
+                              {event.event_sessions
+                                .filter(s => s.trivia_question_id && s.trivia_questions)
+                                .map(s => {
+                                  const q     = s.trivia_questions!;
+                                  const played = usedQIds.has(s.trivia_question_id!);
+                                  return (
+                                    <div key={s.id} className="flex items-center gap-2 bg-cream/6 rounded-xl px-3 py-2">
+                                      <div className="flex-1 min-w-0">
+                                        <p className={cn("text-[10px] font-medium truncate", played ? "text-cream/30 line-through" : "text-cream/70")}>
+                                          {s.title}
+                                        </p>
+                                        <p className="text-[9px] text-cream/35 truncate">{q.question}</p>
+                                      </div>
+                                      {played ? (
+                                        <span className="text-[9px] text-gold/40 flex-shrink-0">played</span>
+                                      ) : (
+                                        <button
+                                          onClick={() => { setSelectedQId(s.trivia_question_id!); }}
+                                          className="text-[10px] font-semibold text-gold hover:text-gold-light flex-shrink-0 transition-colors"
+                                        >
+                                          Select →
+                                        </button>
+                                      )}
+                                    </div>
+                                  );
+                                })}
+                            </div>
+                          </div>
+                        )}
                       </>
                     )}
                   </div>

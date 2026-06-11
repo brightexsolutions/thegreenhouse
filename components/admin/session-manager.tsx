@@ -18,7 +18,7 @@ import {
 import { CSS } from "@dnd-kit/utilities";
 import {
   GripVertical, Plus, Trash2, ChevronDown, ChevronUp, X, Check,
-  Music2, Loader2, Mic, BookOpen, Heart, Zap, Headphones, Library, Search, MessageSquare,
+  Music2, Loader2, Mic, BookOpen, Heart, Zap, Headphones, Library, Search, MessageSquare, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,10 +28,13 @@ type SessionSong = {
   item_type: string; item_text: string | null;
   songs: Song | null;
 };
+type TriviaQuestion = { id: string; question: string; category: string };
 type Session = {
   id: string; title: string; type: string;
   duration_min: number | null; notes: string | null;
   sort_order: number; session_songs: SessionSong[];
+  trivia_question_id: string | null;
+  trivia_questions: TriviaQuestion | null;
 };
 
 const TEXT_ITEM_TYPES = [
@@ -60,12 +63,20 @@ interface Props {
 }
 
 export function SessionManager({ eventId, initialSessions }: Props) {
-  const [sessions,       setSessions]       = useState<Session[]>(initialSessions);
-  const [expanded,       setExpanded]       = useState<Set<string>>(new Set());
-  const [saving,         setSaving]         = useState(false);
-  const [addingSession,  setAddingSession]  = useState(false);
-  const [newTitle,       setNewTitle]       = useState("");
-  const [newType,        setNewType]        = useState("worship");
+  const [sessions,        setSessions]        = useState<Session[]>(initialSessions);
+  const [expanded,        setExpanded]        = useState<Set<string>>(new Set());
+  const [saving,          setSaving]          = useState(false);
+  const [addingSession,   setAddingSession]   = useState(false);
+  const [newTitle,        setNewTitle]        = useState("");
+  const [newType,         setNewType]         = useState("worship");
+  const [triviaQuestions, setTriviaQuestions] = useState<TriviaQuestion[]>([]);
+
+  useEffect(() => {
+    fetch("/api/admin/trivia")
+      .then(r => r.ok ? r.json() : null)
+      .then((d: { questions: TriviaQuestion[] } | null) => { if (d?.questions) setTriviaQuestions(d.questions); })
+      .catch(() => {});
+  }, []);
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -299,6 +310,7 @@ export function SessionManager({ eventId, initialSessions }: Props) {
                     index={idx}
                     expanded={expanded.has(session.id)}
                     allSessions={sessions}
+                    triviaQuestions={triviaQuestions}
                     onToggle={() => toggleExpand(session.id)}
                     onUpdate={patch => updateSession(session.id, patch)}
                     onDelete={() => deleteSession(session.id)}
@@ -319,24 +331,25 @@ export function SessionManager({ eventId, initialSessions }: Props) {
 }
 
 interface CardProps {
-  session:         Session;
-  index:           number;
-  expanded:        boolean;
-  allSessions:     Session[];
-  onToggle:        () => void;
-  onUpdate:        (patch: Partial<Session>) => void;
-  onDelete:        () => void;
-  onAddSong:       (title: string, artist: string, lyrics: string, songId?: string) => Promise<void>;
-  onAddTextItem:   (item_type: string, item_text: string) => Promise<void>;
-  onRemoveSong:    (ssId: string) => void;
-  onUpdateLyrics:  (songId: string, lyrics: string) => void;
-  onUpdateVocalist:(ssId: string, vocalist: string) => void;
+  session:          Session;
+  index:            number;
+  expanded:         boolean;
+  allSessions:      Session[];
+  triviaQuestions:  TriviaQuestion[];
+  onToggle:         () => void;
+  onUpdate:         (patch: Partial<Session>) => void;
+  onDelete:         () => void;
+  onAddSong:        (title: string, artist: string, lyrics: string, songId?: string) => Promise<void>;
+  onAddTextItem:    (item_type: string, item_text: string) => Promise<void>;
+  onRemoveSong:     (ssId: string) => void;
+  onUpdateLyrics:   (songId: string, lyrics: string) => void;
+  onUpdateVocalist: (ssId: string, vocalist: string) => void;
 }
 
 type LibrarySong = { id: string; title: string; artist: string | null; lyrics: string | null };
 
 function SortableSessionCard({
-  session, index, expanded, allSessions, onToggle, onUpdate, onDelete, onAddSong, onAddTextItem, onRemoveSong, onUpdateLyrics, onUpdateVocalist,
+  session, index, expanded, allSessions, triviaQuestions, onToggle, onUpdate, onDelete, onAddSong, onAddTextItem, onRemoveSong, onUpdateLyrics, onUpdateVocalist,
 }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: session.id });
   const [addingSong,      setAddingSong]      = useState(false);
@@ -484,6 +497,13 @@ function SortableSessionCard({
           {typeInfo.label}
         </span>
 
+        {/* Trivia planned badge */}
+        {session.trivia_question_id && (
+          <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-700 text-[10px] font-semibold flex-shrink-0">
+            <Sparkles size={9} /> Trivia
+          </span>
+        )}
+
         {/* Duration */}
         <div className="flex items-center gap-1 flex-shrink-0">
           <input
@@ -535,6 +555,34 @@ function SortableSessionCard({
               className="w-full px-3 py-2 rounded-xl border border-mist text-sm text-charcoal/70 focus:outline-none focus:border-forest resize-none placeholder:text-charcoal/25"
               placeholder="Notes visible only to admins…"
             />
+          </div>
+
+          {/* Trivia planning */}
+          <div className="px-4 pb-4">
+            <label className="flex items-center gap-1.5 text-[11px] font-semibold text-charcoal/55 uppercase tracking-wider mb-1.5">
+              <Sparkles size={10} className="text-amber-500" /> Planned trivia
+            </label>
+            {triviaQuestions.length === 0 ? (
+              <p className="text-[11px] text-charcoal/35 italic">No trivia questions in library yet</p>
+            ) : (
+              <select
+                value={session.trivia_question_id ?? ""}
+                onChange={e => onUpdate({ trivia_question_id: e.target.value || null })}
+                className="w-full px-3 py-2 rounded-xl border border-mist text-sm text-charcoal focus:outline-none focus:border-amber-400 bg-white"
+              >
+                <option value="">No trivia planned</option>
+                {triviaQuestions.map(q => (
+                  <option key={q.id} value={q.id}>
+                    [{q.category}] {q.question.length > 70 ? q.question.slice(0, 70) + "…" : q.question}
+                  </option>
+                ))}
+              </select>
+            )}
+            {session.trivia_questions && (
+              <p className="text-[11px] text-amber-700/70 mt-1.5 truncate">
+                Planned: {session.trivia_questions.question}
+              </p>
+            )}
           </div>
 
           {/* Songs/items — Spotify-style dark panel */}

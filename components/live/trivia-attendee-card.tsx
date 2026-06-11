@@ -46,9 +46,9 @@ function saveName(name: string) {
 export function TriviaAttendeeCard({ roundId, onClose }: Props) {
   const [round,          setRound]         = useState<TriviaRound | null>(null);
   const [results,        setResults]       = useState<Results | null>(null);
-  const [name,           setName]          = useState(getStoredName);
+  const [name,           setName]          = useState<string>("");
   const [editingName,    setEditingName]   = useState(false);
-  const [nameInput,      setNameInput]     = useState(getStoredName);
+  const [nameInput,      setNameInput]     = useState<string>("");
   const [selectedIndex,  setSelectedIndex] = useState<number | null>(null);
   const [openAnswer,     setOpenAnswer]    = useState("");
   const [submitted,      setSubmitted]     = useState(false);
@@ -56,6 +56,12 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
   const [submitting,     setSubmitting]    = useState(false);
   const [timeLeft,       setTimeLeft]      = useState<number | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
+
+  // Hydrate name from localStorage after mount (avoids SSR/client mismatch)
+  useEffect(() => {
+    const stored = getStoredName();
+    if (stored) { setName(stored); setNameInput(stored); }
+  }, []);
 
   // Fetch round details
   useEffect(() => {
