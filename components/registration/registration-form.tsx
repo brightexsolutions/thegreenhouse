@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, CheckCircle2, Leaf, Download, Mail } from "lucide-react";
+import { Loader2, CheckCircle2, Leaf, Download, Mail, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { normalisePhone } from "@/lib/phone";
 import type { Event } from "@/types/database";
@@ -44,7 +44,7 @@ const SOURCE_OPTIONS = [
 ];
 
 interface RegistrationFormProps {
-  event: Pick<Event, "id" | "slug" | "title" | "event_date" | "venue_name">;
+  event: Pick<Event, "id" | "slug" | "title" | "event_date" | "venue_name" | "theme_title">;
   onSuccess?: (hasEmail: boolean) => void;
 }
 
@@ -104,6 +104,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
   if (submitted) {
     const hasEmail   = !!(emailValue?.trim());
     const pdfUrl     = ticketToken ? `/api/ticket/${ticketToken}/pdf` : null;
+    const ticketPageUrl = ticketToken ? `/ticket/${ticketToken}` : null;
 
     return (
       <div className="py-8 text-center">
@@ -180,6 +181,25 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
               </p>
             </div>
           </>
+        )}
+
+        {/* Badge teaser — shown for all registrants */}
+        {ticketPageUrl && (
+          <div className="mt-6 max-w-xs mx-auto">
+            <a
+              href={ticketPageUrl}
+              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-forest/8 border border-forest/15 hover:bg-forest/12 hover:border-forest/25 transition-all group"
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#c9a24a]/15 border border-[#c9a24a]/25 flex items-center justify-center flex-shrink-0">
+                <Sparkles size={15} className="text-[#c9a24a]" />
+              </div>
+              <div className="flex-1 min-w-0 text-left">
+                <p className="text-sm font-semibold text-forest">You have a digital badge</p>
+                <p className="text-xs text-charcoal/50 leading-snug">Customize with your photo &amp; share with friends</p>
+              </div>
+              <span className="text-forest/30 group-hover:text-forest/60 transition-colors text-sm">→</span>
+            </a>
+          </div>
         )}
       </div>
     );

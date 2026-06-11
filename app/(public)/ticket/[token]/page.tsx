@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { Download, ArrowLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
-import { BadgeDownload } from "@/components/ticket/badge-download";
+import { TicketBadgeSection } from "@/components/ticket/ticket-badge-section";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -211,17 +211,10 @@ export default async function TicketPage({ params }: Props) {
             </p>
           </div>
 
-          {/* Action buttons */}
-          <div className="px-8 pb-8 space-y-3">
-            <a
-              href={`/api/ticket/${ticket.ticket_token}/pdf`}
-              className="flex items-center justify-center gap-2.5 w-full py-3.5 rounded-full text-sm font-semibold transition-all duration-200"
-              style={{ background: "#1b3a2a", color: "#f7f2e8" }}
-            >
-              <Download size={15} />
-              Download PDF ticket
-            </a>
-            <BadgeDownload
+          {/* Action buttons — PDF download handled by TicketBadgeSection below */}
+          <div className="px-8 pb-8">
+            <TicketBadgeSection
+              pdfUrl={`/api/ticket/${ticket.ticket_token}/pdf`}
               firstName={ticket.first_name}
               lastName={ticket.last_name}
               sessionLabel={sessionLabel}
@@ -232,102 +225,6 @@ export default async function TicketPage({ params }: Props) {
               siteName={SITE_NAME}
             />
           </div>
-        </div>
-      </div>
-
-      {/* ── SOCIAL BADGE PREVIEW ── */}
-      <div className="w-full max-w-sm mt-8">
-        <p className="text-center text-[11px] text-cream/30 uppercase tracking-[0.25em] mb-4">Social sharing badge</p>
-        {/* Badge preview — square card */}
-        <div
-          className="relative rounded-3xl overflow-hidden aspect-square w-full"
-          style={{ background: "linear-gradient(145deg, #1b3a2a 0%, #0d2218 60%, #1b3a2a 100%)" }}
-        >
-          {/* Gold radial glow */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{ background: "radial-gradient(ellipse 90% 90% at 50% 0%, rgba(201,162,74,0.22), transparent 65%)" }}
-          />
-          {/* Dot grid */}
-          <div
-            className="absolute inset-0 opacity-[0.06] pointer-events-none"
-            style={{
-              backgroundImage: "radial-gradient(circle, #c9a24a 1px, transparent 1px)",
-              backgroundSize: "24px 24px",
-            }}
-          />
-          {/* Decorative ring */}
-          <div
-            className="absolute rounded-full pointer-events-none"
-            style={{
-              width: "80%", height: "80%",
-              top: "-20%", right: "-20%",
-              border: "1px solid rgba(201,162,74,0.08)",
-            }}
-          />
-
-          {/* Badge content */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center">
-            <p
-              className="label-caps tracking-[0.4em] mb-5 text-[10px]"
-              style={{ color: "rgba(201,162,74,0.7)" }}
-            >
-              {SITE_NAME}
-            </p>
-            <p
-              className="font-display font-semibold leading-tight mb-3"
-              style={{ color: "#f7f2e8", fontSize: "clamp(1rem,4vw,1.35rem)" }}
-            >
-              I&apos;m attending
-            </p>
-            <p
-              className="font-display font-bold leading-tight mb-2"
-              style={{ color: "#c9a24a", fontSize: "clamp(1.2rem,5vw,1.7rem)" }}
-            >
-              {sessionLabel}
-            </p>
-            {event.theme_title && (
-              <p
-                className="font-display italic mb-3"
-                style={{ color: "rgba(228,201,126,0.85)", fontSize: "clamp(0.85rem,3vw,1.05rem)" }}
-              >
-                {event.theme_title}
-              </p>
-            )}
-            <div
-              className="h-px w-16 mb-4"
-              style={{ background: "rgba(201,162,74,0.3)" }}
-            />
-            <p
-              className="font-display font-medium mb-2"
-              style={{ color: "rgba(247,242,232,0.8)", fontSize: "clamp(0.9rem,3.5vw,1.1rem)" }}
-            >
-              {ticket.first_name} {ticket.last_name}
-            </p>
-            <p
-              className="text-sm"
-              style={{ color: "rgba(247,242,232,0.45)" }}
-            >
-              {shortDate}
-            </p>
-          </div>
-        </div>
-
-        {/* Badge download CTA */}
-        <div className="mt-4 text-center space-y-2">
-          <BadgeDownload
-            firstName={ticket.first_name}
-            lastName={ticket.last_name}
-            sessionLabel={sessionLabel}
-            shortDate={shortDate}
-            themeTitle={event.theme_title}
-            themeScripture={event.theme_scripture}
-            venueName={event.venue_name}
-            siteName={SITE_NAME}
-          />
-          <p className="text-[10px]" style={{ color: "rgba(247,242,232,0.2)" }}>
-            Share on Instagram, WhatsApp, or X
-          </p>
         </div>
       </div>
 

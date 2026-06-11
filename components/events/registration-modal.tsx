@@ -113,11 +113,12 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
         <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-4">
           <RegistrationForm
             event={{
-              id:         event.id,
-              slug:       event.slug,
-              title:      event.title,
-              event_date: event.event_date,
-              venue_name: event.venue_name,
+              id:          event.id,
+              slug:        event.slug,
+              title:       event.title,
+              event_date:  event.event_date,
+              venue_name:  event.venue_name,
+              theme_title: (event as { theme_title?: string | null }).theme_title ?? null,
             }}
             onSuccess={(hasEmail) => { if (hasEmail) setTimeout(() => setOpen(false), 3500); }}
           />
