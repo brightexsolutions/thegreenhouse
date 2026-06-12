@@ -88,59 +88,85 @@ export default async function GetInvolvedPage({
         </div>
       </section>
 
-      {/* Two-path entry — full visual panels */}
-      <section className="grid sm:grid-cols-2">
-        {/* Volunteer */}
-        <a href="#roles" className="group relative h-[260px] sm:h-[300px] flex flex-col justify-end overflow-hidden">
-          <Image
-            src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=900&q=75"
-            alt=""
-            fill
-            className="object-cover group-hover:scale-105 transition-transform duration-700"
-            sizes="(max-width:640px) 100vw, 50vw"
-            aria-hidden
-            unoptimized
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#0d2218] via-[#0d2218]/70 to-[#0d2218]/20" />
-          <div className="relative p-8 pb-9">
-            <span className="label-caps text-gold/80 text-xs">Ways to serve</span>
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-white mt-1 mb-2 leading-tight">
-              Volunteer<br />your gift
-            </h2>
-            <p className="text-white/70 text-sm leading-relaxed max-w-xs">
-              Worship, hosting, creative, vision — every gifted person has a place here.
-            </p>
-            <span className="inline-flex items-center gap-2 mt-5 text-gold text-sm font-semibold group-hover:gap-3 transition-all duration-200">
-              See roles <span>↓</span>
-            </span>
-          </div>
-        </a>
+      {/* Two-path — dramatic asymmetric split */}
+      <section className="relative overflow-hidden">
+        <div className="grid sm:grid-cols-[58fr_42fr]">
 
-        {/* Support financially */}
-        <a href="?interest=give#contact" className="group relative h-[260px] sm:h-[300px] flex flex-col justify-end overflow-hidden">
-          <Image
-            src="https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?auto=format&fit=crop&w=900&q=75"
-            alt=""
-            fill
-            className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
-            sizes="(max-width:640px) 100vw, 50vw"
-            aria-hidden
-            unoptimized
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-[#3a2800]/95 via-[#3a2800]/65 to-[#0d2218]/25" />
-          <div className="relative p-8 pb-9">
-            <span className="label-caps text-gold/80 text-xs">Partner with us</span>
-            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-white mt-1 mb-2 leading-tight">
-              Support<br />financially
-            </h2>
-            <p className="text-white/70 text-sm leading-relaxed max-w-xs">
-              Fund the space, the sound, and the people who make each session possible.
-            </p>
-            <span className="inline-flex items-center gap-2 mt-5 text-gold text-sm font-semibold group-hover:gap-3 transition-all duration-200">
-              Partner with us <span>↓</span>
+          {/* Volunteer panel */}
+          <a href="#roles" className="group relative h-[320px] sm:h-[520px] flex flex-col justify-end overflow-hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1200&q=80"
+              alt=""
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-700"
+              sizes="(max-width:640px) 100vw, 58vw"
+              aria-hidden
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#0d2218] via-[#0d2218]/80 to-[#0d2218]/15" />
+            {/* Decorative ghosted number */}
+            <span className="absolute right-0 top-0 font-display text-[clamp(140px,18vw,220px)] font-semibold leading-none text-white/[0.04] select-none pointer-events-none translate-x-6">
+              01
             </span>
-          </div>
-        </a>
+            {/* Vertical accent line */}
+            <div className="absolute left-10 sm:left-14 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-gold/25 to-transparent hidden sm:block" />
+
+            <div className="relative p-8 sm:p-14 pb-10 sm:pb-16">
+              <span className="label-caps text-gold text-xs">Ways to serve</span>
+              <h2 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-white mt-2 leading-[0.95] mb-4">
+                Volunteer<br />your gift
+              </h2>
+              <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-sm">
+                Worship, hosting, creative, vision — every gifted person has a role here.
+              </p>
+              <div className="flex items-center gap-3 mt-7">
+                <div className="w-10 h-px bg-gold group-hover:w-16 transition-all duration-300" />
+                <span className="text-gold text-sm font-semibold tracking-wide">Explore roles</span>
+              </div>
+            </div>
+          </a>
+
+          {/* Support panel */}
+          <a href="?interest=give#contact" className="group relative h-[320px] sm:h-[520px] flex flex-col justify-end overflow-hidden">
+            <Image
+              src="https://images.unsplash.com/photo-1532629345422-7515f3d16bb6?auto=format&fit=crop&w=900&q=80"
+              alt=""
+              fill
+              className="object-cover group-hover:scale-105 transition-transform duration-700"
+              sizes="(max-width:640px) 100vw, 42vw"
+              aria-hidden
+              unoptimized
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-[#1a0e00]/95 via-[#2c1900]/80 to-[#0d2218]/30" />
+            {/* Decorative ghosted number */}
+            <span className="absolute right-0 top-0 font-display text-[clamp(140px,16vw,200px)] font-semibold leading-none text-white/[0.04] select-none pointer-events-none translate-x-4">
+              02
+            </span>
+            {/* Decorative rings */}
+            <div className="absolute top-10 right-10 w-28 h-28 rounded-full border border-gold/15 hidden sm:block" />
+            <div className="absolute top-[52px] right-[52px] w-14 h-14 rounded-full border border-gold/20 hidden sm:block" />
+
+            <div className="relative p-8 sm:p-12 pb-10 sm:pb-16">
+              <span className="label-caps text-gold text-xs">Partner with us</span>
+              <h2 className="font-display text-5xl sm:text-6xl font-semibold text-white mt-2 leading-[0.95] mb-4">
+                Support<br />financially
+              </h2>
+              <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-xs">
+                Fund the space, the sound, and the people who make it all possible.
+              </p>
+              <div className="flex items-center gap-3 mt-7">
+                <div className="w-10 h-px bg-gold group-hover:w-16 transition-all duration-300" />
+                <span className="text-gold text-sm font-semibold tracking-wide">Partner with us</span>
+              </div>
+            </div>
+          </a>
+        </div>
+
+        {/* Subtle diagonal seam between panels */}
+        <div
+          className="hidden sm:block absolute inset-y-0 left-[58%] w-px bg-white/10 pointer-events-none"
+          style={{ transform: "skewX(-0.8deg)", transformOrigin: "center" }}
+        />
       </section>
 
       {/* Roles */}
