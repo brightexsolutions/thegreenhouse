@@ -117,7 +117,7 @@ function drawQRCorner(
   const qSize  = W * 0.12;
   const inner  = W * 0.013;
   const gap    = W * 0.009;
-  const tSize  = W * 0.0145;
+  const tSize  = W * 0.019;
   const tH     = tSize * 1.5;
   const totalW = qSize + inner * 2;
   const totalH = inner + qSize + gap + tH + inner;
@@ -195,7 +195,7 @@ function drawV1(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   ctx.textAlign = "center";
   ctx.fillStyle = "rgba(201,162,74,0.6)"; ctx.font = `300 ${W * 0.013}px sans-serif`; ctx.letterSpacing = "5px";
   ctx.fillText((p.siteName ?? "THE GREEN HOUSE").toUpperCase(), cx, y); ctx.letterSpacing = "0px"; y += W * 0.056;
-  ctx.fillStyle = "rgba(247,242,232,0.55)"; ctx.font = `400 ${W * 0.032}px ${sf}`;
+  ctx.fillStyle = "rgba(247,242,232,0.78)"; ctx.font = `400 ${W * 0.032}px ${sf}`;
   ctx.fillText("I'll be attending", cx, y); y += W * 0.076;
   ctx.fillStyle = "#c9a24a"; ctx.font = `700 ${W * 0.064}px ${sf}`;
   y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.76, W * 0.074);
@@ -204,7 +204,7 @@ function drawV1(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
     ctx.fillStyle = "rgba(228,201,126,0.82)"; ctx.font = `italic 400 ${W * 0.027}px ${sf}`;
     ctx.fillText(`Theme: ${p.themeTitle}`, cx, y); y += W * 0.038;
     if (p.themeScripture) {
-      ctx.fillStyle = "rgba(247,242,232,0.38)"; ctx.font = `400 ${W * 0.019}px sans-serif`;
+      ctx.fillStyle = "rgba(247,242,232,0.65)"; ctx.font = `400 ${W * 0.023}px sans-serif`;
       ctx.letterSpacing = "1px"; ctx.fillText(p.themeScripture, cx, y); ctx.letterSpacing = "0px"; y += W * 0.038;
     }
   } else { y += W * 0.022; }
@@ -217,7 +217,7 @@ function drawV1(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
 
   ctx.fillStyle = "rgba(247,242,232,0.9)"; ctx.font = `400 ${W * 0.032}px ${sf}`;
   ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.048;
-  ctx.fillStyle = "rgba(247,242,232,0.5)"; ctx.font = `400 ${W * 0.022}px sans-serif`;
+  ctx.fillStyle = "rgba(247,242,232,0.68)"; ctx.font = `400 ${W * 0.024}px sans-serif`;
   ctx.fillText(p.shortDate, cx, y);
   if (p.venueName) {
     y += W * 0.035;
@@ -264,7 +264,7 @@ function drawV2(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
 
     // Text below, center-aligned
     const cx2 = W / 2; let ty = sqCy + sqSize / 2 + H * 0.05; ctx.textAlign = "center";
-    ctx.fillStyle = "rgba(27,58,42,0.4)"; ctx.font = `500 ${W * 0.013}px sans-serif`;
+    ctx.fillStyle = "rgba(27,58,42,0.62)"; ctx.font = `500 ${W * 0.017}px sans-serif`;
     ctx.letterSpacing = "4px"; ctx.fillText("I'LL BE ATTENDING", cx2, ty); ctx.letterSpacing = "0px"; ty += W * 0.062;
     ctx.fillStyle = "#1b3a2a"; ctx.font = `700 ${W * 0.063}px ${sf}`;
     ty = wrapText(ctx, p.sessionLabel, cx2, ty, W * 0.76, W * 0.072);
@@ -274,21 +274,21 @@ function drawV2(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
       ctx.fillStyle = "rgba(27,58,42,0.65)"; ctx.font = `italic 400 ${W * 0.026}px ${sf}`;
       ctx.fillText(`Theme: ${p.themeTitle}`, cx2, ty); ty += W * 0.036;
       if (p.themeScripture) {
-        ctx.fillStyle = "rgba(27,58,42,0.4)"; ctx.font = `400 ${W * 0.019}px sans-serif`;
+        ctx.fillStyle = "rgba(27,58,42,0.65)"; ctx.font = `400 ${W * 0.023}px sans-serif`;
         ctx.fillText(p.themeScripture, cx2, ty); ty += W * 0.032;
       }
       ty += W * 0.008;
     }
     ctx.fillStyle = "#1b3a2a"; ctx.font = `400 ${W * 0.032}px ${sf}`;
     ctx.fillText(`${p.firstName} ${p.lastName}`, cx2, ty); ty += W * 0.042;
-    ctx.fillStyle = "rgba(27,58,42,0.45)"; ctx.font = `400 ${W * 0.019}px sans-serif`;
+    ctx.fillStyle = "rgba(27,58,42,0.68)"; ctx.font = `400 ${W * 0.024}px sans-serif`;
     ctx.fillText(p.shortDate, cx2, ty);
     drawQRCorner(ctx, W, H, qrImg, false, W * 0.068);
   } else {
     const cx = W / 2; let y = H * 0.3; ctx.textAlign = "center";
     ctx.fillStyle = "rgba(27,58,42,0.055)"; ctx.font = `700 ${W * 0.28}px ${sf}`;
     ctx.fillText("GH", cx, H * 0.66);
-    ctx.fillStyle = "rgba(27,58,42,0.3)"; ctx.font = `500 ${W * 0.013}px sans-serif`;
+    ctx.fillStyle = "rgba(27,58,42,0.58)"; ctx.font = `500 ${W * 0.017}px sans-serif`;
     ctx.letterSpacing = "5px"; ctx.fillText("I'LL BE ATTENDING", cx, y); ctx.letterSpacing = "0px"; y += W * 0.072;
     ctx.fillStyle = "#1b3a2a"; ctx.font = `700 ${W * 0.075}px ${sf}`;
     y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.75, W * 0.083);
@@ -296,7 +296,7 @@ function drawV2(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
     ctx.strokeStyle = "#c9a24a"; ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(cx - W * 0.07, y); ctx.lineTo(cx + W * 0.07, y); ctx.stroke(); y += W * 0.052;
     ctx.fillStyle = "#1b3a2a"; ctx.font = `400 ${W * 0.032}px ${sf}`; ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.046;
-    ctx.fillStyle = "rgba(27,58,42,0.45)"; ctx.font = `400 ${W * 0.02}px sans-serif`; ctx.fillText(p.shortDate, cx, y);
+    ctx.fillStyle = "rgba(27,58,42,0.68)"; ctx.font = `400 ${W * 0.024}px sans-serif`; ctx.fillText(p.shortDate, cx, y);
     drawQRCorner(ctx, W, H, qrImg, false, W * 0.068);
   }
 }
@@ -334,7 +334,7 @@ function drawV3(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   ctx.textAlign = "center";
   ctx.fillStyle = "rgba(201,162,74,0.5)"; ctx.font = `300 ${W * 0.013}px sans-serif`;
   ctx.letterSpacing = "5px"; ctx.fillText((p.siteName ?? "THE GREEN HOUSE").toUpperCase(), cx, y); ctx.letterSpacing = "0px"; y += W * 0.055;
-  ctx.fillStyle = "rgba(247,242,232,0.45)"; ctx.font = `300 ${W * 0.025}px ${sf}`;
+  ctx.fillStyle = "rgba(247,242,232,0.72)"; ctx.font = `300 ${W * 0.028}px ${sf}`;
   ctx.fillText("I'll be attending", cx, y); y += W * 0.074;
   ctx.fillStyle = "#f7f2e8"; ctx.font = `700 ${W * 0.065}px ${sf}`;
   y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.82, W * 0.075);
@@ -342,7 +342,7 @@ function drawV3(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
     y += W * 0.01; ctx.fillStyle = "#c9a24a"; ctx.font = `italic 400 ${W * 0.027}px ${sf}`;
     ctx.fillText(`Theme: ${p.themeTitle}`, cx, y); y += W * 0.038;
     if (p.themeScripture) {
-      ctx.fillStyle = "rgba(247,242,232,0.45)"; ctx.font = `400 ${W * 0.02}px sans-serif`;
+      ctx.fillStyle = "rgba(247,242,232,0.68)"; ctx.font = `400 ${W * 0.023}px sans-serif`;
       ctx.letterSpacing = "1px"; ctx.fillText(p.themeScripture, cx, y); ctx.letterSpacing = "0px"; y += W * 0.036;
     }
   }
@@ -355,7 +355,7 @@ function drawV3(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
 
   ctx.fillStyle = "rgba(247,242,232,0.88)"; ctx.font = `400 ${W * 0.033}px ${sf}`;
   ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.047;
-  ctx.fillStyle = "rgba(247,242,232,0.45)"; ctx.font = `400 ${W * 0.021}px sans-serif`;
+  ctx.fillStyle = "rgba(247,242,232,0.68)"; ctx.font = `400 ${W * 0.024}px sans-serif`;
   ctx.fillText(p.shortDate, cx, y);
   drawQRCorner(ctx, W, H, qrImg, true, W * 0.038);
 }
@@ -417,7 +417,7 @@ function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   }
 
   ctx.textAlign = "center";
-  ctx.fillStyle = "rgba(201,162,74,0.7)"; ctx.font = `300 ${W * 0.013}px sans-serif`;
+  ctx.fillStyle = "rgba(201,162,74,0.88)"; ctx.font = `300 ${W * 0.017}px sans-serif`;
   ctx.letterSpacing = "5px"; ctx.fillText("I'LL BE ATTENDING", cx, y); ctx.letterSpacing = "0px"; y += W * 0.067;
   ctx.fillStyle = "#f7f2e8"; ctx.font = `700 ${W * 0.065}px ${sf}`;
   y = wrapText(ctx, p.sessionLabel, cx, y, W * 0.78, W * 0.074);
@@ -425,7 +425,7 @@ function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
     y += W * 0.01; ctx.fillStyle = "#c9a24a"; ctx.font = `italic 400 ${W * 0.029}px ${sf}`;
     ctx.fillText(`Theme: ${p.themeTitle}`, cx, y); y += W * 0.040;
     if (p.themeScripture) {
-      ctx.fillStyle = "rgba(247,242,232,0.45)"; ctx.font = `400 ${W * 0.019}px sans-serif`;
+      ctx.fillStyle = "rgba(247,242,232,0.68)"; ctx.font = `400 ${W * 0.023}px sans-serif`;
       ctx.letterSpacing = "1px"; ctx.fillText(p.themeScripture, cx, y); ctx.letterSpacing = "0px"; y += W * 0.036;
     }
   }
@@ -435,7 +435,7 @@ function drawV4(ctx: CanvasRenderingContext2D, W: number, H: number, p: BadgePro
   ctx.beginPath(); ctx.moveTo(cx - W * 0.1, y); ctx.lineTo(cx + W * 0.1, y); ctx.stroke(); y += W * 0.048;
   ctx.fillStyle = "rgba(247,242,232,0.9)"; ctx.font = `400 ${W * 0.033}px ${sf}`;
   ctx.fillText(`${p.firstName} ${p.lastName}`, cx, y); y += W * 0.05;
-  ctx.fillStyle = "rgba(247,242,232,0.5)"; ctx.font = `400 ${W * 0.021}px sans-serif`; ctx.fillText(p.shortDate, cx, y);
+  ctx.fillStyle = "rgba(247,242,232,0.68)"; ctx.font = `400 ${W * 0.024}px sans-serif`; ctx.fillText(p.shortDate, cx, y);
   // QR inside the gold frame — edgePad = fi + inner gap
   drawQRCorner(ctx, W, H, qrImg, true, fi + W * 0.028);
 }
