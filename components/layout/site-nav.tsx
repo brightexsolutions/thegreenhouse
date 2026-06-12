@@ -134,6 +134,23 @@ export function SiteNav({ liveSlug }: SiteNavProps) {
             >
               Join a Session
             </Link>
+            {liveSlug && (
+              <Link
+                href={`/live/${liveSlug}`}
+                className={cn(
+                  "lg:hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all duration-200",
+                  solid
+                    ? "bg-forest/10 text-forest border border-forest/20"
+                    : "bg-white/10 text-cream border border-white/20"
+                )}
+              >
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold" />
+                </span>
+                Live
+              </Link>
+            )}
             <button
               onClick={() => setOpen(!open)}
               className={cn(
