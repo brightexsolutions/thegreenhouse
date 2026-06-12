@@ -2,7 +2,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import { LiveAttendeeView } from "@/components/live/live-attendee-view";
-// import { PreEventView } from "@/components/live/pre-event-view"; // re-enable with status gate before go-live
+import { PreEventView } from "@/components/live/pre-event-view";
 import { Wifi } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 
@@ -67,22 +67,20 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
     .filter(s => !(s as { deleted_at?: string | null }).deleted_at)
     .sort((a, b) => a.sort_order - b.sort_order);
 
-  // TODO: re-enable status gate before go-live
-  // if (typedEvent.status !== "live") {
-  //   return (
-  //     <PreEventView
-  //       eventTitle={typedEvent.title}
-  //       eventDate={typedEvent.event_date}
-  //       eventTime={typedEvent.event_time}
-  //       venueName={typedEvent.venue_name}
-  //       themeTitle={typedEvent.theme_title}
-  //       themeScripture={typedEvent.theme_scripture}
-  //       isPast={typedEvent.status === "past"}
-  //     />
-  //   );
-  // }
+  if (typedEvent.status !== "live") {
+    return (
+      <PreEventView
+        eventTitle={typedEvent.title}
+        eventDate={typedEvent.event_date}
+        eventTime={typedEvent.event_time}
+        venueName={typedEvent.venue_name}
+        themeTitle={typedEvent.theme_title}
+        themeScripture={typedEvent.theme_scripture}
+        isPast={typedEvent.status === "past"}
+      />
+    );
+  }
 
-  // Live state (status gate temporarily disabled for testing)
   return (
     <div className="min-h-screen bg-cream">
       <div className="bg-green-600 text-white text-center py-2.5 text-xs font-medium flex items-center justify-center gap-2">
