@@ -1,4 +1,5 @@
 export const SITE_NAME        = "The Green House";
+export const EMAIL_FROM_NAME  = "GreenHouse Worship Community";
 export const SITE_URL         = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.greenhousews.co.ke";
 export const SESSION_FREQUENCY = "quarterly";
 
@@ -10,8 +11,8 @@ export const CONTACT_WHATSAPP          = "254706609085";
 export const REGISTRATION_SUPPORT_WA   = "254741980127";
 
 // Resend FROM addresses — tickets get their own mailbox, everything else goes through hello
-export const TICKET_FROM_EMAIL = () => process.env.RESEND_TICKET_FROM  ?? `The Green House <tickets@greenhousews.co.ke>`;
-export const COMMS_FROM_EMAIL  = () => process.env.RESEND_COMMS_FROM   ?? `The Green House <hello@greenhousews.co.ke>`;
+export const TICKET_FROM_EMAIL = () => process.env.RESEND_TICKET_FROM  ?? `${EMAIL_FROM_NAME} <tickets@greenhousews.co.ke>`;
+export const COMMS_FROM_EMAIL  = () => process.env.RESEND_COMMS_FROM   ?? `${EMAIL_FROM_NAME} <hello@greenhousews.co.ke>`;
 
 export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
 export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";

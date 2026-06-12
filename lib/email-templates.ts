@@ -1,4 +1,4 @@
-import { SITE_NAME, SITE_URL, CONTACT_EMAIL } from "./constants";
+import { SITE_NAME, EMAIL_FROM_NAME, SITE_URL, CONTACT_EMAIL } from "./constants";
 
 interface TicketEmailData {
   firstName:      string;
@@ -59,7 +59,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
 <body>
 <div class="wrap">
   <div class="header">
-    <div class="logo">${SITE_NAME}</div>
+    <div class="logo">${EMAIL_FROM_NAME}</div>
     <h1>See you there,<br />${d.firstName}.</h1>
   </div>
   <div class="body">
@@ -120,7 +120,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
   <div class="footer">
     <p>This email was sent because you registered for <strong>${d.eventTitle}</strong>.</p>
     <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
-    <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${SITE_NAME}</p>
+    <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${EMAIL_FROM_NAME}</p>
   </div>
 </div>
 </body>
@@ -150,7 +150,7 @@ Doors open 30 minutes before the session begins.
 
 Questions? ${CONTACT_EMAIL}
 
-— The Green House Team
+— ${EMAIL_FROM_NAME}
 ${SITE_URL}
 `;
 }
