@@ -114,8 +114,8 @@ export function SessionPromptDialog({ event }: SessionPromptProps) {
           )}
         </div>
 
-        {/* Body */}
-        <div className="bg-white px-7 py-6 space-y-3">
+        {/* Body + Actions — single white block, no internal seams */}
+        <div className="bg-white px-7 pt-6 pb-8 space-y-3">
           <div className="flex items-start gap-3">
             <Calendar size={15} className="text-forest/50 mt-0.5 shrink-0" />
             <div>
@@ -133,23 +133,22 @@ export function SessionPromptDialog({ event }: SessionPromptProps) {
           <p className="text-charcoal/55 text-sm leading-relaxed pt-1">
             We&apos;d love to have you. Grab your spot — it only takes a moment.
           </p>
-        </div>
 
-        {/* Actions */}
-        <div className="bg-white px-7 pb-8 flex items-center gap-3">
-          <Link
-            href={`/events/${event.slug}`}
-            onClick={dismiss}
-            className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
-          >
-            I&apos;d like to attend <ArrowRight size={14} />
-          </Link>
-          <button
-            onClick={dismiss}
-            className="px-5 py-3.5 rounded-full border border-mist text-charcoal/60 text-sm font-medium hover:border-charcoal/20 hover:text-charcoal/80 transition-colors"
-          >
-            Maybe later
-          </button>
+          <div className="flex items-center gap-3 pt-3">
+            <Link
+              href={`/events/${event.slug}`}
+              onClick={dismiss}
+              className="flex-1 inline-flex items-center justify-center gap-2 py-3.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
+            >
+              I&apos;d like to attend <ArrowRight size={14} />
+            </Link>
+            <button
+              onClick={dismiss}
+              className="px-5 py-3.5 rounded-full border border-mist text-charcoal/60 text-sm font-medium hover:border-charcoal/20 hover:text-charcoal/80 transition-colors"
+            >
+              Maybe later
+            </button>
+          </div>
         </div>
       </div>
     </>
