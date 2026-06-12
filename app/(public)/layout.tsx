@@ -8,7 +8,7 @@ async function getUpcomingEvent() {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("events")
-      .select("slug, title, event_date, event_time, venue_name, theme_title, type, price_kes")
+      .select("slug, title, event_date, event_time, venue_name, theme_title, type, price_kes, status")
       .in("status", ["published", "live"])
       .is("deleted_at", null)
       .gte("event_date", new Date().toISOString().split("T")[0])
@@ -23,10 +23,11 @@ async function getUpcomingEvent() {
 
 export default async function PublicLayout({ children }: { children: React.ReactNode }) {
   const upcomingEvent = await getUpcomingEvent();
+  const liveSlug = upcomingEvent?.status === "live" ? upcomingEvent.slug : undefined;
 
   return (
     <>
-      <SiteNav />
+      <SiteNav liveSlug={liveSlug} />
       <main>{children}</main>
       <SiteFooter />
       {upcomingEvent && <SessionPromptDialog event={upcomingEvent} />}
