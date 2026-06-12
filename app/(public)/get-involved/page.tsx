@@ -133,7 +133,7 @@ export default async function GetInvolvedPage({
           <FadeInStagger className="grid sm:grid-cols-2 gap-5" staggerDelay={0.08}>
             {ROLES.map((role) => (
               <StaggerChild key={role.title}>
-                <div className="group relative rounded-3xl overflow-hidden h-[280px] flex flex-col justify-end hover:-translate-y-1 transition-all duration-300 shadow-card hover:shadow-card-hover">
+                <div className="group relative rounded-3xl overflow-hidden h-[340px] flex flex-col justify-end hover:-translate-y-1 transition-all duration-300 shadow-card hover:shadow-card-hover">
                   <Image
                     src={role.image}
                     alt=""
@@ -142,12 +142,11 @@ export default async function GetInvolvedPage({
                     sizes="(max-width:640px) 90vw, (max-width:1024px) 45vw, 44vw"
                     unoptimized
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/65 to-transparent" />
-                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-forest/20" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d2218] via-[#0d2218]/80 to-[#0d2218]/15" />
                   <div className="relative p-7">
-                    <span className="label-caps text-gold/90 text-xs">{role.tagline}</span>
-                    <h3 className="font-display text-2xl font-semibold text-cream mt-1 mb-2">{role.title}</h3>
-                    <p className="text-cream/70 text-sm leading-relaxed">{role.body}</p>
+                    <span className="label-caps text-gold text-xs">{role.tagline}</span>
+                    <h3 className="font-display text-2xl font-semibold text-white mt-1 mb-2">{role.title}</h3>
+                    <p className="text-white/85 text-sm leading-relaxed">{role.body}</p>
                   </div>
                 </div>
               </StaggerChild>
