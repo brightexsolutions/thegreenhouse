@@ -88,34 +88,59 @@ export default async function GetInvolvedPage({
         </div>
       </section>
 
-      {/* Two-path entry — draws attention to both volunteer and financial support */}
-      <section className="bg-cream py-10 border-b border-mist">
-        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid sm:grid-cols-2 gap-4">
-            <a
-              href="#roles"
-              className="group flex items-center gap-5 p-5 rounded-2xl border border-mist bg-white hover:border-forest/30 hover:shadow-card transition-all duration-200"
-            >
-              <span className="w-11 h-11 rounded-full bg-forest/10 flex items-center justify-center text-xl shrink-0 group-hover:bg-forest/20 transition-colors">🌿</span>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-forest text-sm">Volunteer your gift</p>
-                <p className="text-charcoal/50 text-xs mt-0.5">Worship, hosting, creative, vision</p>
-              </div>
-              <span className="text-forest/30 group-hover:text-forest transition-colors text-sm">↓</span>
-            </a>
-            <a
-              href="?interest=give#contact"
-              className="group flex items-center gap-5 p-5 rounded-2xl border border-gold/30 bg-gold-pale hover:border-gold/60 hover:shadow-card transition-all duration-200"
-            >
-              <span className="w-11 h-11 rounded-full bg-gold/15 flex items-center justify-center text-xl shrink-0 group-hover:bg-gold/25 transition-colors">🤝</span>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-forest text-sm">Support financially</p>
-                <p className="text-charcoal/50 text-xs mt-0.5">Partner with us to fund the mission</p>
-              </div>
-              <span className="text-gold/50 group-hover:text-gold transition-colors text-sm">↓</span>
-            </a>
+      {/* Two-path entry — full visual panels */}
+      <section className="grid sm:grid-cols-2">
+        {/* Volunteer */}
+        <a href="#roles" className="group relative h-[260px] sm:h-[300px] flex flex-col justify-end overflow-hidden">
+          <Image
+            src="https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=900&q=75"
+            alt=""
+            fill
+            className="object-cover group-hover:scale-105 transition-transform duration-700"
+            sizes="(max-width:640px) 100vw, 50vw"
+            aria-hidden
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#0d2218] via-[#0d2218]/70 to-[#0d2218]/20" />
+          <div className="relative p-8 pb-9">
+            <span className="label-caps text-gold/80 text-xs">Ways to serve</span>
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-white mt-1 mb-2 leading-tight">
+              Volunteer<br />your gift
+            </h2>
+            <p className="text-white/70 text-sm leading-relaxed max-w-xs">
+              Worship, hosting, creative, vision — every gifted person has a place here.
+            </p>
+            <span className="inline-flex items-center gap-2 mt-5 text-gold text-sm font-semibold group-hover:gap-3 transition-all duration-200">
+              See roles <span>↓</span>
+            </span>
           </div>
-        </div>
+        </a>
+
+        {/* Support financially */}
+        <a href="?interest=give#contact" className="group relative h-[260px] sm:h-[300px] flex flex-col justify-end overflow-hidden">
+          <Image
+            src="https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?auto=format&fit=crop&w=900&q=75"
+            alt=""
+            fill
+            className="object-cover object-top group-hover:scale-105 transition-transform duration-700"
+            sizes="(max-width:640px) 100vw, 50vw"
+            aria-hidden
+            unoptimized
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-[#3a2800]/95 via-[#3a2800]/65 to-[#0d2218]/25" />
+          <div className="relative p-8 pb-9">
+            <span className="label-caps text-gold/80 text-xs">Partner with us</span>
+            <h2 className="font-display text-3xl sm:text-4xl font-semibold text-white mt-1 mb-2 leading-tight">
+              Support<br />financially
+            </h2>
+            <p className="text-white/70 text-sm leading-relaxed max-w-xs">
+              Fund the space, the sound, and the people who make each session possible.
+            </p>
+            <span className="inline-flex items-center gap-2 mt-5 text-gold text-sm font-semibold group-hover:gap-3 transition-all duration-200">
+              Partner with us <span>↓</span>
+            </span>
+          </div>
+        </a>
       </section>
 
       {/* Roles */}
