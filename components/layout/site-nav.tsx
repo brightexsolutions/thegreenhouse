@@ -17,7 +17,11 @@ const links = [
 // Pages with a full-bleed dark/image hero — nav starts transparent
 const HERO_ROUTES = ["/", "/about", "/events", "/gallery", "/get-involved"];
 
-export function SiteNav() {
+interface SiteNavProps {
+  liveSlug?: string;
+}
+
+export function SiteNav({ liveSlug }: SiteNavProps) {
   const [scrolled, setScrolled] = useState(false);
   const [open,     setOpen]     = useState(false);
   const pathname = usePathname();
@@ -102,6 +106,23 @@ export function SiteNav() {
 
           {/* CTA + mobile toggle */}
           <div className="flex items-center gap-3">
+            {liveSlug && (
+              <Link
+                href={`/live/${liveSlug}`}
+                className={cn(
+                  "hidden lg:inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all duration-200",
+                  solid
+                    ? "bg-forest/10 text-forest border border-forest/20 hover:bg-forest/15"
+                    : "bg-white/10 text-cream border border-white/20 hover:bg-white/15"
+                )}
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-gold" />
+                </span>
+                We&apos;re Live
+              </Link>
+            )}
             <Link
               href="/events"
               className={cn(
@@ -113,6 +134,23 @@ export function SiteNav() {
             >
               Join a Session
             </Link>
+            {liveSlug && (
+              <Link
+                href={`/live/${liveSlug}`}
+                className={cn(
+                  "lg:hidden inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-all duration-200",
+                  solid
+                    ? "bg-forest/10 text-forest border border-forest/20"
+                    : "bg-white/10 text-cream border border-white/20"
+                )}
+              >
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75" />
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-gold" />
+                </span>
+                Live
+              </Link>
+            )}
             <button
               onClick={() => setOpen(!open)}
               className={cn(
@@ -165,9 +203,21 @@ export function SiteNav() {
                 </Link>
               );
             })}
+            {liveSlug && (
+              <Link
+                href={`/live/${liveSlug}`}
+                className="mt-6 w-full inline-flex items-center justify-center gap-2 px-5 py-3 rounded-full bg-forest/10 border border-forest/20 text-forest font-semibold text-sm hover:bg-forest/15 transition-colors"
+              >
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-gold opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-gold" />
+                </span>
+                We&apos;re Live Now
+              </Link>
+            )}
             <Link
               href="/events"
-              className="mt-6 w-full text-center px-5 py-3 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-colors"
+              className="mt-3 w-full text-center px-5 py-3 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-colors"
             >
               Join a Session
             </Link>

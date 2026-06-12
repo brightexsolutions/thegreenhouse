@@ -173,10 +173,10 @@ export default function AboutPage() {
                   { icon: "🛐",  label: "Deep Worship", body: "Extended time in worship and prayer — unhurried, unperformed, and real." },
                   { icon: "🤝",  label: "Connection",  body: "Cross-church fellowship built on vulnerability, not networking." },
                 ].map((item) => (
-                  <div key={item.label} className="rounded-2xl bg-white/5 border border-white/10 p-5">
-                    <span className="text-2xl">{item.icon}</span>
-                    <h3 className="font-semibold text-cream text-sm mt-3 mb-1">{item.label}</h3>
-                    <p className="text-cream/55 text-xs leading-relaxed">{item.body}</p>
+                  <div key={item.label} className="rounded-2xl bg-white/5 border border-white/10 p-6">
+                    <span className="text-3xl">{item.icon}</span>
+                    <h3 className="font-semibold text-white text-base mt-3 mb-2">{item.label}</h3>
+                    <p className="text-cream/80 text-sm leading-relaxed">{item.body}</p>
                   </div>
                 ))}
               </div>
