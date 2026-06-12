@@ -62,8 +62,9 @@ export function WhatHappens() {
               <em className="not-italic text-gold">stays with you</em>
             </h2>
             <p className="text-charcoal/60 text-base leading-relaxed mb-10">
-              Not a concert. Not a conference. Just an honest room full of people
-              from different churches across Nairobi — all choosing to show up for something real.
+              Not a concert. Not a conference. A space built for tired souls — people from
+              different churches across Nairobi who need somewhere to slow down, exhale, and
+              find God and each other without the noise.
             </p>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

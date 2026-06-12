@@ -115,6 +115,47 @@ export default function GetInvolvedPage() {
         </div>
       </section>
 
+      {/* Financial Support */}
+      <section className="py-20 md:py-28 bg-cream overflow-hidden">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid lg:grid-cols-2 gap-16 items-center">
+            <FadeIn>
+              <span className="label-caps text-gold">Partner With Us</span>
+              <h2 className="font-display text-4xl md:text-5xl font-semibold text-forest mt-2 mb-5 leading-tight">
+                Why your generosity<br />matters
+              </h2>
+              <p className="text-charcoal/60 text-base leading-relaxed mb-4">
+                Every session has real costs — a warm venue, quality sound, invited guests, and the
+                small touches that make the room feel like a haven, not just a hall.
+              </p>
+              <p className="text-charcoal/60 text-base leading-relaxed">
+                By giving, you&apos;re not just covering expenses. You&apos;re directly investing in a space
+                where many people come tired and leave restored — and in the larger vision of community
+                outreach, mental health support, and discipleship that lies ahead.
+              </p>
+            </FadeIn>
+            <FadeIn delay={0.1}>
+              <div className="space-y-4">
+                {[
+                  { icon: "🏛", label: "Venue & Space",        body: "A warm, comfortable, and inviting physical setting — the foundation of everything." },
+                  { icon: "🎵", label: "Sound & Equipment",    body: "Quality acoustic resources so worship doesn't feel like an afterthought." },
+                  { icon: "👤", label: "Invited Guests",       body: "Bringing in voices and gifts that enrich every session for everyone in the room." },
+                  { icon: "☕", label: "Hospitality",          body: "The refreshments and small details that turn a gathering into a community." },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-mist">
+                    <span className="text-2xl mt-0.5 shrink-0">{item.icon}</span>
+                    <div>
+                      <p className="font-semibold text-forest text-sm">{item.label}</p>
+                      <p className="text-charcoal/55 text-xs leading-relaxed mt-0.5">{item.body}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </FadeIn>
+          </div>
+        </div>
+      </section>
+
       {/* Values */}
       <section
         className="py-20 md:py-28 relative overflow-hidden"

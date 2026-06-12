@@ -3,23 +3,23 @@ import { FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
 const pillars = [
   {
     icon: "🌿",
-    title: "Low Pressure",
-    description: "No performance. No gatekeeping. Come as you are — whether you're full of faith or full of questions.",
-  },
-  {
-    icon: "🔁",
-    title: "Rotating Venues",
-    description: "We move between churches and spaces across Nairobi so no single community owns the gathering.",
+    title: "A Safe Space",
+    description: "No performance. No gatekeeping. A genuinely low-pressure room where you can exhale, be honest, and encounter God without putting on a show.",
   },
   {
     icon: "✝️",
     title: "Cross-Church",
-    description: "Built for the whole body. People from different denominations and backgrounds, one table.",
+    description: "Run by gifted people from active ministries across Nairobi — meeting as the wider body, not as competing congregations.",
   },
   {
-    icon: "⏱",
-    title: "~60 Minutes",
-    description: "Intentionally short. We respect your time. One tight, meaningful hour — then you're free.",
+    icon: "🧠",
+    title: "Whole-Person Focus",
+    description: "We take seriously the mental and emotional weight many Christians quietly carry — this space is built for real renewal, not just religious attendance.",
+  },
+  {
+    icon: "⏳",
+    title: "Unhurried",
+    description: "2–3 hours of worship, hymns, sharing, and genuine connection. Long enough to actually decompress. Rare enough that each session counts.",
   },
 ];
 
