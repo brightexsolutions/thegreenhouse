@@ -73,7 +73,13 @@ function Field({ label, hint, error, children }: FieldProps) {
 
 type GivingSettings = { giving_paybill?: string; giving_account?: string; giving_till?: string; giving_phone?: string };
 
-export function InvolvementForm() {
+interface InvolvementFormProps {
+  defaultInterest?: string;
+}
+
+const VALID_INTERESTS = ["worship_team", "host_venue", "vision_carrier", "creative_team", "partner", "give", "attend", "other"] as const;
+
+export function InvolvementForm({ defaultInterest }: InvolvementFormProps) {
   const [submitted,      setSubmitted]      = useState(false);
   const [serverError,    setServerError]    = useState<string | null>(null);
   const [givingSettings, setGivingSettings] = useState<GivingSettings>({});
@@ -85,9 +91,13 @@ export function InvolvementForm() {
       .catch(() => {});
   }, []);
 
+  const resolvedDefault = (VALID_INTERESTS as readonly string[]).includes(defaultInterest ?? "")
+    ? (defaultInterest as FormData["interest"])
+    : "attend";
+
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FormData>({
     resolver: zodResolver(schema),
-    defaultValues: { interest: "attend" },
+    defaultValues: { interest: resolvedDefault },
   });
 
   const interest = watch("interest");

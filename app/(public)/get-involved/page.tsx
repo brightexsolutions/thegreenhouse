@@ -4,8 +4,6 @@ import Link from "next/link";
 import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
 import { InvolvementForm } from "@/components/get-involved/involvement-form";
 
-export const revalidate = 3600;
-
 export const metadata: Metadata = {
   title: "Get Involved",
   description: "Serve at The Green House — lead worship, host a venue, or join our volunteer team. Every role matters.",
@@ -46,7 +44,12 @@ const VALUES = [
   { label: "Stay connected", body: "Keep in touch between sessions, not just on the day." },
 ];
 
-export default function GetInvolvedPage() {
+export default async function GetInvolvedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ interest?: string }>;
+}) {
+  const { interest } = await searchParams;
   return (
     <>
       {/* Hero — photo background */}
@@ -101,7 +104,7 @@ export default function GetInvolvedPage() {
               <span className="text-forest/30 group-hover:text-forest transition-colors text-sm">↓</span>
             </a>
             <a
-              href="#support"
+              href="?interest=give#contact"
               className="group flex items-center gap-5 p-5 rounded-2xl border border-gold/30 bg-gold-pale hover:border-gold/60 hover:shadow-card transition-all duration-200"
             >
               <span className="w-11 h-11 rounded-full bg-gold/15 flex items-center justify-center text-xl shrink-0 group-hover:bg-gold/25 transition-colors">🤝</span>
@@ -195,7 +198,7 @@ export default function GetInvolvedPage() {
                 outreach, mental health support, and discipleship that lies ahead.
               </p>
               <Link
-                href="#contact"
+                href="?interest=give#contact"
                 className="inline-flex items-center gap-2 mt-8 px-6 py-3.5 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-all duration-200"
               >
                 Reach out to give →
@@ -207,15 +210,16 @@ export default function GetInvolvedPage() {
               <div className="relative rounded-3xl overflow-hidden shadow-2xl">
                 <div className="relative h-[420px]">
                   <Image
-                    src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=900&q=80"
-                    alt="Community gathering"
+                    src="https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?auto=format&fit=crop&w=900&q=80"
+                    alt="African community gathering"
                     fill
-                    className="object-cover"
+                    className="object-cover object-top"
                     sizes="(max-width:1024px) 90vw, 44vw"
                     unoptimized
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/80 to-forest/20" />
-                  <div className="absolute inset-x-0 bottom-0 p-7 space-y-3">
+                  {/* Strong gradient so text is always legible */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-[#0d2218] via-[#0d2218]/85 to-[#0d2218]/25" />
+                  <div className="absolute inset-x-0 bottom-0 p-7 space-y-3.5">
                     {[
                       { icon: "🏛", label: "Venue & Space",     body: "A warm, comfortable physical setting — the foundation of everything." },
                       { icon: "🎵", label: "Sound & Equipment", body: "Quality acoustics so worship doesn't feel like an afterthought." },
@@ -223,10 +227,10 @@ export default function GetInvolvedPage() {
                       { icon: "☕", label: "Hospitality",       body: "The small touches that turn a gathering into a community." },
                     ].map((item) => (
                       <div key={item.label} className="flex items-start gap-3">
-                        <span className="text-lg mt-0.5 shrink-0">{item.icon}</span>
+                        <span className="text-base mt-0.5 shrink-0">{item.icon}</span>
                         <div>
-                          <p className="font-semibold text-cream text-sm">{item.label}</p>
-                          <p className="text-cream/55 text-xs leading-relaxed mt-0.5">{item.body}</p>
+                          <p className="font-semibold text-white text-sm leading-snug">{item.label}</p>
+                          <p className="text-white/70 text-xs leading-relaxed mt-0.5">{item.body}</p>
                         </div>
                       </div>
                     ))}
@@ -313,7 +317,7 @@ export default function GetInvolvedPage() {
             {/* Right — form */}
             <FadeIn delay={0.1}>
               <div className="bg-white border border-mist rounded-3xl p-8 shadow-card">
-                <InvolvementForm />
+                <InvolvementForm defaultInterest={interest} />
               </div>
             </FadeIn>
           </div>
