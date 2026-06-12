@@ -14,25 +14,25 @@ export const metadata: Metadata = {
 
 const ROLES = [
   {
-    emoji:   "🎵",
+    image:   "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=800&q=75",
     title:   "Worship Team",
     tagline: "Lead the room",
     body:    "Are you a vocalist or instrumentalist? We rotate worship teams each session. Your church background doesn't matter — your heart does.",
   },
   {
-    emoji:   "🏛",
+    image:   "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=800&q=75",
     title:   "Host a Venue",
     tagline: "Open your doors",
     body:    "We intentionally rotate between spaces. If your church or space can seat 80–200 people and you'd like to host, we'd love to talk.",
   },
   {
-    emoji:   "🌿",
+    image:   "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=75",
     title:   "Vision Carrier",
     tagline: "Shape what it becomes",
     body:    "A small group of people who believe in what The Green House is doing and want to help it grow — through prayer, ideas, and showing up.",
   },
   {
-    emoji:   "📸",
+    image:   "https://images.unsplash.com/photo-1452802447250-470a88ac82bc?auto=format&fit=crop&w=800&q=75",
     title:   "Creative Team",
     tagline: "Capture and create",
     body:    "Photography, video, design, or social — if you have a creative skill and want to use it for something meaningful, this is for you.",
@@ -85,8 +85,38 @@ export default function GetInvolvedPage() {
         </div>
       </section>
 
+      {/* Two-path entry — draws attention to both volunteer and financial support */}
+      <section className="bg-cream py-10 border-b border-mist">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="grid sm:grid-cols-2 gap-4">
+            <a
+              href="#roles"
+              className="group flex items-center gap-5 p-5 rounded-2xl border border-mist bg-white hover:border-forest/30 hover:shadow-card transition-all duration-200"
+            >
+              <span className="w-11 h-11 rounded-full bg-forest/10 flex items-center justify-center text-xl shrink-0 group-hover:bg-forest/20 transition-colors">🌿</span>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-forest text-sm">Volunteer your gift</p>
+                <p className="text-charcoal/50 text-xs mt-0.5">Worship, hosting, creative, vision</p>
+              </div>
+              <span className="text-forest/30 group-hover:text-forest transition-colors text-sm">↓</span>
+            </a>
+            <a
+              href="#support"
+              className="group flex items-center gap-5 p-5 rounded-2xl border border-gold/30 bg-gold-pale hover:border-gold/60 hover:shadow-card transition-all duration-200"
+            >
+              <span className="w-11 h-11 rounded-full bg-gold/15 flex items-center justify-center text-xl shrink-0 group-hover:bg-gold/25 transition-colors">🤝</span>
+              <div className="flex-1 min-w-0">
+                <p className="font-semibold text-forest text-sm">Support financially</p>
+                <p className="text-charcoal/50 text-xs mt-0.5">Partner with us to fund the mission</p>
+              </div>
+              <span className="text-gold/50 group-hover:text-gold transition-colors text-sm">↓</span>
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Roles */}
-      <section className="py-20 md:py-28 bg-cream">
+      <section id="roles" className="py-20 md:py-28 bg-cream">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <div className="max-w-lg mb-14">
@@ -100,13 +130,21 @@ export default function GetInvolvedPage() {
           <FadeInStagger className="grid sm:grid-cols-2 gap-5" staggerDelay={0.08}>
             {ROLES.map((role) => (
               <StaggerChild key={role.title}>
-                <div className="group relative bg-white border border-mist rounded-3xl p-7 h-full flex flex-col hover:-translate-y-1 transition-all duration-300 shadow-card hover:shadow-card-hover overflow-hidden">
-                  <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gold group-hover:w-full transition-all duration-500" />
-                  <span className="text-4xl mb-5">{role.emoji}</span>
-                  <div className="flex-1">
-                    <span className="label-caps text-gold text-xs">{role.tagline}</span>
-                    <h3 className="font-display text-2xl font-semibold text-forest mt-1 mb-3">{role.title}</h3>
-                    <p className="text-sm text-charcoal/70 leading-relaxed">{role.body}</p>
+                <div className="group relative rounded-3xl overflow-hidden h-[280px] flex flex-col justify-end hover:-translate-y-1 transition-all duration-300 shadow-card hover:shadow-card-hover">
+                  <Image
+                    src={role.image}
+                    alt=""
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-700"
+                    sizes="(max-width:640px) 90vw, (max-width:1024px) 45vw, 44vw"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/65 to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-br from-transparent to-forest/20" />
+                  <div className="relative p-7">
+                    <span className="label-caps text-gold/90 text-xs">{role.tagline}</span>
+                    <h3 className="font-display text-2xl font-semibold text-cream mt-1 mb-2">{role.title}</h3>
+                    <p className="text-cream/70 text-sm leading-relaxed">{role.body}</p>
                   </div>
                 </div>
               </StaggerChild>
@@ -115,8 +153,31 @@ export default function GetInvolvedPage() {
         </div>
       </section>
 
+      {/* Cinematic quote strip */}
+      <section className="relative h-[42vh] min-h-[280px] overflow-hidden flex items-center justify-center">
+        <Image
+          src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=70"
+          alt=""
+          fill
+          className="object-cover object-center"
+          sizes="100vw"
+          aria-hidden
+          unoptimized
+        />
+        <div className="absolute inset-0 bg-forest/75" />
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_50%_50%,rgba(201,162,74,0.08),transparent)]" />
+        <FadeIn>
+          <div className="relative text-center px-6 max-w-2xl mx-auto">
+            <p className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold text-cream leading-tight">
+              &ldquo;Every role is given freely.<br />
+              <em className="not-italic text-gold">None is given lightly.</em>&rdquo;
+            </p>
+          </div>
+        </FadeIn>
+      </section>
+
       {/* Financial Support */}
-      <section className="py-20 md:py-28 bg-cream overflow-hidden">
+      <section id="support" className="py-20 md:py-28 bg-cream overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <FadeIn>
@@ -133,23 +194,44 @@ export default function GetInvolvedPage() {
                 where many people come tired and leave restored — and in the larger vision of community
                 outreach, mental health support, and discipleship that lies ahead.
               </p>
+              <Link
+                href="#contact"
+                className="inline-flex items-center gap-2 mt-8 px-6 py-3.5 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-all duration-200"
+              >
+                Reach out to give →
+              </Link>
             </FadeIn>
+
+            {/* Right — photo with overlaid list */}
             <FadeIn delay={0.1}>
-              <div className="space-y-4">
-                {[
-                  { icon: "🏛", label: "Venue & Space",        body: "A warm, comfortable, and inviting physical setting — the foundation of everything." },
-                  { icon: "🎵", label: "Sound & Equipment",    body: "Quality acoustic resources so worship doesn't feel like an afterthought." },
-                  { icon: "👤", label: "Invited Guests",       body: "Bringing in voices and gifts that enrich every session for everyone in the room." },
-                  { icon: "☕", label: "Hospitality",          body: "The refreshments and small details that turn a gathering into a community." },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-start gap-4 p-4 rounded-2xl bg-white border border-mist">
-                    <span className="text-2xl mt-0.5 shrink-0">{item.icon}</span>
-                    <div>
-                      <p className="font-semibold text-forest text-sm">{item.label}</p>
-                      <p className="text-charcoal/55 text-xs leading-relaxed mt-0.5">{item.body}</p>
-                    </div>
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+                <div className="relative h-[420px]">
+                  <Image
+                    src="https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=900&q=80"
+                    alt="Community gathering"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width:1024px) 90vw, 44vw"
+                    unoptimized
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/80 to-forest/20" />
+                  <div className="absolute inset-x-0 bottom-0 p-7 space-y-3">
+                    {[
+                      { icon: "🏛", label: "Venue & Space",     body: "A warm, comfortable physical setting — the foundation of everything." },
+                      { icon: "🎵", label: "Sound & Equipment", body: "Quality acoustics so worship doesn't feel like an afterthought." },
+                      { icon: "👤", label: "Invited Guests",    body: "Voices and gifts that enrich every session for everyone in the room." },
+                      { icon: "☕", label: "Hospitality",       body: "The small touches that turn a gathering into a community." },
+                    ].map((item) => (
+                      <div key={item.label} className="flex items-start gap-3">
+                        <span className="text-lg mt-0.5 shrink-0">{item.icon}</span>
+                        <div>
+                          <p className="font-semibold text-cream text-sm">{item.label}</p>
+                          <p className="text-cream/55 text-xs leading-relaxed mt-0.5">{item.body}</p>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
               </div>
             </FadeIn>
           </div>
@@ -187,7 +269,7 @@ export default function GetInvolvedPage() {
       </section>
 
       {/* Contact form */}
-      <section className="py-20 md:py-28 bg-cream">
+      <section id="contact" className="py-20 md:py-28 bg-cream">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-start">
             {/* Left — copy */}
