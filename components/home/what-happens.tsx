@@ -25,6 +25,7 @@ export function WhatHappens() {
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 90vw, 44vw"
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-forest/60 via-transparent to-transparent" />
               </div>
@@ -37,6 +38,7 @@ export function WhatHappens() {
                   fill
                   className="object-cover"
                   sizes="(max-width: 1024px) 42vw, 22vw"
+                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               </div>

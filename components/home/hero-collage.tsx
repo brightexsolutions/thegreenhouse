@@ -64,7 +64,7 @@ function CardInner({
 }) {
   return (
     <div className="relative w-full h-full overflow-hidden shadow-2xl" style={{ borderRadius: borderRadius ?? "2rem" }}>
-      <Image src={src} alt={alt} fill className="object-cover" sizes="(max-width:1024px) 40vw, 22vw" priority={alt === "Worship" || alt === "Pause"} />
+      <Image src={src} alt={alt} fill className="object-cover" sizes="(max-width:1024px) 40vw, 22vw" priority={alt === "Worship" || alt === "Pause"} unoptimized />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-4">
         <span className="label-caps text-cream text-xs font-bold tracking-widest">{label}</span>
@@ -238,7 +238,7 @@ export function HeroCollage() {
                 className="relative w-full h-full overflow-hidden shadow-2xl"
                 style={{ borderRadius: "inherit" }}
               >
-                <Image src={PHOTOS.reflect} alt="Reflect" fill className="object-cover" sizes="(max-width:1024px) 34vw, 18vw" />
+                <Image src={PHOTOS.reflect} alt="Reflect" fill className="object-cover" sizes="(max-width:1024px) 34vw, 18vw" unoptimized />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <span className="label-caps text-cream text-xs font-bold tracking-widest">Reflect</span>

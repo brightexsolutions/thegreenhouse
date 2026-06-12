@@ -157,6 +157,7 @@ export default async function EventDetailPage({ params }: Props) {
             priority
             sizes="100vw"
             aria-hidden
+            unoptimized
           />
         </div>
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20" />

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
+import { storageUrl } from "@/lib/constants";
 import type { Event } from "@/types/database";
 
 function Countdown({ targetDate }: { targetDate: string }) {
@@ -52,7 +53,7 @@ function Countdown({ targetDate }: { targetDate: string }) {
   );
 }
 
-const SUPABASE_URL = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+
 
 export function EventTeaser({ event }: { event: Event | null }) {
   if (!event) return null;
@@ -63,7 +64,7 @@ export function EventTeaser({ event }: { event: Event | null }) {
   });
   const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
   const coverUrl = event.cover_image
-    ? `${SUPABASE_URL}/storage/v1/object/public/event-images/${event.cover_image}`
+    ? storageUrl(`event-images/${event.cover_image}`, { width: 900, quality: 80 })
     : null;
 
   return (
@@ -77,6 +78,7 @@ export function EventTeaser({ event }: { event: Event | null }) {
           className="object-cover opacity-35"
           sizes="100vw"
           aria-hidden
+          unoptimized
         />
         <div className="absolute inset-0 bg-gradient-to-br from-forest/95 via-forest/80 to-moss/60" />
       </div>
@@ -133,6 +135,7 @@ export function EventTeaser({ event }: { event: Event | null }) {
                     fill
                     className="object-cover"
                     sizes="(max-width: 1024px) 100vw, 50vw"
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-forest/40 to-transparent" />
                 </div>

@@ -72,6 +72,7 @@ export default async function GalleryPage() {
             priority
             sizes="100vw"
             aria-hidden
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/85 to-forest/50" />
         </div>
@@ -111,6 +112,7 @@ export default async function GalleryPage() {
                       className="object-cover blur-[2px] brightness-75"
                       sizes="(max-width:640px) 50vw, 33vw"
                       aria-hidden
+                      unoptimized
                     />
                   </div>
                 ))}
@@ -152,6 +154,7 @@ export default async function GalleryPage() {
                         fill
                         className="object-cover transition-transform duration-700 group-hover:scale-105"
                         sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
+                        unoptimized
                       />
                       <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300" />
 
@@ -190,6 +193,7 @@ export default async function GalleryPage() {
               className="object-cover opacity-20"
               sizes="100vw"
               aria-hidden
+              unoptimized
             />
             <div className="absolute inset-0 bg-forest" style={{ opacity: 0.88 }} />
           </div>

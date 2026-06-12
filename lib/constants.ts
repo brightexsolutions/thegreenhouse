@@ -6,7 +6,8 @@ export const GOOGLE_SITE_VERIFICATION = "VF6ZtFBVZPyZxr2XDozrNRD_U1Tuy6B69pJp7gE
 
 export const CONTACT_EMAIL    = "hello@greenhousews.co.ke";
 export const REPLY_TO_EMAIL   = "thegreenhouse.contact01@gmail.com";
-export const CONTACT_WHATSAPP = "254706609085";
+export const CONTACT_WHATSAPP          = "254706609085";
+export const REGISTRATION_SUPPORT_WA   = "254741980127";
 
 // Resend FROM addresses — tickets get their own mailbox, everything else goes through hello
 export const TICKET_FROM_EMAIL = () => process.env.RESEND_TICKET_FROM  ?? `The Green House <tickets@greenhousews.co.ke>`;
@@ -22,12 +23,18 @@ export function whatsappUrl(message?: string): string {
   return message ? `${base}?text=${encodeURIComponent(message)}` : base;
 }
 
-/** Supabase storage CDN URL with optional transform params */
+/** Supabase storage CDN URL.
+ *  When transform params are supplied, uses the /render/image/ endpoint so
+ *  Supabase handles resizing — not Vercel. This avoids consuming Vercel's
+ *  Image Optimization quota. Always pair the returned URL with unoptimized
+ *  on the Next.js <Image> component.
+ */
 export function storageUrl(path: string, params?: { width?: number; quality?: number }): string {
-  const base = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public`;
-  if (!params) return `${base}/${path}`;
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
+  if (!params) return `${supabaseUrl}/storage/v1/object/public/${path}`;
   const q = new URLSearchParams();
   if (params.width)   q.set("width",   String(params.width));
   if (params.quality) q.set("quality", String(params.quality));
-  return `${base}/${path}?${q.toString()}`;
+  // /render/image/public/ is the Supabase transform endpoint (free tier supported)
+  return `${supabaseUrl}/storage/v1/render/image/public/${path}?${q.toString()}`;
 }

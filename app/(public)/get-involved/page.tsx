@@ -60,6 +60,7 @@ export default function GetInvolvedPage() {
             priority
             sizes="100vw"
             aria-hidden
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/88 to-forest/55" />
         </div>

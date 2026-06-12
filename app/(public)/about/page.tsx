@@ -27,6 +27,7 @@ export default function AboutPage() {
             priority
             sizes="100vw"
             aria-hidden
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/85 to-forest/50" />
         </div>
@@ -113,6 +114,7 @@ export default function AboutPage() {
                     fill
                     className="object-cover"
                     sizes="(max-width:1024px) 90vw, 44vw"
+                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-forest/40 to-transparent" />
                 </div>
@@ -124,6 +126,7 @@ export default function AboutPage() {
                     fill
                     className="object-cover"
                     sizes="(max-width:1024px) 40vw, 20vw"
+                    unoptimized
                   />
                 </div>
                 {/* Gold ring */}
@@ -150,6 +153,7 @@ export default function AboutPage() {
             className="object-cover opacity-25"
             sizes="100vw"
             aria-hidden
+            unoptimized
           />
           <div className="absolute inset-0 bg-gradient-to-b from-forest via-forest/95 to-forest" />
         </div>
