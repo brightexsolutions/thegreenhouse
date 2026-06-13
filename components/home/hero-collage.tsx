@@ -8,10 +8,10 @@ import { ArrowRight } from "lucide-react";
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
 const PHOTOS = {
-  pause:   "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=600&q=80",
-  worship: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=700&q=80",
-  connect: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=700&q=80",
-  reflect: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=700&q=80",
+  pause:   "https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?auto=format&fit=crop&w=600&q=80",
+  worship: "https://images.unsplash.com/photo-1555041469-149b6c552c97?auto=format&fit=crop&w=700&q=80",
+  connect: "https://images.unsplash.com/photo-1573497491765-dccce02b29df?auto=format&fit=crop&w=700&q=80",
+  reflect: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=700&q=80",
 };
 
 /**

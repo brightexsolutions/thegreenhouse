@@ -4,6 +4,7 @@ import { StatsStrip }       from "@/components/home/stats-strip";
 import { WhatHappens }      from "@/components/home/what-happens";
 import { VisionCards }      from "@/components/about/vision-cards";
 import { EventTeaser }      from "@/components/home/event-teaser";
+import { GetInvolvedCta }   from "@/components/home/get-involved-cta";
 import { CommunityCircles } from "@/components/home/community-circles";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Event } from "@/types/database";
@@ -54,7 +55,10 @@ export default async function HomePage() {
       {/* 4 — Next session countdown */}
       {nextEvent && <EventTeaser event={nextEvent} />}
 
-      {/* 5 — Community circles */}
+      {/* 5 — Get involved CTA */}
+      <GetInvolvedCta />
+
+      {/* 6 — Community circles */}
       <CommunityCircles />
     </>
   );

@@ -34,13 +34,15 @@ type FormData = z.infer<typeof schema>;
 
 interface EventFormProps {
   eventId?: string;
-  defaultValues?: Partial<FormData & { cover_image?: string; slug?: string; dress_code?: string }>;
+  defaultValues?: Partial<FormData & { cover_image?: string; banner_image?: string; slug?: string; dress_code?: string }>;
 }
 
 export function EventForm({ eventId, defaultValues }: EventFormProps) {
   const router = useRouter();
-  const [uploading, setUploading]   = useState(false);
-  const [coverPath, setCoverPath]   = useState<string | null>(defaultValues?.cover_image ?? null);
+  const [uploadingCover,  setUploadingCover]  = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [coverPath,  setCoverPath]  = useState<string | null>(defaultValues?.cover_image  ?? null);
+  const [bannerPath, setBannerPath] = useState<string | null>(defaultValues?.banner_image ?? null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -55,18 +57,22 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
   const type  = watch("type");
   const isNew = !eventId;
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+  async function uploadImage(
+    e: React.ChangeEvent<HTMLInputElement>,
+    setLoading: (v: boolean) => void,
+    setPath: (p: string) => void,
+  ) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setUploading(true);
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
       const res = await fetch("/api/admin/upload-image", { method: "POST", body: formData });
       const data = await res.json();
-      if (data.path) setCoverPath(data.path);
+      if (data.path) setPath(data.path);
     } finally {
-      setUploading(false);
+      setLoading(false);
     }
   }
 
@@ -74,7 +80,8 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
     setSubmitError(null);
     const payload = {
       ...data,
-      cover_image: coverPath ?? undefined,
+      cover_image:  coverPath  ?? undefined,
+      banner_image: bannerPath ?? undefined,
       price_kes:   data.type === "paid" ? (data.price_kes ?? 0) : 0,
       // empty strings → null
       venue_map_url:     data.venue_map_url || null,
@@ -113,44 +120,83 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
 
       <div className="flex-1 space-y-6 pb-5">
 
-      {/* Cover image */}
-      <div className="bg-white rounded-2xl border border-mist p-6 space-y-4">
-        <h3 className="text-sm font-semibold text-charcoal">Cover image</h3>
-        <div className={cn(
-          "relative rounded-2xl border-2 border-dashed border-mist flex items-center justify-center overflow-hidden transition-all",
-          coverPath ? "h-48" : "h-36 hover:border-forest/30 cursor-pointer"
-        )}>
-          {coverPath ? (
-            <>
-              <NextImage
-                src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${coverPath}`}
-                alt="Cover"
-                fill
-                className="object-cover"
-                unoptimized
-              />
-              <button
-                type="button"
-                onClick={() => setCoverPath(null)}
-                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
-              >
-                <X size={12} />
-              </button>
-            </>
-          ) : (
-            <label className="flex flex-col items-center gap-2 cursor-pointer w-full h-full justify-center">
-              {uploading ? (
-                <Loader2 size={18} className="animate-spin text-forest" />
-              ) : (
-                <>
-                  <ImageIcon size={20} className="text-charcoal/25" />
-                  <span className="text-xs text-charcoal/40">Click to upload cover image</span>
-                  <span className="text-[10px] text-charcoal/25">JPEG, PNG, WebP — max 10MB</span>
-                </>
-              )}
-              <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={handleImageUpload} />
-            </label>
-          )}
+      {/* Images — Banner + Poster */}
+      <div className="bg-white rounded-2xl border border-mist p-6 space-y-5">
+        <div>
+          <h3 className="text-sm font-semibold text-charcoal">Images</h3>
+          <p className="text-xs text-charcoal/45 mt-0.5">Banner is used as the hero background. Poster appears in the event details section.</p>
+        </div>
+
+        {/* Banner — wide landscape */}
+        <div>
+          <span className="text-xs font-semibold text-charcoal/60 mb-2 block">Banner <span className="font-normal text-charcoal/35">(landscape — hero background)</span></span>
+          <div className={cn(
+            "relative rounded-2xl border-2 border-dashed border-mist flex items-center justify-center overflow-hidden transition-all",
+            bannerPath ? "h-40" : "h-28 hover:border-forest/30 cursor-pointer"
+          )}>
+            {bannerPath ? (
+              <>
+                <NextImage
+                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${bannerPath}`}
+                  alt="Banner"
+                  fill
+                  className="object-cover"
+                  unoptimized
+                />
+                <button type="button" onClick={() => setBannerPath(null)}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors">
+                  <X size={12} />
+                </button>
+              </>
+            ) : (
+              <label className="flex flex-col items-center gap-1.5 cursor-pointer w-full h-full justify-center">
+                {uploadingBanner ? <Loader2 size={16} className="animate-spin text-forest" /> : (
+                  <>
+                    <ImageIcon size={18} className="text-charcoal/25" />
+                    <span className="text-xs text-charcoal/40">Upload banner (landscape)</span>
+                  </>
+                )}
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                  onChange={(e) => uploadImage(e, setUploadingBanner, setBannerPath)} />
+              </label>
+            )}
+          </div>
+        </div>
+
+        {/* Poster — portrait */}
+        <div>
+          <span className="text-xs font-semibold text-charcoal/60 mb-2 block">Poster <span className="font-normal text-charcoal/35">(portrait — shown in event details)</span></span>
+          <div className={cn(
+            "relative rounded-2xl border-2 border-dashed border-mist flex items-center justify-center overflow-hidden transition-all",
+            coverPath ? "h-48" : "h-28 hover:border-forest/30 cursor-pointer"
+          )}>
+            {coverPath ? (
+              <>
+                <NextImage
+                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${coverPath}`}
+                  alt="Poster"
+                  fill
+                  className="object-cover object-top"
+                  unoptimized
+                />
+                <button type="button" onClick={() => setCoverPath(null)}
+                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors">
+                  <X size={12} />
+                </button>
+              </>
+            ) : (
+              <label className="flex flex-col items-center gap-1.5 cursor-pointer w-full h-full justify-center">
+                {uploadingCover ? <Loader2 size={16} className="animate-spin text-forest" /> : (
+                  <>
+                    <ImageIcon size={18} className="text-charcoal/25" />
+                    <span className="text-xs text-charcoal/40">Upload poster (portrait)</span>
+                  </>
+                )}
+                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                  onChange={(e) => uploadImage(e, setUploadingCover, setCoverPath)} />
+              </label>
+            )}
+          </div>
         </div>
       </div>
 

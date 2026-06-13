@@ -20,7 +20,7 @@ export default function AboutPage() {
         {/* Background photo */}
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1600&q=75"
+            src="https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?auto=format&fit=crop&w=1600&q=75"
             alt=""
             fill
             className="object-cover"
@@ -110,7 +110,7 @@ export default function AboutPage() {
                 {/* Main photo */}
                 <div className="absolute inset-0 rounded-[2rem] overflow-hidden shadow-2xl">
                   <Image
-                    src="https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=800&q=80"
+                    src="https://images.unsplash.com/photo-1573497491765-dccce02b29df?auto=format&fit=crop&w=800&q=80"
                     alt="Community gathering"
                     fill
                     className="object-cover"

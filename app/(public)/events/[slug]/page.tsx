@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio, Shirt, Users } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio, Shirt, Users, Share2, MessageCircle, Copy, Heart } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { storageUrl, SITE_URL, SITE_NAME } from "@/lib/constants";
 import { FadeIn } from "@/components/motion/fade-in";
 import { RegistrationModal } from "@/components/events/registration-modal";
 import { EventQRCode } from "@/components/events/event-qr-code";
+import { EventShareButtons } from "@/components/events/event-share-buttons";
 import type { Event } from "@/types/database";
 
 export const revalidate = 60;
@@ -46,7 +48,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const event = result?.event;
   if (!event) return {};
 
-  const coverUrl = event.cover_image
+  const ogImage = event.banner_image
+    ? storageUrl(`event-images/${event.banner_image}`, { width: 1200 })
+    : event.cover_image
     ? storageUrl(`event-images/${event.cover_image}`, { width: 1200 })
     : undefined;
 
@@ -63,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: event.description ?? `${event.title} — ${formattedDate}`,
       url: `${SITE_URL}/events/${slug}`,
       type: "website",
-      ...(coverUrl ? { images: [{ url: coverUrl, width: 1200, alt: event.title }] } : {}),
+      ...(ogImage ? { images: [{ url: ogImage, width: 1200, alt: event.title }] } : {}),
     },
   };
 }
@@ -104,23 +108,25 @@ function jsonLd(event: Event) {
           },
         }
       : {}),
-    ...(event.cover_image
+    ...(event.banner_image
+      ? { image: storageUrl(`event-images/${event.banner_image}`, { width: 1200 }) }
+      : event.cover_image
       ? { image: storageUrl(`event-images/${event.cover_image}`, { width: 1200 }) }
       : {}),
   };
   return JSON.stringify(base);
 }
 
-// Fallback hero photos when event has no cover image
-const HERO_FALLBACKS = [
+// African-context fallback banners (used only when no banner_image is uploaded)
+const BANNER_FALLBACKS = [
+  "https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?auto=format&fit=crop&w=1600&q=80",
   "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1573497491765-dccce02b29df?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80",
 ];
-function pickHeroFallback(slug: string) {
+function pickBannerFallback(slug: string) {
   const hash = slug.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  return HERO_FALLBACKS[hash % HERO_FALLBACKS.length];
+  return BANNER_FALLBACKS[hash % BANNER_FALLBACKS.length];
 }
 
 export default async function EventDetailPage({ params }: Props) {
@@ -129,28 +135,34 @@ export default async function EventDetailPage({ params }: Props) {
   if (!result) notFound();
   const { event, registrantCount } = result;
 
-  const coverUrl = event.cover_image
-    ? storageUrl(`event-images/${event.cover_image}`, { width: 1600, quality: 85 })
-    : pickHeroFallback(event.slug);
+  // Banner = hero background. Poster (cover_image) shown in details, never as hero bg.
+  const bannerUrl = event.banner_image
+    ? storageUrl(`event-images/${event.banner_image}`, { width: 1600, quality: 85 })
+    : pickBannerFallback(event.slug);
+
+  const posterUrl = event.cover_image
+    ? storageUrl(`event-images/${event.cover_image}`, { width: 600, quality: 85 })
+    : null;
 
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
   const time = event.event_time.slice(0, 5).replace(":", ".");
 
-  const isOpen = event.status === "published" || event.status === "live";
-  const isFull = !!(event.capacity && registrantCount >= event.capacity);
+  const isOpen   = event.status === "published" || event.status === "live";
+  const isPast   = event.status === "past";
+  const isFull   = !!(event.capacity && registrantCount >= event.capacity);
+  const eventUrl = `${SITE_URL}/events/${event.slug}`;
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(event) }} />
 
-      {/* Hero */}
+      {/* Hero — banner image only */}
       <section className="relative min-h-[70vh] flex items-end overflow-hidden pt-20">
-        {/* BG photo — always present */}
         <div className="absolute inset-0">
           <Image
-            src={coverUrl}
+            src={bannerUrl}
             alt=""
             fill
             className="object-cover scale-[1.03] transition-transform duration-[8s] ease-out"
@@ -160,12 +172,12 @@ export default async function EventDetailPage({ params }: Props) {
             unoptimized
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20" />
-        {/* Subtle colour tint for brand feel */}
-        <div className="absolute inset-0 bg-gradient-to-br from-forest/30 via-transparent to-transparent" />
+        {/* Deep overlay for text readability regardless of image brightness */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25" />
+        <div className="absolute inset-0 bg-gradient-to-br from-forest/35 via-transparent to-transparent" />
 
-        {/* Status ribbon — sits over the hero */}
-        {event.status === "past" && (
+        {/* Status ribbons */}
+        {isPast && (
           <div className="absolute top-[72px] left-0 right-0 z-10 flex justify-center pointer-events-none">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/50 backdrop-blur-md border border-cream/15 text-cream/70 text-xs font-medium">
               <History size={11} className="text-cream/50" />
@@ -185,9 +197,8 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* Decorative */}
         <div className="absolute top-24 right-12 w-64 h-64 rounded-full border border-cream/5 hidden lg:block" />
-        <div className="absolute inset-0 opacity-[0.04]"
+        <div className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: "radial-gradient(circle, #fdfcf8 1px, transparent 1px)",
             backgroundSize: "28px 28px",
@@ -235,7 +246,6 @@ export default async function EventDetailPage({ params }: Props) {
             {/* Left — info */}
             <div className="lg:col-span-2 space-y-10">
 
-              {/* Description */}
               {event.description && (
                 <FadeIn>
                   <p className="text-charcoal/70 leading-relaxed text-base sm:text-lg max-w-2xl">
@@ -268,6 +278,34 @@ export default async function EventDetailPage({ params }: Props) {
                 </FadeIn>
               )}
 
+              {/* Poster — only shown when uploaded */}
+              {posterUrl && (
+                <FadeIn>
+                  <div>
+                    <span className="label-caps text-charcoal/50 text-xs">Event Poster</span>
+                    <div className="mt-3 relative rounded-3xl overflow-hidden shadow-xl max-w-xs">
+                      <Image
+                        src={posterUrl}
+                        alt={`${event.title} poster`}
+                        width={400}
+                        height={560}
+                        className="w-full object-cover"
+                        unoptimized
+                      />
+                      {/* Share poster overlay */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent flex items-center gap-2">
+                        <EventShareButtons
+                          url={eventUrl}
+                          title={event.title}
+                          date={formattedDate}
+                          variant="poster"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </FadeIn>
+              )}
+
               {/* Dress code */}
               {event.dress_code && (
                 <FadeIn>
@@ -283,7 +321,7 @@ export default async function EventDetailPage({ params }: Props) {
                 </FadeIn>
               )}
 
-              {/* Venue details */}
+              {/* Venue */}
               {(event.venue_name || event.venue_address) && (
                 <FadeIn>
                   <div>
@@ -334,65 +372,138 @@ export default async function EventDetailPage({ params }: Props) {
               )}
             </div>
 
-            {/* Right — registration card */}
+            {/* Right — registration card OR past session card */}
             <div className="lg:col-span-1">
               <FadeIn delay={0.1}>
-                <div className="sticky top-28 rounded-3xl border border-mist bg-off-white p-7 shadow-card">
-                  {/* Entry type */}
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="text-sm font-semibold text-charcoal">Entry</span>
-                    <span className="text-lg font-display font-semibold text-forest">
-                      {event.type === "free" ? "Free" : `KES ${event.price_kes?.toLocaleString()}`}
-                    </span>
-                  </div>
+                {isPast ? (
+                  <PastEventCard event={event} />
+                ) : (
+                  <div className="sticky top-28 rounded-3xl border border-mist bg-off-white p-7 shadow-card">
+                    <div className="flex items-center justify-between mb-5">
+                      <span className="text-sm font-semibold text-charcoal">Entry</span>
+                      <span className="text-lg font-display font-semibold text-forest">
+                        {event.type === "free" ? "Free" : `KES ${event.price_kes?.toLocaleString()}`}
+                      </span>
+                    </div>
 
-                  <div className="space-y-3 mb-6">
-                    <InfoRow icon={<Calendar size={12} />} label={formattedDate} />
-                    <InfoRow icon={<Clock size={12} />} label={`${time}pm`} />
-                    {event.venue_name && <InfoRow icon={<MapPin size={12} />} label={event.venue_name} />}
-                    {event.dress_code && <InfoRow icon={<Shirt size={12} />} label={event.dress_code} />}
-                    {event.capacity && (
-                      <InfoRow
-                        icon={<Users size={12} />}
-                        label={isFull
-                          ? `${event.capacity} — session full`
-                          : `${registrantCount} / ${event.capacity} registered`
-                        }
-                      />
+                    <div className="space-y-3 mb-6">
+                      <InfoRow icon={<Calendar size={12} />} label={formattedDate} />
+                      <InfoRow icon={<Clock size={12} />} label={`${time}pm`} />
+                      {event.venue_name && <InfoRow icon={<MapPin size={12} />} label={event.venue_name} />}
+                      {event.dress_code && <InfoRow icon={<Shirt size={12} />} label={event.dress_code} />}
+                      {event.capacity && (
+                        <InfoRow
+                          icon={<Users size={12} />}
+                          label={isFull
+                            ? `${event.capacity} — session full`
+                            : `${registrantCount} / ${event.capacity} registered`
+                          }
+                        />
+                      )}
+                    </div>
+
+                    {isOpen && isFull ? (
+                      <div className="w-full py-3.5 rounded-full bg-red-50 border border-red-100 text-red-500 text-sm text-center font-medium">
+                        This session is full
+                      </div>
+                    ) : isOpen ? (
+                      <RegistrationModal event={event} />
+                    ) : (
+                      <div className="w-full py-3.5 rounded-full bg-charcoal/8 text-charcoal/40 text-sm text-center font-medium cursor-not-allowed">
+                        Registration closed
+                      </div>
+                    )}
+
+                    {isOpen && !isFull && (
+                      <p className="text-center text-xs text-charcoal/50 mt-3 leading-relaxed">
+                        Ticket sent to your email — link can also be copied &amp; shared
+                      </p>
+                    )}
+
+                    {isOpen && !isFull && (
+                      <div className="mt-5 space-y-4">
+                        <EventQRCode slug={event.slug} />
+                        <div className="pt-2 border-t border-mist">
+                          <p className="text-xs text-charcoal/40 mb-2 text-center">Share this session</p>
+                          <EventShareButtons url={eventUrl} title={event.title} date={formattedDate} variant="card" />
+                        </div>
+                      </div>
                     )}
                   </div>
-
-                  {isOpen && isFull ? (
-                    <div className="w-full py-3.5 rounded-full bg-red-50 border border-red-100 text-red-500 text-sm text-center font-medium">
-                      This session is full
-                    </div>
-                  ) : isOpen ? (
-                    <RegistrationModal event={event} />
-                  ) : (
-                    <div className="w-full py-3.5 rounded-full bg-charcoal/8 text-charcoal/40 text-sm text-center font-medium cursor-not-allowed">
-                      {event.status === "past" ? "Session ended" : "Registration closed"}
-                    </div>
-                  )}
-
-                  {isOpen && !isFull && (
-                    <p className="text-center text-xs text-charcoal/50 mt-3 leading-relaxed">
-                      Ticket sent to your email — link can also be copied &amp; shared
-                    </p>
-                  )}
-
-                  {/* QR code for sharing */}
-                  {isOpen && !isFull && (
-                    <div className="mt-5">
-                      <EventQRCode slug={event.slug} />
-                    </div>
-                  )}
-                </div>
+                )}
               </FadeIn>
             </div>
+
           </div>
         </div>
       </section>
     </>
+  );
+}
+
+function PastEventCard({ event }: { event: Event }) {
+  return (
+    <div className="sticky top-28 rounded-3xl overflow-hidden border border-mist shadow-card">
+      {/* Dark header */}
+      <div className="relative bg-forest px-7 pt-8 pb-6 overflow-hidden">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(201,162,74,0.10),transparent)]" />
+        <div className="absolute top-3 right-16 w-16 h-16 rounded-full border border-cream/5" />
+        <div className="relative">
+          <span className="label-caps text-gold/70 text-xs">Session complete</span>
+          <h3 className="font-display text-2xl font-semibold text-cream mt-1 leading-tight">
+            How was your experience?
+          </h3>
+          <p className="text-cream/50 text-sm mt-2 leading-relaxed">
+            Your reflection matters — it shapes future sessions.
+          </p>
+        </div>
+      </div>
+
+      {/* White body */}
+      <div className="bg-off-white px-7 py-6 space-y-4">
+
+        {/* Feedback link if set */}
+        {event.feedback_url ? (
+          <a
+            href={event.feedback_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-3 w-full px-5 py-3.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
+          >
+            <Heart size={14} />
+            Share your feedback
+            <ExternalLink size={11} className="ml-auto opacity-60" />
+          </a>
+        ) : (
+          <div className="rounded-2xl bg-mist/60 border border-mist px-5 py-4 text-center">
+            <p className="text-xs text-charcoal/50 leading-relaxed">
+              Feedback form coming soon — check back or reach out directly.
+            </p>
+          </div>
+        )}
+
+        {/* Divider */}
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-mist" />
+          <span className="text-xs text-charcoal/30">or</span>
+          <div className="flex-1 h-px bg-mist" />
+        </div>
+
+        {/* Share prompt */}
+        <div>
+          <p className="text-xs text-charcoal/50 text-center mb-3">
+            Tell someone what you experienced
+          </p>
+          <EventShareButtons
+            url={`${SITE_URL}/events/${event.slug}`}
+            title={event.title}
+            date={new Date(event.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "long", year: "numeric" })}
+            variant="card"
+            message="I attended this and it was worth it — check it out"
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -21,7 +21,8 @@ export interface Event {
   price_kes:        number;
   capacity:         number | null;
   status:           EventStatus;
-  cover_image:      string | null;  // storage path
+  cover_image:      string | null;  // poster — shown in event details section
+  banner_image:     string | null;  // wide hero background — separate from poster
   description:      string | null;
   feedback_url:     string | null;
   theme_title:      string | null;
