@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X, Heart, Smartphone, MessageCircle, Plus, Loader2 } from "lucide-react";
+import { X, Heart, Smartphone, MessageCircle, Loader2 } from "lucide-react";
 
 interface GivingDetails {
   paybill?: string | null;
@@ -24,7 +24,6 @@ type Panel = "give" | "feedback" | null;
 
 export function DonationPrompt({ eventId, giving, delayMs = 3 * 60 * 1000 }: Props) {
   const [fabVisible, setFabVisible] = useState(false);
-  const [fabOpen,    setFabOpen]    = useState(false);
   const [panel,      setPanel]      = useState<Panel>(null);
 
   // Feedback form state
@@ -47,7 +46,7 @@ export function DonationPrompt({ eventId, giving, delayMs = 3 * 60 * 1000 }: Pro
     if (dismissed) {
       const elapsed = Date.now() - Number(dismissed);
       if (elapsed >= SNOOZE_MS && hasPayment) {
-        const t2 = setTimeout(() => { setFabOpen(false); setPanel("give"); }, delayMs);
+        const t2 = setTimeout(() => { setPanel("give"); }, delayMs);
         return () => { clearTimeout(t1); clearTimeout(t2); };
       }
     } else if (hasPayment) {
@@ -61,7 +60,6 @@ export function DonationPrompt({ eventId, giving, delayMs = 3 * 60 * 1000 }: Pro
   function closePanel() {
     if (panel === "give") localStorage.setItem(GIVE_KEY, String(Date.now()));
     setPanel(null);
-    setFabOpen(false);
   }
 
   async function submitFeedback(e: React.FormEvent) {
@@ -232,44 +230,54 @@ export function DonationPrompt({ eventId, giving, delayMs = 3 * 60 * 1000 }: Pro
         </div>
       )}
 
-      {/* FAB — always visible once revealed */}
+      {/* Persistent action pills — always visible once revealed */}
       {!panel && (
-        <div className="fixed bottom-6 right-5 z-50 flex flex-col items-end gap-2" style={{ animation: "livePanel 0.3s cubic-bezier(0.32,0.72,0,1) both" }}>
+        <div className="fixed bottom-6 right-5 z-50 flex flex-col items-end gap-3" style={{ animation: "livePanel 0.3s cubic-bezier(0.32,0.72,0,1) both" }}>
+          <style>{`
+            @keyframes pillEntrance { 0%{opacity:0;transform:translateX(40px)} 100%{opacity:1;transform:translateX(0)} }
+            @keyframes pulseRing {
+              0%   { transform: scale(1);   opacity: 0.6; }
+              70%  { transform: scale(1.55); opacity: 0; }
+              100% { transform: scale(1.55); opacity: 0; }
+            }
+            @keyframes heartbeat {
+              0%,100% { transform: scale(1); }
+              14%     { transform: scale(1.2); }
+              28%     { transform: scale(1); }
+              42%     { transform: scale(1.15); }
+              70%     { transform: scale(1); }
+            }
+            @keyframes gentleBounce {
+              0%,100% { transform: translateY(0); }
+              40%     { transform: translateY(-4px); }
+              60%     { transform: translateY(-2px); }
+            }
+          `}</style>
 
-          {/* Speed-dial actions */}
-          {fabOpen && (
-            <>
-              {hasPayment && (
-                <button
-                  onClick={() => { setFabOpen(false); setPanel("give"); }}
-                  className="flex items-center gap-2.5 pl-3 pr-4 py-2 rounded-full bg-white border border-mist shadow-md text-xs font-semibold text-charcoal hover:border-forest/20 hover:text-forest transition-all"
-                >
-                  <span className="w-6 h-6 rounded-full bg-gold/15 flex items-center justify-center flex-shrink-0">
-                    <Heart size={11} className="text-gold" />
-                  </span>
-                  Give
-                </button>
-              )}
+          {hasPayment && (
+            <div className="relative" style={{ animation: "pillEntrance 0.4s 0.1s cubic-bezier(0.32,0.72,0,1) both" }}>
+              {/* Pulse ring behind the Give pill */}
+              <span className="absolute inset-0 rounded-full bg-gold/40 pointer-events-none" style={{ animation: "pulseRing 2.2s ease-out 1.5s infinite" }} />
               <button
-                onClick={() => { setFabOpen(false); setPanel("feedback"); }}
-                className="flex items-center gap-2.5 pl-3 pr-4 py-2 rounded-full bg-white border border-mist shadow-md text-xs font-semibold text-charcoal hover:border-forest/20 hover:text-forest transition-all"
+                onClick={() => setPanel("give")}
+                className="relative flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-full bg-forest text-cream shadow-lg hover:bg-moss active:scale-95 transition-colors"
               >
-                <span className="w-6 h-6 rounded-full bg-forest/10 flex items-center justify-center flex-shrink-0">
-                  <MessageCircle size={11} className="text-forest" />
-                </span>
-                Reflection
+                <Heart size={13} className="text-gold" style={{ animation: "heartbeat 2.5s ease-in-out 2s infinite" }} />
+                <span className="text-xs font-semibold">Give</span>
               </button>
-            </>
+            </div>
           )}
 
-          {/* Main FAB button */}
-          <button
-            onClick={() => setFabOpen(v => !v)}
-            className="w-12 h-12 rounded-full bg-forest text-cream shadow-lg hover:bg-moss transition-all hover:-translate-y-0.5 active:scale-95 flex items-center justify-center"
-            aria-label={fabOpen ? "Close actions" : "Actions"}
-          >
-            <Plus size={20} className={`transition-transform duration-200 ${fabOpen ? "rotate-45" : ""}`} />
-          </button>
+          <div style={{ animation: "pillEntrance 0.4s 0.25s cubic-bezier(0.32,0.72,0,1) both" }}>
+            <button
+              onClick={() => setPanel("feedback")}
+              className="flex items-center gap-2 pl-3 pr-4 py-2.5 rounded-full bg-white border border-mist text-charcoal shadow-md hover:border-forest/30 hover:text-forest active:scale-95 transition-all"
+              style={{ animation: "gentleBounce 3s ease-in-out 3s infinite" }}
+            >
+              <MessageCircle size={13} className="text-forest/70" />
+              <span className="text-xs font-semibold">Reflection</span>
+            </button>
+          </div>
         </div>
       )}
     </>
