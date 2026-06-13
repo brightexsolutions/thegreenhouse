@@ -40,8 +40,8 @@ export function SessionPromptDialog({ event }: SessionPromptProps) {
   useEffect(() => {
     // Don't show on the events page — they're already there
     if (pathname.startsWith("/events")) return;
-    // Don't show on admin/checkin/live
-    if (pathname.startsWith("/admin") || pathname.startsWith("/checkin") || pathname.startsWith("/live")) return;
+    // Don't show on admin/checkin/live/ticket
+    if (pathname.startsWith("/admin") || pathname.startsWith("/checkin") || pathname.startsWith("/live") || pathname.startsWith("/ticket")) return;
 
     // Show once per browser session
     if (sessionStorage.getItem(SESSION_KEY)) return;
