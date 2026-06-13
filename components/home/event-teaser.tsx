@@ -63,8 +63,9 @@ export function EventTeaser({ event }: { event: Event | null }) {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
   const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
-  const coverUrl = event.cover_image
-    ? storageUrl(`event-images/${event.cover_image}`, { width: 900, quality: 80 })
+  // Teaser shows banner only — poster (cover_image) stays on the detail page
+  const coverUrl = event.banner_image
+    ? storageUrl(`event-images/${event.banner_image}`, { width: 900, quality: 80 })
     : null;
 
   return (

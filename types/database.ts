@@ -23,6 +23,7 @@ export interface Event {
   status:           EventStatus;
   cover_image:      string | null;  // poster — shown in event details section
   banner_image:     string | null;  // wide hero background — separate from poster
+  highlight_video:  string | null;  // short looping clip shown on past event detail page
   description:      string | null;
   feedback_url:     string | null;
   theme_title:      string | null;

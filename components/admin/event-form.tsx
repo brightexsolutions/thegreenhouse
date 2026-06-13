@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, X, Image as ImageIcon } from "lucide-react";
+import { Loader2, X, Image as ImageIcon, Video, Eye, RefreshCw, Trash2, Upload } from "lucide-react";
 import NextImage from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -34,15 +34,17 @@ type FormData = z.infer<typeof schema>;
 
 interface EventFormProps {
   eventId?: string;
-  defaultValues?: Partial<FormData & { cover_image?: string; banner_image?: string; slug?: string; dress_code?: string }>;
+  defaultValues?: Partial<FormData & { cover_image?: string; banner_image?: string; highlight_video?: string; slug?: string; dress_code?: string }>;
 }
 
 export function EventForm({ eventId, defaultValues }: EventFormProps) {
   const router = useRouter();
   const [uploadingCover,  setUploadingCover]  = useState(false);
   const [uploadingBanner, setUploadingBanner] = useState(false);
-  const [coverPath,  setCoverPath]  = useState<string | null>(defaultValues?.cover_image  ?? null);
-  const [bannerPath, setBannerPath] = useState<string | null>(defaultValues?.banner_image ?? null);
+  const [uploadingVideo,  setUploadingVideo]  = useState(false);
+  const [coverPath,  setCoverPath]  = useState<string | null>(defaultValues?.cover_image     ?? null);
+  const [bannerPath, setBannerPath] = useState<string | null>(defaultValues?.banner_image    ?? null);
+  const [videoPath,  setVideoPath]  = useState<string | null>(defaultValues?.highlight_video ?? null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
@@ -76,12 +78,28 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
     }
   }
 
+  async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingVideo(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload-video", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.path) setVideoPath(data.path);
+    } finally {
+      setUploadingVideo(false);
+    }
+  }
+
   async function onSubmit(data: FormData) {
     setSubmitError(null);
     const payload = {
       ...data,
-      cover_image:  coverPath  ?? undefined,
-      banner_image: bannerPath ?? undefined,
+      cover_image:      coverPath  ?? undefined,
+      banner_image:     bannerPath ?? undefined,
+      highlight_video:  videoPath  ?? undefined,
       price_kes:   data.type === "paid" ? (data.price_kes ?? 0) : 0,
       // empty strings → null
       venue_map_url:     data.venue_map_url || null,
@@ -120,83 +138,174 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
 
       <div className="flex-1 space-y-6 pb-5">
 
-      {/* Images — Banner + Poster */}
+      {/* Media — Banner, Poster, Highlight video */}
       <div className="bg-white rounded-2xl border border-mist p-6 space-y-5">
         <div>
-          <h3 className="text-sm font-semibold text-charcoal">Images</h3>
-          <p className="text-xs text-charcoal/45 mt-0.5">Banner is used as the hero background. Poster appears in the event details section.</p>
+          <h3 className="text-sm font-semibold text-charcoal">Media</h3>
+          <p className="text-xs text-charcoal/45 mt-0.5">Banner: wide hero background. Poster: portrait shown in event details.</p>
         </div>
 
-        {/* Banner — wide landscape */}
-        <div>
-          <span className="text-xs font-semibold text-charcoal/60 mb-2 block">Banner <span className="font-normal text-charcoal/35">(landscape — hero background)</span></span>
-          <div className={cn(
-            "relative rounded-2xl border-2 border-dashed border-mist flex items-center justify-center overflow-hidden transition-all",
-            bannerPath ? "h-40" : "h-28 hover:border-forest/30 cursor-pointer"
-          )}>
+        {/* Banner + Poster — side by side */}
+        <div className="grid grid-cols-2 gap-4">
+
+          {/* Banner */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-charcoal/60">Banner</span>
+              <span className="text-[11px] text-charcoal/30">landscape · hero bg</span>
+            </div>
             {bannerPath ? (
-              <>
-                <NextImage
-                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${bannerPath}`}
-                  alt="Banner"
-                  fill
-                  className="object-cover"
-                  unoptimized
-                />
-                <button type="button" onClick={() => setBannerPath(null)}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors">
-                  <X size={12} />
-                </button>
-              </>
-            ) : (
-              <label className="flex flex-col items-center gap-1.5 cursor-pointer w-full h-full justify-center">
-                {uploadingBanner ? <Loader2 size={16} className="animate-spin text-forest" /> : (
-                  <>
-                    <ImageIcon size={18} className="text-charcoal/25" />
-                    <span className="text-xs text-charcoal/40">Upload banner (landscape)</span>
-                  </>
+              <div className="rounded-2xl overflow-hidden border border-mist">
+                <div className="relative h-32 bg-charcoal/5">
+                  <NextImage
+                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${bannerPath}`}
+                    alt="Banner"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${bannerPath}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all"
+                  >
+                    <Eye size={10} /> View
+                  </a>
+                  <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
+                    <RefreshCw size={10} /> Replace
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                      onChange={(e) => uploadImage(e, setUploadingBanner, setBannerPath)} />
+                  </label>
+                  <button type="button" onClick={() => setBannerPath(null)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
+                    <Trash2 size={10} /> Delete
+                  </button>
+                </div>
+                {uploadingBanner && (
+                  <div className="flex items-center justify-center gap-2 py-2 text-xs text-forest">
+                    <Loader2 size={12} className="animate-spin" /> Uploading…
+                  </div>
                 )}
+              </div>
+            ) : (
+              <label className={cn(
+                "flex flex-col items-center justify-center gap-2 h-36 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3"
+              )}>
+                {uploadingBanner
+                  ? <Loader2 size={16} className="animate-spin text-forest" />
+                  : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload banner</span></>
+                }
                 <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
                   onChange={(e) => uploadImage(e, setUploadingBanner, setBannerPath)} />
               </label>
             )}
           </div>
-        </div>
 
-        {/* Poster — portrait */}
-        <div>
-          <span className="text-xs font-semibold text-charcoal/60 mb-2 block">Poster <span className="font-normal text-charcoal/35">(portrait — shown in event details)</span></span>
-          <div className={cn(
-            "relative rounded-2xl border-2 border-dashed border-mist flex items-center justify-center overflow-hidden transition-all",
-            coverPath ? "h-48" : "h-28 hover:border-forest/30 cursor-pointer"
-          )}>
+          {/* Poster */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-charcoal/60">Poster</span>
+              <span className="text-[11px] text-charcoal/30">portrait · event details</span>
+            </div>
             {coverPath ? (
-              <>
-                <NextImage
-                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${coverPath}`}
-                  alt="Poster"
-                  fill
-                  className="object-cover object-top"
-                  unoptimized
-                />
-                <button type="button" onClick={() => setCoverPath(null)}
-                  className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors">
-                  <X size={12} />
-                </button>
-              </>
-            ) : (
-              <label className="flex flex-col items-center gap-1.5 cursor-pointer w-full h-full justify-center">
-                {uploadingCover ? <Loader2 size={16} className="animate-spin text-forest" /> : (
-                  <>
-                    <ImageIcon size={18} className="text-charcoal/25" />
-                    <span className="text-xs text-charcoal/40">Upload poster (portrait)</span>
-                  </>
+              <div className="rounded-2xl overflow-hidden border border-mist">
+                <div className="relative h-32 bg-charcoal/5">
+                  <NextImage
+                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${coverPath}`}
+                    alt="Poster"
+                    fill
+                    className="object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
+                  <a
+                    href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${coverPath}`}
+                    target="_blank" rel="noopener noreferrer"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all"
+                  >
+                    <Eye size={10} /> View
+                  </a>
+                  <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
+                    <RefreshCw size={10} /> Replace
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                      onChange={(e) => uploadImage(e, setUploadingCover, setCoverPath)} />
+                  </label>
+                  <button type="button" onClick={() => setCoverPath(null)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
+                    <Trash2 size={10} /> Delete
+                  </button>
+                </div>
+                {uploadingCover && (
+                  <div className="flex items-center justify-center gap-2 py-2 text-xs text-forest">
+                    <Loader2 size={12} className="animate-spin" /> Uploading…
+                  </div>
                 )}
+              </div>
+            ) : (
+              <label className="flex flex-col items-center justify-center gap-2 h-36 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
+                {uploadingCover
+                  ? <Loader2 size={16} className="animate-spin text-forest" />
+                  : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload poster</span></>
+                }
                 <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
                   onChange={(e) => uploadImage(e, setUploadingCover, setCoverPath)} />
               </label>
             )}
           </div>
+        </div>
+
+        {/* Highlight video — full width */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-charcoal/60">Highlight video</span>
+            <span className="text-[11px] text-charcoal/30">looping clip · past event page</span>
+          </div>
+          {videoPath ? (
+            <div className="rounded-2xl overflow-hidden border border-mist">
+              <div className="relative h-36 bg-black">
+                <video
+                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${videoPath}`}
+                  autoPlay loop muted playsInline
+                  className="w-full h-full object-cover opacity-80"
+                />
+              </div>
+              <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
+                <a
+                  href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${videoPath}`}
+                  target="_blank" rel="noopener noreferrer"
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all"
+                >
+                  <Eye size={10} /> View
+                </a>
+                <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
+                  <RefreshCw size={10} /> Replace
+                  <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only"
+                    onChange={handleVideoUpload} />
+                </label>
+                <button type="button" onClick={() => setVideoPath(null)}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
+                  <Trash2 size={10} /> Delete
+                </button>
+              </div>
+              {uploadingVideo && (
+                <div className="flex items-center justify-center gap-2 py-2 text-xs text-forest">
+                  <Loader2 size={12} className="animate-spin" /> Uploading…
+                </div>
+              )}
+            </div>
+          ) : (
+            <label className="flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
+              {uploadingVideo
+                ? <Loader2 size={16} className="animate-spin text-forest" />
+                : <><Video size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload highlight video (MP4 · max 100MB)</span></>
+              }
+              <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only"
+                onChange={handleVideoUpload} />
+            </label>
+          )}
         </div>
       </div>
 

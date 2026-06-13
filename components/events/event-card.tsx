@@ -44,8 +44,9 @@ export function EventCard({ event, featured = false }: EventCardProps) {
   const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
   const isPast = event.status === "past";
 
-  const coverUrl = event.cover_image
-    ? storageUrl(`event-images/${event.cover_image}`, { width: featured ? 1200 : 800, quality: 80 })
+  // Cards always use banner_image — poster (cover_image) is for the detail page only
+  const coverUrl = event.banner_image
+    ? storageUrl(`event-images/${event.banner_image}`, { width: featured ? 1200 : 800, quality: 80 })
     : pickFallback(event.slug);
 
   return (

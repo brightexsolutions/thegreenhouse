@@ -2,20 +2,23 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio, Shirt, Users, Share2, MessageCircle, Copy, Heart } from "lucide-react";
+import { ArrowRight, Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio, Shirt, Users } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { storageUrl, SITE_URL, SITE_NAME } from "@/lib/constants";
 import { FadeIn } from "@/components/motion/fade-in";
 import { RegistrationModal } from "@/components/events/registration-modal";
 import { EventQRCode } from "@/components/events/event-qr-code";
 import { EventShareButtons } from "@/components/events/event-share-buttons";
+import { PastEventCard }     from "@/components/events/past-event-card";
 import type { Event } from "@/types/database";
 
 export const revalidate = 60;
 
 type Props = { params: Promise<{ slug: string }> };
 
-async function getEventWithCount(slug: string): Promise<{ event: Event; registrantCount: number } | null> {
+interface EventImageRow { id: string; path: string; caption: string | null; sort_order: number; }
+
+async function getEventWithCount(slug: string): Promise<{ event: Event; registrantCount: number; galleryImages: EventImageRow[] } | null> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
@@ -27,16 +30,19 @@ async function getEventWithCount(slug: string): Promise<{ event: Event; registra
     if (!data) return null;
     const event = data as Event;
 
-    let registrantCount = 0;
-    if (event.capacity) {
-      const { count } = await supabase
-        .from("registrations")
-        .select("id", { count: "exact", head: true })
-        .eq("event_id", event.id)
-        .is("deleted_at", null);
-      registrantCount = count ?? 0;
-    }
-    return { event, registrantCount };
+    const [registrantResult, imagesResult] = await Promise.all([
+      event.capacity
+        ? supabase.from("registrations").select("id", { count: "exact", head: true }).eq("event_id", event.id).is("deleted_at", null)
+        : Promise.resolve({ count: 0 }),
+      event.status === "past"
+        ? supabase.from("event_images").select("id, path, caption, sort_order").eq("event_id", event.id).order("sort_order").limit(12)
+        : Promise.resolve({ data: [] }),
+    ]);
+
+    const registrantCount = (registrantResult as { count: number | null }).count ?? 0;
+    const galleryImages   = ((imagesResult as { data: EventImageRow[] | null }).data ?? []) as EventImageRow[];
+
+    return { event, registrantCount, galleryImages };
   } catch {
     return null;
   }
@@ -133,7 +139,7 @@ export default async function EventDetailPage({ params }: Props) {
   const { slug } = await params;
   const result = await getEventWithCount(slug);
   if (!result) notFound();
-  const { event, registrantCount } = result;
+  const { event, registrantCount, galleryImages } = result;
 
   // Banner = hero background. Poster (cover_image) shown in details, never as hero bg.
   const bannerUrl = event.banner_image
@@ -278,29 +284,34 @@ export default async function EventDetailPage({ params }: Props) {
                 </FadeIn>
               )}
 
-              {/* Poster — only shown when uploaded */}
+              {/* Poster — small inline thumbnail, click to view full */}
               {posterUrl && (
                 <FadeIn>
-                  <div>
-                    <span className="label-caps text-charcoal/50 text-xs">Event Poster</span>
-                    <div className="mt-3 relative rounded-3xl overflow-hidden shadow-xl max-w-xs">
+                  <div className="flex items-center gap-4">
+                    <a
+                      href={posterUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="relative w-16 h-20 rounded-xl overflow-hidden shadow-md border border-mist flex-shrink-0 hover:shadow-lg transition-shadow"
+                    >
                       <Image
                         src={posterUrl}
                         alt={`${event.title} poster`}
-                        width={400}
-                        height={560}
-                        className="w-full object-cover"
+                        fill
+                        className="object-cover"
                         unoptimized
                       />
-                      {/* Share poster overlay */}
-                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/70 to-transparent flex items-center gap-2">
-                        <EventShareButtons
-                          url={eventUrl}
-                          title={event.title}
-                          date={formattedDate}
-                          variant="poster"
-                        />
-                      </div>
+                    </a>
+                    <div>
+                      <p className="text-sm font-medium text-charcoal">Event Poster</p>
+                      <a
+                        href={posterUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-forest hover:underline mt-0.5 inline-flex items-center gap-1"
+                      >
+                        View full size <ExternalLink size={9} />
+                      </a>
                     </div>
                   </div>
                 </FadeIn>
@@ -437,75 +448,85 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
         </div>
       </section>
+
+      {/* Past event: highlight video + photo gallery */}
+      {isPast && (event.highlight_video || galleryImages.length > 0) && (
+        <section className="py-16 md:py-20 bg-off-white border-t border-mist">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-14">
+
+            {/* Highlight video */}
+            {event.highlight_video && (
+              <FadeIn>
+                <div>
+                  <span className="label-caps text-charcoal/40 text-xs">Session highlight</span>
+                  <div className="mt-4 rounded-3xl overflow-hidden shadow-lg border border-mist bg-black aspect-video">
+                    <video
+                      src={storageUrl(`event-images/${event.highlight_video}`)}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                </div>
+              </FadeIn>
+            )}
+
+            {/* Photo gallery */}
+            {galleryImages.length > 0 && (
+              <FadeIn>
+                <div>
+                  <div className="flex items-center justify-between mb-5">
+                    <span className="label-caps text-charcoal/40 text-xs">From the session</span>
+                    <Link
+                      href="/gallery"
+                      className="inline-flex items-center gap-1.5 text-xs text-forest hover:underline font-medium"
+                    >
+                      View full gallery <ExternalLink size={10} />
+                    </Link>
+                  </div>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+                    {galleryImages.slice(0, 8).map((img, i) => (
+                      <a
+                        key={img.id}
+                        href={storageUrl(`event-images/${img.path}`)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="group relative aspect-square rounded-2xl overflow-hidden bg-mist"
+                      >
+                        <Image
+                          src={storageUrl(`event-images/${img.path}`, { width: 400, quality: 75 })}
+                          alt={img.caption ?? `${event.title} photo ${i + 1}`}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500"
+                          sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                          unoptimized
+                        />
+                      </a>
+                    ))}
+                  </div>
+                  {galleryImages.length > 8 && (
+                    <div className="mt-5 text-center">
+                      <Link
+                        href="/gallery"
+                        className="inline-flex items-center gap-2 px-6 py-2.5 rounded-full border border-forest/20 text-sm text-forest font-medium hover:bg-forest hover:text-cream transition-all"
+                      >
+                        View all {galleryImages.length}+ photos <ArrowRight size={13} />
+                      </Link>
+                    </div>
+                  )}
+                </div>
+              </FadeIn>
+            )}
+
+          </div>
+        </section>
+      )}
     </>
   );
 }
 
-function PastEventCard({ event }: { event: Event }) {
-  return (
-    <div className="sticky top-28 rounded-3xl overflow-hidden border border-mist shadow-card">
-      {/* Dark header */}
-      <div className="relative bg-forest px-7 pt-8 pb-6 overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(201,162,74,0.10),transparent)]" />
-        <div className="absolute top-3 right-16 w-16 h-16 rounded-full border border-cream/5" />
-        <div className="relative">
-          <span className="label-caps text-gold/70 text-xs">Session complete</span>
-          <h3 className="font-display text-2xl font-semibold text-cream mt-1 leading-tight">
-            How was your experience?
-          </h3>
-          <p className="text-cream/50 text-sm mt-2 leading-relaxed">
-            Your reflection matters — it shapes future sessions.
-          </p>
-        </div>
-      </div>
-
-      {/* White body */}
-      <div className="bg-off-white px-7 py-6 space-y-4">
-
-        {/* Feedback link if set */}
-        {event.feedback_url ? (
-          <a
-            href={event.feedback_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-3 w-full px-5 py-3.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
-          >
-            <Heart size={14} />
-            Share your feedback
-            <ExternalLink size={11} className="ml-auto opacity-60" />
-          </a>
-        ) : (
-          <div className="rounded-2xl bg-mist/60 border border-mist px-5 py-4 text-center">
-            <p className="text-xs text-charcoal/50 leading-relaxed">
-              Feedback form coming soon — check back or reach out directly.
-            </p>
-          </div>
-        )}
-
-        {/* Divider */}
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-mist" />
-          <span className="text-xs text-charcoal/30">or</span>
-          <div className="flex-1 h-px bg-mist" />
-        </div>
-
-        {/* Share prompt */}
-        <div>
-          <p className="text-xs text-charcoal/50 text-center mb-3">
-            Tell someone what you experienced
-          </p>
-          <EventShareButtons
-            url={`${SITE_URL}/events/${event.slug}`}
-            title={event.title}
-            date={new Date(event.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "long", year: "numeric" })}
-            variant="card"
-            message="I attended this and it was worth it — check it out"
-          />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function InfoRow({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (

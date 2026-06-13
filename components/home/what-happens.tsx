@@ -20,7 +20,7 @@ export function WhatHappens() {
               {/* Main large photo */}
               <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden shadow-2xl">
                 <Image
-                  src="https://images.unsplash.com/photo-1555041469-149b6c552c97?auto=format&fit=crop&w=900&q=80"
+                  src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=80"
                   alt="An evening at The Green House"
                   fill
                   className="object-cover"
@@ -33,7 +33,7 @@ export function WhatHappens() {
               {/* Smaller overlay photo — bottom right */}
               <div className="absolute -bottom-6 -right-4 sm:-right-8 w-[46%] h-[42%] rounded-[1.5rem] overflow-hidden shadow-xl border-4 border-cream">
                 <Image
-                  src="https://images.unsplash.com/photo-1573497491765-dccce02b29df?auto=format&fit=crop&w=500&q=80"
+                  src="https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=500&q=80"
                   alt="Community connection"
                   fill
                   className="object-cover"

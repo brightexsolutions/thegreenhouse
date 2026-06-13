@@ -58,6 +58,15 @@ export default async function HomePage() {
       {/* 5 — Get involved CTA */}
       <GetInvolvedCta />
 
+      {/* Separator */}
+      <div className="flex items-center justify-center gap-4 py-2 bg-cream">
+        <div className="h-px w-24 bg-gradient-to-r from-transparent to-gold/30" />
+        <div className="w-1.5 h-1.5 rounded-full bg-gold/40" />
+        <div className="w-1 h-1 rounded-full bg-gold/25" />
+        <div className="w-1.5 h-1.5 rounded-full bg-gold/40" />
+        <div className="h-px w-24 bg-gradient-to-l from-transparent to-gold/30" />
+      </div>
+
       {/* 6 — Community circles */}
       <CommunityCircles />
     </>
