@@ -2,7 +2,6 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import { LiveAttendeeView } from "@/components/live/live-attendee-view";
-import { PreEventView } from "@/components/live/pre-event-view";
 import { DonationPrompt } from "@/components/live/donation-prompt";
 import { Wifi } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
@@ -132,7 +131,7 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
       />
 
       {/* TESTING: remove delayMs before go-live */}
-      <DonationPrompt eventId={typedEvent.id} giving={giving} delayMs={5000} />
+      <DonationPrompt eventId={typedEvent.id} slug={slug} giving={giving} delayMs={5000} />
     </div>
   );
 }

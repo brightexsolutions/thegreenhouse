@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, X, Image as ImageIcon, Video, Eye, RefreshCw, Trash2, Upload } from "lucide-react";
+import { Loader2, Video, Eye, RefreshCw, Trash2, Upload } from "lucide-react";
 import NextImage from "next/image";
 import { cn } from "@/lib/utils";
 
