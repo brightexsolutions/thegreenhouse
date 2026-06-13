@@ -12,14 +12,14 @@ interface GivingDetails {
 
 interface Props {
   giving: GivingDetails;
-  /** Delay in ms before the prompt appears. Default: 10 minutes. */
+  /** Delay in ms before the prompt appears. Default: 3 minutes. */
   delayMs?: number;
 }
 
 const STORAGE_KEY  = "gh_donation_prompt_dismissed_at";
 const SNOOZE_MS    = 25 * 60 * 1000; // re-show after 25 min if snoozed
 
-export function DonationPrompt({ giving, delayMs = 10 * 60 * 1000 }: Props) {
+export function DonationPrompt({ giving, delayMs = 3 * 60 * 1000 }: Props) {
   const [visible, setVisible] = useState(false);
 
   // Don't render at all if no payment method is configured
