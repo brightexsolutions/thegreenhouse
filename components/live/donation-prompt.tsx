@@ -16,13 +16,12 @@ interface Props {
   delayMs?: number;
 }
 
-const STORAGE_KEY  = "gh_donation_prompt_dismissed_at";
-const SNOOZE_MS    = 25 * 60 * 1000; // re-show after 25 min if snoozed
+const STORAGE_KEY = "gh_donation_prompt_dismissed_at";
+const SNOOZE_MS   = 25 * 60 * 1000;
 
 export function DonationPrompt({ giving, delayMs = 3 * 60 * 1000 }: Props) {
-  const [visible, setVisible] = useState(false);
+  const [state, setState] = useState<"hidden" | "pill" | "open">("hidden");
 
-  // Don't render at all if no payment method is configured
   const hasPayment = giving.paybill || giving.till || giving.phone;
   if (!hasPayment) return null;
 
@@ -30,19 +29,40 @@ export function DonationPrompt({ giving, delayMs = 3 * 60 * 1000 }: Props) {
     const dismissed = localStorage.getItem(STORAGE_KEY);
     if (dismissed) {
       const elapsed = Date.now() - Number(dismissed);
-      if (elapsed < SNOOZE_MS) return; // still within snooze window
+      // Was dismissed before — show pill immediately so it's always accessible
+      setState("pill");
+      if (elapsed < SNOOZE_MS) return;
+      // Snooze expired — re-open the full prompt
+      const t = setTimeout(() => setState("open"), delayMs);
+      return () => clearTimeout(t);
     }
-
-    const t = setTimeout(() => setVisible(true), delayMs);
+    // First time — wait then show full prompt
+    const t = setTimeout(() => setState("open"), delayMs);
     return () => clearTimeout(t);
   }, [delayMs]);
 
   function dismiss() {
     localStorage.setItem(STORAGE_KEY, String(Date.now()));
-    setVisible(false);
+    setState("pill");
   }
 
-  if (!visible) return null;
+  if (state === "hidden") return null;
+
+  // Collapsed pill — always reachable after first dismiss
+  if (state === "pill") {
+    return (
+      <button
+        onClick={() => setState("open")}
+        className="fixed bottom-6 right-5 z-50 flex items-center gap-2 px-4 py-2.5 rounded-full bg-forest text-cream shadow-lg hover:bg-moss transition-all hover:-translate-y-0.5 active:scale-95"
+        style={{ animation: "slideUpPrompt 0.3s cubic-bezier(0.32,0.72,0,1) both" }}
+        aria-label="Give tonight"
+      >
+        <style>{`@keyframes slideUpPrompt { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }`}</style>
+        <Heart size={13} className="text-gold" />
+        <span className="text-xs font-semibold">Give</span>
+      </button>
+    );
+  }
 
   return (
     <>
