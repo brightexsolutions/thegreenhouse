@@ -127,7 +127,7 @@ function jsonLd(event: Event) {
 const BANNER_FALLBACKS = [
   "https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?auto=format&fit=crop&w=1600&q=80",
   "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1573497491765-dccce02b29df?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1470229722913-7c0e2dbbafd3?auto=format&fit=crop&w=1600&q=80",
   "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=80",
 ];
 function pickBannerFallback(slug: string) {
