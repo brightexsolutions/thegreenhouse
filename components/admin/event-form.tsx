@@ -359,7 +359,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         </Field>
 
         <Field label="Description">
-          <textarea {...register("description")} rows={3} placeholder="What attendees can expect…" className={cn(inp(false), "resize-none")} />
+          <textarea {...register("description")} rows={4} placeholder="What attendees can expect…" className={cn(inp(false), "resize-y min-h-[100px]")} />
         </Field>
       </div>
 
@@ -389,7 +389,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
           </Field>
         </div>
         <Field label="Theme description">
-          <textarea {...register("theme_description")} rows={2} placeholder="A conversation about…" className={cn(inp(false), "resize-none")} />
+          <textarea {...register("theme_description")} rows={5} placeholder="A conversation about…" className={cn(inp(false), "resize-y min-h-[120px]")} />
         </Field>
       </div>
 
