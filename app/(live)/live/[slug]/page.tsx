@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import { LiveAttendeeView } from "@/components/live/live-attendee-view";
 import { DonationPrompt } from "@/components/live/donation-prompt";
+import { PreEventView } from "@/components/live/pre-event-view";
 import { Wifi } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 
@@ -77,20 +78,19 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
     .filter(s => !(s as { deleted_at?: string | null }).deleted_at)
     .sort((a, b) => a.sort_order - b.sort_order);
 
-  // TESTING: status gate disabled — re-enable before go-live
-  // if (typedEvent.status !== "live") {
-  //   return (
-  //     <PreEventView
-  //       eventTitle={typedEvent.title}
-  //       eventDate={typedEvent.event_date}
-  //       eventTime={typedEvent.event_time}
-  //       venueName={typedEvent.venue_name}
-  //       themeTitle={typedEvent.theme_title}
-  //       themeScripture={typedEvent.theme_scripture}
-  //       isPast={typedEvent.status === "past"}
-  //     />
-  //   );
-  // }
+  if (typedEvent.status !== "live") {
+    return (
+      <PreEventView
+        eventTitle={typedEvent.title}
+        eventDate={typedEvent.event_date}
+        eventTime={typedEvent.event_time}
+        venueName={typedEvent.venue_name}
+        themeTitle={typedEvent.theme_title}
+        themeScripture={typedEvent.theme_scripture}
+        isPast={typedEvent.status === "past"}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream">
