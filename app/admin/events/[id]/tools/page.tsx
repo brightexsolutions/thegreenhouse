@@ -5,6 +5,7 @@ import { QrSharePanel } from "@/components/admin/qr-share-panel";
 import { CommsSendDialog } from "@/components/admin/comms-send-dialog";
 import { SongContributionPanel } from "@/components/admin/song-contribution-panel";
 import { ContributionLinkPanel } from "@/components/admin/contribution-link-panel";
+import { PostEventEmailPanel } from "@/components/admin/post-event-email-panel";
 import Link from "next/link";
 import { ExternalLink, Download, Tv2 } from "lucide-react";
 
@@ -16,10 +17,10 @@ export default async function EventToolsPage({ params }: Props) {
   const { id } = await params;
   const supabase = createAdminClient();
 
-  const [{ data: event }, { count: registrantCount }] = await Promise.all([
+  const [{ data: event }, { count: registrantCount }, { count: emailCount }] = await Promise.all([
     supabase
       .from("events")
-      .select("id, title, slug, status, checkin_token")
+      .select("id, title, slug, status, checkin_token, post_event_email_sent")
       .eq("id", id)
       .is("deleted_at", null)
       .single(),
@@ -27,6 +28,12 @@ export default async function EventToolsPage({ params }: Props) {
       .from("registrations")
       .select("id", { count: "exact", head: true })
       .eq("event_id", id)
+      .is("deleted_at", null),
+    supabase
+      .from("registrations")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", id)
+      .not("email", "is", null)
       .is("deleted_at", null),
   ]);
 
@@ -142,6 +149,15 @@ export default async function EventToolsPage({ params }: Props) {
           <CommsSendDialog events={[{ id, title: event.title }]} />
         </div>
       </div>
+
+      {/* Post-event email — only shown for past events */}
+      {event.status === "past" && (
+        <PostEventEmailPanel
+          eventId={id}
+          alreadySent={(event as { post_event_email_sent?: boolean }).post_event_email_sent ?? false}
+          emailCount={emailCount ?? 0}
+        />
+      )}
     </div>
   );
 }

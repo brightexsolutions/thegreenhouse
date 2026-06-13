@@ -31,8 +31,9 @@ export interface Event {
   theme_description:string | null;
   dress_code:       string | null;
   playlist_url:     string | null;
-  checkin_token:    string | null;
-  deleted_at:       string | null;
+  checkin_token:         string | null;
+  post_event_email_sent: boolean;
+  deleted_at:            string | null;
   created_at:       string;
   updated_at:       string;
 }
