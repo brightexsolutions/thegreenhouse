@@ -23,7 +23,7 @@ const SECTIONS = [
     title: "Contact",
     description: "Used in email footers, confirmation messages, and the public contact page.",
     fields: [
-      { key: "contact_email",   label: "Contact email",   placeholder: "hello@greenhousews.co.ke",  type: "email" },
+      { key: "contact_email",   label: "Contact email",   placeholder: "thegreenhouse.contact01@gmail.com",  type: "email" },
       { key: "whatsapp_number", label: "WhatsApp number", placeholder: "+254717645180",              type: "tel" },
     ],
   },

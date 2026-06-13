@@ -50,7 +50,7 @@ type TriviaRound = {
   started_at?:   string;
 };
 
-type Song = { id: string; title: string; artist: string | null; lyrics: string | null };
+type Song = { id: string; title: string; artist: string | null; lyrics: string | null; key: string | null };
 
 type SessionItem = {
   id:        string;
@@ -114,6 +114,10 @@ function getLyricsVerses(lyrics: string | null) {
 
 export default function ControlPage({ params }: { params: { slug: string } }) {
   const slug = params.slug;
+  // Read ?t= token from URL (only on client)
+  const controlToken = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("t")
+    : null;
 
   const supabaseRef = useRef(createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -122,12 +126,15 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const supabase = supabaseRef.current;
 
   const [authed,          setAuthed]         = useState<boolean | null>(null);
+  const [permissions,     setPermissions]    = useState<string[]>(["full"]);
   const [event,           setEvent]          = useState<EventData | null>(null);
   const [display,         setDisplay]        = useState<DisplayState | null>(null);
   const [saving,          setSaving]         = useState(false);
   const [saveError,       setSaveError]      = useState(false);
   const [customText,      setCustomText]     = useState("");
   const [focusTab,        setFocusTab]       = useState<"all" | "music" | "scenes" | "trivia" | "feedback">("all");
+  const [openSection,     setOpenSection]    = useState<string>("music");
+  const [openSessionId,   setOpenSessionId]  = useState<string | null>(null);
   const [activeSong,      setActiveSong]     = useState<Song | null>(null);
   const [realtimeStatus,  setRealtimeStatus] = useState<"connecting" | "connected" | "disconnected">("connecting");
 
@@ -135,11 +142,9 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const [feedback,         setFeedback]        = useState<Feedback[]>([]);
   const [loadingFeedback,  setLoadingFeedback] = useState(false);
   const [projecting,       setProjecting]      = useState<string | null>(null);
-  const [feedbackOpen,     setFeedbackOpen]    = useState(true);
 
   // Trivia state
   const [triviaQuestions,  setTriviaQuestions] = useState<TriviaQuestion[]>([]);
-  const [triviaOpen,       setTriviaOpen]      = useState(true);
   const [selectedQId,      setSelectedQId]     = useState<string>("");
   const [triviaRound,      setTriviaRound]     = useState<TriviaRound | null>(null);
   const [triviaCount,      setTriviaCount]     = useState(0);
@@ -148,16 +153,47 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const [triviaLoading,    setTriviaLoading]   = useState(false);
   const [usedQIds,         setUsedQIds]        = useState<Set<string>>(new Set());
 
-  // Auth check
+  // Auth check — admin session OR valid control token
   useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => setAuthed(!!user));
-  }, []);
+    async function checkAuth() {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) { setAuthed(true); setPermissions(["full"]); return; }
+      const t = new URLSearchParams(window.location.search).get("t");
+      if (!t) { setAuthed(false); return; }
+      try {
+        const res = await fetch(`/api/live/${slug}/control-access?t=${encodeURIComponent(t)}`);
+        if (res.ok) {
+          const data = await res.json() as { valid: boolean; permissions?: string[] };
+          setAuthed(data.valid);
+          if (data.valid) setPermissions(data.permissions ?? ["full"]);
+        } else {
+          setAuthed(false);
+        }
+      } catch {
+        setAuthed(false);
+      }
+    }
+    checkAuth();
+  }, [slug]);
+
+  // Auto-set focusTab to first allowed tab when permissions are scoped
+  useEffect(() => {
+    if (permissions.includes("full")) return;
+    const validKeys = ["music", "scenes", "trivia", "feedback"];
+    const first = permissions.find(p => validKeys.includes(p));
+    if (first) setFocusTab(first as typeof focusTab);
+  }, [permissions]);
+
+  // Auto-open the relevant section when switching tabs
+  useEffect(() => {
+    if (focusTab !== "all") setOpenSection(focusTab);
+  }, [focusTab]);
 
   // Shared event loader
   const loadEvent = useCallback(async (isInitial: boolean) => {
     const { data } = await supabase
       .from("events")
-      .select("id, title, event_date, slug, event_sessions(id, title, sort_order, deleted_at, trivia_question_id, trivia_questions(id, question, category), session_songs(id, vocalist, item_type, item_text, songs(id, title, artist, lyrics)))")
+      .select("id, title, event_date, slug, event_sessions(id, title, sort_order, deleted_at, trivia_question_id, trivia_questions(id, question, category), session_songs(id, vocalist, item_type, item_text, songs(id, title, artist, lyrics, key)))")
       .eq("slug", slug)
       .single();
     if (!data) return;
@@ -167,6 +203,8 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     if (isInitial) {
       const res = await supabase.from("display_state").select("*").eq("event_id", ev.id).maybeSingle();
       if (res?.data) setDisplay(res.data as DisplayState);
+      const sorted = [...ev.event_sessions].sort((a, b) => a.sort_order - b.sort_order);
+      if (sorted[0]) setOpenSessionId(sorted[0].id);
     }
   }, [slug]);
 
@@ -492,14 +530,26 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   if (authed === false) {
     return (
       <div className="min-h-screen bg-off-white flex items-center justify-center p-6">
-        <div className="text-center">
-          <p className="text-sm text-charcoal/60 mb-4">Admin login required to use the control panel</p>
-          <Link
-            href={`/admin/login?redirect=/live/${slug}/control`}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-forest text-cream text-sm font-medium"
-          >
-            Sign in
-          </Link>
+        <div className="text-center max-w-xs">
+          <div className="w-14 h-14 rounded-2xl bg-forest/8 flex items-center justify-center mx-auto mb-4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7 text-forest/40">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
+            </svg>
+          </div>
+          <h2 className="font-display text-lg font-semibold text-charcoal mb-1">Access required</h2>
+          <p className="text-sm text-charcoal/50 mb-5 leading-relaxed">
+            {controlToken
+              ? "This control link has expired or is invalid. Ask the event admin for an updated link."
+              : "Use the link shared by the event admin, or sign in with your admin account."}
+          </p>
+          {!controlToken && (
+            <Link
+              href={`/admin/login?redirect=/live/${slug}/control`}
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-forest text-cream text-sm font-medium hover:bg-moss transition-colors"
+            >
+              Sign in as admin
+            </Link>
+          )}
         </div>
       </div>
     );
@@ -561,15 +611,20 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
         <span className="text-sm font-semibold text-gold uppercase tracking-wider">{display?.scene ?? "—"}</span>
       </div>
 
-      {/* Focus tabs — each person can focus on their area */}
-      <div className="flex items-center gap-1 mb-5 bg-cream/8 rounded-2xl p-1">
-        {([
+      {/* Focus tabs — filtered by permissions */}
+      {(() => {
+        const hasFullAccess = permissions.includes("full");
+        const visibleTabs = ([
           { key: "all",      label: "General",  badge: false },
           { key: "music",    label: "Music",    badge: false },
           { key: "scenes",   label: "Scenes",   badge: false },
           { key: "trivia",   label: "Trivia",   badge: triviaRound?.status === "active" },
           { key: "feedback", label: "Feedback", badge: feedback.length > 0 },
-        ] as const).map(({ key, label, badge }) => (
+        ] as const).filter(t => hasFullAccess || permissions.includes(t.key));
+        if (visibleTabs.length <= 1) return null; // single-tab: no tab bar needed
+        return (
+      <div className="flex items-center gap-1 mb-5 bg-cream/8 rounded-2xl p-1">
+        {visibleTabs.map(({ key, label, badge }) => (
           <button
             key={key}
             onClick={() => setFocusTab(key)}
@@ -587,6 +642,8 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
           </button>
         ))}
       </div>
+        );
+      })()}
 
       {/* Active feedback chip */}
       {display?.featured_feedback && (
@@ -611,26 +668,41 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
         <>
           {/* Scene switcher */}
           {(focusTab === "all" || focusTab === "scenes") && (
-          <section className="mb-5">
-            <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Scenes</h2>
-            <div className="grid grid-cols-3 gap-2">
-              {SCENES.map(({ key, label, icon: Icon }) => (
-                <button key={key} onClick={() => setScene(key)} disabled={saving}
-                  className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl text-xs font-medium transition-all ${
-                    display.scene === key ? "bg-gold text-forest" : "bg-cream/10 text-cream/60 hover:bg-cream/20"
-                  }`}>
-                  <Icon size={16} />
-                  {label}
-                </button>
-              ))}
-            </div>
+          <section className="mb-3">
+            <button
+              onClick={() => setOpenSection(s => s === "scenes" ? "" : "scenes")}
+              className="w-full flex items-center justify-between mb-3 group"
+            >
+              <h2 className="text-xs text-cream/40 uppercase tracking-wider">Scenes</h2>
+              <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${openSection === "scenes" ? "rotate-180" : ""}`} />
+            </button>
+            {openSection === "scenes" && (
+              <div className="grid grid-cols-3 gap-2">
+                {SCENES.map(({ key, label, icon: Icon }) => (
+                  <button key={key} onClick={() => setScene(key)} disabled={saving}
+                    className={`flex flex-col items-center gap-1.5 py-3 px-2 rounded-2xl text-xs font-medium transition-all ${
+                      display.scene === key ? "bg-gold text-forest" : "bg-cream/10 text-cream/60 hover:bg-cream/20"
+                    }`}>
+                    <Icon size={16} />
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
           </section>
           )}
 
           {/* Program — session + song navigation */}
           {(focusTab === "all" || focusTab === "music") && (
-          <section className="mb-5">
-            <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Program</h2>
+          <section className="mb-3">
+            <button
+              onClick={() => setOpenSection(s => s === "music" ? "" : "music")}
+              className="w-full flex items-center justify-between mb-3 group"
+            >
+              <h2 className="text-xs text-cream/40 uppercase tracking-wider">Program</h2>
+              <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${openSection === "music" ? "rotate-180" : ""}`} />
+            </button>
+            {openSection === "music" && <>
             {event.event_sessions.length === 0 ? (
               <p className="text-cream/30 text-xs text-center py-4">No program built yet</p>
             ) : (
@@ -643,16 +715,20 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                       <div key={sess.id} className={`rounded-2xl overflow-hidden border transition-all ${
                         sessIsActive ? "border-gold/40" : "border-cream/10"
                       }`}>
-                        {/* Session header */}
-                        <div className={`px-3 py-2 flex items-center gap-2 text-xs font-semibold ${
-                          sessIsActive ? "bg-gold/15 text-gold" : "bg-cream/8 text-cream/50"
-                        }`}>
-                          <Music size={10} />
-                          {sess.title}
-                          {sessIsActive && <span className="ml-auto text-[9px] uppercase tracking-wider text-gold/70">active</span>}
-                        </div>
-                        {/* Program items in session */}
-                        {sess.session_songs.length === 0 ? (
+                        {/* Session header — accordion toggle */}
+                        <button
+                          onClick={() => setOpenSessionId(id => id === sess.id ? null : sess.id)}
+                          className={`w-full px-3 py-2.5 flex items-center gap-2 text-xs font-semibold transition-colors ${
+                            sessIsActive ? "bg-gold/15 text-gold" : "bg-cream/8 text-cream/50 hover:bg-cream/12"
+                          }`}
+                        >
+                          <Music size={10} className="flex-shrink-0" />
+                          <span className="flex-1 text-left">{sess.title}</span>
+                          {sessIsActive && <span className="text-[9px] uppercase tracking-wider text-gold/70">active</span>}
+                          <ChevronDown size={12} className={`flex-shrink-0 transition-transform duration-200 ${openSessionId === sess.id ? "rotate-180" : ""} ${sessIsActive ? "text-gold/50" : "text-cream/25"}`} />
+                        </button>
+                        {/* Program items — only shown when session is open */}
+                        {openSessionId === sess.id && (sess.session_songs.length === 0 ? (
                           <div className="px-3 py-2 text-[10px] text-cream/20">No items</div>
                         ) : (
                           sess.session_songs.map((ss) => {
@@ -703,7 +779,14 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                                   }
                                 </div>
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-sm font-medium truncate">{song.title}</p>
+                                  <div className="flex items-center gap-1.5">
+                                    <p className="text-sm font-medium truncate">{song.title}</p>
+                                    {song.key && (
+                                      <span className="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-gold/20 text-gold border border-gold/30">
+                                        {song.key}
+                                      </span>
+                                    )}
+                                  </div>
                                   <div className="flex items-center gap-1.5">
                                     {song.artist && <p className="text-[10px] text-cream/35 truncate">{song.artist}</p>}
                                     {song.artist && ss.vocalist && <span className="text-[9px] text-cream/15">·</span>}
@@ -714,7 +797,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                               </button>
                             );
                           })
-                        )}
+                        ))}
                       </div>
                     );
                   })}
@@ -725,7 +808,14 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
             {activeSong && verses.length > 0 && (
               <div className="mt-3 bg-cream/8 rounded-2xl p-3">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="text-xs text-gold/70 font-semibold truncate">{activeSong.title}</p>
+                  <div className="flex items-center gap-1.5 min-w-0">
+                    <p className="text-xs text-gold/70 font-semibold truncate">{activeSong.title}</p>
+                    {activeSong.key && (
+                      <span className="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-gold/25 text-gold border border-gold/40">
+                        {activeSong.key}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] text-cream/30 tabular-nums flex-shrink-0 ml-2">
                     {display.verse_index + 1}/{verses.length}
                   </span>
@@ -745,18 +835,18 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                 </div>
               </div>
             )}
+            </>}
           </section>
           )}
 
-          {/* Custom text */}
-          {(focusTab === "all" || focusTab === "scenes") && (
-          <section className="mb-5">
-            <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Custom text</h2>
+          {/* Custom text + Display theme (under Scenes) */}
+          {(focusTab === "all" || focusTab === "scenes") && openSection === "scenes" && (
+          <section className="mb-3 space-y-3">
             <textarea value={customText} onChange={e => setCustomText(e.target.value)} rows={3}
-              placeholder="Type any text to push to the display…"
+              placeholder="Push custom text to display…"
               className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold resize-none" />
             <button onClick={pushCustom} disabled={!customText.trim() || saving}
-              className="w-full mt-2 py-3 rounded-xl bg-cream/15 hover:bg-cream/25 text-cream text-sm font-medium disabled:opacity-40 transition-colors">
+              className="w-full py-2.5 rounded-xl bg-cream/15 hover:bg-cream/25 text-cream text-sm font-medium disabled:opacity-40 transition-colors">
               Push to display
             </button>
           </section>
@@ -764,38 +854,26 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
 
           {/* Attendee feedback */}
           {(focusTab === "all" || focusTab === "feedback") && (
-          <section className="mb-5">
-            {focusTab === "all" ? (
-              <button
-                onClick={() => setFeedbackOpen(o => !o)}
-                className="w-full flex items-center justify-between mb-3 group"
-              >
-                <h2 className="text-xs text-cream/40 uppercase tracking-wider">Attendee feedback</h2>
-                <div className="flex items-center gap-2">
-                  {loadingFeedback && <Loader2 size={12} className="animate-spin text-cream/30" />}
-                  {!loadingFeedback && feedback.length > 0 && (
-                    <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">{feedback.length}</span>
-                  )}
-                  <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${feedbackOpen ? "rotate-180" : ""}`} />
-                </div>
-              </button>
-            ) : (
-              <div className="flex items-center justify-between mb-3">
-                <h2 className="text-xs text-cream/40 uppercase tracking-wider">Attendee feedback</h2>
-                <div className="flex items-center gap-2">
-                  {loadingFeedback && <Loader2 size={12} className="animate-spin text-cream/30" />}
-                  {!loadingFeedback && feedback.length > 0 && (
-                    <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">{feedback.length}</span>
-                  )}
-                </div>
+          <section className="mb-3">
+            <button
+              onClick={() => setOpenSection(s => s === "feedback" ? "" : "feedback")}
+              className="w-full flex items-center justify-between mb-3 group"
+            >
+              <h2 className="text-xs text-cream/40 uppercase tracking-wider">Attendee feedback</h2>
+              <div className="flex items-center gap-2">
+                {loadingFeedback && <Loader2 size={12} className="animate-spin text-cream/30" />}
+                {!loadingFeedback && feedback.length > 0 && (
+                  <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">{feedback.length}</span>
+                )}
+                <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${openSection === "feedback" ? "rotate-180" : ""}`} />
               </div>
-            )}
+            </button>
 
-            {(focusTab === "feedback" || feedbackOpen) && (
+            {openSection === "feedback" && (
               feedback.length === 0 ? (
                 <p className="text-cream/25 text-xs text-center py-4">No feedback yet</p>
               ) : (
-                <div className={`space-y-2 overflow-y-auto ${focusTab === "feedback" ? "" : "max-h-60"}`}>
+                <div className="space-y-2 overflow-y-auto max-h-72">
                   {feedback.map((fb) => (
                     <div key={fb.id} className="bg-cream/8 rounded-xl p-3 flex items-start gap-2.5">
                       <div className="flex-1 min-w-0">
@@ -843,9 +921,9 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
 
           {/* Trivia */}
           {(focusTab === "all" || focusTab === "trivia") && (
-          <section className="mb-5">
+          <section className="mb-3">
             <button
-              onClick={() => setTriviaOpen(o => !o)}
+              onClick={() => setOpenSection(s => s === "trivia" ? "" : "trivia")}
               className="w-full flex items-center justify-between mb-3 group"
             >
               <h2 className="text-xs text-cream/40 uppercase tracking-wider">Trivia</h2>
@@ -862,11 +940,11 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                 {triviaRound && triviaRound.status === "closed" && (
                   <span className="text-[10px] text-gold font-bold bg-gold/20 px-2 py-0.5 rounded-full">🏆 Leaderboard</span>
                 )}
-                <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${triviaOpen ? "rotate-180" : ""}`} />
+                <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${openSection === "trivia" ? "rotate-180" : ""}`} />
               </div>
             </button>
 
-            {triviaOpen && (
+            {openSection === "trivia" && (
               <div className="space-y-3">
                 {/* Active / revealing round controls */}
                 {triviaRound && triviaRound.status === "closed" ? (
@@ -1036,10 +1114,10 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
           </section>
           )}
 
-          {/* Display theme */}
-          {(focusTab === "all" || focusTab === "scenes") && (
-          <section className="mb-5">
-            <h2 className="text-xs text-cream/40 uppercase tracking-wider mb-3">Display theme</h2>
+          {/* Display theme — shown in scenes section */}
+          {(focusTab === "all" || focusTab === "scenes") && openSection === "scenes" && (
+          <section className="mb-3">
+            <p className="text-[10px] font-semibold text-cream/30 uppercase tracking-wider mb-2">Display theme</p>
             <div className="grid grid-cols-3 gap-2">
               {DISPLAY_THEMES.map(({ key, label, icon: Icon, bg, fg }) => (
                 <button key={key} onClick={() => setTheme(key)} disabled={saving}

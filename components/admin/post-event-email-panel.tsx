@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Mail, CheckCircle2, Loader2, Send } from "lucide-react";
 
 interface Props {
@@ -10,13 +11,15 @@ interface Props {
 }
 
 export function PostEventEmailPanel({ eventId, alreadySent, emailCount }: Props) {
+  const confirm = useConfirm();
   const [sent,    setSent]    = useState(alreadySent);
   const [loading, setLoading] = useState(false);
   const [result,  setResult]  = useState<{ sent: number; failed: number } | null>(null);
   const [error,   setError]   = useState<string | null>(null);
 
   async function sendNow() {
-    if (!confirm(`Send a post-event thank-you email to all ${emailCount} registrant${emailCount !== 1 ? "s" : ""} with email addresses?`)) return;
+    const ok = await confirm({ title: "Send post-event email", message: `This will send a thank-you email to all ${emailCount} registrant${emailCount !== 1 ? "s" : ""} with email addresses. This cannot be undone.`, confirmLabel: "Send now" });
+    if (!ok) return;
     setLoading(true);
     setError(null);
     try {

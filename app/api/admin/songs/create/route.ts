@@ -11,8 +11,8 @@ export async function POST(req: NextRequest) {
   const supabase = await guard();
   if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { title, artist, lyrics } = await req.json() as {
-    title: string; artist?: string; lyrics?: string;
+  const { title, artist, lyrics, key } = await req.json() as {
+    title: string; artist?: string; lyrics?: string; key?: string | null;
   };
 
   if (!title?.trim()) {
@@ -25,8 +25,9 @@ export async function POST(req: NextRequest) {
       title:  title.trim(),
       artist: artist?.trim() || null,
       lyrics: lyrics?.trim() || null,
+      key:    key?.trim()    || null,
     })
-    .select("id, title, artist, lyrics, created_at")
+    .select("id, title, artist, lyrics, key, created_at")
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

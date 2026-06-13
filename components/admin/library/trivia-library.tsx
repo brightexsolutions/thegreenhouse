@@ -7,6 +7,7 @@ import {
   Music2, Users, Smile,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type TriviaQuestion = {
   id:            string;
@@ -66,6 +67,7 @@ function inputCls(err?: boolean) {
 }
 
 export function TriviaLibrary() {
+  const confirm = useConfirm();
   const [questions,  setQuestions]  = useState<TriviaQuestion[]>([]);
   const [loading,    setLoading]    = useState(true);
   const [showForm,   setShowForm]   = useState(false);
@@ -146,7 +148,7 @@ export function TriviaLibrary() {
   }
 
   async function deleteQuestion(id: string) {
-    if (!confirm("Delete this trivia question?")) return;
+    const ok = await confirm({ message: "This trivia question will be permanently deleted.", destructive: true }); if (!ok) return;
     setDeleting(id);
     await fetch(`/api/admin/trivia/${id}`, { method: "DELETE" });
     setQuestions(prev => prev.filter(q => q.id !== id));

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, Check, MessageCircle, Share2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -14,6 +14,8 @@ interface Props {
 
 export function EventShareButtons({ url, title, date, variant, message }: Props) {
   const [copied, setCopied] = useState(false);
+  const [hasNativeShare, setHasNativeShare] = useState(false);
+  useEffect(() => { setHasNativeShare(!!navigator.share); }, []);
 
   const shareText = message
     ? `${message}: ${title} — ${date}`
@@ -62,8 +64,6 @@ export function EventShareButtons({ url, title, date, variant, message }: Props)
   }
 
   // card variant
-  const hasNativeShare = typeof navigator !== "undefined" && !!navigator.share;
-
   return (
     <div className="flex items-center gap-2 flex-wrap">
       <button

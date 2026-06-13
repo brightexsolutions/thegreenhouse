@@ -43,10 +43,10 @@ export default async function CheckinPage({ params, searchParams }: Props) {
 
   const { data: registrants } = await supabase
     .from("registrations")
-    .select("id, first_name, last_name, email, phone, role, ticket_token, checked_in, is_walkin, photo_consent")
+    .select("id, first_name, last_name, email, phone, role, ticket_token, checked_in, is_walkin, photo_consent, created_at")
     .eq("event_id", (event as { id: string }).id)
     .is("deleted_at", null)
-    .order("first_name", { ascending: true });
+    .order("created_at", { ascending: false });
 
   const list = (registrants as Array<{
     id: string;
@@ -59,6 +59,7 @@ export default async function CheckinPage({ params, searchParams }: Props) {
     checked_in: boolean;
     is_walkin?: boolean;
     photo_consent: boolean;
+    created_at: string;
   }>) ?? [];
 
   const formattedDate = new Date((event as { event_date: string }).event_date).toLocaleDateString("en-KE", {

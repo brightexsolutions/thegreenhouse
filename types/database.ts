@@ -68,6 +68,7 @@ export interface Song {
   title:      string;
   artist:     string | null;
   lyrics:     string | null;
+  key:        string | null;
   deleted_at: string | null;
   created_at: string;
   updated_at: string;

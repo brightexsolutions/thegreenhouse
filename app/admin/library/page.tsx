@@ -24,7 +24,7 @@ export default async function LibraryPage({ searchParams }: Props) {
   const [{ data: songs }, { data: events }, { data: themes }] = await Promise.all([
     supabase
       .from("songs")
-      .select("id, title, artist, lyrics, created_at")
+      .select("id, title, artist, lyrics, key, created_at")
       .is("deleted_at", null)
       .order("title", { ascending: true }),
     supabase

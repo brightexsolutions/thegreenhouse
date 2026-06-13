@@ -48,11 +48,10 @@ export async function POST(req: NextRequest, { params }: Props) {
 
   const raw = Buffer.from(await file.arrayBuffer());
 
-  // Compress with Sharp: max 1200px wide, 80% quality
-  const compressed = await sharp(raw)
-    .resize({ width: 1200, withoutEnlargement: true })
-    .jpeg({ quality: 80 })
-    .toBuffer();
+  // Auto-rotate per EXIF orientation, then compress
+  const sharpInstance = sharp(raw).rotate().resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 80 });
+  const compressed = await sharpInstance.toBuffer();
+  const { width: compressedWidth, height: compressedHeight } = await sharp(compressed).metadata();
 
   const path = `events/${eventId}/gallery/${randomUUID()}.jpg`;
 
@@ -75,7 +74,14 @@ export async function POST(req: NextRequest, { params }: Props) {
     .single();
 
   if (dbErr) return NextResponse.json({ error: dbErr.message }, { status: 500 });
-  return NextResponse.json({ photo: row }, { status: 201 });
+  return NextResponse.json({
+    photo: row,
+    meta: {
+      width:   compressedWidth  ?? null,
+      height:  compressedHeight ?? null,
+      size_kb: Math.round(compressed.length / 1024),
+    },
+  }, { status: 201 });
 }
 
 export async function DELETE(req: NextRequest, { params }: Props) {

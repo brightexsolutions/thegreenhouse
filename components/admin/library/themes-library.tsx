@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Palette, Plus, X, BookOpen, ChevronDown, Loader2, CheckCircle2, AlertCircle, Edit2, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type Theme = {
   id:          string;
@@ -35,6 +36,7 @@ function ThemeCard({
   onUpdated: (t: Theme) => void;
   onDeleted: (id: string) => void;
 }) {
+  const confirm = useConfirm();
   const [expanded,    setExpanded]    = useState(false);
   const [,            setAssigning]   = useState(false);
   const [editing,     setEditing]     = useState(false);
@@ -106,7 +108,8 @@ function ThemeCard({
   }
 
   async function doDelete() {
-    if (!confirm(`Delete theme "${theme.title}"? This will also unassign it from any events.`)) return;
+    const ok = await confirm({ title: `Delete "${theme.title}"?`, message: "This theme will be permanently deleted and unassigned from any events.", destructive: true });
+    if (!ok) return;
     setBusy("del");
     const res = await fetch(`/api/admin/themes?id=${theme.id}`, { method: "DELETE" });
     setBusy(null);

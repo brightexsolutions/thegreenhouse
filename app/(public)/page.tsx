@@ -4,8 +4,9 @@ import { StatsStrip }       from "@/components/home/stats-strip";
 import { WhatHappens }      from "@/components/home/what-happens";
 import { VisionCards }      from "@/components/about/vision-cards";
 import { EventTeaser }      from "@/components/home/event-teaser";
-import { GetInvolvedCta }   from "@/components/home/get-involved-cta";
-import { CommunityCircles } from "@/components/home/community-circles";
+import { GetInvolvedCta }      from "@/components/home/get-involved-cta";
+import { CommunityCircles }   from "@/components/home/community-circles";
+import { SessionHighlight }   from "@/components/home/session-highlight";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Event } from "@/types/database";
 
@@ -52,7 +53,10 @@ export default async function HomePage() {
       {/* 3 — What makes it different (4 pillars) */}
       <VisionCards />
 
-      {/* 4 — Next session countdown */}
+      {/* 4 — Session highlight video */}
+      <SessionHighlight />
+
+      {/* 5 — Next session countdown */}
       {nextEvent && <EventTeaser event={nextEvent} />}
 
       {/* 5 — Get involved CTA */}

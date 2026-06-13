@@ -23,7 +23,7 @@ const STATUS_COLORS: Record<string, string> = {
 const FALLBACK_PHOTOS = [
   "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=75",
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=75",
-  "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=800&q=75",
+  "https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=800&q=75",
   "https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=800&q=75",
 ];
 

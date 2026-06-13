@@ -1,16 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Copy, RefreshCw, Check, Link as LinkIcon, ExternalLink, AlertTriangle, Loader2 } from "lucide-react";
+import { Copy, RefreshCw, Check, Gamepad2, ExternalLink, AlertTriangle, Loader2 } from "lucide-react";
 
-interface CheckinLinkPanelProps {
+interface Props {
   eventId:      string;
   eventSlug:    string;
-  checkinToken: string | null;
+  controlToken: string | null;
 }
 
-export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLinkPanelProps) {
-  const [token,   setToken]   = useState(checkinToken);
+export function ControlLinkPanel({ eventId, eventSlug, controlToken }: Props) {
+  const [token,   setToken]   = useState(controlToken);
   const [copied,  setCopied]  = useState(false);
   const [loading, setLoading] = useState(false);
   const [confirm, setConfirm] = useState(false);
@@ -18,13 +18,13 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
   const [origin, setOrigin] = useState("");
   useEffect(() => { setOrigin(window.location.origin); }, []);
 
-  const checkinUrl = token ? `${origin}/checkin/${eventSlug}?t=${token}` : null;
+  const controlUrl = token ? `${origin}/live/${eventSlug}/control?t=${token}` : null;
 
   async function generateToken() {
     setLoading(true);
     setConfirm(false);
     try {
-      const res  = await fetch(`/api/admin/events/${eventId}/checkin-token`, { method: "POST" });
+      const res  = await fetch(`/api/admin/events/${eventId}/control-token`, { method: "POST" });
       const data = await res.json() as { token?: string };
       if (data.token) setToken(data.token);
     } finally {
@@ -33,8 +33,8 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
   }
 
   async function handleCopy() {
-    if (!checkinUrl) return;
-    await navigator.clipboard.writeText(checkinUrl);
+    if (!controlUrl) return;
+    await navigator.clipboard.writeText(controlUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
   }
@@ -42,15 +42,14 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
   return (
     <div className="bg-white rounded-2xl border border-mist p-5">
       <div className="flex items-center gap-2 mb-1">
-        <LinkIcon size={13} className="text-forest" />
-        <h3 className="text-sm font-semibold text-charcoal">Check-in Link</h3>
+        <Gamepad2 size={13} className="text-forest" />
+        <h3 className="text-sm font-semibold text-charcoal">Control Panel Link</h3>
       </div>
       <p className="text-xs text-charcoal/50 mb-4 leading-relaxed">
-        Share with your door team. No admin login required — access is protected by the token in the link.
+        Share with worship leaders and team members who need to control the display. No admin login required.
       </p>
 
       {!token ? (
-        /* ── No token yet ── */
         <button
           onClick={generateToken}
           disabled={loading}
@@ -58,19 +57,14 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
         >
           {loading
             ? <><Loader2 size={14} className="animate-spin" /> Generating…</>
-            : <><LinkIcon size={14} /> Generate check-in link</>}
+            : <><Gamepad2 size={14} /> Generate control link</>}
         </button>
       ) : (
-        /* ── Token exists ── */
         <>
-          {/* URL preview */}
           <div className="bg-off-white rounded-xl px-3 py-2.5 mb-3 border border-mist">
-            <p className="text-[11px] text-charcoal/50 font-mono truncate">
-              {checkinUrl}
-            </p>
+            <p className="text-[11px] text-charcoal/50 font-mono truncate">{controlUrl}</p>
           </div>
 
-          {/* Primary actions */}
           <div className="grid grid-cols-2 gap-2 mb-4">
             <button
               onClick={handleCopy}
@@ -81,7 +75,7 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
                 : <><Copy size={13} /> Copy link</>}
             </button>
             <a
-              href={checkinUrl ?? "#"}
+              href={controlUrl ?? "#"}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center justify-center gap-2 py-2.5 rounded-xl border border-forest/30 text-forest text-xs font-semibold hover:bg-forest/5 transition-colors"
@@ -90,7 +84,6 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
             </a>
           </div>
 
-          {/* Regenerate — behind a confirm step */}
           {!confirm ? (
             <button
               onClick={() => setConfirm(true)}
@@ -104,7 +97,7 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
               <div className="flex items-start gap-2">
                 <AlertTriangle size={13} className="text-amber-500 flex-shrink-0 mt-0.5" />
                 <p className="text-xs text-amber-700 leading-relaxed">
-                  This will invalidate the current link. You&apos;ll need to share the new one with your door team.
+                  The current link will stop working. Share the new one with your team again.
                 </p>
               </div>
               <div className="flex gap-2">

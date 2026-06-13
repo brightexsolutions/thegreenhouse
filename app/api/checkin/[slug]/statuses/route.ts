@@ -25,7 +25,7 @@ export async function GET(req: NextRequest, { params }: Props) {
 
   const { data } = await supabase
     .from("registrations")
-    .select("id, first_name, last_name, email, phone, role, ticket_token, checked_in, is_walkin, photo_consent")
+    .select("id, first_name, last_name, email, phone, role, ticket_token, checked_in, is_walkin, photo_consent, created_at")
     .eq("event_id", (event as { id: string }).id)
     .is("deleted_at", null)
     .order("first_name", { ascending: true });

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import { CheckinLinkPanel } from "@/components/admin/checkin-link-panel";
+import { ControlLinksPanel } from "@/components/admin/control-links-panel";
 import { QrSharePanel } from "@/components/admin/qr-share-panel";
 import { CommsSendDialog } from "@/components/admin/comms-send-dialog";
 import { SongContributionPanel } from "@/components/admin/song-contribution-panel";
@@ -17,7 +18,7 @@ export default async function EventToolsPage({ params }: Props) {
   const { id } = await params;
   const supabase = createAdminClient();
 
-  const [{ data: event }, { count: registrantCount }, { count: emailCount }] = await Promise.all([
+  const [{ data: event }, { count: registrantCount }, { count: emailCount }, { data: controlLinks }] = await Promise.all([
     supabase
       .from("events")
       .select("id, title, slug, status, checkin_token, post_event_email_sent")
@@ -35,6 +36,11 @@ export default async function EventToolsPage({ params }: Props) {
       .eq("event_id", id)
       .not("email", "is", null)
       .is("deleted_at", null),
+    supabase
+      .from("control_links")
+      .select("id, label, permissions, token, created_at")
+      .eq("event_id", id)
+      .order("created_at", { ascending: true }),
   ]);
 
   if (!event) notFound();
@@ -91,6 +97,13 @@ export default async function EventToolsPage({ params }: Props) {
         <CheckinLinkPanel eventId={id} eventSlug={event.slug} checkinToken={event.checkin_token} />
         <QrSharePanel eventId={id} eventSlug={event.slug} />
       </div>
+
+      {/* Control panel access links */}
+      <ControlLinksPanel
+        eventId={id}
+        eventSlug={event.slug}
+        initial={(controlLinks ?? []) as Parameters<typeof ControlLinksPanel>[0]["initial"]}
+      />
 
       {/* Song contributions */}
       {songSubmissionToken && (

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { UserPlus, Trash2, ShieldCheck } from "lucide-react";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type AdminProfile = {
   id:         string;
@@ -13,6 +14,7 @@ type AdminProfile = {
 };
 
 export default function AdminsPage() {
+  const confirm = useConfirm();
   const [admins,  setAdmins]  = useState<AdminProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [adding,  setAdding]  = useState(false);
@@ -70,7 +72,8 @@ export default function AdminsPage() {
   }
 
   async function removeAdmin(id: string, name: string | null) {
-    if (!confirm(`Remove ${name ?? "this admin"}? They will lose all admin access.`)) return;
+    const ok = await confirm({ title: `Remove ${name ?? "this admin"}?`, message: "They will immediately lose all admin access.", destructive: true });
+    if (!ok) return;
     setBusy(id + "-del");
     await fetch("/api/admin/system/admins", {
       method:  "DELETE",

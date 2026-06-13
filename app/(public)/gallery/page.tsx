@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import { createAdminClient } from "@/lib/supabase/server";
-import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
+import { FadeIn } from "@/components/motion/fade-in";
 import { storageUrl } from "@/lib/constants";
-import { ArrowUpRight } from "lucide-react";
+import { GalleryGrid } from "@/components/events/gallery-grid";
 
 export const revalidate = 300;
 
@@ -142,42 +142,18 @@ export default async function GalleryPage() {
               </div>
             </div>
           ) : (
-            <FadeInStagger className="columns-2 sm:columns-3 lg:columns-4 gap-3 space-y-0" staggerDelay={0.03}>
-              {images.map((img, i) => {
-                const url = storageUrl(`event-images/${img.path}`, { width: 800, quality: 80 });
-                return (
-                  <StaggerChild key={img.id}>
-                    <div className={`group relative overflow-hidden rounded-2xl mb-3 break-inside-avoid ${SIZE_CYCLE[i % SIZE_CYCLE.length]}`}>
-                      <Image
-                        src={url}
-                        alt={img.caption ?? "Gallery photo"}
-                        fill
-                        className="object-cover transition-transform duration-700 group-hover:scale-105"
-                        sizes="(max-width:640px) 50vw, (max-width:1024px) 33vw, 25vw"
-                        unoptimized
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all duration-300" />
-
-                      {(img.caption || img.events) && (
-                        <div className="absolute inset-x-0 bottom-0 p-3 translate-y-full group-hover:translate-y-0 transition-transform duration-300">
-                          <div className="bg-black/70 backdrop-blur-sm rounded-xl px-3 py-2">
-                            {img.caption && <p className="text-cream text-sm">{img.caption}</p>}
-                            {img.events && (
-                              <Link
-                                href={`/events/${img.events.slug}`}
-                                className="text-gold/80 text-xs flex items-center gap-1 mt-0.5 hover:text-gold"
-                              >
-                                {img.events.title} <ArrowUpRight size={10} />
-                              </Link>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </StaggerChild>
-                );
-              })}
-            </FadeInStagger>
+            <GalleryGrid
+              images={images.map((img, i) => ({
+                id:         img.id,
+                src:        storageUrl(`event-images/${img.path}`, { width: 800, quality: 80 }),
+                fullSrc:    storageUrl(`event-images/${img.path}`),
+                alt:        img.caption ?? "Gallery photo",
+                aspect:     SIZE_CYCLE[i % SIZE_CYCLE.length],
+                caption:    img.caption,
+                eventTitle: img.events?.title ?? null,
+                eventSlug:  img.events?.slug  ?? null,
+              }))}
+            />
           )}
         </div>
       </section>

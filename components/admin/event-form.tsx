@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Video, Eye, RefreshCw, Trash2, Upload } from "lucide-react";
+import { Loader2, Video, Eye, RefreshCw, Trash2, Upload, X, Link2 } from "lucide-react";
 import NextImage from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -45,9 +45,13 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
   const [coverPath,  setCoverPath]  = useState<string | null>(defaultValues?.cover_image     ?? null);
   const [bannerPath, setBannerPath] = useState<string | null>(defaultValues?.banner_image    ?? null);
   const [videoPath,  setVideoPath]  = useState<string | null>(defaultValues?.highlight_video ?? null);
+  const [bannerUrlInput, setBannerUrlInput] = useState("");
+  const [coverUrlInput,  setCoverUrlInput]  = useState("");
+  const [videoUrlInput,  setVideoUrlInput]  = useState("");
+  const [lightboxSrc,    setLightboxSrc]    = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting, isDirty } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       type: "free",
@@ -59,15 +63,40 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
   const type  = watch("type");
   const isNew = !eventId;
 
+  async function compressImage(file: File, maxPx = 1920, quality = 0.88): Promise<File> {
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const { naturalWidth: w, naturalHeight: h } = img;
+        const scale = Math.min(1, maxPx / Math.max(w, h));
+        const canvas = document.createElement("canvas");
+        canvas.width  = Math.round(w * scale);
+        canvas.height = Math.round(h * scale);
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          blob => resolve(blob ? new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" }) : file),
+          "image/jpeg",
+          quality,
+        );
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
   async function uploadImage(
     e: React.ChangeEvent<HTMLInputElement>,
     setLoading: (v: boolean) => void,
     setPath: (p: string) => void,
   ) {
-    const file = e.target.files?.[0];
-    if (!file) return;
+    const raw = e.target.files?.[0];
+    if (!raw) return;
     setLoading(true);
     try {
+      const file = raw.type.startsWith("image/") ? await compressImage(raw) : raw;
       const formData = new FormData();
       formData.append("file", file);
       const res = await fetch("/api/admin/upload-image", { method: "POST", body: formData });
@@ -91,6 +120,12 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
     } finally {
       setUploadingVideo(false);
     }
+  }
+
+  function mediaUrl(path: string | null): string | null {
+    if (!path) return null;
+    if (path.startsWith("http://") || path.startsWith("https://")) return path;
+    return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${path}`;
   }
 
   async function onSubmit(data: FormData) {
@@ -133,6 +168,13 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
     router.refresh();
   }
 
+  const mediaChanged = !isNew && (
+    bannerPath !== (defaultValues?.banner_image ?? null) ||
+    coverPath  !== (defaultValues?.cover_image  ?? null) ||
+    videoPath  !== (defaultValues?.highlight_video ?? null)
+  );
+  const hasUnsavedChanges = !isNew && (isDirty || mediaChanged);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col min-h-full">
 
@@ -156,9 +198,9 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
             </div>
             {bannerPath ? (
               <div className="rounded-2xl overflow-hidden border border-mist">
-                <div className="relative h-32 bg-charcoal/5">
+                <div className="relative h-32 bg-charcoal/5 cursor-zoom-in" onClick={() => setLightboxSrc(mediaUrl(bannerPath))}>
                   <NextImage
-                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${bannerPath}`}
+                    src={mediaUrl(bannerPath)!}
                     alt="Banner"
                     fill
                     className="object-cover"
@@ -166,13 +208,10 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
                   />
                 </div>
                 <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${bannerPath}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all"
-                  >
+                  <button type="button" onClick={() => setLightboxSrc(mediaUrl(bannerPath))}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all">
                     <Eye size={10} /> View
-                  </a>
+                  </button>
                   <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
                     <RefreshCw size={10} /> Replace
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
@@ -190,16 +229,34 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
                 )}
               </div>
             ) : (
-              <label className={cn(
-                "flex flex-col items-center justify-center gap-2 h-36 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3"
-              )}>
-                {uploadingBanner
-                  ? <Loader2 size={16} className="animate-spin text-forest" />
-                  : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload banner</span></>
-                }
-                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
-                  onChange={(e) => uploadImage(e, setUploadingBanner, setBannerPath)} />
-              </label>
+              <div className="space-y-2">
+                <label className={cn(
+                  "flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3"
+                )}>
+                  {uploadingBanner
+                    ? <Loader2 size={16} className="animate-spin text-forest" />
+                    : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload banner</span></>
+                  }
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                    onChange={(e) => uploadImage(e, setUploadingBanner, setBannerPath)} />
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <Link2 size={11} className="text-charcoal/25 flex-shrink-0" />
+                  <input
+                    type="url"
+                    value={bannerUrlInput}
+                    onChange={e => setBannerUrlInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); if (bannerUrlInput.trim()) { setBannerPath(bannerUrlInput.trim()); setBannerUrlInput(""); } } }}
+                    placeholder="Or paste image URL"
+                    className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/40"
+                  />
+                  <button type="button" onClick={() => { if (bannerUrlInput.trim()) { setBannerPath(bannerUrlInput.trim()); setBannerUrlInput(""); } }}
+                    disabled={!bannerUrlInput.trim()}
+                    className="px-2.5 py-1.5 rounded-xl bg-forest text-cream text-[11px] font-semibold disabled:opacity-40 hover:bg-moss transition-colors">
+                    Use
+                  </button>
+                </div>
+              </div>
             )}
           </div>
 
@@ -211,9 +268,9 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
             </div>
             {coverPath ? (
               <div className="rounded-2xl overflow-hidden border border-mist">
-                <div className="relative h-32 bg-charcoal/5">
+                <div className="relative h-32 bg-charcoal/5 cursor-zoom-in" onClick={() => setLightboxSrc(mediaUrl(coverPath))}>
                   <NextImage
-                    src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${coverPath}`}
+                    src={mediaUrl(coverPath)!}
                     alt="Poster"
                     fill
                     className="object-cover object-top"
@@ -221,13 +278,10 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
                   />
                 </div>
                 <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
-                  <a
-                    href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${coverPath}`}
-                    target="_blank" rel="noopener noreferrer"
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all"
-                  >
+                  <button type="button" onClick={() => setLightboxSrc(mediaUrl(coverPath))}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all">
                     <Eye size={10} /> View
-                  </a>
+                  </button>
                   <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
                     <RefreshCw size={10} /> Replace
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
@@ -245,14 +299,32 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
                 )}
               </div>
             ) : (
-              <label className="flex flex-col items-center justify-center gap-2 h-36 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
-                {uploadingCover
-                  ? <Loader2 size={16} className="animate-spin text-forest" />
-                  : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload poster</span></>
-                }
-                <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
-                  onChange={(e) => uploadImage(e, setUploadingCover, setCoverPath)} />
-              </label>
+              <div className="space-y-2">
+                <label className="flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
+                  {uploadingCover
+                    ? <Loader2 size={16} className="animate-spin text-forest" />
+                    : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload poster</span></>
+                  }
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                    onChange={(e) => uploadImage(e, setUploadingCover, setCoverPath)} />
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <Link2 size={11} className="text-charcoal/25 flex-shrink-0" />
+                  <input
+                    type="url"
+                    value={coverUrlInput}
+                    onChange={e => setCoverUrlInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); if (coverUrlInput.trim()) { setCoverPath(coverUrlInput.trim()); setCoverUrlInput(""); } } }}
+                    placeholder="Or paste image URL"
+                    className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/40"
+                  />
+                  <button type="button" onClick={() => { if (coverUrlInput.trim()) { setCoverPath(coverUrlInput.trim()); setCoverUrlInput(""); } }}
+                    disabled={!coverUrlInput.trim()}
+                    className="px-2.5 py-1.5 rounded-xl bg-forest text-cream text-[11px] font-semibold disabled:opacity-40 hover:bg-moss transition-colors">
+                    Use
+                  </button>
+                </div>
+              </div>
             )}
           </div>
         </div>
@@ -265,21 +337,18 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
           </div>
           {videoPath ? (
             <div className="rounded-2xl overflow-hidden border border-mist">
-              <div className="relative h-36 bg-black">
+              <div className="relative h-56 bg-black cursor-zoom-in" onClick={() => setLightboxSrc(mediaUrl(videoPath))}>
                 <video
-                  src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${videoPath}`}
+                  src={mediaUrl(videoPath)!}
                   autoPlay loop muted playsInline
                   className="w-full h-full object-cover opacity-80"
                 />
               </div>
               <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
-                <a
-                  href={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${videoPath}`}
-                  target="_blank" rel="noopener noreferrer"
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all"
-                >
+                <button type="button" onClick={() => setLightboxSrc(mediaUrl(videoPath))}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all">
                   <Eye size={10} /> View
-                </a>
+                </button>
                 <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
                   <RefreshCw size={10} /> Replace
                   <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only"
@@ -297,14 +366,32 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
               )}
             </div>
           ) : (
-            <label className="flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
-              {uploadingVideo
-                ? <Loader2 size={16} className="animate-spin text-forest" />
-                : <><Video size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload highlight video (MP4 · max 100MB)</span></>
-              }
-              <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only"
-                onChange={handleVideoUpload} />
-            </label>
+            <div className="space-y-2">
+              <label className="flex flex-col items-center justify-center gap-2 h-24 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
+                {uploadingVideo
+                  ? <Loader2 size={16} className="animate-spin text-forest" />
+                  : <><Video size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload highlight video (MP4 · max 100MB)</span></>
+                }
+                <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only"
+                  onChange={handleVideoUpload} />
+              </label>
+              <div className="flex items-center gap-1.5">
+                <Link2 size={11} className="text-charcoal/25 flex-shrink-0" />
+                <input
+                  type="url"
+                  value={videoUrlInput}
+                  onChange={e => setVideoUrlInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); if (videoUrlInput.trim()) { setVideoPath(videoUrlInput.trim()); setVideoUrlInput(""); } } }}
+                  placeholder="Or paste video URL"
+                  className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/40"
+                />
+                <button type="button" onClick={() => { if (videoUrlInput.trim()) { setVideoPath(videoUrlInput.trim()); setVideoUrlInput(""); } }}
+                  disabled={!videoUrlInput.trim()}
+                  className="px-2.5 py-1.5 rounded-xl bg-forest text-cream text-[11px] font-semibold disabled:opacity-40 hover:bg-moss transition-colors">
+                  Use
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -415,7 +502,9 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
       </div>{/* end flex-1 cards */}
 
       {/* Action bar — fixed at bottom of scroll container */}
-      <div className="sticky bottom-0 -mx-6 px-6 py-2 bg-off-white border-t border-mist flex items-center justify-between gap-3 z-10 mt-auto">
+      <div className={`sticky bottom-0 -mx-6 px-6 py-2 border-t flex items-center justify-between gap-3 z-10 mt-auto transition-colors ${
+        hasUnsavedChanges ? "bg-amber-50 border-amber-200" : "bg-off-white border-mist"
+      }`}>
         <div className="flex items-center gap-3">
           <button
             type="submit"
@@ -431,11 +520,50 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
           >
             Cancel
           </button>
+          {hasUnsavedChanges && !isSubmitting && (
+            <span className="flex items-center gap-1.5 text-xs text-amber-700 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              Unsaved changes
+            </span>
+          )}
         </div>
         {submitError && (
           <p className="text-sm text-red-500 text-right">{submitError}</p>
         )}
       </div>
+
+      {/* Lightbox */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxSrc(null)}
+            className="absolute top-4 right-4 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X size={20} />
+          </button>
+          {lightboxSrc.match(/\.(mp4|webm|mov|MOV)$/) ? (
+            <video
+              src={lightboxSrc}
+              controls
+              autoPlay
+              className="max-w-full max-h-[88vh] rounded-2xl shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={lightboxSrc}
+              alt="Preview"
+              className="max-w-full max-h-[88vh] object-contain rounded-2xl shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            />
+          )}
+        </div>
+      )}
     </form>
   );
 }
