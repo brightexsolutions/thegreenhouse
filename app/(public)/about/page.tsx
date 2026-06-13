@@ -20,10 +20,10 @@ export default function AboutPage() {
         {/* Background photo */}
         <div className="absolute inset-0">
           <Image
-            src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1600&q=75"
+            src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=75"
             alt=""
             fill
-            className="object-cover"
+            className="object-cover object-top"
             priority
             sizes="100vw"
             aria-hidden
@@ -122,7 +122,7 @@ export default function AboutPage() {
                 {/* Accent card bottom-left */}
                 <div className="absolute -bottom-5 -left-5 w-[45%] h-[38%] rounded-[1.5rem] overflow-hidden shadow-xl border-4 border-cream">
                   <Image
-                    src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=400&q=80"
+                    src="https://res.cloudinary.com/dpjget2he/image/upload/v1781373355/IMG_4402_gwdrn1.jpg"
                     alt="People connecting"
                     fill
                     className="object-cover"

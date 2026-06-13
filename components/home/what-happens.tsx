@@ -20,7 +20,7 @@ export function WhatHappens() {
               {/* Main large photo */}
               <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden shadow-2xl">
                 <Image
-                  src="https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=900&q=80"
+                  src="https://res.cloudinary.com/dpjget2he/image/upload/v1781370714/IMG_4446_dozayr.jpg"
                   alt="An evening at The Green House"
                   fill
                   className="object-cover"

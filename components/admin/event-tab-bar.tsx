@@ -3,13 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
-import { FileText, Music2, Users, Wrench } from "lucide-react";
+import { FileText, MessageSquare, Music2, Users, Wrench } from "lucide-react";
 
 const TABS = [
-  { href: (id: string) => `/admin/events/${id}`,             label: "Details",     icon: FileText, exact: true  },
-  { href: (id: string) => `/admin/events/${id}/sessions`,    label: "Program",     icon: Music2,   exact: false },
-  { href: (id: string) => `/admin/events/${id}/registrants`, label: "Registrants", icon: Users,    exact: false },
-  { href: (id: string) => `/admin/events/${id}/tools`,       label: "Tools",       icon: Wrench,   exact: false },
+  { href: (id: string) => `/admin/events/${id}`,             label: "Details",     icon: FileText,      exact: true  },
+  { href: (id: string) => `/admin/events/${id}/sessions`,    label: "Program",     icon: Music2,        exact: false },
+  { href: (id: string) => `/admin/events/${id}/registrants`, label: "Registrants", icon: Users,         exact: false },
+  { href: (id: string) => `/admin/events/${id}/feedback`,    label: "Feedback",    icon: MessageSquare, exact: false },
+  { href: (id: string) => `/admin/events/${id}/tools`,       label: "Tools",       icon: Wrench,        exact: false },
 ];
 
 export function EventTabBar({ eventId }: { eventId: string }) {

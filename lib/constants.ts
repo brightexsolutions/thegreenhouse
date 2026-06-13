@@ -1,11 +1,11 @@
 export const SITE_NAME        = "The Green House";
-export const EMAIL_FROM_NAME  = "GreenHouse Worship Community";
+export const EMAIL_FROM_NAME  = "Green House Worship Community";
 export const SITE_URL         = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.greenhousews.co.ke";
 export const SESSION_FREQUENCY = "quarterly";
 
 export const GOOGLE_SITE_VERIFICATION = "VF6ZtFBVZPyZxr2XDozrNRD_U1Tuy6B69pJp7gERino";
 
-export const CONTACT_EMAIL    = "hello@greenhousews.co.ke";
+export const CONTACT_EMAIL    = "thegreenhouse.contact01@gmail.com";
 export const REPLY_TO_EMAIL   = "thegreenhouse.contact01@gmail.com";
 export const CONTACT_WHATSAPP          = "254706609085";
 export const REGISTRATION_SUPPORT_WA   = "254741980127";
@@ -13,6 +13,9 @@ export const REGISTRATION_SUPPORT_WA   = "254741980127";
 // Resend FROM addresses — tickets get their own mailbox, everything else goes through hello
 export const TICKET_FROM_EMAIL = () => process.env.RESEND_TICKET_FROM  ?? `${EMAIL_FROM_NAME} <tickets@greenhousews.co.ke>`;
 export const COMMS_FROM_EMAIL  = () => process.env.RESEND_COMMS_FROM   ?? `${EMAIL_FROM_NAME} <hello@greenhousews.co.ke>`;
+
+// Session highlight videos — update per session after event
+export const SESSION_01_HIGHLIGHT_VIDEO = "https://res.cloudinary.com/dpjget2he/video/upload/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.mp4";
 
 export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
 export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";

@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { randomUUID } from "crypto";
+import sharp from "sharp";
 
 type Props = { params: Promise<{ slug: string }> };
 
-const MAX_BYTES = 2 * 1024 * 1024; // 2MB
+const MAX_BYTES = 15 * 1024 * 1024; // 15MB raw — compressed down server-side
 
 export async function POST(req: NextRequest, { params }: Props) {
   const { slug } = await params;
@@ -38,12 +39,13 @@ export async function POST(req: NextRequest, { params }: Props) {
     }, { status: 413 });
   }
 
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const path   = `attendees/${event.id}/${randomUUID()}.jpg`;
+  const raw = Buffer.from(await file.arrayBuffer());
+  const compressed = await sharp(raw).rotate().resize({ width: 1200, withoutEnlargement: true }).jpeg({ quality: 80 }).toBuffer();
+  const path = `attendees/${event.id}/${randomUUID()}.jpg`;
 
   const { error: uploadErr } = await supabase.storage
     .from("attendee-photos")
-    .upload(path, buffer, { contentType: file.type, cacheControl: "3600" });
+    .upload(path, compressed, { contentType: "image/jpeg", cacheControl: "3600" });
 
   if (uploadErr) {
     return NextResponse.json({ error: "Upload failed. Please try again." }, { status: 500 });
@@ -54,7 +56,7 @@ export async function POST(req: NextRequest, { params }: Props) {
     storage_path: path,
     caption:      caption?.trim() || null,
     submitted_by: submittedBy?.trim() || null,
-    file_size_kb: Math.round(file.size / 1024),
+    file_size_kb: Math.round(compressed.length / 1024),
     is_approved:  false,
     show_on_site: false,
   });

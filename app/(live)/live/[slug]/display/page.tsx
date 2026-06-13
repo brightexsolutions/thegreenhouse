@@ -323,7 +323,7 @@ function GalleryScene({ imageUrls, t }: { imageUrls: string[]; t: typeof THEMES[
 
       {/* Centered label */}
       <div className="absolute inset-x-0 bottom-12 text-center z-20">
-        <p className="text-sm uppercase tracking-[0.5em] font-semibold" style={{ color: t.sub, opacity: 0.75 }}>
+        <p className="text-base md:text-xl uppercase tracking-[0.5em] font-semibold" style={{ color: t.sub, opacity: 0.75 }}>
           The Green House
         </p>
       </div>
@@ -633,17 +633,17 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
 
               {scene === "branding" && (
                 <div className="text-center flex flex-col items-center gap-0">
-                  <div className="text-sm uppercase tracking-[0.5em] mb-10 font-semibold" style={{ color: t.sub }}>The Green House</div>
+                  <div className="text-base md:text-xl uppercase tracking-[0.5em] mb-10 font-semibold" style={{ color: t.sub }}>The Green House</div>
                   <div className="font-display font-semibold leading-[1.1] mb-6" style={{ color: t.text, fontSize: "clamp(3rem,8vw,7rem)" }}>
                     Pause. Breathe.<br />Reflect. Worship.
                   </div>
-                  <div className="text-lg md:text-2xl font-display font-medium mb-10" style={{ color: t.gold }}>
+                  <div className="text-2xl md:text-4xl font-display font-medium mb-10" style={{ color: t.gold }}>
                     {event.title.replace("The Green House — ", "").replace("The Green House – ", "")}
                   </div>
-                  <div className="flex flex-col items-center gap-1.5">
-                    <p className="text-sm md:text-base" style={{ color: t.sub }}>{formattedDate}</p>
-                    {event.venue_name && <p className="text-sm" style={{ color: t.sub, opacity: 0.55 }}>{event.venue_name}</p>}
-                    {event.subtitle && <p className="text-sm italic mt-1" style={{ color: t.sub, opacity: 0.5 }}>{event.subtitle}</p>}
+                  <div className="flex flex-col items-center gap-2">
+                    <p className="text-xl md:text-2xl" style={{ color: t.sub }}>{formattedDate}</p>
+                    {event.venue_name && <p className="text-lg md:text-xl" style={{ color: t.sub, opacity: 0.55 }}>{event.venue_name}</p>}
+                    {event.subtitle && <p className="text-lg italic mt-1" style={{ color: t.sub, opacity: 0.5 }}>{event.subtitle}</p>}
                   </div>
                 </div>
               )}
@@ -654,16 +654,16 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
 
               {scene === "now_playing" && (activeSong ? (
                 <div className="text-center">
-                  <p className="text-sm uppercase tracking-[0.45em] mb-8 font-semibold" style={{ color: t.goldSub }}>Now Playing</p>
+                  <p className="text-lg md:text-2xl uppercase tracking-[0.45em] mb-8 font-semibold" style={{ color: t.goldSub }}>Now Playing</p>
                   <h1 className="font-display text-6xl md:text-8xl font-semibold" style={{ color: t.text }}>{activeSong.title}</h1>
-                  {activeSong.artist && <p className="mt-6 text-2xl md:text-3xl" style={{ color: t.sub }}>{activeSong.artist}</p>}
+                  {activeSong.artist && <p className="mt-6 text-3xl md:text-5xl" style={{ color: t.sub }}>{activeSong.artist}</p>}
                   {activeVocalist && (
                     <div className="mt-8 flex items-center justify-center gap-4">
-                      <div className="w-12 h-12 md:w-14 md:h-14 rounded-full flex items-center justify-center text-lg md:text-xl font-bold flex-shrink-0"
+                      <div className="w-14 h-14 md:w-16 md:h-16 rounded-full flex items-center justify-center text-xl md:text-2xl font-bold flex-shrink-0"
                         style={{ background: `${t.gold}22`, border: `1.5px solid ${t.gold}66`, color: t.gold }}>
                         {activeVocalist.charAt(0).toUpperCase()}
                       </div>
-                      <p className="text-xl md:text-3xl font-medium tracking-wide" style={{ color: t.gold }}>
+                      <p className="text-2xl md:text-4xl font-medium tracking-wide" style={{ color: t.gold }}>
                         {activeVocalist}
                       </p>
                     </div>
@@ -689,15 +689,15 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
               ) : (
                 <div className="text-center max-w-5xl w-full">
                   {activeSong && (
-                    <div className="mb-10 flex flex-col items-center gap-2">
-                      <p className="text-sm uppercase tracking-[0.35em] font-semibold" style={{ color: t.goldSub }}>{activeSong.title}</p>
+                    <div className="mb-10 flex flex-col items-center gap-3">
+                      <p className="text-xl md:text-2xl uppercase tracking-[0.35em] font-semibold" style={{ color: t.goldSub }}>{activeSong.title}</p>
                       {activeVocalist && (
-                        <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold flex-shrink-0"
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full flex items-center justify-center text-base font-bold flex-shrink-0"
                             style={{ background: `${t.gold}22`, border: `1px solid ${t.gold}55`, color: t.gold }}>
                             {activeVocalist.charAt(0).toUpperCase()}
                           </div>
-                          <p className="text-base md:text-lg tracking-[0.2em]" style={{ color: t.gold }}>{activeVocalist}</p>
+                          <p className="text-2xl md:text-3xl tracking-[0.2em]" style={{ color: t.gold }}>{activeVocalist}</p>
                         </div>
                       )}
                     </div>
@@ -729,7 +729,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
 
               {scene === "program" && (
                 <div className="w-full max-w-3xl">
-                  <p className="text-sm md:text-base uppercase tracking-[0.45em] mb-10 text-center font-semibold"
+                  <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-10 text-center font-semibold"
                     style={{ color: t.gold }}>Tonight&apos;s Program</p>
                   <div className="space-y-4">
                     {[...event.event_sessions].sort((a, b) => a.sort_order - b.sort_order).map((sess, i) => (
@@ -747,18 +747,18 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
 
               {scene === "theme" && (
                 <div className="text-center max-w-3xl">
-                  <p className="text-sm uppercase tracking-[0.45em] mb-10 font-semibold" style={{ color: t.goldSub }}>Tonight&apos;s Theme</p>
+                  <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-10 font-semibold" style={{ color: t.goldSub }}>Tonight&apos;s Theme</p>
                   <h1 className="font-display text-7xl md:text-9xl font-bold mb-8" style={{ color: t.text }}>{event.theme_title ?? "—"}</h1>
-                  {event.theme_scripture && <p className="text-xl md:text-2xl font-display italic" style={{ color: t.gold }}>{event.theme_scripture}</p>}
+                  {event.theme_scripture && <p className="text-2xl md:text-4xl font-display italic" style={{ color: t.gold }}>{event.theme_scripture}</p>}
                   {event.theme_description && (
-                    <p className="mt-6 text-base md:text-lg max-w-xl mx-auto leading-relaxed" style={{ color: t.sub }}>{event.theme_description}</p>
+                    <p className="mt-6 text-xl md:text-2xl max-w-xl mx-auto leading-relaxed" style={{ color: t.sub }}>{event.theme_description}</p>
                   )}
                 </div>
               )}
 
               {scene === "prayer" && (
                 <div className="text-center max-w-3xl">
-                  <p className="text-sm uppercase tracking-[0.45em] mb-12 font-semibold" style={{ color: t.sub, opacity: 0.55 }}>Take a moment</p>
+                  <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-12 font-semibold" style={{ color: t.sub, opacity: 0.55 }}>Take a moment</p>
                   <div className="font-display text-4xl md:text-6xl font-medium leading-snug whitespace-pre-line" style={{ color: t.text }}>
                     {display.custom_text || "Close your eyes.\nBe still."}
                   </div>
@@ -869,8 +869,8 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
 
                 {/* Live badge */}
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="w-1.5 h-1.5 rounded-full animate-pulse" style={{ background: "#4ade80" }} />
-                  <p className="text-[10px] uppercase tracking-[0.4em] font-semibold" style={{ color: t.goldSub }}>
+                  <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: "#4ade80" }} />
+                  <p className="text-sm md:text-base uppercase tracking-[0.4em] font-semibold" style={{ color: t.goldSub }}>
                     {display.featured_feedback_author ? display.featured_feedback_author : "From the room"}
                   </p>
                 </div>
@@ -992,20 +992,20 @@ function CountdownScene({ eventDate, eventTime, t }: { eventDate: string; eventT
       <div className="text-center flex flex-col items-center gap-6">
         <div className="flex items-center gap-3">
           <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
-          <p className="text-base uppercase tracking-[0.45em] font-semibold" style={{ color: t.goldSub }}>Session is live</p>
+          <p className="text-xl md:text-2xl uppercase tracking-[0.45em] font-semibold" style={{ color: t.goldSub }}>Session is live</p>
           <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
         </div>
         <p className="font-display text-5xl md:text-7xl font-semibold" style={{ color: t.text }}>
           We&apos;re on.
         </p>
-        <p className="text-base md:text-lg" style={{ color: t.sub }}>The session has begun — welcome.</p>
+        <p className="text-xl md:text-2xl" style={{ color: t.sub }}>The session has begun — welcome.</p>
       </div>
     );
   }
 
   return (
     <div className="text-center">
-      <p className="text-sm uppercase tracking-[0.45em] mb-8 font-semibold" style={{ color: t.goldSub }}>Session begins in</p>
+      <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-8 font-semibold" style={{ color: t.goldSub }}>Session begins in</p>
       <p className="font-display text-7xl md:text-9xl font-bold tabular-nums" style={{ color: t.text }}>{remaining}</p>
     </div>
   );
@@ -1961,11 +1961,11 @@ function CommunityScene({ attendees, t }: {
 
       {/* Centred count */}
       <div className="relative text-center z-10">
-        <p className="text-sm uppercase tracking-[0.45em] mb-4 font-semibold" style={{ color: t.goldSub }}>In the room tonight</p>
+        <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-4 font-semibold" style={{ color: t.goldSub }}>In the room tonight</p>
         {count > 0 ? (
           <>
             <p className="font-display text-8xl md:text-[10rem] font-bold leading-none" style={{ color: t.text }}>{count}</p>
-            <p className="mt-4 text-xl md:text-2xl" style={{ color: t.sub }}>people gathered here tonight</p>
+            <p className="mt-4 text-2xl md:text-3xl" style={{ color: t.sub }}>people gathered here tonight</p>
           </>
         ) : (
           <p className="font-display text-4xl" style={{ color: t.sub }}>—</p>

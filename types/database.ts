@@ -21,7 +21,9 @@ export interface Event {
   price_kes:        number;
   capacity:         number | null;
   status:           EventStatus;
-  cover_image:      string | null;  // storage path
+  cover_image:      string | null;  // poster — shown in event details section
+  banner_image:     string | null;  // wide hero background — separate from poster
+  highlight_video:  string | null;  // short looping clip shown on past event detail page
   description:      string | null;
   feedback_url:     string | null;
   theme_title:      string | null;
@@ -29,8 +31,9 @@ export interface Event {
   theme_description:string | null;
   dress_code:       string | null;
   playlist_url:     string | null;
-  checkin_token:    string | null;
-  deleted_at:       string | null;
+  checkin_token:         string | null;
+  post_event_email_sent: boolean;
+  deleted_at:            string | null;
   created_at:       string;
   updated_at:       string;
 }
@@ -65,6 +68,7 @@ export interface Song {
   title:      string;
   artist:     string | null;
   lyrics:     string | null;
+  key:        string | null;
   deleted_at: string | null;
   created_at: string;
   updated_at: string;

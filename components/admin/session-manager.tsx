@@ -21,6 +21,7 @@ import {
   Music2, Loader2, Mic, BookOpen, Heart, Zap, Headphones, Library, Search, MessageSquare, Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type Song = { id: string; title: string; artist: string | null; lyrics: string | null };
 type SessionSong = {
@@ -72,6 +73,7 @@ interface Props {
 }
 
 export function SessionManager({ eventId, initialSessions }: Props) {
+  const confirm = useConfirm();
   const [sessions,        setSessions]        = useState<Session[]>(initialSessions);
   const [expanded,        setExpanded]        = useState<Set<string>>(new Set());
   const [saving,          setSaving]          = useState(false);
@@ -126,7 +128,7 @@ export function SessionManager({ eventId, initialSessions }: Props) {
   }
 
   async function deleteSession(id: string) {
-    if (!confirm("Remove this session?")) return;
+    const ok = await confirm({ message: "This session and all its items will be removed.", destructive: true }); if (!ok) return;
     await fetch(`/api/admin/events/${eventId}/sessions/${id}`, { method: "DELETE" });
     setSessions(prev => prev.filter(s => s.id !== id));
   }

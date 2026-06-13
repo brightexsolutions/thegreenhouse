@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import { LiveAttendeeView } from "@/components/live/live-attendee-view";
+import { DonationPrompt } from "@/components/live/donation-prompt";
 import { PreEventView } from "@/components/live/pre-event-view";
 import { Wifi } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
@@ -26,12 +27,22 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
   const { slug } = await params;
   const supabase = createAdminClient();
 
-  const { data: event } = await supabase
-    .from("events")
-    .select("*, event_sessions(*, session_songs(*, songs(*)))")
-    .eq("slug", slug)
-    .is("deleted_at", null)
-    .single();
+  const [{ data: event }, { data: givingSettings }] = await Promise.all([
+    supabase
+      .from("events")
+      .select("*, event_sessions(*, session_songs(*, songs(*)))")
+      .eq("slug", slug)
+      .is("deleted_at", null)
+      .single(),
+    supabase
+      .from("site_settings")
+      .select("key, value")
+      .in("key", ["giving_paybill", "giving_account", "giving_till", "giving_phone"]),
+  ]);
+
+  const giving = Object.fromEntries(
+    (givingSettings ?? []).map((r: { key: string; value: string }) => [r.key.replace("giving_", ""), r.value])
+  ) as { paybill?: string; account?: string; till?: string; phone?: string };
 
   if (!event) notFound();
 
@@ -118,6 +129,9 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
           description: typedEvent.theme_description,
         }}
       />
+
+      {/* TESTING: remove delayMs before go-live */}
+      <DonationPrompt eventId={typedEvent.id} slug={slug} giving={giving} delayMs={5000} />
     </div>
   );
 }

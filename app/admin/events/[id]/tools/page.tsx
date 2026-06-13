@@ -1,10 +1,12 @@
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import { CheckinLinkPanel } from "@/components/admin/checkin-link-panel";
+import { ControlLinksPanel } from "@/components/admin/control-links-panel";
 import { QrSharePanel } from "@/components/admin/qr-share-panel";
 import { CommsSendDialog } from "@/components/admin/comms-send-dialog";
 import { SongContributionPanel } from "@/components/admin/song-contribution-panel";
 import { ContributionLinkPanel } from "@/components/admin/contribution-link-panel";
+import { PostEventEmailPanel } from "@/components/admin/post-event-email-panel";
 import Link from "next/link";
 import { ExternalLink, Download, Tv2 } from "lucide-react";
 
@@ -16,10 +18,10 @@ export default async function EventToolsPage({ params }: Props) {
   const { id } = await params;
   const supabase = createAdminClient();
 
-  const [{ data: event }, { count: registrantCount }] = await Promise.all([
+  const [{ data: event }, { count: registrantCount }, { count: emailCount }, { data: controlLinks }] = await Promise.all([
     supabase
       .from("events")
-      .select("id, title, slug, status, checkin_token")
+      .select("id, title, slug, status, checkin_token, post_event_email_sent")
       .eq("id", id)
       .is("deleted_at", null)
       .single(),
@@ -28,6 +30,17 @@ export default async function EventToolsPage({ params }: Props) {
       .select("id", { count: "exact", head: true })
       .eq("event_id", id)
       .is("deleted_at", null),
+    supabase
+      .from("registrations")
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", id)
+      .not("email", "is", null)
+      .is("deleted_at", null),
+    supabase
+      .from("control_links")
+      .select("id, label, permissions, token, created_at")
+      .eq("event_id", id)
+      .order("created_at", { ascending: true }),
   ]);
 
   if (!event) notFound();
@@ -84,6 +97,13 @@ export default async function EventToolsPage({ params }: Props) {
         <CheckinLinkPanel eventId={id} eventSlug={event.slug} checkinToken={event.checkin_token} />
         <QrSharePanel eventId={id} eventSlug={event.slug} />
       </div>
+
+      {/* Control panel access links */}
+      <ControlLinksPanel
+        eventId={id}
+        eventSlug={event.slug}
+        initial={(controlLinks ?? []) as Parameters<typeof ControlLinksPanel>[0]["initial"]}
+      />
 
       {/* Song contributions */}
       {songSubmissionToken && (
@@ -142,6 +162,15 @@ export default async function EventToolsPage({ params }: Props) {
           <CommsSendDialog events={[{ id, title: event.title }]} />
         </div>
       </div>
+
+      {/* Post-event email — only shown for past events */}
+      {event.status === "past" && (
+        <PostEventEmailPanel
+          eventId={id}
+          alreadySent={(event as { post_event_email_sent?: boolean }).post_event_email_sent ?? false}
+          emailCount={emailCount ?? 0}
+        />
+      )}
     </div>
   );
 }

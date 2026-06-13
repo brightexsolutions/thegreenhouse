@@ -3,12 +3,18 @@
 import { useState, useMemo } from "react";
 import { Music2, Search, Trash2, Edit2, Check, X, ChevronDown, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "@/components/ui/confirm-dialog";
+
+const KEYS = ["C","C#/Db","D","D#/Eb","E","F","F#/Gb","G","G#/Ab","A","A#/Bb","B"];
+const MODES = ["", "m"]; // major (no suffix) and minor (m)
+const KEY_OPTIONS = ["", ...KEYS.flatMap(k => MODES.map(m => k + m))];
 
 type Song = {
   id:         string;
   title:      string;
   artist:     string | null;
   lyrics:     string | null;
+  key:        string | null;
   created_at: string;
 };
 
@@ -33,6 +39,7 @@ function initials(title: string) {
 }
 
 export function SongsLibrary({ initialSongs }: Props) {
+  const confirm = useConfirm();
   const [songs,    setSongs]    = useState<Song[]>(initialSongs);
   const [query,    setQuery]    = useState("");
   const [selected, setSelected] = useState<string | null>(null);
@@ -40,7 +47,7 @@ export function SongsLibrary({ initialSongs }: Props) {
   const [editData, setEditData] = useState<Partial<Song>>({});
   const [saving,   setSaving]   = useState(false);
   const [adding,   setAdding]   = useState(false);
-  const [newSong,  setNewSong]  = useState({ title: "", artist: "", lyrics: "" });
+  const [newSong,  setNewSong]  = useState({ title: "", artist: "", lyrics: "", key: "" });
 
   const filtered = useMemo(() =>
     songs.filter(s =>
@@ -49,7 +56,7 @@ export function SongsLibrary({ initialSongs }: Props) {
 
   function startEdit(song: Song) {
     setEditing(song.id);
-    setEditData({ title: song.title, artist: song.artist, lyrics: song.lyrics });
+    setEditData({ title: song.title, artist: song.artist, lyrics: song.lyrics, key: song.key });
     setSelected(song.id);
   }
 
@@ -68,7 +75,7 @@ export function SongsLibrary({ initialSongs }: Props) {
   }
 
   async function deleteSong(id: string) {
-    if (!confirm("Remove this song from the library?")) return;
+    const ok = await confirm({ message: "This song will be removed from the library.", destructive: true }); if (!ok) return;
     const res = await fetch("/api/admin/songs", {
       method: "DELETE",
       headers: { "Content-Type": "application/json" },
@@ -91,7 +98,7 @@ export function SongsLibrary({ initialSongs }: Props) {
     if (res.ok) {
       const { song } = await res.json();
       setSongs(prev => [song, ...prev]);
-      setNewSong({ title: "", artist: "", lyrics: "" });
+      setNewSong({ title: "", artist: "", lyrics: "", key: "" });
       setAdding(false);
     }
     setSaving(false);
@@ -143,6 +150,18 @@ export function SongsLibrary({ initialSongs }: Props) {
               onChange={e => setNewSong(p => ({ ...p, artist: e.target.value }))}
               className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
             />
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-charcoal/50 w-12 flex-shrink-0">Key</label>
+              <select
+                value={newSong.key}
+                onChange={e => setNewSong(p => ({ ...p, key: e.target.value }))}
+                className="flex-1 px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest bg-white"
+              >
+                {KEY_OPTIONS.map(k => (
+                  <option key={k} value={k}>{k || "— no key —"}</option>
+                ))}
+              </select>
+            </div>
             <textarea
               placeholder={"Verse 1:\n...\n\nChorus:\n..."}
               value={newSong.lyrics}
@@ -198,9 +217,16 @@ export function SongsLibrary({ initialSongs }: Props) {
                       {initials(song.title)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className={cn("text-sm font-medium truncate", isActive ? "text-forest" : "text-charcoal")}>
-                        {song.title}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className={cn("text-sm font-medium truncate", isActive ? "text-forest" : "text-charcoal")}>
+                          {song.title}
+                        </p>
+                        {song.key && (
+                          <span className="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-gold/15 text-gold/80 border border-gold/20">
+                            {song.key}
+                          </span>
+                        )}
+                      </div>
                       <p className="text-xs text-charcoal/40 truncate mt-0.5">
                         {song.artist ?? <span className="italic">Unknown artist</span>}
                         {song.lyrics && <span className="text-charcoal/25"> · has lyrics</span>}
@@ -252,10 +278,29 @@ export function SongsLibrary({ initialSongs }: Props) {
                       placeholder="Artist / songwriter"
                       className="w-full px-3 py-1.5 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
                     />
+                    <div className="flex items-center gap-2">
+                      <label className="text-xs text-charcoal/50 w-12 flex-shrink-0">Key</label>
+                      <select
+                        value={editData.key ?? ""}
+                        onChange={e => setEditData(p => ({ ...p, key: e.target.value || null }))}
+                        className="flex-1 px-3 py-1.5 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest bg-white"
+                      >
+                        {KEY_OPTIONS.map(k => (
+                          <option key={k} value={k}>{k || "— no key —"}</option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 ) : (
                   <>
-                    <h2 className="text-xl font-semibold text-charcoal truncate">{activeSong.title}</h2>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-xl font-semibold text-charcoal truncate">{activeSong.title}</h2>
+                      {activeSong.key && (
+                        <span className="flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-lg bg-gold/15 text-gold/80 border border-gold/20">
+                          {activeSong.key}
+                        </span>
+                      )}
+                    </div>
                     <p className="text-sm text-charcoal/50 mt-0.5">{activeSong.artist ?? <span className="italic">Unknown artist</span>}</p>
                   </>
                 )}

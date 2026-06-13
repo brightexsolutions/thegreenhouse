@@ -1,4 +1,4 @@
-import { SITE_NAME, EMAIL_FROM_NAME, SITE_URL, CONTACT_EMAIL } from "./constants";
+import { SITE_NAME, EMAIL_FROM_NAME, SITE_URL, CONTACT_EMAIL, SOCIAL_INSTAGRAM } from "./constants";
 
 interface TicketEmailData {
   firstName:      string;
@@ -125,6 +125,119 @@ export function ticketEmailHtml(d: TicketEmailData): string {
 </div>
 </body>
 </html>`;
+}
+
+// ─── Post-event thank-you email ──────────────────────────────────────────────
+
+export interface PostEventEmailData {
+  firstName:       string;
+  eventTitle:      string;
+  eventDate:       string;
+  themeTitle?:     string | null;
+  themeScripture?: string | null;
+  eventSlug:       string;
+}
+
+export function postEventEmailHtml(d: PostEventEmailData): string {
+  const feedbackUrl = `${SITE_URL}/events/${d.eventSlug}`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Thank you for being there — ${d.eventTitle}</title>
+<style>
+  body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  .header { background: #1b3a2a; padding: 40px 40px 32px; border-radius: 16px 16px 0 0; }
+  .logo { color: #c9a24a; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; font-weight: 700; }
+  .header h1 { color: #f7f2e8; font-size: 30px; font-weight: 700; margin: 14px 0 0; line-height: 1.2; }
+  .header p { color: rgba(247,242,232,0.6); font-size: 14px; margin: 10px 0 0; }
+  .body { background: #ffffff; border-radius: 0 0 16px 16px; padding: 32px 40px 40px; }
+  .greeting { font-size: 16px; color: #1a1a18; line-height: 1.7; margin-bottom: 24px; }
+  .theme-block { background: linear-gradient(135deg,#1b3a2a,#0d2218); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+  .theme-label { color: rgba(201,162,74,0.7); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin: 0 0 6px; }
+  .theme-title { color: #c9a24a; font-size: 22px; font-weight: 700; font-style: italic; margin: 0 0 4px; }
+  .theme-verse { color: rgba(247,242,232,0.55); font-size: 13px; margin: 0; }
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
+  .feedback-box { background: #f7f2e8; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 28px; }
+  .feedback-title { font-size: 16px; font-weight: 700; color: #1b3a2a; margin: 0 0 8px; }
+  .feedback-body { font-size: 14px; color: #5c4a35; line-height: 1.6; margin: 0 0 20px; }
+  .cta { display: inline-block; background: #1b3a2a; color: #f7f2e8 !important; text-decoration: none; padding: 14px 32px; border-radius: 100px; font-weight: 700; font-size: 15px; }
+  .footer { text-align: center; padding: 24px 40px; font-size: 13px; color: #6b7280; line-height: 1.8; }
+  .footer a { color: #c9a24a; text-decoration: none; font-weight: 600; }
+  .social { margin-top: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">${EMAIL_FROM_NAME}</div>
+    <h1>Thank you,<br />${d.firstName}.</h1>
+    <p>We're glad you were part of ${d.eventTitle}.</p>
+  </div>
+  <div class="body">
+    <p class="greeting">
+      Something real happens when people gather with open hearts. Thank you for bringing yours last night.
+      Whether you sang, prayed, listened, or simply showed up — you were part of what made it meaningful.
+    </p>
+
+    ${d.themeTitle ? `
+    <div class="theme-block">
+      <p class="theme-label">Session theme</p>
+      <p class="theme-title">${d.themeTitle}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+    </div>` : ""}
+
+    <hr class="divider" />
+
+    <div class="feedback-box">
+      <p class="feedback-title">How did it land for you?</p>
+      <p class="feedback-body">
+        We'd love to hear your reflection — what stayed with you, what moved you, or even what you'd want to see next time.
+        It takes less than a minute and shapes what we build next.
+      </p>
+      <a href="${feedbackUrl}" class="cta">Share your reflection</a>
+    </div>
+
+    <p style="font-size:14px;color:#6b7280;line-height:1.7;text-align:center;">
+      The next session is on its way. Stay connected with us on
+      <a href="${SOCIAL_INSTAGRAM}" style="color:#1b3a2a;font-weight:600;">Instagram</a>
+      for updates, behind-the-scenes moments, and when registration opens.
+    </p>
+  </div>
+  <div class="footer">
+    <p>You received this because you attended <strong>${d.eventTitle}</strong>.</p>
+    <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
+    <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${EMAIL_FROM_NAME}</p>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+export function postEventEmailText(d: PostEventEmailData): string {
+  const feedbackUrl = `${SITE_URL}/events/${d.eventSlug}`;
+  return `${SITE_NAME} — Thank you for being there
+
+Hi ${d.firstName},
+
+We're glad you were part of ${d.eventTitle}${d.themeTitle ? ` — "${d.themeTitle}"` : ""}.
+${d.themeScripture ? `Scripture: ${d.themeScripture}\n` : ""}
+Something real happens when people gather with open hearts. Thank you for showing up.
+
+How did it land for you?
+Share your reflection here: ${feedbackUrl}
+
+It takes less than a minute and helps shape what we build next.
+
+Stay connected: ${SOCIAL_INSTAGRAM}
+
+Questions? ${CONTACT_EMAIL}
+
+— ${EMAIL_FROM_NAME}
+${SITE_URL}
+`;
 }
 
 export function ticketEmailText(d: TicketEmailData): string {

@@ -23,7 +23,7 @@ const STATUS_COLORS: Record<string, string> = {
 const FALLBACK_PHOTOS = [
   "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=800&q=75",
   "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=800&q=75",
-  "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=800&q=75",
+  "https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=800&q=75",
   "https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=800&q=75",
 ];
 
@@ -44,8 +44,9 @@ export function EventCard({ event, featured = false }: EventCardProps) {
   const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
   const isPast = event.status === "past";
 
-  const coverUrl = event.cover_image
-    ? storageUrl(`event-images/${event.cover_image}`, { width: featured ? 1200 : 800, quality: 80 })
+  // Cards always use banner_image — poster (cover_image) is for the detail page only
+  const coverUrl = event.banner_image
+    ? storageUrl(`event-images/${event.banner_image}`, { width: featured ? 1200 : 800, quality: 80 })
     : pickFallback(event.slug);
 
   return (

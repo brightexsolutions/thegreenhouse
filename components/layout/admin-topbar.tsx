@@ -1,8 +1,9 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, RefreshCw } from "lucide-react";
 
 interface AdminTopbarProps {
   fullName: string;
@@ -11,6 +12,23 @@ interface AdminTopbarProps {
 
 export function AdminTopbar({ fullName, role }: AdminTopbarProps) {
   const router = useRouter();
+  const [refreshing, setRefreshing] = useState(false);
+
+  // Auto-refresh server data when the tab regains visibility
+  useEffect(() => {
+    function onVisible() {
+      if (document.visibilityState === "visible") router.refresh();
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => document.removeEventListener("visibilitychange", onVisible);
+  }, [router]);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    router.refresh();
+    // Give the refresh a moment to complete before clearing the spinner
+    setTimeout(() => setRefreshing(false), 800);
+  }
 
   async function handleSignOut() {
     const supabase = createBrowserClient(
@@ -26,8 +44,18 @@ export function AdminTopbar({ fullName, role }: AdminTopbarProps) {
     <header className="h-14 border-b border-mist bg-white flex items-center justify-between px-6 flex-shrink-0">
       <div />
 
-      <div className="flex items-center gap-3">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2">
+        {/* Manual refresh */}
+        <button
+          onClick={handleRefresh}
+          disabled={refreshing}
+          className="w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/40 hover:text-forest hover:border-forest/30 transition-all disabled:opacity-50"
+          title="Refresh data"
+        >
+          <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
+        </button>
+
+        <div className="flex items-center gap-2 pl-1">
           <div className="w-7 h-7 rounded-full bg-forest/10 flex items-center justify-center">
             <User size={13} className="text-forest" />
           </div>

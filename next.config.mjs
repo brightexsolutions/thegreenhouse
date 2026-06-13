@@ -1,5 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    // Disable client-side router cache for dynamic routes so admin pages
+    // always show fresh data on navigation (not just on full browser refresh)
+    staleTimes: { dynamic: 0 },
+  },
   images: {
     remotePatterns: [
       {

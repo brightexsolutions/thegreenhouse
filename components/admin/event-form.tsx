@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, X, Image as ImageIcon } from "lucide-react";
+import { Loader2, Video, Eye, RefreshCw, Trash2, Upload, X, Link2 } from "lucide-react";
 import NextImage from "next/image";
 import { cn } from "@/lib/utils";
 
@@ -34,16 +34,24 @@ type FormData = z.infer<typeof schema>;
 
 interface EventFormProps {
   eventId?: string;
-  defaultValues?: Partial<FormData & { cover_image?: string; slug?: string; dress_code?: string }>;
+  defaultValues?: Partial<FormData & { cover_image?: string; banner_image?: string; highlight_video?: string; slug?: string; dress_code?: string }>;
 }
 
 export function EventForm({ eventId, defaultValues }: EventFormProps) {
   const router = useRouter();
-  const [uploading, setUploading]   = useState(false);
-  const [coverPath, setCoverPath]   = useState<string | null>(defaultValues?.cover_image ?? null);
+  const [uploadingCover,  setUploadingCover]  = useState(false);
+  const [uploadingBanner, setUploadingBanner] = useState(false);
+  const [uploadingVideo,  setUploadingVideo]  = useState(false);
+  const [coverPath,  setCoverPath]  = useState<string | null>(defaultValues?.cover_image     ?? null);
+  const [bannerPath, setBannerPath] = useState<string | null>(defaultValues?.banner_image    ?? null);
+  const [videoPath,  setVideoPath]  = useState<string | null>(defaultValues?.highlight_video ?? null);
+  const [bannerUrlInput, setBannerUrlInput] = useState("");
+  const [coverUrlInput,  setCoverUrlInput]  = useState("");
+  const [videoUrlInput,  setVideoUrlInput]  = useState("");
+  const [lightboxSrc,    setLightboxSrc]    = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const { register, handleSubmit, watch, formState: { errors, isSubmitting } } = useForm<FormData>({
+  const { register, handleSubmit, watch, formState: { errors, isSubmitting, isDirty } } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       type: "free",
@@ -55,26 +63,78 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
   const type  = watch("type");
   const isNew = !eventId;
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    setUploading(true);
+  async function compressImage(file: File, maxPx = 1920, quality = 0.88): Promise<File> {
+    return new Promise((resolve) => {
+      const img = new window.Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const { naturalWidth: w, naturalHeight: h } = img;
+        const scale = Math.min(1, maxPx / Math.max(w, h));
+        const canvas = document.createElement("canvas");
+        canvas.width  = Math.round(w * scale);
+        canvas.height = Math.round(h * scale);
+        const ctx = canvas.getContext("2d")!;
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(
+          blob => resolve(blob ? new File([blob], file.name.replace(/\.\w+$/, ".jpg"), { type: "image/jpeg" }) : file),
+          "image/jpeg",
+          quality,
+        );
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+
+  async function uploadImage(
+    e: React.ChangeEvent<HTMLInputElement>,
+    setLoading: (v: boolean) => void,
+    setPath: (p: string) => void,
+  ) {
+    const raw = e.target.files?.[0];
+    if (!raw) return;
+    setLoading(true);
     try {
+      const file = raw.type.startsWith("image/") ? await compressImage(raw) : raw;
       const formData = new FormData();
       formData.append("file", file);
       const res = await fetch("/api/admin/upload-image", { method: "POST", body: formData });
       const data = await res.json();
-      if (data.path) setCoverPath(data.path);
+      if (data.path) setPath(data.path);
     } finally {
-      setUploading(false);
+      setLoading(false);
     }
+  }
+
+  async function handleVideoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingVideo(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload-video", { method: "POST", body: formData });
+      const data = await res.json();
+      if (data.path) setVideoPath(data.path);
+    } finally {
+      setUploadingVideo(false);
+    }
+  }
+
+  function mediaUrl(path: string | null): string | null {
+    if (!path) return null;
+    if (path.startsWith("http://") || path.startsWith("https://")) return path;
+    return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${path}`;
   }
 
   async function onSubmit(data: FormData) {
     setSubmitError(null);
     const payload = {
       ...data,
-      cover_image: coverPath ?? undefined,
+      cover_image:      coverPath  ?? undefined,
+      banner_image:     bannerPath ?? undefined,
+      highlight_video:  videoPath  ?? undefined,
       price_kes:   data.type === "paid" ? (data.price_kes ?? 0) : 0,
       // empty strings → null
       venue_map_url:     data.venue_map_url || null,
@@ -108,48 +168,230 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
     router.refresh();
   }
 
+  const mediaChanged = !isNew && (
+    bannerPath !== (defaultValues?.banner_image ?? null) ||
+    coverPath  !== (defaultValues?.cover_image  ?? null) ||
+    videoPath  !== (defaultValues?.highlight_video ?? null)
+  );
+  const hasUnsavedChanges = !isNew && (isDirty || mediaChanged);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col min-h-full">
 
       <div className="flex-1 space-y-6 pb-5">
 
-      {/* Cover image */}
-      <div className="bg-white rounded-2xl border border-mist p-6 space-y-4">
-        <h3 className="text-sm font-semibold text-charcoal">Cover image</h3>
-        <div className={cn(
-          "relative rounded-2xl border-2 border-dashed border-mist flex items-center justify-center overflow-hidden transition-all",
-          coverPath ? "h-48" : "h-36 hover:border-forest/30 cursor-pointer"
-        )}>
-          {coverPath ? (
-            <>
-              <NextImage
-                src={`${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/event-images/${coverPath}`}
-                alt="Cover"
-                fill
-                className="object-cover"
-                unoptimized
-              />
-              <button
-                type="button"
-                onClick={() => setCoverPath(null)}
-                className="absolute top-2 right-2 w-7 h-7 rounded-full bg-black/60 flex items-center justify-center text-white hover:bg-black/80 transition-colors"
-              >
-                <X size={12} />
-              </button>
-            </>
-          ) : (
-            <label className="flex flex-col items-center gap-2 cursor-pointer w-full h-full justify-center">
-              {uploading ? (
-                <Loader2 size={18} className="animate-spin text-forest" />
-              ) : (
-                <>
-                  <ImageIcon size={20} className="text-charcoal/25" />
-                  <span className="text-xs text-charcoal/40">Click to upload cover image</span>
-                  <span className="text-[10px] text-charcoal/25">JPEG, PNG, WebP — max 10MB</span>
-                </>
+      {/* Media — Banner, Poster, Highlight video */}
+      <div className="bg-white rounded-2xl border border-mist p-6 space-y-5">
+        <div>
+          <h3 className="text-sm font-semibold text-charcoal">Media</h3>
+          <p className="text-xs text-charcoal/45 mt-0.5">Banner: wide hero background. Poster: portrait shown in event details.</p>
+        </div>
+
+        {/* Banner + Poster — side by side */}
+        <div className="grid grid-cols-2 gap-4">
+
+          {/* Banner */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-charcoal/60">Banner</span>
+              <span className="text-[11px] text-charcoal/30">landscape · hero bg</span>
+            </div>
+            {bannerPath ? (
+              <div className="rounded-2xl overflow-hidden border border-mist">
+                <div className="relative h-32 bg-charcoal/5 cursor-zoom-in" onClick={() => setLightboxSrc(mediaUrl(bannerPath))}>
+                  <NextImage
+                    src={mediaUrl(bannerPath)!}
+                    alt="Banner"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
+                  <button type="button" onClick={() => setLightboxSrc(mediaUrl(bannerPath))}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all">
+                    <Eye size={10} /> View
+                  </button>
+                  <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
+                    <RefreshCw size={10} /> Replace
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                      onChange={(e) => uploadImage(e, setUploadingBanner, setBannerPath)} />
+                  </label>
+                  <button type="button" onClick={() => setBannerPath(null)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
+                    <Trash2 size={10} /> Delete
+                  </button>
+                </div>
+                {uploadingBanner && (
+                  <div className="flex items-center justify-center gap-2 py-2 text-xs text-forest">
+                    <Loader2 size={12} className="animate-spin" /> Uploading…
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <label className={cn(
+                  "flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3"
+                )}>
+                  {uploadingBanner
+                    ? <Loader2 size={16} className="animate-spin text-forest" />
+                    : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload banner</span></>
+                  }
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                    onChange={(e) => uploadImage(e, setUploadingBanner, setBannerPath)} />
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <Link2 size={11} className="text-charcoal/25 flex-shrink-0" />
+                  <input
+                    type="url"
+                    value={bannerUrlInput}
+                    onChange={e => setBannerUrlInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); if (bannerUrlInput.trim()) { setBannerPath(bannerUrlInput.trim()); setBannerUrlInput(""); } } }}
+                    placeholder="Or paste image URL"
+                    className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/40"
+                  />
+                  <button type="button" onClick={() => { if (bannerUrlInput.trim()) { setBannerPath(bannerUrlInput.trim()); setBannerUrlInput(""); } }}
+                    disabled={!bannerUrlInput.trim()}
+                    className="px-2.5 py-1.5 rounded-xl bg-forest text-cream text-[11px] font-semibold disabled:opacity-40 hover:bg-moss transition-colors">
+                    Use
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Poster */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs font-semibold text-charcoal/60">Poster</span>
+              <span className="text-[11px] text-charcoal/30">portrait · event details</span>
+            </div>
+            {coverPath ? (
+              <div className="rounded-2xl overflow-hidden border border-mist">
+                <div className="relative h-32 bg-charcoal/5 cursor-zoom-in" onClick={() => setLightboxSrc(mediaUrl(coverPath))}>
+                  <NextImage
+                    src={mediaUrl(coverPath)!}
+                    alt="Poster"
+                    fill
+                    className="object-cover object-top"
+                    unoptimized
+                  />
+                </div>
+                <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
+                  <button type="button" onClick={() => setLightboxSrc(mediaUrl(coverPath))}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all">
+                    <Eye size={10} /> View
+                  </button>
+                  <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
+                    <RefreshCw size={10} /> Replace
+                    <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                      onChange={(e) => uploadImage(e, setUploadingCover, setCoverPath)} />
+                  </label>
+                  <button type="button" onClick={() => setCoverPath(null)}
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
+                    <Trash2 size={10} /> Delete
+                  </button>
+                </div>
+                {uploadingCover && (
+                  <div className="flex items-center justify-center gap-2 py-2 text-xs text-forest">
+                    <Loader2 size={12} className="animate-spin" /> Uploading…
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-2">
+                <label className="flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
+                  {uploadingCover
+                    ? <Loader2 size={16} className="animate-spin text-forest" />
+                    : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload poster</span></>
+                  }
+                  <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
+                    onChange={(e) => uploadImage(e, setUploadingCover, setCoverPath)} />
+                </label>
+                <div className="flex items-center gap-1.5">
+                  <Link2 size={11} className="text-charcoal/25 flex-shrink-0" />
+                  <input
+                    type="url"
+                    value={coverUrlInput}
+                    onChange={e => setCoverUrlInput(e.target.value)}
+                    onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); if (coverUrlInput.trim()) { setCoverPath(coverUrlInput.trim()); setCoverUrlInput(""); } } }}
+                    placeholder="Or paste image URL"
+                    className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/40"
+                  />
+                  <button type="button" onClick={() => { if (coverUrlInput.trim()) { setCoverPath(coverUrlInput.trim()); setCoverUrlInput(""); } }}
+                    disabled={!coverUrlInput.trim()}
+                    className="px-2.5 py-1.5 rounded-xl bg-forest text-cream text-[11px] font-semibold disabled:opacity-40 hover:bg-moss transition-colors">
+                    Use
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Highlight video — full width */}
+        <div>
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-charcoal/60">Highlight video</span>
+            <span className="text-[11px] text-charcoal/30">looping clip · past event page</span>
+          </div>
+          {videoPath ? (
+            <div className="rounded-2xl overflow-hidden border border-mist">
+              <div className="relative h-56 bg-black cursor-zoom-in" onClick={() => setLightboxSrc(mediaUrl(videoPath))}>
+                <video
+                  src={mediaUrl(videoPath)!}
+                  autoPlay loop muted playsInline
+                  className="w-full h-full object-cover opacity-80"
+                />
+              </div>
+              <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
+                <button type="button" onClick={() => setLightboxSrc(mediaUrl(videoPath))}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all">
+                  <Eye size={10} /> View
+                </button>
+                <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
+                  <RefreshCw size={10} /> Replace
+                  <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only"
+                    onChange={handleVideoUpload} />
+                </label>
+                <button type="button" onClick={() => setVideoPath(null)}
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
+                  <Trash2 size={10} /> Delete
+                </button>
+              </div>
+              {uploadingVideo && (
+                <div className="flex items-center justify-center gap-2 py-2 text-xs text-forest">
+                  <Loader2 size={12} className="animate-spin" /> Uploading…
+                </div>
               )}
-              <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only" onChange={handleImageUpload} />
-            </label>
+            </div>
+          ) : (
+            <div className="space-y-2">
+              <label className="flex flex-col items-center justify-center gap-2 h-24 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
+                {uploadingVideo
+                  ? <Loader2 size={16} className="animate-spin text-forest" />
+                  : <><Video size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload highlight video (MP4 · max 100MB)</span></>
+                }
+                <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only"
+                  onChange={handleVideoUpload} />
+              </label>
+              <div className="flex items-center gap-1.5">
+                <Link2 size={11} className="text-charcoal/25 flex-shrink-0" />
+                <input
+                  type="url"
+                  value={videoUrlInput}
+                  onChange={e => setVideoUrlInput(e.target.value)}
+                  onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); if (videoUrlInput.trim()) { setVideoPath(videoUrlInput.trim()); setVideoUrlInput(""); } } }}
+                  placeholder="Or paste video URL"
+                  className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/40"
+                />
+                <button type="button" onClick={() => { if (videoUrlInput.trim()) { setVideoPath(videoUrlInput.trim()); setVideoUrlInput(""); } }}
+                  disabled={!videoUrlInput.trim()}
+                  className="px-2.5 py-1.5 rounded-xl bg-forest text-cream text-[11px] font-semibold disabled:opacity-40 hover:bg-moss transition-colors">
+                  Use
+                </button>
+              </div>
+            </div>
           )}
         </div>
       </div>
@@ -204,7 +446,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         </Field>
 
         <Field label="Description">
-          <textarea {...register("description")} rows={3} placeholder="What attendees can expect…" className={cn(inp(false), "resize-none")} />
+          <textarea {...register("description")} rows={4} placeholder="What attendees can expect…" className={cn(inp(false), "resize-y min-h-[100px]")} />
         </Field>
       </div>
 
@@ -234,7 +476,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
           </Field>
         </div>
         <Field label="Theme description">
-          <textarea {...register("theme_description")} rows={2} placeholder="A conversation about…" className={cn(inp(false), "resize-none")} />
+          <textarea {...register("theme_description")} rows={5} placeholder="A conversation about…" className={cn(inp(false), "resize-y min-h-[120px]")} />
         </Field>
       </div>
 
@@ -260,7 +502,9 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
       </div>{/* end flex-1 cards */}
 
       {/* Action bar — fixed at bottom of scroll container */}
-      <div className="sticky bottom-0 -mx-6 px-6 py-2 bg-off-white border-t border-mist flex items-center justify-between gap-3 z-10 mt-auto">
+      <div className={`sticky bottom-0 -mx-6 px-6 py-2 border-t flex items-center justify-between gap-3 z-10 mt-auto transition-colors ${
+        hasUnsavedChanges ? "bg-amber-50 border-amber-200" : "bg-off-white border-mist"
+      }`}>
         <div className="flex items-center gap-3">
           <button
             type="submit"
@@ -276,11 +520,50 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
           >
             Cancel
           </button>
+          {hasUnsavedChanges && !isSubmitting && (
+            <span className="flex items-center gap-1.5 text-xs text-amber-700 font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+              Unsaved changes
+            </span>
+          )}
         </div>
         {submitError && (
           <p className="text-sm text-red-500 text-right">{submitError}</p>
         )}
       </div>
+
+      {/* Lightbox */}
+      {lightboxSrc && (
+        <div
+          className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
+          onClick={() => setLightboxSrc(null)}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxSrc(null)}
+            className="absolute top-4 right-4 p-2.5 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+          >
+            <X size={20} />
+          </button>
+          {lightboxSrc.match(/\.(mp4|webm|mov|MOV)$/) ? (
+            <video
+              src={lightboxSrc}
+              controls
+              autoPlay
+              className="max-w-full max-h-[88vh] rounded-2xl shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            />
+          ) : (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={lightboxSrc}
+              alt="Preview"
+              className="max-w-full max-h-[88vh] object-contain rounded-2xl shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            />
+          )}
+        </div>
+      )}
     </form>
   );
 }

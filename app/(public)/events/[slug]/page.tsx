@@ -1,19 +1,26 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import Link from "next/link";
 import { notFound } from "next/navigation";
-import { Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio, Shirt, Users } from "lucide-react";
+import { ArrowRight, Calendar, Clock, MapPin, ExternalLink, Music2, BookOpen, History, Radio, Shirt, Users } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { storageUrl, SITE_URL, SITE_NAME } from "@/lib/constants";
 import { FadeIn } from "@/components/motion/fade-in";
 import { RegistrationModal } from "@/components/events/registration-modal";
 import { EventQRCode } from "@/components/events/event-qr-code";
+import { EventShareButtons } from "@/components/events/event-share-buttons";
+import { PosterViewer }      from "@/components/events/poster-viewer";
+import { PastEventCard }     from "@/components/events/past-event-card";
+import { GalleryCarousel }   from "@/components/events/gallery-carousel";
 import type { Event } from "@/types/database";
 
 export const revalidate = 60;
 
 type Props = { params: Promise<{ slug: string }> };
 
-async function getEventWithCount(slug: string): Promise<{ event: Event; registrantCount: number } | null> {
+interface EventImageRow { id: string; path: string; caption: string | null; sort_order: number; }
+
+async function getEventWithCount(slug: string): Promise<{ event: Event; registrantCount: number; galleryImages: EventImageRow[] } | null> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
@@ -25,16 +32,17 @@ async function getEventWithCount(slug: string): Promise<{ event: Event; registra
     if (!data) return null;
     const event = data as Event;
 
-    let registrantCount = 0;
-    if (event.capacity) {
-      const { count } = await supabase
-        .from("registrations")
-        .select("id", { count: "exact", head: true })
-        .eq("event_id", event.id)
-        .is("deleted_at", null);
-      registrantCount = count ?? 0;
-    }
-    return { event, registrantCount };
+    const [registrantResult, imagesResult] = await Promise.all([
+      event.capacity
+        ? supabase.from("registrations").select("id", { count: "exact", head: true }).eq("event_id", event.id).is("deleted_at", null)
+        : Promise.resolve({ count: 0 }),
+      supabase.from("event_images").select("id, path, caption, sort_order").eq("event_id", event.id).order("sort_order"),
+    ]);
+
+    const registrantCount = (registrantResult as { count: number | null }).count ?? 0;
+    const galleryImages   = ((imagesResult as { data: EventImageRow[] | null }).data ?? []) as EventImageRow[];
+
+    return { event, registrantCount, galleryImages };
   } catch {
     return null;
   }
@@ -46,7 +54,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const event = result?.event;
   if (!event) return {};
 
-  const coverUrl = event.cover_image
+  const ogImage = event.banner_image
+    ? storageUrl(`event-images/${event.banner_image}`, { width: 1200 })
+    : event.cover_image
     ? storageUrl(`event-images/${event.cover_image}`, { width: 1200 })
     : undefined;
 
@@ -63,7 +73,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: event.description ?? `${event.title} — ${formattedDate}`,
       url: `${SITE_URL}/events/${slug}`,
       type: "website",
-      ...(coverUrl ? { images: [{ url: coverUrl, width: 1200, alt: event.title }] } : {}),
+      ...(ogImage ? { images: [{ url: ogImage, width: 1200, alt: event.title }] } : {}),
     },
   };
 }
@@ -80,6 +90,14 @@ export async function generateStaticParams() {
   } catch {
     return [];
   }
+}
+
+function getYouTubeEmbedUrl(url: string): string | null {
+  const watchMatch = url.match(/youtube\.com\/watch\?(?:.*&)?v=([A-Za-z0-9_-]+)/);
+  if (watchMatch) return `https://www.youtube.com/embed/${watchMatch[1]}?rel=0`;
+  const shortMatch = url.match(/youtu\.be\/([A-Za-z0-9_-]+)/);
+  if (shortMatch) return `https://www.youtube.com/embed/${shortMatch[1]}?rel=0`;
+  return null;
 }
 
 function jsonLd(event: Event) {
@@ -104,53 +122,77 @@ function jsonLd(event: Event) {
           },
         }
       : {}),
-    ...(event.cover_image
+    ...(event.banner_image
+      ? { image: storageUrl(`event-images/${event.banner_image}`, { width: 1200 }) }
+      : event.cover_image
       ? { image: storageUrl(`event-images/${event.cover_image}`, { width: 1200 }) }
       : {}),
   };
   return JSON.stringify(base);
 }
 
-// Fallback hero photos when event has no cover image
-const HERO_FALLBACKS = [
+// African-context fallback banners (used only when no banner_image is uploaded)
+const BANNER_FALLBACKS = [
+  "https://images.unsplash.com/photo-1594608661623-aa0bd3a69d98?auto=format&fit=crop&w=1600&q=80",
   "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1540575467063-178a50c2df87?auto=format&fit=crop&w=1600&q=80",
-  "https://images.unsplash.com/photo-1501386761578-eac5c94b800a?auto=format&fit=crop&w=1600&q=80",
+  "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=80",
   "https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=1600&q=80",
 ];
-function pickHeroFallback(slug: string) {
+function pickBannerFallback(slug: string) {
   const hash = slug.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-  return HERO_FALLBACKS[hash % HERO_FALLBACKS.length];
+  return BANNER_FALLBACKS[hash % BANNER_FALLBACKS.length];
 }
 
 export default async function EventDetailPage({ params }: Props) {
   const { slug } = await params;
   const result = await getEventWithCount(slug);
   if (!result) notFound();
-  const { event, registrantCount } = result;
+  const { event, registrantCount, galleryImages } = result;
 
-  const coverUrl = event.cover_image
-    ? storageUrl(`event-images/${event.cover_image}`, { width: 1600, quality: 85 })
-    : pickHeroFallback(event.slug);
+  // Banner = hero background. Poster (cover_image) shown in details, never as hero bg.
+  const bannerUrl = event.banner_image
+    ? storageUrl(`event-images/${event.banner_image}`, { width: 1600, quality: 85 })
+    : pickBannerFallback(event.slug);
+
+  function resolveMedia(path: string | null | undefined): string | null {
+    if (!path) return null;
+    if (path.startsWith("http://") || path.startsWith("https://")) return path;
+    return storageUrl(`event-images/${path}`);
+  }
+
+  const posterThumbUrl = event.cover_image
+    ? (event.cover_image.startsWith("http")
+        ? event.cover_image
+        : storageUrl(`event-images/${event.cover_image}`, { width: 400, quality: 85 }))
+    : null;
+
+  const posterFullUrl = event.cover_image
+    ? resolveMedia(event.cover_image)
+    : null;
+
+  const posterUrl = posterThumbUrl;
+
+  const videoUrl = resolveMedia(event.highlight_video);
 
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
   const time = event.event_time.slice(0, 5).replace(":", ".");
 
-  const isOpen = event.status === "published" || event.status === "live";
-  const isFull = !!(event.capacity && registrantCount >= event.capacity);
+  const isOpen   = event.status === "published" || event.status === "live";
+  const isPast   = event.status === "past";
+  const isFull   = !!(event.capacity && registrantCount >= event.capacity);
+  const eventUrl = `${SITE_URL}/events/${event.slug}`;
 
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(event) }} />
 
-      {/* Hero */}
+      {/* Hero — banner image only */}
       <section className="relative min-h-[70vh] flex items-end overflow-hidden pt-20">
-        {/* BG photo — always present */}
         <div className="absolute inset-0">
           <Image
-            src={coverUrl}
+            src={bannerUrl}
             alt=""
             fill
             className="object-cover scale-[1.03] transition-transform duration-[8s] ease-out"
@@ -160,12 +202,12 @@ export default async function EventDetailPage({ params }: Props) {
             unoptimized
           />
         </div>
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/45 to-black/20" />
-        {/* Subtle colour tint for brand feel */}
-        <div className="absolute inset-0 bg-gradient-to-br from-forest/30 via-transparent to-transparent" />
+        {/* Deep overlay for text readability regardless of image brightness */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/55 to-black/25" />
+        <div className="absolute inset-0 bg-gradient-to-br from-forest/35 via-transparent to-transparent" />
 
-        {/* Status ribbon — sits over the hero */}
-        {event.status === "past" && (
+        {/* Status ribbons */}
+        {isPast && (
           <div className="absolute top-[72px] left-0 right-0 z-10 flex justify-center pointer-events-none">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/50 backdrop-blur-md border border-cream/15 text-cream/70 text-xs font-medium">
               <History size={11} className="text-cream/50" />
@@ -185,9 +227,8 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* Decorative */}
         <div className="absolute top-24 right-12 w-64 h-64 rounded-full border border-cream/5 hidden lg:block" />
-        <div className="absolute inset-0 opacity-[0.04]"
+        <div className="absolute inset-0 opacity-[0.03]"
           style={{
             backgroundImage: "radial-gradient(circle, #fdfcf8 1px, transparent 1px)",
             backgroundSize: "28px 28px",
@@ -235,7 +276,6 @@ export default async function EventDetailPage({ params }: Props) {
             {/* Left — info */}
             <div className="lg:col-span-2 space-y-10">
 
-              {/* Description */}
               {event.description && (
                 <FadeIn>
                   <p className="text-charcoal/70 leading-relaxed text-base sm:text-lg max-w-2xl">
@@ -244,32 +284,87 @@ export default async function EventDetailPage({ params }: Props) {
                 </FadeIn>
               )}
 
-              {/* Theme block */}
+              {/* Theme block — poster lives inside on the right */}
               {event.theme_title && (
                 <FadeIn>
                   <div className="rounded-3xl bg-forest p-8 text-cream relative overflow-hidden">
                     <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_100%_0%,rgba(201,162,74,0.12),transparent)]" />
-                    <div className="relative">
-                      <span className="label-caps text-gold/70 text-xs">Tonight&apos;s Theme</span>
-                      <h2 className="font-display text-3xl sm:text-4xl font-semibold mt-1 mb-3">
-                        {event.theme_title}
-                      </h2>
-                      {event.theme_scripture && (
-                        <div className="flex items-center gap-2 text-cream/50 text-sm mb-4">
-                          <BookOpen size={13} />
-                          <span>{event.theme_scripture}</span>
-                        </div>
-                      )}
-                      {event.theme_description && (
-                        <p className="text-cream/60 text-sm leading-relaxed">{event.theme_description}</p>
+                    <div className="relative flex items-start gap-6">
+                      <div className="flex-1 min-w-0">
+                        <span className="label-caps text-gold/70 text-xs">Tonight&apos;s Theme</span>
+                        <h2 className="font-display text-3xl sm:text-4xl font-semibold mt-1 mb-3">
+                          {event.theme_title}
+                        </h2>
+                        {event.theme_scripture && (
+                          <div className="flex items-center gap-2 text-cream/50 text-sm mb-4">
+                            <BookOpen size={13} />
+                            <span>{event.theme_scripture}</span>
+                          </div>
+                        )}
+                        {event.theme_description && (
+                          <p className="text-cream/60 text-sm leading-relaxed">{event.theme_description}</p>
+                        )}
+                      </div>
+                      {posterUrl && (
+                        <PosterViewer
+                          src={posterUrl}
+                          fullSrc={posterFullUrl ?? posterUrl}
+                          title={event.title}
+                          thumbnailClassName="relative w-20 flex-shrink-0 rounded-xl overflow-hidden shadow-lg border border-cream/15 hover:border-cream/30 hover:scale-[1.02] transition-all duration-200"
+                        />
                       )}
                     </div>
                   </div>
                 </FadeIn>
               )}
 
-              {/* Dress code */}
-              {event.dress_code && (
+              {/* Highlight video — YouTube embed or direct file */}
+              {videoUrl && (() => {
+                const ytEmbed = getYouTubeEmbedUrl(videoUrl);
+                return (
+                  <FadeIn>
+                    {ytEmbed ? (
+                      <div className="rounded-3xl overflow-hidden border border-mist shadow-lg aspect-video">
+                        <iframe
+                          src={ytEmbed}
+                          title="Highlight video"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          className="w-full h-full"
+                        />
+                      </div>
+                    ) : (
+                      <div className="rounded-3xl overflow-hidden border border-mist bg-black shadow-lg">
+                        <video
+                          src={videoUrl}
+                          autoPlay
+                          muted
+                          playsInline
+                          controls
+                          loop
+                          className="w-full"
+                        />
+                      </div>
+                    )}
+                  </FadeIn>
+                );
+              })()}
+
+              {/* Poster shown standalone only when there is no theme block to host it */}
+              {posterUrl && !event.theme_title && (
+                <FadeIn>
+                  <div className="flex items-center gap-4">
+                    <PosterViewer src={posterUrl} fullSrc={posterFullUrl ?? posterUrl} title={event.title} />
+                    <div>
+                      <p className="text-sm font-medium text-charcoal">Event Poster</p>
+                      <p className="text-xs text-charcoal/40 mt-0.5">Tap to view</p>
+                    </div>
+                  </div>
+                </FadeIn>
+              )}
+
+              {/* Dress code — not relevant on past events */}
+              {event.dress_code && !isPast && (
                 <FadeIn>
                   <div className="rounded-2xl bg-gold/8 border border-gold/20 p-5 flex items-start gap-4">
                     <div className="w-9 h-9 rounded-xl bg-gold/15 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -283,8 +378,8 @@ export default async function EventDetailPage({ params }: Props) {
                 </FadeIn>
               )}
 
-              {/* Venue details */}
-              {(event.venue_name || event.venue_address) && (
+              {/* Venue — only in left column for upcoming events; past events show it in sidebar */}
+              {!isPast && (event.venue_name || event.venue_address) && (
                 <FadeIn>
                   <div>
                     <span className="label-caps text-charcoal/50 text-xs">Venue</span>
@@ -334,67 +429,132 @@ export default async function EventDetailPage({ params }: Props) {
               )}
             </div>
 
-            {/* Right — registration card */}
+            {/* Right — registration card OR past session card + venue */}
             <div className="lg:col-span-1">
               <FadeIn delay={0.1}>
-                <div className="sticky top-28 rounded-3xl border border-mist bg-off-white p-7 shadow-card">
-                  {/* Entry type */}
-                  <div className="flex items-center justify-between mb-5">
-                    <span className="text-sm font-semibold text-charcoal">Entry</span>
-                    <span className="text-lg font-display font-semibold text-forest">
-                      {event.type === "free" ? "Free" : `KES ${event.price_kes?.toLocaleString()}`}
-                    </span>
-                  </div>
-
-                  <div className="space-y-3 mb-6">
-                    <InfoRow icon={<Calendar size={12} />} label={formattedDate} />
-                    <InfoRow icon={<Clock size={12} />} label={`${time}pm`} />
-                    {event.venue_name && <InfoRow icon={<MapPin size={12} />} label={event.venue_name} />}
-                    {event.dress_code && <InfoRow icon={<Shirt size={12} />} label={event.dress_code} />}
-                    {event.capacity && (
-                      <InfoRow
-                        icon={<Users size={12} />}
-                        label={isFull
-                          ? `${event.capacity} — session full`
-                          : `${registrantCount} / ${event.capacity} registered`
-                        }
-                      />
+                {isPast ? (
+                  <div className="space-y-4">
+                    <PastEventCard event={event} />
+                    {(event.venue_name || event.venue_address) && (
+                      <div className="rounded-2xl bg-off-white border border-mist p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="w-7 h-7 rounded-lg bg-forest/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <MapPin size={13} className="text-forest" />
+                          </div>
+                          <div>
+                            {event.venue_name && (
+                              <p className="font-medium text-charcoal text-sm">{event.venue_name}</p>
+                            )}
+                            {event.venue_address && (
+                              <p className="text-charcoal/50 text-xs mt-0.5">{event.venue_address}</p>
+                            )}
+                            {event.venue_map_url && (
+                              <a href={event.venue_map_url} target="_blank" rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-xs text-forest mt-1.5 hover:underline">
+                                Open in Maps <ExternalLink size={10} />
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      </div>
                     )}
                   </div>
-
-                  {isOpen && isFull ? (
-                    <div className="w-full py-3.5 rounded-full bg-red-50 border border-red-100 text-red-500 text-sm text-center font-medium">
-                      This session is full
+                ) : (
+                  <div className="sticky top-28 rounded-3xl border border-mist bg-off-white p-7 shadow-card">
+                    <div className="flex items-center justify-between mb-5">
+                      <span className="text-sm font-semibold text-charcoal">Entry</span>
+                      <span className="text-lg font-display font-semibold text-forest">
+                        {event.type === "free" ? "Free" : `KES ${event.price_kes?.toLocaleString()}`}
+                      </span>
                     </div>
-                  ) : isOpen ? (
-                    <RegistrationModal event={event} />
-                  ) : (
-                    <div className="w-full py-3.5 rounded-full bg-charcoal/8 text-charcoal/40 text-sm text-center font-medium cursor-not-allowed">
-                      {event.status === "past" ? "Session ended" : "Registration closed"}
-                    </div>
-                  )}
 
-                  {isOpen && !isFull && (
-                    <p className="text-center text-xs text-charcoal/50 mt-3 leading-relaxed">
-                      Ticket sent to your email — link can also be copied &amp; shared
-                    </p>
-                  )}
-
-                  {/* QR code for sharing */}
-                  {isOpen && !isFull && (
-                    <div className="mt-5">
-                      <EventQRCode slug={event.slug} />
+                    <div className="space-y-3 mb-6">
+                      <InfoRow icon={<Calendar size={12} />} label={formattedDate} />
+                      <InfoRow icon={<Clock size={12} />} label={`${time}pm`} />
+                      {event.venue_name && <InfoRow icon={<MapPin size={12} />} label={event.venue_name} />}
+                      {event.dress_code && <InfoRow icon={<Shirt size={12} />} label={event.dress_code} />}
+                      {event.capacity && (
+                        <InfoRow
+                          icon={<Users size={12} />}
+                          label={isFull
+                            ? `${event.capacity} — session full`
+                            : `${registrantCount} / ${event.capacity} registered`
+                          }
+                        />
+                      )}
                     </div>
-                  )}
-                </div>
+
+                    {isOpen && isFull ? (
+                      <div className="w-full py-3.5 rounded-full bg-red-50 border border-red-100 text-red-500 text-sm text-center font-medium">
+                        This session is full
+                      </div>
+                    ) : isOpen ? (
+                      <RegistrationModal event={event} />
+                    ) : (
+                      <div className="w-full py-3.5 rounded-full bg-charcoal/8 text-charcoal/40 text-sm text-center font-medium cursor-not-allowed">
+                        Registration closed
+                      </div>
+                    )}
+
+                    {isOpen && !isFull && (
+                      <p className="text-center text-xs text-charcoal/50 mt-3 leading-relaxed">
+                        Ticket sent to your email — link can also be copied &amp; shared
+                      </p>
+                    )}
+
+                    {isOpen && !isFull && (
+                      <div className="mt-5 space-y-4">
+                        <EventQRCode slug={event.slug} />
+                        <div className="pt-2 border-t border-mist">
+                          <p className="text-xs text-charcoal/40 mb-2 text-center">Share this session</p>
+                          <EventShareButtons url={eventUrl} title={event.title} date={formattedDate} variant="card" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
               </FadeIn>
             </div>
+
           </div>
         </div>
       </section>
+
+      {/* Event photos — auto-scrolling carousel */}
+      {galleryImages.length > 0 && (
+        <section className="py-16 md:py-20 bg-charcoal">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+            <FadeIn>
+              <div className="flex items-end justify-between mb-8">
+                <div>
+                  <span className="label-caps text-cream/35 text-xs">From the session</span>
+                  <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mt-1">{event.title}</h2>
+                </div>
+                <Link
+                  href="/gallery"
+                  className="inline-flex items-center gap-1.5 text-xs text-cream/50 hover:text-cream font-medium transition-colors"
+                >
+                  View full gallery <ArrowRight size={11} />
+                </Link>
+              </div>
+            </FadeIn>
+
+            <GalleryCarousel
+              eventTitle={event.title}
+              images={galleryImages.map(img => ({
+                id:      img.id,
+                src:     storageUrl(`event-images/${img.path}`, { width: 600, quality: 80 }),
+                fullSrc: storageUrl(`event-images/${img.path}`),
+                alt:     img.caption ?? `${event.title} photo`,
+              }))}
+            />
+          </div>
+        </section>
+      )}
     </>
   );
 }
+
 
 function InfoRow({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (

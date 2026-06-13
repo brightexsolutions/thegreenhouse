@@ -8,13 +8,14 @@ export async function POST(req: NextRequest, { params }: Props) {
   const { slug } = await params;
 
   const body = await req.json().catch(() => ({})) as {
-    first_name?: string;
-    last_name?:  string;
-    phone?:      string;
-    token?:      string;
+    first_name?:    string;
+    last_name?:     string;
+    phone?:         string;
+    token?:         string;
+    photo_consent?: boolean;
   };
 
-  const { first_name, last_name, phone, token } = body;
+  const { first_name, last_name, phone, token, photo_consent } = body;
 
   if (!first_name?.trim() || !last_name?.trim() || !token) {
     return NextResponse.json({ error: "first_name, last_name and token are required" }, { status: 400 });
@@ -39,17 +40,18 @@ export async function POST(req: NextRequest, { params }: Props) {
   const { data, error } = await supabase
     .from("registrations")
     .insert({
-      event_id:     eventId,
-      first_name:   first_name.trim(),
-      last_name:    last_name.trim(),
-      phone:        phone?.trim() ? normalisePhone(phone.trim()) : null,
+      event_id:        eventId,
+      first_name:      first_name.trim(),
+      last_name:       last_name.trim(),
+      phone:           phone?.trim() ? normalisePhone(phone.trim()) : null,
       role:            "guest",
       source:          "other",
       is_walkin:       true,
       checked_in:      true,
       whatsapp_opt_in: false,
+      photo_consent:   photo_consent ?? false,
     })
-    .select("id, first_name, last_name, phone, role, checked_in, is_walkin")
+    .select("id, first_name, last_name, email, phone, role, ticket_token, checked_in, is_walkin, photo_consent, created_at")
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

@@ -9,8 +9,8 @@ const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
 
 const PHOTOS = {
   pause:   "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=600&q=80",
-  worship: "https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=700&q=80",
-  connect: "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=700&q=80",
+  worship: "https://res.cloudinary.com/dpjget2he/image/upload/v1781375011/IMG_4476_mkgrmd.jpg",
+  connect: "https://res.cloudinary.com/dpjget2he/image/upload/v1781373355/IMG_4402_gwdrn1.jpg",
   reflect: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=700&q=80",
 };
 

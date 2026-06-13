@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { CheckCircle2, XCircle, Eye, EyeOff, Trash2, Loader2, Camera, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 interface Event {
   id:         string;
@@ -27,6 +28,7 @@ interface Props {
 }
 
 export function AttendeePhotoApproval({ events }: Props) {
+  const confirm = useConfirm();
   const [selectedEventId, setSelectedEventId] = useState(events[0]?.id ?? "");
   const [photos,  setPhotos]  = useState<Photo[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,7 +70,8 @@ export function AttendeePhotoApproval({ events }: Props) {
   }
 
   async function deletePhoto(photoId: string) {
-    if (!confirm("Delete this photo permanently?")) return;
+    const ok = await confirm({ message: "This photo will be permanently deleted.", destructive: true });
+    if (!ok) return;
     setPending(p => ({ ...p, [photoId]: true }));
     const res = await fetch(`/api/admin/events/${selectedEventId}/attendee-photos`, {
       method: "DELETE",

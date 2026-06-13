@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { AdminSidebar } from "@/components/layout/admin-sidebar";
 import { AdminTopbar } from "@/components/layout/admin-topbar";
+import { ConfirmProvider } from "@/components/ui/confirm-dialog";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const h = await headers();
@@ -35,7 +36,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <AdminTopbar fullName={profile.full_name} role={profile.role} />
         <main className="flex-1 overflow-y-auto overflow-x-hidden p-6">
-          {children}
+          <ConfirmProvider>
+            {children}
+          </ConfirmProvider>
         </main>
       </div>
     </div>

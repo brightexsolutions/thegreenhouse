@@ -41,7 +41,9 @@ export default async function EditEventPage({ params }: Props) {
           dress_code:        event.dress_code ?? undefined,
           playlist_url:      event.playlist_url ?? undefined,
           feedback_url:      event.feedback_url ?? undefined,
-          cover_image:       event.cover_image ?? undefined,
+          cover_image:       event.cover_image     ?? undefined,
+          banner_image:      event.banner_image    ?? undefined,
+          highlight_video:   event.highlight_video ?? undefined,
           slug:              event.slug,
         }}
       />
