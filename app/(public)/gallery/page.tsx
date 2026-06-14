@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { FadeIn } from "@/components/motion/fade-in";
 import { storageUrl } from "@/lib/constants";
 import { GalleryGrid } from "@/components/events/gallery-grid";
+import { GalleryVideos } from "@/components/gallery/gallery-videos";
 
 export const revalidate = 300;
 
@@ -98,6 +99,9 @@ export default async function GalleryPage() {
       {/* Gallery grid */}
       <section className="py-16 md:py-24 bg-cream">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+          {/* Videos — always shown above the photo grid */}
+          <GalleryVideos />
+
           {isEmpty ? (
             /* Empty state — placeholder grid with coming-soon overlay */
             <div className="relative">
