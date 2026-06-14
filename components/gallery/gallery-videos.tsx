@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Play, X, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
-import { SESSION_01_HIGHLIGHT_VIDEO, SESSION_01_UMWEMA_VIDEO } from "@/lib/constants";
+import { SESSION_01_HIGHLIGHT_VIDEO, SESSION_01_UMWEMA_VIDEO, SESSION_01_EBENEZER_VIDEO } from "@/lib/constants";
 
 const VIDEOS = [
   {
@@ -23,6 +23,15 @@ const VIDEOS = [
     duration:    "6:04",
     src:         SESSION_01_UMWEMA_VIDEO,
     thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2/v1781426590/greenhouse-session-1-umwema_znsmuo.jpg",
+  },
+  {
+    id:          "ebenezer",
+    title:       "Wewe ni Ebenezer",
+    translation: "You are my Ebenezer",
+    label:       "Session 01 · 2026",
+    duration:    "2:30",
+    src:         SESSION_01_EBENEZER_VIDEO,
+    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.jpg",
   },
 ];
 
@@ -171,7 +180,7 @@ export function GalleryVideos() {
           </motion.div>
 
           {/* Video cards */}
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
             {VIDEOS.map((v, i) => (
               <motion.button
                 key={v.id}
@@ -180,7 +189,7 @@ export function GalleryVideos() {
                 animate={isInView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.38 + i * 0.16, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -4 }}
-                className="group relative w-full sm:w-[272px] rounded-2xl overflow-hidden text-left
+                className="group relative w-full rounded-2xl overflow-hidden text-left
                            border border-white/[0.055] hover:border-gold/28
                            shadow-xl shadow-black/50 hover:shadow-[0_12px_44px_rgba(201,162,74,0.18)]
                            transition-[border-color,box-shadow] duration-400

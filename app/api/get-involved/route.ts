@@ -3,6 +3,7 @@ import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { normalisePhone } from "@/lib/phone";
 import { logger } from "@/lib/logger";
+import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_NAME, SITE_URL, CONTACT_EMAIL, REPLY_TO_EMAIL, COMMS_FROM_EMAIL } from "@/lib/constants";
 
 const schema = z.object({
@@ -41,28 +42,53 @@ export async function POST(req: NextRequest) {
   const interestLabel = INTEREST_LABELS[d.interest] ?? d.interest;
 
   try {
+    // Persist submission to DB for admin review
+    const supabase = createAdminClient();
+    await supabase.from("enquiries").insert({
+      full_name:    d.full_name,
+      email:        d.email ?? null,
+      phone:        d.phone ?? null,
+      interest:     d.interest,
+      partner_type: d.partner_type ?? null,
+      message:      d.message ?? null,
+    });
+
     const { Resend } = await import("resend");
     const resend = new Resend(process.env.RESEND_API_KEY ?? "placeholder");
     const from   = COMMS_FROM_EMAIL();
+    const isPartner = d.interest === "partner";
+
+    // Quick-reply links for the notification email
+    const waLink   = d.phone ? `https://wa.me/${d.phone.replace(/\D/g, "")}` : null;
+    const mailLink = d.email ? `mailto:${d.email}` : null;
+
+    const replyButtons = [
+      ...(mailLink ? [`<a href="${mailLink}" style="display:inline-block;padding:10px 20px;background:#1b3a2a;color:#f7f2e8;text-decoration:none;border-radius:100px;font-size:13px;font-weight:600">Reply by email</a>`] : []),
+      ...(waLink   ? [`<a href="${waLink}"   style="display:inline-block;padding:10px 20px;background:#25D366;color:#fff;text-decoration:none;border-radius:100px;font-size:13px;font-weight:600">WhatsApp</a>`] : []),
+    ].join("&nbsp;&nbsp;");
 
     // Notification to team
     await resend.emails.send({
       from,
       to:      [CONTACT_EMAIL],
-      replyTo: d.email,
-      subject: `New involvement enquiry — ${d.full_name} (${interestLabel})`,
+      replyTo: d.email ?? undefined,
+      subject: isPartner
+        ? `⚡ Partnership enquiry — ${d.full_name}`
+        : `New involvement enquiry — ${d.full_name} (${interestLabel})`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a18">
+          ${isPartner ? `<div style="background:#c9a24a;color:#fff;padding:6px 14px;border-radius:100px;display:inline-block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Partnership Enquiry</div>` : ""}
           <h2 style="color:#1b3a2a;margin-bottom:4px">New involvement enquiry</h2>
           <p style="color:#666;margin-top:0">via The Green House website</p>
           <table style="width:100%;border-collapse:collapse;margin-top:20px">
             <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666;width:140px">Name</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${d.full_name}</td></tr>
-            <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Email</td><td style="padding:10px 0;border-bottom:1px solid #eee"><a href="mailto:${d.email}" style="color:#1b3a2a">${d.email}</a></td></tr>
+            ${d.email ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Email</td><td style="padding:10px 0;border-bottom:1px solid #eee"><a href="mailto:${d.email}" style="color:#1b3a2a">${d.email}</a></td></tr>` : ""}
             ${d.phone ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Phone</td><td style="padding:10px 0;border-bottom:1px solid #eee">${d.phone}</td></tr>` : ""}
             <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Interest</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600;color:#c9a24a">${interestLabel}</td></tr>
             ${d.partner_type ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Partnership type</td><td style="padding:10px 0;border-bottom:1px solid #eee">${d.partner_type}</td></tr>` : ""}
             ${d.message ? `<tr><td style="padding:10px 0;color:#666;vertical-align:top">Message</td><td style="padding:10px 0;white-space:pre-wrap">${d.message}</td></tr>` : ""}
           </table>
+          ${replyButtons ? `<div style="margin-top:24px;display:flex;gap:12px">${replyButtons}</div>` : ""}
         </div>
       `,
     });

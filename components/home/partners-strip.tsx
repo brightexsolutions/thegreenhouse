@@ -75,7 +75,7 @@ export function PartnersStrip() {
             return (
               <FadeIn key={partner.name} delay={i * 0.1}>
                 <div
-                  className={`group relative rounded-3xl overflow-hidden flex flex-col items-center justify-center min-h-[220px] sm:min-h-[240px] px-6 py-8 text-center
+                  className={`group relative rounded-3xl overflow-hidden flex flex-col items-center justify-center min-h-[180px] sm:min-h-[200px] px-6 py-7 text-center
                     ${partner.url ? "cursor-pointer" : ""}
                   `}
                 >
