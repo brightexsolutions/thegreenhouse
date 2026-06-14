@@ -95,7 +95,7 @@ export function UmwemaMoment() {
               {/* Caption strip */}
               <div className="pt-3.5 pb-1 px-1 flex items-center justify-between">
                 <span className="font-display text-sm text-charcoal/45 italic tracking-wide">
-                  Session 01 · March 2025
+                  Session 01 · March 2026
                 </span>
                 <span className="label-caps text-gold/55 text-[10px]">Nairobi</span>
               </div>
@@ -169,7 +169,7 @@ export function UmwemaMoment() {
               </div>
               <div>
                 <p className="text-xs font-semibold text-forest">Worship Team · Session 01</p>
-                <p className="text-xs text-charcoal/40 mt-0.5">March 28, 2025 · Nairobi, Kenya</p>
+                <p className="text-xs text-charcoal/40 mt-0.5">March 28, 2026 · Nairobi, Kenya</p>
               </div>
             </motion.div>
           </div>
