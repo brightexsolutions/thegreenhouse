@@ -10,8 +10,9 @@ import { RegistrationModal } from "@/components/events/registration-modal";
 import { EventQRCode } from "@/components/events/event-qr-code";
 import { EventShareButtons } from "@/components/events/event-share-buttons";
 import { PosterViewer }      from "@/components/events/poster-viewer";
-import { PastEventCard }     from "@/components/events/past-event-card";
-import { GalleryCarousel }   from "@/components/events/gallery-carousel";
+import { PastEventCard }           from "@/components/events/past-event-card";
+import { GalleryCarousel }         from "@/components/events/gallery-carousel";
+import { EventHighlightVideo }     from "@/components/events/event-highlight-video";
 import type { Event } from "@/types/database";
 
 export const revalidate = 60;
@@ -318,34 +319,18 @@ export default async function EventDetailPage({ params }: Props) {
                 </FadeIn>
               )}
 
-              {/* Highlight video — YouTube embed or direct file */}
+              {/* Highlight video */}
               {videoUrl && (() => {
                 const ytEmbed = getYouTubeEmbedUrl(videoUrl);
                 return (
                   <FadeIn>
-                    {ytEmbed ? (
-                      <div className="rounded-3xl overflow-hidden border border-mist shadow-lg aspect-video">
-                        <iframe
-                          src={ytEmbed}
-                          title="Highlight video"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          allowFullScreen
-                          className="w-full h-full"
-                        />
-                      </div>
-                    ) : (
-                      <div className="rounded-3xl overflow-hidden border border-mist bg-black shadow-lg">
-                        <video
-                          src={videoUrl}
-                          autoPlay
-                          muted
-                          playsInline
-                          controls
-                          loop
-                          className="w-full"
-                        />
-                      </div>
-                    )}
+                    <EventHighlightVideo
+                      src={ytEmbed ? undefined : videoUrl}
+                      youtubeEmbedUrl={ytEmbed ?? undefined}
+                      label="Session Highlight"
+                      eventTitle={event.title}
+                      eventDate={new Date(event.event_date).toLocaleDateString("en-KE", { month: "long", year: "numeric" })}
+                    />
                   </FadeIn>
                 );
               })()}
@@ -522,17 +507,46 @@ export default async function EventDetailPage({ params }: Props) {
 
       {/* Event photos — auto-scrolling carousel */}
       {galleryImages.length > 0 && (
-        <section className="py-16 md:py-20 bg-charcoal">
-          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <section className="relative py-16 md:py-20 bg-charcoal overflow-hidden">
+          {/* Ambient: gold glow top-left */}
+          <div
+            aria-hidden
+            className="absolute -top-16 left-1/4 w-[500px] h-[350px] pointer-events-none"
+            style={{ background: "radial-gradient(ellipse at 30% 0%, rgba(201,162,74,0.08) 0%, transparent 60%)" }}
+          />
+          {/* Ambient: forest glow bottom-right */}
+          <div
+            aria-hidden
+            className="absolute bottom-0 right-0 w-[600px] h-[420px] pointer-events-none"
+            style={{ background: "radial-gradient(ellipse at 100% 100%, rgba(27,58,42,0.45) 0%, transparent 65%)" }}
+          />
+          {/* Subtle grain texture */}
+          <div
+            aria-hidden
+            className="absolute inset-0 pointer-events-none opacity-[0.025]"
+            style={{
+              backgroundImage: `url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4'/><feColorMatrix type='saturate' values='0'/></filter><rect width='200' height='200' filter='url(%23n)'/></svg>")`,
+              backgroundSize: "200px",
+            }}
+          />
+          {/* Top edge fade */}
+          <div aria-hidden className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-black/25 to-transparent pointer-events-none" />
+          {/* Bottom edge fade */}
+          <div aria-hidden className="absolute bottom-0 inset-x-0 h-16 bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
+
+          <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
             <FadeIn>
               <div className="flex items-end justify-between mb-8">
                 <div>
-                  <span className="label-caps text-cream/35 text-xs">From the session</span>
-                  <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mt-1">{event.title}</h2>
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className="h-px w-5 bg-gold/50" />
+                    <span className="label-caps text-gold/60 text-xs">From the session</span>
+                  </div>
+                  <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream">{event.title}</h2>
                 </div>
                 <Link
                   href="/gallery"
-                  className="inline-flex items-center gap-1.5 text-xs text-cream/50 hover:text-cream font-medium transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs text-cream/40 hover:text-gold font-medium transition-colors"
                 >
                   View full gallery <ArrowRight size={11} />
                 </Link>
