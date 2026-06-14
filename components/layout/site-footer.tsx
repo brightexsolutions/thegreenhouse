@@ -26,12 +26,15 @@ export function SiteFooter() {
           {/* Brand column */}
           <div className="lg:col-span-2">
             <div className="flex items-center gap-2.5 mb-4">
-              <span className="w-7 h-7 rounded-full bg-gold/20 flex items-center justify-center">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 text-gold" fill="currentColor">
-                  <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-13 6 0-4 5-8 12-9C21 0 14 0 11 4c-2 3-4 7-4 11a8 8 0 0 0 4 7c2-5 5-10 6-14z"/>
+              <span className="w-8 h-8 rounded-full bg-gold/20 flex items-center justify-center">
+                <svg viewBox="0 0 24 24" className="w-[18px] h-[18px] text-gold" fill="currentColor">
+                  <g transform="translate(12,21)">
+                    <path transform="rotate(-32)" d="M0 0 C-2 -2.5 -2.4 -6.5 -0.8-11.5 C-0.2-13 0.2-13 0.8-11.5 C2.4-6.5 2 -2.5 0 0Z" opacity="0.6"/>
+                    <path transform="rotate(32)"  d="M0 0 C-2 -2.5 -2.4 -6.5 -0.8-11.5 C-0.2-13 0.2-13 0.8-11.5 C2.4-6.5 2 -2.5 0 0Z"/>
+                  </g>
                 </svg>
               </span>
-              <span className="font-display font-semibold text-cream text-base">{SITE_NAME}</span>
+              <span className="font-display font-medium text-cream text-[15px]">{SITE_NAME}</span>
             </div>
             <p className="text-sm text-cream/60 leading-relaxed max-w-xs">
               A {SESSION_FREQUENCY} cross-church gathering in Nairobi.

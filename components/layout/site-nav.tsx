@@ -65,10 +65,11 @@ export function SiteNav({ liveSlug }: SiteNavProps) {
               )}
             >
               <svg viewBox="0 0 24 24" className={cn("w-[18px] h-[18px]", solid ? "text-gold" : "text-forest")} fill="currentColor">
-                {/* Left leaf — organic teardrop curving upper-left */}
-                <path d="M12 20 C10 17 5 14 5 8 C5 4 9 2 12 5 C12 5 13 12 12 20Z" opacity="0.6"/>
-                {/* Right leaf — organic teardrop curving upper-right, on top */}
-                <path d="M12 20 C14 17 19 14 19 8 C19 4 15 2 12 5 C12 5 11 12 12 20Z"/>
+                {/* Two narrow leaf shapes rotated from a shared stem — like a plant sprig */}
+                <g transform="translate(12,21)">
+                  <path transform="rotate(-32)" d="M0 0 C-2 -2.5 -2.4 -6.5 -0.8-11.5 C-0.2-13 0.2-13 0.8-11.5 C2.4-6.5 2 -2.5 0 0Z" opacity="0.6"/>
+                  <path transform="rotate(32)"  d="M0 0 C-2 -2.5 -2.4 -6.5 -0.8-11.5 C-0.2-13 0.2-13 0.8-11.5 C2.4-6.5 2 -2.5 0 0Z"/>
+                </g>
               </svg>
             </span>
             <span
