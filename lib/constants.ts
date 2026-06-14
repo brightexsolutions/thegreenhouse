@@ -22,29 +22,36 @@ export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
 export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";
 export const SOCIAL_YOUTUBE   = "https://youtube.com/@thegreenhouseke";
 
-/** Partners & Supporters — add new entries here as they come on board */
+/** Partners & Supporters — add new entries here as they come on board.
+ *  logoUrl: public URL to partner logo image (PNG/SVG with transparency ideal).
+ *           If null, the partner name is displayed large instead.
+ */
 export const PARTNERS: Array<{
   name:        string;
   role:        string;
   description: string | null;
+  logoUrl:     string | null;
   url:         string | null;
 }> = [
   {
     name:        "Brightex Solutions",
     role:        "Technology & Web",
     description: "Building and maintaining the platform behind The Green House.",
+    logoUrl:     null,
     url:         "https://brightexsolutions.co.ke",
   },
   {
     name:        "Glace Confectionary",
     role:        "Refreshments",
     description: "Cakes, cookies, and treats that make every session sweeter.",
+    logoUrl:     null,
     url:         null,
   },
   {
     name:        "SADO",
     role:        "Partner",
     description: null,
+    logoUrl:     null,
     url:         null,
   },
 ];
