@@ -1,7 +1,16 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useMemo } from "react";
 import { Mail, Phone } from "lucide-react";
+
+type FilterKey = "all" | "partner" | "give" | "other";
+
+const FILTERS: { key: FilterKey; label: string }[] = [
+  { key: "all",     label: "All" },
+  { key: "partner", label: "Partnership" },
+  { key: "give",    label: "Support" },
+  { key: "other",   label: "Other" },
+];
 
 const INTEREST_LABELS: Record<string, string> = {
   worship_team:   "Worship team",
@@ -38,18 +47,58 @@ type Enquiry = {
 
 export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [scrolled, setScrolled] = useState(false);
+  const [scrolled, setScrolled]   = useState(false);
+  const [filter, setFilter]       = useState<FilterKey>("all");
 
   function handleScroll() {
     setScrolled((scrollRef.current?.scrollTop ?? 0) > 0);
   }
 
+  const counts = useMemo(() => ({
+    all:     enquiries.length,
+    partner: enquiries.filter(e => e.interest === "partner").length,
+    give:    enquiries.filter(e => e.interest === "give").length,
+    other:   enquiries.filter(e => e.interest !== "partner" && e.interest !== "give").length,
+  }), [enquiries]);
+
+  const visible = useMemo(() => {
+    if (filter === "all")     return enquiries;
+    if (filter === "partner") return enquiries.filter(e => e.interest === "partner");
+    if (filter === "give")    return enquiries.filter(e => e.interest === "give");
+    return enquiries.filter(e => e.interest !== "partner" && e.interest !== "give");
+  }, [enquiries, filter]);
+
   return (
-    <div
-      ref={scrollRef}
-      onScroll={handleScroll}
-      className="overflow-y-auto flex-1"
-    >
+    <>
+      {/* Filter tabs */}
+      <div className="flex items-center gap-1 px-4 pt-3.5 pb-0 border-b border-mist flex-shrink-0">
+        {FILTERS.map(({ key, label }) => (
+          <button
+            key={key}
+            onClick={() => { setFilter(key); scrollRef.current?.scrollTo(0, 0); }}
+            className={`relative px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap
+              ${filter === key
+                ? "text-forest bg-forest/5"
+                : "text-charcoal/45 hover:text-charcoal/70 hover:bg-charcoal/4"
+              }`}
+          >
+            {label}
+            <span className={`ml-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full
+              ${filter === key ? "bg-forest/12 text-forest" : "bg-charcoal/6 text-charcoal/35"}`}>
+              {counts[key]}
+            </span>
+            {filter === key && (
+              <span className="absolute bottom-0 inset-x-0 h-[2px] bg-forest rounded-t-full" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      <div
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="overflow-y-auto flex-1"
+      >
       <table className="w-full">
         <thead
           className={`sticky top-0 bg-white transition-shadow duration-150 ${
@@ -67,7 +116,14 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
           </tr>
         </thead>
         <tbody className="divide-y divide-mist">
-          {enquiries.map((e) => {
+          {visible.length === 0 ? (
+            <tr>
+              <td colSpan={5} className="px-5 py-14 text-center text-sm text-charcoal/30">
+                No {filter === "all" ? "" : FILTERS.find(f => f.key === filter)?.label.toLowerCase() + " "}enquiries yet
+              </td>
+            </tr>
+          ) : null}
+          {visible.map((e) => {
             const colorClass = INTEREST_COLORS[e.interest] ?? "bg-gray-50 text-gray-500 border-gray-200";
             const label      = INTEREST_LABELS[e.interest] ?? e.interest;
             const isPartner  = e.interest === "partner";
@@ -165,5 +221,6 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
         </tbody>
       </table>
     </div>
+    </>
   );
 }
