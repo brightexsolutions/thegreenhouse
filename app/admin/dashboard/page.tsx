@@ -212,8 +212,9 @@ export default async function AdminDashboardPage() {
                         {r.events.title.replace("The Green House — ", "")}
                       </span>
                     )}
-                    <p className="text-[10px] text-charcoal/30 flex-shrink-0">
-                      {new Date(r.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
+                    <p className="text-[10px] text-charcoal/30 flex-shrink-0 text-right">
+                      <span className="block">{new Date(r.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}</span>
+                      <span className="block text-charcoal/20 text-[9px]">{new Date(r.created_at).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })}</span>
                     </p>
                   </div>
                 ))}
