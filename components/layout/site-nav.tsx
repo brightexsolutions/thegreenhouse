@@ -64,7 +64,7 @@ export function SiteNav({ liveSlug }: SiteNavProps) {
                 solid ? "bg-forest" : "bg-cream"
               )}
             >
-              <svg viewBox="0 0 24 24" className={cn("w-[18px] h-[18px]", solid ? "text-gold" : "text-forest")} fill="currentColor">
+              <svg viewBox="0 0 24 24" className={cn("w-[22px] h-[22px]", solid ? "text-gold" : "text-forest")} fill="currentColor">
                 {/* Two narrow leaf shapes rotated from a shared stem — like a plant sprig */}
                 <g transform="translate(12,21)">
                   <path transform="rotate(-32)" d="M0 0 C-2 -2.5 -2.4 -6.5 -0.8-11.5 C-0.2-13 0.2-13 0.8-11.5 C2.4-6.5 2 -2.5 0 0Z" opacity="0.6"/>
