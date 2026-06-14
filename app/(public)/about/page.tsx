@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
 import { VisionCards } from "@/components/about/vision-cards";
 import { FaqAccordion } from "@/components/about/faq-accordion";
+import { UmwemaMoment } from "@/components/about/umwema-moment";
 import { SESSION_FREQUENCY } from "@/lib/constants";
 
 export const metadata: Metadata = {
@@ -187,6 +188,9 @@ export default function AboutPage() {
 
       {/* Pillars */}
       <VisionCards />
+
+      {/* Umwema — live worship moment from Session 01 */}
+      <UmwemaMoment />
 
       {/* FAQ */}
       <FaqAccordion />
