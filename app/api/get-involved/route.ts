@@ -3,7 +3,8 @@ import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
 import { normalisePhone } from "@/lib/phone";
 import { logger } from "@/lib/logger";
-import { SITE_NAME, SITE_URL, CONTACT_EMAIL, REPLY_TO_EMAIL, COMMS_FROM_EMAIL } from "@/lib/constants";
+import { createAdminClient } from "@/lib/supabase/server";
+import { SITE_NAME, SITE_URL, CONTACT_EMAIL, CONTACT_WHATSAPP, REPLY_TO_EMAIL, COMMS_FROM_EMAIL } from "@/lib/constants";
 
 const schema = z.object({
   full_name:    z.string().min(2).max(120).transform(s => s.trim()),
@@ -41,58 +42,163 @@ export async function POST(req: NextRequest) {
   const interestLabel = INTEREST_LABELS[d.interest] ?? d.interest;
 
   try {
+    // Persist submission to DB for admin review
+    const supabase = createAdminClient();
+    await supabase.from("enquiries").insert({
+      full_name:    d.full_name,
+      email:        d.email ?? null,
+      phone:        d.phone ?? null,
+      interest:     d.interest,
+      partner_type: d.partner_type ?? null,
+      message:      d.message ?? null,
+    });
+
     const { Resend } = await import("resend");
-    const resend = new Resend(process.env.RESEND_API_KEY ?? "placeholder");
-    const from   = COMMS_FROM_EMAIL();
+    const resend    = new Resend(process.env.RESEND_API_KEY ?? "placeholder");
+    const from      = COMMS_FROM_EMAIL();
+    const isPartner = d.interest === "partner";
+    const isGive    = d.interest === "give";
+    const firstName = d.full_name.split(" ")[0];
+
+    // Quick-reply links for the team notification email
+    const waLink   = d.phone ? `https://wa.me/${d.phone.replace(/\D/g, "")}` : null;
+    const mailLink = d.email ? `mailto:${d.email}` : null;
+
+    const replyButtons = [
+      ...(mailLink ? [`<a href="${mailLink}" style="display:inline-block;padding:10px 20px;background:#1b3a2a;color:#f7f2e8;text-decoration:none;border-radius:100px;font-size:13px;font-weight:600">Reply by email</a>`] : []),
+      ...(waLink   ? [`<a href="${waLink}"   style="display:inline-block;padding:10px 20px;background:#25D366;color:#fff;text-decoration:none;border-radius:100px;font-size:13px;font-weight:600">WhatsApp</a>`] : []),
+    ].join("&nbsp;&nbsp;");
+
+    // Flag badge for partner or giving notifications
+    const flagBadge = isPartner
+      ? `<div style="background:#c9a24a;color:#fff;padding:6px 14px;border-radius:100px;display:inline-block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Partnership Enquiry</div>`
+      : isGive
+      ? `<div style="background:#2563eb;color:#fff;padding:6px 14px;border-radius:100px;display:inline-block;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px">Financial Support</div>`
+      : "";
 
     // Notification to team
     await resend.emails.send({
       from,
       to:      [CONTACT_EMAIL],
-      replyTo: d.email,
-      subject: `New involvement enquiry — ${d.full_name} (${interestLabel})`,
+      replyTo: d.email ?? undefined,
+      subject: isPartner
+        ? `⚡ Partnership enquiry — ${d.full_name}`
+        : isGive
+        ? `💛 Financial support enquiry — ${d.full_name}`
+        : `New involvement enquiry — ${d.full_name} (${interestLabel})`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a18">
+          ${flagBadge}
           <h2 style="color:#1b3a2a;margin-bottom:4px">New involvement enquiry</h2>
           <p style="color:#666;margin-top:0">via The Green House website</p>
           <table style="width:100%;border-collapse:collapse;margin-top:20px">
             <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666;width:140px">Name</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${d.full_name}</td></tr>
-            <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Email</td><td style="padding:10px 0;border-bottom:1px solid #eee"><a href="mailto:${d.email}" style="color:#1b3a2a">${d.email}</a></td></tr>
+            ${d.email ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Email</td><td style="padding:10px 0;border-bottom:1px solid #eee"><a href="mailto:${d.email}" style="color:#1b3a2a">${d.email}</a></td></tr>` : ""}
             ${d.phone ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Phone</td><td style="padding:10px 0;border-bottom:1px solid #eee">${d.phone}</td></tr>` : ""}
             <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Interest</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600;color:#c9a24a">${interestLabel}</td></tr>
             ${d.partner_type ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Partnership type</td><td style="padding:10px 0;border-bottom:1px solid #eee">${d.partner_type}</td></tr>` : ""}
             ${d.message ? `<tr><td style="padding:10px 0;color:#666;vertical-align:top">Message</td><td style="padding:10px 0;white-space:pre-wrap">${d.message}</td></tr>` : ""}
           </table>
+          ${replyButtons ? `<div style="margin-top:24px">${replyButtons}</div>` : ""}
         </div>
       `,
     });
+
+    // Per-interest confirmation copy
+    const CONFIRMATIONS: Record<string, {
+      subject: string;
+      heading: string;
+      body: string;
+      cta?: { label: string; href: string };
+      extra?: string;
+    }> = {
+      worship_team: {
+        subject: `Welcome to the worship family — ${SITE_NAME}`,
+        heading: `You're in, ${firstName}.`,
+        body: "You're taking a bold step. We're always looking for hearts that love worship — not just talent. Someone from the team will reach out to talk next steps and what being part of the worship team looks like practically.",
+        cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
+      },
+      host_venue: {
+        subject: `Thanks for offering to host — ${SITE_NAME}`,
+        heading: `This is generous, ${firstName}.`,
+        body: "Venue is everything for a gathering like ours. We'll be in touch to walk through what hosting looks like — space requirements, logistics, and how we can make it work for everyone.",
+        cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
+      },
+      vision_carrier: {
+        subject: `You caught the vision — ${SITE_NAME}`,
+        heading: `Glad you're here, ${firstName}.`,
+        body: "Vision Carriers are the backbone of what we're building — people who believe in the idea and want to see it grow. Someone from the core team will reach out to talk through what this looks like practically.",
+        cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
+      },
+      creative_team: {
+        subject: `The creative table just got bigger — ${SITE_NAME}`,
+        heading: `Welcome, ${firstName}.`,
+        body: "Design, photography, video, social — there's a place for your gift here. We'll be in touch about what we're working on and how you can plug in ahead of the next session.",
+        cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
+      },
+      partner: {
+        subject: `Partnership enquiry received — ${SITE_NAME}`,
+        heading: `Let's build together, ${firstName}.`,
+        body: "We love working with purpose-driven people and organisations. We'll review your enquiry and reach out to discuss what a partnership could look like — what you bring, what we offer, and how we align.",
+        cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
+      },
+      give: {
+        subject: `Your generosity matters — ${SITE_NAME}`,
+        heading: `Thank you, ${firstName}.`,
+        body: "We don't take this lightly. Every contribution — whether financial, material, or in kind — goes directly into making these sessions possible for everyone who walks through the door.",
+        extra: `
+          <div style="background:#f7f2e8;border-left:3px solid #c9a24a;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0">
+            <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#1a1a18">Ready to give or share a payment record?</p>
+            <p style="margin:0;font-size:13px;color:#555;line-height:1.7">
+              Reply directly to this email or reach us on WhatsApp and we'll share the relevant account details and walk you through the process. If you'd like to support in a bigger way — equipment, sponsorship, covering costs for a session — we'd love to have that conversation too.
+            </p>
+          </div>
+          <div style="margin-top:16px">
+            <a href="mailto:${CONTACT_EMAIL}" style="display:inline-block;padding:11px 22px;background:#1b3a2a;color:#f7f2e8;text-decoration:none;border-radius:100px;font-size:13px;font-weight:600;margin-right:10px">Email us</a>
+            <a href="https://wa.me/${CONTACT_WHATSAPP}" style="display:inline-block;padding:11px 22px;background:#25D366;color:#fff;text-decoration:none;border-radius:100px;font-size:13px;font-weight:600">WhatsApp</a>
+          </div>`,
+      },
+      attend: {
+        subject: `Can't wait to see you — ${SITE_NAME}`,
+        heading: `See you there, ${firstName}.`,
+        body: "The best way to experience The Green House is to just show up. Sessions are free, low-pressure, and open to everyone — no church background required. Register for the next one below.",
+        cta: { label: "Register for next session →", href: `${SITE_URL}/events` },
+      },
+      other: {
+        subject: `We've received your message — ${SITE_NAME}`,
+        heading: `Thanks, ${firstName}.`,
+        body: "We've received your message and someone from the team will be in touch soon.",
+        cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
+      },
+    };
+
+    const conf = CONFIRMATIONS[d.interest] ?? CONFIRMATIONS.other;
+    const sharedStyles = `body{margin:0;padding:0;background:#f0ebe0;font-family:Arial,sans-serif;color:#1a1a18}.wrap{max-width:560px;margin:0 auto}.header{background:#1b3a2a;padding:36px 40px 28px;border-radius:16px 16px 0 0}.logo{color:#c9a24a;font-size:11px;letter-spacing:4px;text-transform:uppercase;font-weight:700}.header h1{color:#f7f2e8;font-size:26px;font-weight:700;margin:12px 0 0}.body{background:#fff;border-radius:0 0 16px 16px;padding:28px 40px 36px}.footer{text-align:center;padding:20px 40px;font-size:13px;color:#6b7280}.footer a{color:#c9a24a;text-decoration:none}`;
 
     // Confirmation to submitter
     await resend.emails.send({
       from,
       to:      [d.email],
       replyTo: REPLY_TO_EMAIL,
-      subject: `We've received your message — ${SITE_NAME}`,
+      subject: conf.subject,
       html: `<!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<style>body{margin:0;padding:0;background:#f0ebe0;font-family:Arial,sans-serif;color:#1a1a18}.wrap{max-width:560px;margin:0 auto}.header{background:#1b3a2a;padding:36px 40px 28px;border-radius:16px 16px 0 0}.logo{color:#c9a24a;font-size:11px;letter-spacing:4px;text-transform:uppercase;font-weight:700}.header h1{color:#f7f2e8;font-size:26px;font-weight:700;margin:12px 0 0}.body{background:#fff;border-radius:0 0 16px 16px;padding:28px 40px 36px}.footer{text-align:center;padding:20px 40px;font-size:13px;color:#6b7280}.footer a{color:#c9a24a;text-decoration:none}</style>
+<style>${sharedStyles}</style>
 </head><body>
 <div class="wrap">
   <div class="header">
     <div class="logo">${SITE_NAME}</div>
-    <h1>Thanks, ${d.full_name.split(" ")[0]}.</h1>
+    <h1>${conf.heading}</h1>
   </div>
   <div class="body">
-    <p style="font-size:15px;line-height:1.7;margin-bottom:20px">
-      We've received your message and someone from the team will be in touch soon.
-    </p>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+    <p style="font-size:15px;line-height:1.7;margin-bottom:20px">${conf.body}</p>
+    ${conf.extra ?? ""}
+    <table style="width:100%;border-collapse:collapse;margin:${conf.extra ? "24px" : "0"} 0 24px">
       <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#6b7280;width:130px;font-size:13px">Interest</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600;font-size:14px">${interestLabel}</td></tr>
       ${d.partner_type ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#6b7280;font-size:13px">Partnership type</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px">${d.partner_type}</td></tr>` : ""}
       ${d.message ? `<tr><td style="padding:10px 0;color:#6b7280;font-size:13px;vertical-align:top">Your message</td><td style="padding:10px 0;font-size:14px;white-space:pre-wrap">${d.message}</td></tr>` : ""}
     </table>
-    <p style="font-size:13px;color:#6b7280;line-height:1.6">In the meantime, feel free to attend an upcoming session — no commitment needed.</p>
-    <a href="${SITE_URL}/events" style="display:inline-block;margin-top:16px;padding:12px 28px;background:#1b3a2a;color:#f7f2e8;text-decoration:none;border-radius:100px;font-size:14px;font-weight:600">See upcoming sessions →</a>
+    ${conf.cta && !conf.extra ? `<a href="${conf.cta.href}" style="display:inline-block;padding:12px 28px;background:#1b3a2a;color:#f7f2e8;text-decoration:none;border-radius:100px;font-size:14px;font-weight:600">${conf.cta.label}</a>` : ""}
   </div>
   <div class="footer">
     <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>

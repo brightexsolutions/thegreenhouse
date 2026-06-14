@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 import {
   LayoutDashboard, CalendarDays, Users, MessageSquare,
   Settings2, BookOpen, Leaf, Shield, FileText, Trash2,
-  UserCog, Radio, ExternalLink, Library,
+  UserCog, Radio, ExternalLink, Library, Inbox,
 } from "lucide-react";
 
 const NAV = [
@@ -16,6 +16,7 @@ const NAV = [
   { href: "/admin/registrants",    icon: Users,           label: "Registrants" },
   { href: "/admin/library",        icon: Library,         label: "Library" },
   { href: "/admin/communications", icon: MessageSquare,   label: "Comms" },
+  { href: "/admin/enquiries",      icon: Inbox,           label: "Enquiries" },
   { href: "/admin/docs",           icon: BookOpen,        label: "Docs" },
 ];
 

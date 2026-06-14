@@ -7,6 +7,7 @@ import { EventTeaser }      from "@/components/home/event-teaser";
 import { GetInvolvedCta }      from "@/components/home/get-involved-cta";
 import { CommunityCircles }   from "@/components/home/community-circles";
 import { SessionHighlight }   from "@/components/home/session-highlight";
+import { PartnersStrip }      from "@/components/home/partners-strip";
 import { createAdminClient } from "@/lib/supabase/server";
 import type { Event } from "@/types/database";
 
@@ -61,6 +62,9 @@ export default async function HomePage() {
 
       {/* 5 — Get involved CTA */}
       <GetInvolvedCta />
+
+      {/* Partners & Supporters */}
+      <PartnersStrip />
 
       {/* Separator */}
       <div className="flex items-center justify-center gap-4 py-2 bg-cream">
