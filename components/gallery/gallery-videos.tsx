@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Play, X, Volume2, VolumeX } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useInView } from "framer-motion";
 import { SESSION_01_HIGHLIGHT_VIDEO, SESSION_01_UMWEMA_VIDEO } from "@/lib/constants";
 
 const VIDEOS = [
@@ -73,7 +73,6 @@ function VideoModal({ video, onClose }: { video: typeof VIDEOS[0]; onClose: () =
             className="w-full h-full object-contain"
           />
         </div>
-
         <div className="flex items-center justify-between mt-4 px-1">
           <div>
             <p className="text-cream font-display font-medium text-xl leading-tight">
@@ -106,49 +105,84 @@ function VideoModal({ video, onClose }: { video: typeof VIDEOS[0]; onClose: () =
 
 export function GalleryVideos() {
   const [active, setActive] = useState<typeof VIDEOS[0] | null>(null);
+  const sectionRef = useRef<HTMLDivElement>(null);
+  const isInView = useInView(sectionRef, { once: true, margin: "-60px" });
 
   return (
     <>
       {/* Dark cinema panel */}
-      <div className="relative rounded-3xl overflow-hidden mb-14 bg-[#090f0b]">
-
-        {/* Ambient glow — gold spotlight from above */}
+      <motion.div
+        ref={sectionRef}
+        initial={{ opacity: 0, y: 20 }}
+        animate={isInView ? { opacity: 1, y: 0 } : {}}
+        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
+        className="relative rounded-3xl overflow-hidden mb-14 bg-[#090f0b]"
+      >
+        {/* Gold spotlight — breathes */}
+        <motion.div
+          aria-hidden
+          animate={{ opacity: [0.7, 1, 0.7] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-[620px] h-[340px] pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(201,162,74,0.24) 0%, transparent 65%)" }}
+        />
+        {/* Second gold layer — wider, softer fill */}
         <div
           aria-hidden
-          className="absolute top-0 left-1/2 -translate-x-1/2 w-[560px] h-[280px] pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(201,162,74,0.10) 0%, transparent 70%)" }}
+          className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[220px] pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at 50% 0%, rgba(201,162,74,0.09) 0%, transparent 75%)" }}
         />
-        {/* Ambient glow — forest from below right */}
-        <div
+        {/* Forest glow — bottom right, breathes on offset timer */}
+        <motion.div
           aria-hidden
-          className="absolute bottom-0 right-0 w-[320px] h-[180px] pointer-events-none"
-          style={{ background: "radial-gradient(ellipse at 100% 100%, rgba(27,58,42,0.55) 0%, transparent 65%)" }}
+          animate={{ opacity: [0.65, 1, 0.65] }}
+          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+          className="absolute bottom-0 right-0 w-[400px] h-[240px] pointer-events-none"
+          style={{ background: "radial-gradient(ellipse at 100% 100%, rgba(27,58,42,0.80) 0%, transparent 65%)" }}
         />
-        {/* Subtle top border line */}
-        <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gold/20 to-transparent" />
+        {/* Occasional light-leak sweep */}
+        <motion.div
+          aria-hidden
+          animate={{ x: ["-60%", "200%"], opacity: [0, 0.45, 0] }}
+          transition={{ duration: 3.5, repeat: Infinity, repeatDelay: 9, ease: "easeInOut" }}
+          className="absolute top-[38%] h-px w-[40%] pointer-events-none"
+          style={{ background: "linear-gradient(to right, transparent, rgba(201,162,74,0.55), transparent)" }}
+        />
+        {/* Top border — scales in */}
+        <motion.div
+          initial={{ scaleX: 0 }}
+          animate={isInView ? { scaleX: 1 } : {}}
+          transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
+          className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-gold/40 to-transparent origin-center"
+        />
 
         <div className="relative px-6 sm:px-10 py-10 sm:py-12">
 
           {/* Section label */}
-          <div className="flex items-center justify-center gap-3 mb-9">
-            <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold/40" />
-            <span className="text-[10px] uppercase tracking-[0.22em] text-gold/55 font-medium">
-              Session Recordings
-            </span>
-            <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold/40" />
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: -6 }}
+            animate={isInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.5, delay: 0.3 }}
+            className="flex items-center justify-center gap-3 mb-9"
+          >
+            <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold/55" />
+            <span className="text-[10px] uppercase tracking-[0.22em] text-gold/70 font-semibold">Session Recordings</span>
+            <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold/55" />
+          </motion.div>
 
-          {/* Video cards — constrained width, centered */}
+          {/* Video cards */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-6">
-            {VIDEOS.map((v) => (
+            {VIDEOS.map((v, i) => (
               <motion.button
                 key={v.id}
                 onClick={() => setActive(v)}
-                whileHover={{ y: -3 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
+                initial={{ opacity: 0, y: 28 }}
+                animate={isInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.6, delay: 0.38 + i * 0.16, ease: [0.16, 1, 0.3, 1] }}
+                whileHover={{ y: -4 }}
                 className="group relative w-full sm:w-[272px] rounded-2xl overflow-hidden text-left
-                           border border-white/[0.055] hover:border-gold/20
-                           shadow-xl shadow-black/50 hover:shadow-[0_8px_32px_rgba(201,162,74,0.12)]
+                           border border-white/[0.055] hover:border-gold/28
+                           shadow-xl shadow-black/50 hover:shadow-[0_12px_44px_rgba(201,162,74,0.18)]
                            transition-[border-color,box-shadow] duration-400
                            focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
                 aria-label={`Play ${v.title}`}
@@ -161,33 +195,32 @@ export function GalleryVideos() {
                     src={v.thumb}
                     alt=""
                     className="absolute inset-0 w-full h-full object-cover
-                               opacity-55 group-hover:opacity-75
-                               scale-100 group-hover:scale-[1.04]
+                               opacity-55 group-hover:opacity-78
+                               scale-100 group-hover:scale-[1.05]
                                transition-all duration-500 ease-out"
                     aria-hidden
                   />
-                  {/* Cinematic gradient overlay */}
+                  {/* Cinematic gradient */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#090f0b]/95 via-[#090f0b]/15 to-transparent" />
-                  {/* Left edge feather */}
                   <div className="absolute inset-y-0 left-0 w-8 bg-gradient-to-r from-[#090f0b]/50 to-transparent" />
 
-                  {/* Play button */}
+                  {/* Play button — idle pulse rings */}
                   <div className="absolute inset-0 flex items-center justify-center">
-                    <div className="
-                      relative w-10 h-10 rounded-full
-                      bg-gold/80 group-hover:bg-gold
-                      group-hover:scale-110
-                      transition-all duration-300
-                      flex items-center justify-center
-                      shadow-lg shadow-black/50
-                    ">
-                      {/* Ring pulse */}
-                      <span className="absolute inset-0 rounded-full ring-1 ring-gold/30 group-hover:ring-gold/50 group-hover:scale-[1.6] transition-all duration-500 opacity-0 group-hover:opacity-100" />
-                      <Play size={13} className="text-forest ml-[2px]" fill="currentColor" />
+                    <div className="relative w-10 h-10 rounded-full bg-gold/80 group-hover:bg-gold group-hover:scale-110 transition-all duration-300 flex items-center justify-center shadow-lg shadow-black/50">
+                      <motion.span
+                        animate={{ scale: [1, 1.75], opacity: [0.35, 0] }}
+                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
+                        className="absolute inset-0 rounded-full bg-gold/40 pointer-events-none"
+                      />
+                      <motion.span
+                        animate={{ scale: [1, 1.5], opacity: [0.2, 0] }}
+                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut", delay: 0.6 }}
+                        className="absolute inset-0 rounded-full bg-gold/30 pointer-events-none"
+                      />
+                      <Play size={13} className="text-forest ml-[2px] relative z-10" fill="currentColor" />
                     </div>
                   </div>
 
-                  {/* Duration badge */}
                   {v.duration && (
                     <span className="absolute bottom-2 right-2 px-1.5 py-[2px] rounded bg-black/55 text-cream/60 text-[9px] font-medium tabular-nums backdrop-blur-sm">
                       {v.duration}
@@ -201,20 +234,25 @@ export function GalleryVideos() {
                     {v.title}
                   </p>
                   {v.translation && (
-                    <p className="text-gold/45 italic text-[11px] mt-0.5">&ldquo;{v.translation}&rdquo;</p>
+                    <p className="text-gold/50 italic text-[11px] mt-0.5">&ldquo;{v.translation}&rdquo;</p>
                   )}
-                  <p className="text-cream/25 text-[10px] mt-2 tracking-wide">{v.label}</p>
+                  <p className="text-cream/35 text-[10px] mt-2 tracking-wide">{v.label}</p>
                 </div>
               </motion.button>
             ))}
           </div>
 
-          {/* Bottom note */}
-          <p className="text-center text-cream/18 text-[10px] tracking-widest mt-8 uppercase">
+          {/* Bottom note — visible */}
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={isInView ? { opacity: 1 } : {}}
+            transition={{ duration: 0.5, delay: 0.75 }}
+            className="text-center text-cream/45 text-[10px] tracking-[0.2em] mt-8 uppercase"
+          >
             More recordings after each session
-          </p>
+          </motion.p>
         </div>
-      </div>
+      </motion.div>
 
       {/* Photo grid divider */}
       <div className="flex items-center gap-4 mb-6">
@@ -222,7 +260,6 @@ export function GalleryVideos() {
         <span className="flex-1 h-px bg-gradient-to-r from-charcoal/12 to-transparent" />
       </div>
 
-      {/* Modal */}
       <AnimatePresence>
         {active && <VideoModal video={active} onClose={() => setActive(null)} />}
       </AnimatePresence>
