@@ -57,20 +57,23 @@ export function SiteNav({ liveSlug }: SiteNavProps) {
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            {/* Leaf mark */}
+            {/* Double leaf mark */}
             <span
               className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center transition-colors duration-300",
+                "w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300",
                 solid ? "bg-forest" : "bg-cream"
               )}
             >
-              <svg viewBox="0 0 24 24" className={cn("w-4 h-4", solid ? "text-gold" : "text-forest")} fill="currentColor">
-                <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-13 6 0-4 5-8 12-9C21 0 14 0 11 4c-2 3-4 7-4 11a8 8 0 0 0 4 7c2-5 5-10 6-14z"/>
+              <svg viewBox="0 0 24 24" className={cn("w-[18px] h-[18px]", solid ? "text-gold" : "text-forest")} fill="currentColor">
+                {/* Left leaf — organic teardrop curving upper-left */}
+                <path d="M12 20 C10 17 5 14 5 8 C5 4 9 2 12 5 C12 5 13 12 12 20Z" opacity="0.6"/>
+                {/* Right leaf — organic teardrop curving upper-right, on top */}
+                <path d="M12 20 C14 17 19 14 19 8 C19 4 15 2 12 5 C12 5 11 12 12 20Z"/>
               </svg>
             </span>
             <span
               className={cn(
-                "font-display font-semibold text-base tracking-tight transition-colors duration-300",
+                "font-display font-medium text-[15px] tracking-tight transition-colors duration-300",
                 solid ? "text-forest" : "text-cream"
               )}
             >
