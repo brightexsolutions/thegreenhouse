@@ -43,6 +43,7 @@ export async function GET(req: NextRequest) {
       .from("registrations")
       .select("id, first_name, email")
       .eq("event_id", event.id)
+      .eq("checked_in", true)
       .not("email", "is", null)
       .is("deleted_at", null);
 
