@@ -37,13 +37,14 @@ export function SessionHighlight() {
   const [hovering, setHovering] = useState(false);
   const [progress, setProgress] = useState(0);
 
-  // Play once loaded
+  // Play as soon as the browser can start — "canplay" fires much earlier than
+  // "canplaythrough" on Safari with large files.
   useEffect(() => {
     const vid = videoRef.current;
     if (!vid) return;
     const onReady = () => { setReady(true); vid.play().catch(() => {}); };
-    vid.addEventListener("canplaythrough", onReady, { once: true });
-    return () => vid.removeEventListener("canplaythrough", onReady);
+    vid.addEventListener("canplay", onReady, { once: true });
+    return () => vid.removeEventListener("canplay", onReady);
   }, []);
 
   // Pause / resume on scroll
@@ -321,7 +322,7 @@ export function SessionHighlight() {
                 muted
                 loop
                 playsInline
-                preload="metadata"
+                preload="auto"
                 className="w-full aspect-video object-cover"
               />
 

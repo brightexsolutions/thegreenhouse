@@ -15,9 +15,11 @@ export const TICKET_FROM_EMAIL = () => process.env.RESEND_TICKET_FROM  ?? `${EMA
 export const COMMS_FROM_EMAIL  = () => process.env.RESEND_COMMS_FROM   ?? `${EMAIL_FROM_NAME} <hello@greenhousews.co.ke>`;
 
 // Session highlight videos — update per session after event
-export const SESSION_01_HIGHLIGHT_VIDEO = "https://res.cloudinary.com/dpjget2he/video/upload/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.mp4";
+// vc_h264,f_mp4: forces H.264/AAC re-encode on Cloudinary so Safari can play
+// (ewe-yesu and ebenezer were uploaded in a codec Safari doesn't support)
+export const SESSION_01_HIGHLIGHT_VIDEO = "https://res.cloudinary.com/dpjget2he/video/upload/vc_h264,f_mp4/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.mp4";
 export const SESSION_01_UMWEMA_VIDEO    = "https://res.cloudinary.com/dpjget2he/video/upload/v1781426590/greenhouse-session-1-umwema_znsmuo.mp4";
-export const SESSION_01_EBENEZER_VIDEO  = "https://res.cloudinary.com/dpjget2he/video/upload/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.mp4";
+export const SESSION_01_EBENEZER_VIDEO  = "https://res.cloudinary.com/dpjget2he/video/upload/vc_h264,f_mp4/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.mp4";
 
 export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
 export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";

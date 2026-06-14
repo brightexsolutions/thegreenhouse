@@ -43,6 +43,8 @@ function VideoModal({ video, onClose }: { video: typeof VIDEOS[0]; onClose: () =
     document.body.style.overflow = "hidden";
     const handleKey = (e: KeyboardEvent) => { if (e.key === "Escape") onClose(); };
     window.addEventListener("keydown", handleKey);
+    // Safari: play programmatically so it's tied to the user gesture that opened the modal
+    videoRef.current?.play().catch(() => {});
     return () => {
       document.body.style.overflow = "";
       window.removeEventListener("keydown", handleKey);
@@ -76,9 +78,9 @@ function VideoModal({ video, onClose }: { video: typeof VIDEOS[0]; onClose: () =
           <video
             ref={videoRef}
             src={video.src}
-            autoPlay
             controls
             playsInline
+            preload="auto"
             className="w-full h-full object-contain"
           />
         </div>
