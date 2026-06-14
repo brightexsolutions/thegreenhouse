@@ -6,7 +6,7 @@ INSERT INTO public.events (
   'session-01',
   'The Green House — Session 01',
   'Inaugural Worship & Sharing Evening',
-  '2025-03-28',
+  '2026-03-28',
   '19:00:00',
   'Nairobi',
   'free',

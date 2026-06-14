@@ -240,6 +240,125 @@ ${SITE_URL}
 `;
 }
 
+// ─── Missed-you email (registered but didn't attend) ─────────────────────────
+
+export interface MissedYouEmailData {
+  firstName:       string;
+  eventTitle:      string;
+  eventDate:       string;
+  themeTitle?:     string | null;
+  themeScripture?: string | null;
+  eventSlug:       string;
+}
+
+export function missedYouEmailHtml(d: MissedYouEmailData): string {
+  const eventUrl = `${SITE_URL}/events/${d.eventSlug}`;
+  const eventsUrl = `${SITE_URL}/events`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>We missed you — ${d.eventTitle}</title>
+<style>
+  body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  .header { background: #1b3a2a; padding: 40px 40px 32px; border-radius: 16px 16px 0 0; }
+  .logo { color: #c9a24a; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; font-weight: 700; }
+  .header h1 { color: #f7f2e8; font-size: 30px; font-weight: 700; margin: 14px 0 0; line-height: 1.2; }
+  .header p { color: rgba(247,242,232,0.6); font-size: 14px; margin: 10px 0 0; }
+  .body { background: #ffffff; border-radius: 0 0 16px 16px; padding: 32px 40px 40px; }
+  .greeting { font-size: 16px; color: #1a1a18; line-height: 1.7; margin-bottom: 24px; }
+  .theme-block { background: linear-gradient(135deg,#1b3a2a,#0d2218); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+  .theme-label { color: rgba(201,162,74,0.7); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin: 0 0 6px; }
+  .theme-title { color: #c9a24a; font-size: 22px; font-weight: 700; font-style: italic; margin: 0 0 4px; }
+  .theme-verse { color: rgba(247,242,232,0.55); font-size: 13px; margin: 0; }
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
+  .preview-box { background: #f7f2e8; border-radius: 12px; padding: 24px; text-align: center; margin-bottom: 20px; }
+  .preview-title { font-size: 16px; font-weight: 700; color: #1b3a2a; margin: 0 0 8px; }
+  .preview-body { font-size: 14px; color: #5c4a35; line-height: 1.6; margin: 0 0 20px; }
+  .cta-primary { display: inline-block; background: #1b3a2a; color: #f7f2e8 !important; text-decoration: none; padding: 14px 28px; border-radius: 100px; font-weight: 700; font-size: 15px; }
+  .cta-secondary { display: inline-block; background: transparent; color: #1b3a2a !important; text-decoration: none; padding: 13px 28px; border-radius: 100px; font-weight: 600; font-size: 14px; border: 1.5px solid #1b3a2a; margin-top: 10px; }
+  .footer { text-align: center; padding: 24px 40px; font-size: 13px; color: #6b7280; line-height: 1.8; }
+  .footer a { color: #c9a24a; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">${EMAIL_FROM_NAME}</div>
+    <h1>We missed you,<br />${d.firstName}.</h1>
+    <p>${d.eventTitle} · ${d.eventDate}</p>
+  </div>
+  <div class="body">
+    <p class="greeting">
+      We had hoped to see you at ${d.eventTitle} — and we completely understand that life sometimes has other plans.
+      The evening was a beautiful one, and we genuinely look forward to having you with us at the next one.
+    </p>
+
+    ${d.themeTitle ? `
+    <div class="theme-block">
+      <p class="theme-label">What the evening was about</p>
+      <p class="theme-title">${d.themeTitle}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+    </div>` : ""}
+
+    <hr class="divider" />
+
+    <div class="preview-box">
+      <p class="preview-title">Get a glimpse of what happened</p>
+      <p class="preview-body">
+        Photos, highlights, and a feel for the evening are up on the event page.
+        Take a look — it might make you even more excited for the next one.
+      </p>
+      <a href="${eventUrl}" class="cta-primary">See the event recap →</a>
+    </div>
+
+    <div style="text-align:center;">
+      <a href="${eventsUrl}" class="cta-secondary">See upcoming sessions</a>
+    </div>
+
+    <p style="font-size:14px;color:#6b7280;line-height:1.7;text-align:center;margin-top:28px;">
+      Follow us on
+      <a href="${SOCIAL_INSTAGRAM}" style="color:#1b3a2a;font-weight:600;">Instagram</a>
+      for behind-the-scenes moments and early registration announcements.
+    </p>
+  </div>
+  <div class="footer">
+    <p>You received this because you registered for <strong>${d.eventTitle}</strong>.</p>
+    <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
+    <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${EMAIL_FROM_NAME}</p>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+export function missedYouEmailText(d: MissedYouEmailData): string {
+  const eventUrl  = `${SITE_URL}/events/${d.eventSlug}`;
+  const eventsUrl = `${SITE_URL}/events`;
+  return `${SITE_NAME} — We missed you
+
+Hi ${d.firstName},
+
+We had hoped to see you at ${d.eventTitle} on ${d.eventDate} — and we completely understand that life sometimes has other plans.
+${d.themeTitle ? `\nThe evening explored the theme "${d.themeTitle}"${d.themeScripture ? ` — ${d.themeScripture}` : ""}.` : ""}
+
+Get a glimpse of what happened:
+${eventUrl}
+
+We look forward to seeing you at the next one:
+${eventsUrl}
+
+Follow us on Instagram for updates: ${SOCIAL_INSTAGRAM}
+
+Questions? ${CONTACT_EMAIL}
+
+— ${EMAIL_FROM_NAME}
+${SITE_URL}
+`;
+}
+
 export function ticketEmailText(d: TicketEmailData): string {
   const entryLine = d.isFree === false && d.priceKes
     ? `Ticket price: KES ${d.priceKes.toLocaleString()}. Please present this email or your ticket at the door.`

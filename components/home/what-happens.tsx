@@ -49,7 +49,7 @@ export function WhatHappens() {
               {/* Session count chip */}
               <div className="absolute top-6 left-6 bg-forest/80 backdrop-blur-sm border border-gold/30 rounded-2xl px-4 py-3 shadow-lg">
                 <p className="text-xs text-cream/60 uppercase tracking-wider mb-0.5">Est.</p>
-                <p className="font-display text-xl font-semibold text-cream">2025</p>
+                <p className="font-display text-xl font-semibold text-cream">2026</p>
               </div>
             </div>
           </FadeIn>
