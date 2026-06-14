@@ -20,7 +20,7 @@ const VIDEOS = [
     title:       "Umwema",
     translation: "He is good",
     label:       "Session 01 · 2026",
-    duration:    null,
+    duration:    "6:04",
     src:         SESSION_01_UMWEMA_VIDEO,
     thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2/v1781426590/greenhouse-session-1-umwema_znsmuo.jpg",
   },
