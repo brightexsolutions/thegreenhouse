@@ -21,7 +21,7 @@ const PALETTES = [
     glow:      "rgba(201,162,74,0.40)",
     pattern:   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M0 20L20 0M-4 4L4-4M16 24L24 16' stroke='rgba(255,255,255,0.08)' stroke-width='1'/%3E%3C/svg%3E")`,
     textColor: "text-gold-pale",
-    roleColor: "bg-[#f5edce]/12 text-[#f5edce] border-[#f5edce]/25",
+    roleColor: "bg-cream/10 text-cream border-cream/35",
   },
   {
     // Slate charcoal
