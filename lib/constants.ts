@@ -15,11 +15,9 @@ export const TICKET_FROM_EMAIL = () => process.env.RESEND_TICKET_FROM  ?? `${EMA
 export const COMMS_FROM_EMAIL  = () => process.env.RESEND_COMMS_FROM   ?? `${EMAIL_FROM_NAME} <hello@greenhousews.co.ke>`;
 
 // Session highlight videos — update per session after event
-// fl_faststart moves the MP4 moov atom to the front of the file so Safari can
-// start playing immediately without downloading the whole file first.
-export const SESSION_01_HIGHLIGHT_VIDEO = "https://res.cloudinary.com/dpjget2he/video/upload/fl_faststart/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.mp4";
-export const SESSION_01_UMWEMA_VIDEO    = "https://res.cloudinary.com/dpjget2he/video/upload/fl_faststart/v1781426590/greenhouse-session-1-umwema_znsmuo.mp4";
-export const SESSION_01_EBENEZER_VIDEO  = "https://res.cloudinary.com/dpjget2he/video/upload/fl_faststart/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.mp4";
+export const SESSION_01_HIGHLIGHT_VIDEO = "https://res.cloudinary.com/dpjget2he/video/upload/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.mp4";
+export const SESSION_01_UMWEMA_VIDEO    = "https://res.cloudinary.com/dpjget2he/video/upload/v1781426590/greenhouse-session-1-umwema_znsmuo.mp4";
+export const SESSION_01_EBENEZER_VIDEO  = "https://res.cloudinary.com/dpjget2he/video/upload/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.mp4";
 
 export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
 export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";
