@@ -1,51 +1,64 @@
 import Link from "next/link";
-import { Mail } from "lucide-react";
-import { PARTNERS, CONTACT_EMAIL } from "@/lib/constants";
+import { ArrowRight } from "lucide-react";
+import { PARTNERS, SITE_NAME } from "@/lib/constants";
 import { FadeIn } from "@/components/motion/fade-in";
+import { createAdminClient } from "@/lib/supabase/server";
 
 /** Each palette gives a distinct gradient + pattern + glow per card.
  *  Cycles when there are more partners than palette entries. */
 const PALETTES = [
   {
     // Deep forest — Brightex / tech
-    gradient:   "from-[#0a1f12] via-[#1b3a2a] to-[#0d2318]",
-    glow:       "rgba(46,90,62,0.70)",
-    pattern:    // dot grid
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='11' cy='11' r='1' fill='rgba(255,255,255,0.12)'/%3E%3C/svg%3E")`,
-    textColor:  "text-cream",
-    roleColor:  "bg-cream/10 text-cream/60 border-cream/10",
+    gradient:  "from-[#0a1f12] via-[#1b3a2a] to-[#0d2318]",
+    glow:      "rgba(46,90,62,0.70)",
+    pattern:   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='11' cy='11' r='1' fill='rgba(255,255,255,0.12)'/%3E%3C/svg%3E")`,
+    textColor: "text-cream",
+    roleColor: "bg-cream/10 text-cream/70 border-cream/15",
   },
   {
     // Warm bark / amber — Glace / food
-    gradient:   "from-[#2a1605] via-[#4a2810] to-[#1e0f03]",
-    glow:       "rgba(201,162,74,0.40)",
-    pattern:    // diagonal hatching
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M0 20L20 0M-4 4L4-4M16 24L24 16' stroke='rgba(255,255,255,0.08)' stroke-width='1'/%3E%3C/svg%3E")`,
-    textColor:  "text-gold-pale",
-    roleColor:  "bg-gold/10 text-gold/60 border-gold/15",
+    gradient:  "from-[#2a1605] via-[#4a2810] to-[#1e0f03]",
+    glow:      "rgba(201,162,74,0.40)",
+    pattern:   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Cpath d='M0 20L20 0M-4 4L4-4M16 24L24 16' stroke='rgba(255,255,255,0.08)' stroke-width='1'/%3E%3C/svg%3E")`,
+    textColor: "text-gold-pale",
+    roleColor: "bg-[#f5edce]/12 text-[#f5edce] border-[#f5edce]/25",
   },
   {
-    // Slate charcoal — SADO / neutral
-    gradient:   "from-[#111210] via-[#1e1f1c] to-[#0c0d0b]",
-    glow:       "rgba(100,100,90,0.45)",
-    pattern:    // plus grid
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 7v10M7 12h10' stroke='rgba(255,255,255,0.09)' stroke-width='1'/%3E%3C/svg%3E")`,
-    textColor:  "text-cream",
-    roleColor:  "bg-cream/8 text-cream/50 border-cream/8",
+    // Slate charcoal
+    gradient:  "from-[#111210] via-[#1e1f1c] to-[#0c0d0b]",
+    glow:      "rgba(100,100,90,0.45)",
+    pattern:   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 7v10M7 12h10' stroke='rgba(255,255,255,0.09)' stroke-width='1'/%3E%3C/svg%3E")`,
+    textColor: "text-cream",
+    roleColor: "bg-cream/8 text-cream/60 border-cream/10",
   },
   {
-    // Sage / moss — future partners
-    gradient:   "from-[#1a2e1f] via-[#2d5240] to-[#111e15]",
-    glow:       "rgba(125,168,130,0.35)",
-    pattern:    // hexagonal dots
-      `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ccircle cx='14' cy='14' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3Ccircle cx='0' cy='0' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3Ccircle cx='28' cy='0' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3Ccircle cx='0' cy='28' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3Ccircle cx='28' cy='28' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3C/svg%3E")`,
-    textColor:  "text-cream",
-    roleColor:  "bg-sage/15 text-sage-light/70 border-sage/15",
+    // Sage / moss
+    gradient:  "from-[#1a2e1f] via-[#2d5240] to-[#111e15]",
+    glow:      "rgba(125,168,130,0.35)",
+    pattern:   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='28' height='28'%3E%3Ccircle cx='14' cy='14' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3Ccircle cx='0' cy='0' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3Ccircle cx='28' cy='0' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3Ccircle cx='0' cy='28' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3Ccircle cx='28' cy='28' r='1.2' fill='rgba(255,255,255,0.10)'/%3E%3C/svg%3E")`,
+    textColor: "text-cream",
+    roleColor: "bg-sage/15 text-sage-light/80 border-sage/20",
   },
 ] as const;
 
-export function PartnersStrip() {
+async function getSiteName(): Promise<string> {
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("site_settings")
+      .select("value")
+      .eq("key", "site_name")
+      .single();
+    return data?.value || SITE_NAME;
+  } catch {
+    return SITE_NAME;
+  }
+}
+
+export async function PartnersStrip() {
   if (!PARTNERS.length) return null;
+
+  const siteName = await getSiteName();
 
   return (
     <section className="py-14 md:py-16 bg-cream">
@@ -100,7 +113,6 @@ export function PartnersStrip() {
                   {/* Content */}
                   <div className="relative z-10 flex flex-col items-center gap-4">
                     {partner.logoUrl ? (
-                      // Logo
                       // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={partner.logoUrl}
@@ -108,7 +120,6 @@ export function PartnersStrip() {
                         className="max-h-20 max-w-[80%] object-contain drop-shadow-lg"
                       />
                     ) : (
-                      // Name — huge display type
                       <p className={`font-display font-bold leading-none tracking-tight ${palette.textColor}
                         ${partner.name.length > 12 ? "text-3xl sm:text-4xl" : "text-4xl sm:text-5xl"}
                       `}>
@@ -125,7 +136,7 @@ export function PartnersStrip() {
                   {/* Hover: subtle lift + border glow */}
                   <div className="absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/5 group-hover:ring-white/12 transition-all duration-400" />
 
-                  {/* Clickable overlay if url exists */}
+                  {/* Clickable overlay */}
                   {partner.url && (
                     <Link
                       href={partner.url}
@@ -141,18 +152,18 @@ export function PartnersStrip() {
           })}
         </div>
 
-        {/* Partner CTA — visible and styled */}
+        {/* Partner CTA */}
         <FadeIn delay={0.25}>
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
             <p className="text-sm text-charcoal/55 font-medium">
-              Want to partner with The Green House?
+              Want to partner with {siteName}?
             </p>
             <Link
-              href={`mailto:${CONTACT_EMAIL}`}
+              href="/get-involved?interest=partner"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors shadow-sm"
             >
-              <Mail size={13} />
               Get in touch
+              <ArrowRight size={13} />
             </Link>
           </div>
         </FadeIn>

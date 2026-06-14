@@ -36,7 +36,7 @@ export const PARTNERS: Array<{
 }> = [
   {
     name:        "Brightex Solutions",
-    role:        "Web & Technology Services for Greenhouse",
+    role:        "Web & Technology Services",
     description: "Building and maintaining the platform behind The Green House.",
     logoUrl:     null,
     url:         "https://brightexsolutions.co.ke",
@@ -46,7 +46,7 @@ export const PARTNERS: Array<{
     role:        "Cakes, Cookies for Events",
     description: "Cakes, cookies, and treats that make every session sweeter.",
     logoUrl:     null,
-    url:         null,
+    url:         "https://www.instagram.com/glace.confectionary?igsh=MWV3emxxcGJmMnFkbA==",
   },
 ];
 
