@@ -1,4 +1,4 @@
-export const SITE_NAME        = "The Green House";
+export const SITE_NAME        = "The Green House W.S";
 export const EMAIL_FROM_NAME  = "Green House Worship Community";
 export const SITE_URL         = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.greenhousews.co.ke";
 export const SESSION_FREQUENCY = "quarterly";
@@ -16,6 +16,7 @@ export const COMMS_FROM_EMAIL  = () => process.env.RESEND_COMMS_FROM   ?? `${EMA
 
 // Session highlight videos — update per session after event
 export const SESSION_01_HIGHLIGHT_VIDEO = "https://res.cloudinary.com/dpjget2he/video/upload/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.mp4";
+export const SESSION_01_UMWEMA_VIDEO    = "https://res.cloudinary.com/dpjget2he/video/upload/v1781426590/greenhouse-session-1-umwema_znsmuo.mp4";
 
 export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
 export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";

@@ -57,20 +57,24 @@ export function SiteNav({ liveSlug }: SiteNavProps) {
         <nav className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 lg:h-20">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
-            {/* Leaf mark */}
+            {/* Double leaf mark */}
             <span
               className={cn(
-                "w-7 h-7 rounded-full flex items-center justify-center transition-colors duration-300",
+                "w-8 h-8 rounded-full flex items-center justify-center transition-colors duration-300",
                 solid ? "bg-forest" : "bg-cream"
               )}
             >
-              <svg viewBox="0 0 24 24" className={cn("w-4 h-4", solid ? "text-gold" : "text-forest")} fill="currentColor">
-                <path d="M17 8C8 10 5.9 16.17 3.82 21.34L5.71 22l1-2.3A4.49 4.49 0 0 0 8 20C19 20 22 3 22 3c-1 2-8 2-13 6 0-4 5-8 12-9C21 0 14 0 11 4c-2 3-4 7-4 11a8 8 0 0 0 4 7c2-5 5-10 6-14z"/>
+              <svg viewBox="0 0 24 24" className={cn("w-[22px] h-[22px]", solid ? "text-gold" : "text-forest")} fill="currentColor">
+                {/* Two narrow leaf shapes rotated from a shared stem — like a plant sprig */}
+                <g transform="translate(12,21)">
+                  <path transform="rotate(-32)" d="M0 0 C-2 -2.5 -2.4 -6.5 -0.8-11.5 C-0.2-13 0.2-13 0.8-11.5 C2.4-6.5 2 -2.5 0 0Z" opacity="0.6"/>
+                  <path transform="rotate(32)"  d="M0 0 C-2 -2.5 -2.4 -6.5 -0.8-11.5 C-0.2-13 0.2-13 0.8-11.5 C2.4-6.5 2 -2.5 0 0Z"/>
+                </g>
               </svg>
             </span>
             <span
               className={cn(
-                "font-display font-semibold text-base tracking-tight transition-colors duration-300",
+                "font-display font-medium text-[15px] tracking-tight transition-colors duration-300",
                 solid ? "text-forest" : "text-cream"
               )}
             >
