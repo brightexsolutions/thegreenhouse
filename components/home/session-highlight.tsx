@@ -82,7 +82,7 @@ export function SessionHighlight() {
 
       {/* Film grain */}
       <div
-        className="absolute inset-0 pointer-events-none z-20 mix-blend-overlay opacity-[0.04]"
+        className="absolute inset-0 pointer-events-none z-20 mix-blend-overlay opacity-[0.09]"
         style={{
           backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
           backgroundSize: "160px 160px",
@@ -95,7 +95,7 @@ export function SessionHighlight() {
           initial={{ opacity: 0, x: 80 }}
           animate={isInView ? { opacity: 1, x: 0 } : {}}
           transition={{ duration: 1.4, ease: "easeOut" }}
-          className="font-display font-bold text-cream/[0.022] leading-none pr-4"
+          className="font-display font-bold text-cream/[0.045] leading-none pr-4"
           style={{ fontSize: "clamp(180px, 30vw, 420px)" }}
         >
           01
@@ -107,30 +107,30 @@ export function SessionHighlight() {
         initial={{ opacity: 0 }}
         animate={isInView ? { opacity: 1 } : {}}
         transition={{ duration: 2.5 }}
-        className="absolute -top-40 -left-40 w-[600px] h-[600px] rounded-full pointer-events-none"
+        className="absolute -top-40 -left-40 w-[750px] h-[750px] rounded-full pointer-events-none"
       >
         <motion.div
-          animate={{ scale: [1, 1.18, 1], opacity: [0.6, 1, 0.6] }}
+          animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
           transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
           className="w-full h-full rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(201,162,74,0.09) 0%, transparent 65%)" }}
+          style={{ background: "radial-gradient(circle, rgba(201,162,74,0.22) 0%, transparent 65%)" }}
         />
       </motion.div>
 
       {/* Breathing bottom-right forest glow */}
       <motion.div
-        animate={{ scale: [1, 1.12, 1], opacity: [0.45, 0.75, 0.45] }}
+        animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
         transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-        className="absolute -bottom-32 -right-32 w-[520px] h-[520px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(27,58,42,0.6) 0%, transparent 70%)" }}
+        className="absolute -bottom-32 -right-32 w-[650px] h-[650px] rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(46,90,62,0.85) 0%, transparent 70%)" }}
       />
 
       {/* One-shot horizontal light leak on entrance */}
       <motion.div
         initial={{ opacity: 0, scaleX: 0 }}
-        animate={isInView ? { opacity: [0, 0.14, 0], scaleX: [0, 1, 1] } : {}}
+        animate={isInView ? { opacity: [0, 0.55, 0], scaleX: [0, 1, 1] } : {}}
         transition={{ duration: 2.8, delay: 1.0, ease: "easeOut" }}
-        className="absolute top-[40%] left-0 right-0 h-px pointer-events-none origin-left"
+        className="absolute top-[40%] left-0 right-0 h-[2px] pointer-events-none origin-left"
         style={{
           background: "linear-gradient(90deg, transparent 0%, rgba(201,162,74,0.7) 25%, rgba(228,201,126,0.9) 50%, rgba(201,162,74,0.5) 75%, transparent 100%)",
         }}
@@ -138,7 +138,7 @@ export function SessionHighlight() {
 
       {/* Dot grid */}
       <div
-        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        className="absolute inset-0 opacity-[0.07] pointer-events-none"
         style={{
           backgroundImage: "radial-gradient(circle, #f7f2e8 1px, transparent 1px)",
           backgroundSize: "32px 32px",
@@ -151,8 +151,8 @@ export function SessionHighlight() {
           <motion.div
             key={i}
             className="absolute rounded-full bg-gold"
-            style={{ width: p.size, height: p.size, left: p.left, bottom: "8%", opacity: 0 }}
-            animate={{ y: [0, -p.amp, -p.amp * 2.2], opacity: [0, 0.45, 0] }}
+            style={{ width: p.size * 2, height: p.size * 2, left: p.left, bottom: "8%", opacity: 0 }}
+            animate={{ y: [0, -p.amp, -p.amp * 2.2], opacity: [0, 0.75, 0] }}
             transition={{ duration: p.duration, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
           />
         ))}
@@ -239,20 +239,20 @@ export function SessionHighlight() {
             <motion.div
               animate={{ rotate: 360 }}
               transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 rounded-full border border-dashed border-gold/12"
+              className="absolute inset-0 rounded-full border border-dashed border-gold/30"
             />
             {/* Slow counter-rotate inner dashed */}
             <motion.div
               animate={{ rotate: -360 }}
               transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-3 rounded-full border border-dashed border-gold/08"
+              className="absolute inset-3 rounded-full border border-dashed border-gold/20"
             />
-            <div className="absolute inset-0 rounded-full border border-gold/10 animate-ping" style={{ animationDuration: "3.8s" }} />
-            <div className="absolute inset-2 rounded-full border border-gold/18" />
-            <div className="absolute inset-5 rounded-full border border-gold/28" />
-            <div className="w-3.5 h-3.5 rounded-full bg-gold/55" />
-            <div className="absolute top-1.5 right-3 w-1.5 h-1.5 rounded-full bg-gold/25" />
-            <div className="absolute bottom-2 left-1.5 w-1 h-1 rounded-full bg-gold/18" />
+            <div className="absolute inset-0 rounded-full border border-gold/25 animate-ping" style={{ animationDuration: "3.8s" }} />
+            <div className="absolute inset-2 rounded-full border border-gold/40" />
+            <div className="absolute inset-5 rounded-full border border-gold/55" />
+            <div className="w-3.5 h-3.5 rounded-full bg-gold/80" />
+            <div className="absolute top-1.5 right-3 w-1.5 h-1.5 rounded-full bg-gold/50" />
+            <div className="absolute bottom-2 left-1.5 w-1 h-1 rounded-full bg-gold/35" />
           </motion.div>
         </div>
 
@@ -266,9 +266,9 @@ export function SessionHighlight() {
           {WAVE.map((h, i) => (
             <motion.div
               key={i}
-              className="w-[3px] rounded-full bg-gold/18"
+              className="w-[3px] rounded-full bg-gold/50"
               style={{ height: `${h * 11}%` }}
-              animate={{ scaleY: [0.7, 1, 0.7], opacity: [0.18, 0.45, 0.18] }}
+              animate={{ scaleY: [0.6, 1, 0.6], opacity: [0.4, 0.8, 0.4] }}
               transition={{ duration: 1.8 + (i % 5) * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.06 }}
             />
           ))}
@@ -285,21 +285,21 @@ export function SessionHighlight() {
         >
           {/* Ambient cinema blur */}
           <motion.div
-            animate={{ opacity: hovering ? 0.8 : 0.5, scale: hovering ? 1.03 : 1 }}
+            animate={{ opacity: hovering ? 1 : 0.75, scale: hovering ? 1.05 : 1 }}
             transition={{ duration: 0.8 }}
-            className="absolute inset-0 rounded-3xl pointer-events-none blur-2xl scale-[0.94]"
+            className="absolute -inset-6 rounded-3xl pointer-events-none blur-3xl"
             style={{
-              background: "radial-gradient(ellipse at 30% 60%, rgba(201,162,74,0.22) 0%, transparent 55%), radial-gradient(ellipse at 72% 28%, rgba(180,100,60,0.15) 0%, transparent 50%)",
+              background: "radial-gradient(ellipse at 25% 65%, rgba(201,162,74,0.55) 0%, transparent 50%), radial-gradient(ellipse at 75% 25%, rgba(180,80,40,0.40) 0%, transparent 50%), radial-gradient(ellipse at 55% 85%, rgba(100,60,20,0.30) 0%, transparent 45%)",
             }}
           />
 
           {/* Gradient glow border */}
           <div
-            className="p-[1px] rounded-2xl transition-all duration-700"
+            className="p-[1.5px] rounded-2xl transition-all duration-700"
             style={{
               background: hovering
-                ? "linear-gradient(135deg, rgba(201,162,74,0.55) 0%, rgba(201,162,74,0.12) 40%, transparent 60%, rgba(201,162,74,0.22) 100%)"
-                : "linear-gradient(135deg, rgba(201,162,74,0.22) 0%, transparent 50%, rgba(201,162,74,0.08) 100%)",
+                ? "linear-gradient(135deg, rgba(201,162,74,0.85) 0%, rgba(201,162,74,0.25) 35%, rgba(228,201,126,0.15) 60%, rgba(201,162,74,0.55) 100%)"
+                : "linear-gradient(135deg, rgba(201,162,74,0.50) 0%, rgba(201,162,74,0.10) 45%, transparent 65%, rgba(201,162,74,0.25) 100%)",
             }}
           >
             {/* Gold corner accents */}
@@ -309,7 +309,7 @@ export function SessionHighlight() {
                 initial={{ opacity: 0, scale: 0.4 }}
                 animate={isInView ? { opacity: 1, scale: 1 } : {}}
                 transition={{ duration: 0.5, delay: 0.7 + i * 0.07 }}
-                className={`absolute z-10 w-7 h-7 pointer-events-none border-gold/55 ${cls}`}
+                className={`absolute z-10 w-8 h-8 pointer-events-none border-gold/80 ${cls}`}
               />
             ))}
 
