@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendBroadcastEmail } from "@/lib/communications/email";
-import { postEventEmailHtml, postEventEmailText } from "@/lib/email-templates";
+import { postEventEmailHtml, postEventEmailText, missedYouEmailHtml, missedYouEmailText } from "@/lib/email-templates";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
@@ -38,8 +38,8 @@ export async function GET(req: NextRequest) {
       weekday: "long", day: "numeric", month: "long", year: "numeric",
     });
 
-    // Get all registrants with emails for this event
-    const { data: registrants } = await supabase
+    // ── Attendees (checked_in = true) → thank-you email ──────────────────
+    const { data: attendeeRows } = await supabase
       .from("registrations")
       .select("id, first_name, email")
       .eq("event_id", event.id)
@@ -47,18 +47,24 @@ export async function GET(req: NextRequest) {
       .not("email", "is", null)
       .is("deleted_at", null);
 
-    const recipients = (registrants ?? []).filter(r => r.email) as Array<{ id: string; first_name: string; email: string }>;
+    const attendees = (attendeeRows ?? []).filter(r => r.email) as Array<{ id: string; first_name: string; email: string }>;
 
-    if (recipients.length === 0) {
-      await supabase.from("events").update({ post_event_email_sent: true }).eq("id", event.id);
-      summary.push({ eventId: event.id, title: event.title, sent: 0, failed: 0 });
-      continue;
-    }
+    // ── Non-attendees (checked_in = false OR null, has email) → missed-you ──
+    const { data: absentRows } = await supabase
+      .from("registrations")
+      .select("id, first_name, email")
+      .eq("event_id", event.id)
+      .neq("checked_in", true)
+      .not("email", "is", null)
+      .is("deleted_at", null);
+
+    const absentees = (absentRows ?? []).filter(r => r.email) as Array<{ id: string; first_name: string; email: string }>;
 
     let sent = 0;
     let failed = 0;
 
-    for (const r of recipients) {
+    // Send thank-you to attendees
+    for (const r of attendees) {
       const html = postEventEmailHtml({
         firstName:      r.first_name,
         eventTitle:     event.title,
@@ -75,45 +81,72 @@ export async function GET(req: NextRequest) {
         themeScripture: event.theme_scripture,
         eventSlug:      event.slug,
       });
-
-      const results = await sendBroadcastEmail({
-        to:      [r.email],
-        subject: `Thank you for being there — ${event.title}`,
-        html,
-        text,
-      });
-
+      const subject = `Thank you for being there — ${event.title}`;
+      const results = await sendBroadcastEmail({ to: [r.email], subject, html, text });
       const result = results[0];
       if (result?.success) {
         sent++;
         await supabase.from("communications_log").insert({
-          event_id:       event.id,
-          registration_id: r.id,
-          channel:        "email",
-          recipient:      r.email,
-          subject:        `Thank you for being there — ${event.title}`,
-          message_body:   text,
-          status:         "sent",
-          provider_id:    result.providerId,
-          sent_at:        new Date().toISOString(),
+          event_id: event.id, registration_id: r.id,
+          channel: "email", recipient: r.email, subject,
+          message_body: text, status: "sent",
+          provider_id: result.providerId, sent_at: new Date().toISOString(),
         });
       } else {
         failed++;
         await supabase.from("communications_log").insert({
-          event_id:        event.id,
-          registration_id: r.id,
-          channel:         "email",
-          recipient:       r.email,
-          subject:         `Thank you for being there — ${event.title}`,
-          status:          "failed",
-          error_message:   result?.error ?? "Unknown error",
+          event_id: event.id, registration_id: r.id,
+          channel: "email", recipient: r.email, subject,
+          status: "failed", error_message: result?.error ?? "Unknown error",
         });
       }
     }
 
-    // Mark as sent regardless — avoid re-sending to those who already got it
+    // Send missed-you to non-attendees
+    for (const r of absentees) {
+      const html = missedYouEmailHtml({
+        firstName:      r.first_name,
+        eventTitle:     event.title,
+        eventDate:      formattedDate,
+        themeTitle:     event.theme_title,
+        themeScripture: event.theme_scripture,
+        eventSlug:      event.slug,
+      });
+      const text = missedYouEmailText({
+        firstName:      r.first_name,
+        eventTitle:     event.title,
+        eventDate:      formattedDate,
+        themeTitle:     event.theme_title,
+        themeScripture: event.theme_scripture,
+        eventSlug:      event.slug,
+      });
+      const subject = `We missed you at ${event.title}`;
+      const results = await sendBroadcastEmail({ to: [r.email], subject, html, text });
+      const result = results[0];
+      if (result?.success) {
+        sent++;
+        await supabase.from("communications_log").insert({
+          event_id: event.id, registration_id: r.id,
+          channel: "email", recipient: r.email, subject,
+          message_body: text, status: "sent",
+          provider_id: result.providerId, sent_at: new Date().toISOString(),
+        });
+      } else {
+        failed++;
+        await supabase.from("communications_log").insert({
+          event_id: event.id, registration_id: r.id,
+          channel: "email", recipient: r.email, subject,
+          status: "failed", error_message: result?.error ?? "Unknown error",
+        });
+      }
+    }
+
+    // Mark as sent — avoid re-triggering for this event
     await supabase.from("events").update({ post_event_email_sent: true }).eq("id", event.id);
-    logger.info("cron_post_event_email_sent", { eventId: event.id, title: event.title, sent, failed });
+    logger.info("cron_post_event_email_sent", {
+      eventId: event.id, title: event.title,
+      attendees: attendees.length, absentees: absentees.length, sent, failed,
+    });
     summary.push({ eventId: event.id, title: event.title, sent, failed });
   }
 
