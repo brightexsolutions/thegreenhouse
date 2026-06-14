@@ -22,6 +22,33 @@ export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
 export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";
 export const SOCIAL_YOUTUBE   = "https://youtube.com/@thegreenhouseke";
 
+/** Partners & Supporters — add new entries here as they come on board */
+export const PARTNERS: Array<{
+  name:        string;
+  role:        string;
+  description: string | null;
+  url:         string | null;
+}> = [
+  {
+    name:        "Brightex Solutions",
+    role:        "Technology & Web",
+    description: "Building and maintaining the platform behind The Green House.",
+    url:         "https://brightexsolutions.co.ke",
+  },
+  {
+    name:        "Glace Confectionary",
+    role:        "Refreshments",
+    description: "Cakes, cookies, and treats that make every session sweeter.",
+    url:         null,
+  },
+  {
+    name:        "SADO",
+    role:        "Partner",
+    description: null,
+    url:         null,
+  },
+];
+
 /** Build a WhatsApp link with optional pre-filled message */
 export function whatsappUrl(message?: string): string {
   const base = `https://wa.me/${CONTACT_WHATSAPP}`;
