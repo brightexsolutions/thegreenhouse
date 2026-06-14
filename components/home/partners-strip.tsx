@@ -1,11 +1,9 @@
 import Link from "next/link";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Code2, Terminal, Cpu, Braces, Cake, UtensilsCrossed, Cookie } from "lucide-react";
 import { PARTNERS, SITE_NAME } from "@/lib/constants";
 import { FadeIn } from "@/components/motion/fade-in";
 import { createAdminClient } from "@/lib/supabase/server";
 
-/** Each palette gives a distinct gradient + pattern + glow per card.
- *  Cycles when there are more partners than palette entries. */
 const PALETTES = [
   {
     // Deep forest — Brightex / tech
@@ -13,7 +11,7 @@ const PALETTES = [
     glow:      "rgba(46,90,62,0.70)",
     pattern:   `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='11' cy='11' r='1' fill='rgba(255,255,255,0.12)'/%3E%3C/svg%3E")`,
     textColor: "text-cream",
-    roleColor: "bg-cream/10 text-cream/70 border-cream/15",
+    roleColor: "bg-cream/10 text-cream border-cream/35",
   },
   {
     // Warm bark / amber — Glace / food
@@ -40,6 +38,59 @@ const PALETTES = [
     roleColor: "bg-sage/15 text-sage-light/80 border-sage/20",
   },
 ] as const;
+
+/** Thematic icon decorations per partner slot — faint watermark layer */
+function CardDecoration({ index }: { index: number }) {
+  if (index === 0) {
+    // Brightex — tech / code
+    return (
+      <>
+        {/* Large code brackets — top right */}
+        <div className="absolute top-4 right-4 text-white/[0.07] pointer-events-none">
+          <Code2 size={58} strokeWidth={1} />
+        </div>
+        {/* Terminal — bottom left */}
+        <div className="absolute bottom-4 left-4 text-white/[0.05] pointer-events-none">
+          <Terminal size={34} strokeWidth={1} />
+        </div>
+        {/* CPU chip — top left, smallest */}
+        <div className="absolute top-5 left-5 text-white/[0.04] pointer-events-none">
+          <Cpu size={22} strokeWidth={1} />
+        </div>
+        {/* Braces — bottom right hint */}
+        <div className="absolute bottom-5 right-5 text-white/[0.04] pointer-events-none">
+          <Braces size={18} strokeWidth={1} />
+        </div>
+      </>
+    );
+  }
+
+  if (index === 1) {
+    // Glace — cake & confectionery
+    return (
+      <>
+        {/* Cake — top right, largest */}
+        <div className="absolute top-3 right-4 text-white/[0.09] pointer-events-none">
+          <Cake size={54} strokeWidth={1} />
+        </div>
+        {/* Utensils crossed — bottom left */}
+        <div className="absolute bottom-4 left-4 text-white/[0.07] pointer-events-none">
+          <UtensilsCrossed size={32} strokeWidth={1} />
+        </div>
+        {/* Cookie — top left, small */}
+        <div className="absolute top-5 left-5 text-white/[0.05] pointer-events-none">
+          <Cookie size={20} strokeWidth={1} />
+        </div>
+        {/* Second cookie — bottom right hint */}
+        <div className="absolute bottom-5 right-5 text-white/[0.04] pointer-events-none">
+          <Cookie size={16} strokeWidth={1} />
+        </div>
+      </>
+    );
+  }
+
+  return null;
+}
 
 async function getSiteName(): Promise<string> {
   try {
@@ -101,6 +152,9 @@ export async function PartnersStrip() {
                     style={{ backgroundImage: palette.pattern, backgroundSize: "22px 22px" }}
                   />
 
+                  {/* Thematic icon decorations */}
+                  <CardDecoration index={i} />
+
                   {/* Ambient radial glow — bottom centre */}
                   <div
                     className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-2/3 pointer-events-none"
@@ -133,7 +187,7 @@ export async function PartnersStrip() {
                     </span>
                   </div>
 
-                  {/* Hover: subtle lift + border glow */}
+                  {/* Hover: subtle border glow */}
                   <div className="absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/5 group-hover:ring-white/12 transition-all duration-400" />
 
                   {/* Clickable overlay */}
