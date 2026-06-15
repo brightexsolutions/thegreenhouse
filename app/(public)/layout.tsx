@@ -1,6 +1,7 @@
 import { SiteNav } from "@/components/layout/site-nav";
 import { SiteFooter } from "@/components/layout/site-footer";
 import { SessionPromptDialog } from "@/components/layout/session-prompt-dialog";
+import { ChatFab } from "@/components/chat/chat-fab";
 import { createAdminClient } from "@/lib/supabase/server";
 
 async function getUpcomingEvent() {
@@ -31,6 +32,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <main>{children}</main>
       <SiteFooter />
       {upcomingEvent && <SessionPromptDialog event={upcomingEvent} />}
+      <ChatFab />
     </>
   );
 }
