@@ -96,15 +96,25 @@ const SECTIONS = [
         <p>Visitors register via the modal on the public event page. The compact overlay appears above all other page elements. The form collects name, email or phone, how they heard about the event, their role, and consent preferences.</p>
         <p>After successful registration:</p>
         <ul className="pl-4 list-disc space-y-1">
-          <li><strong>Email provided</strong> — a PDF ticket is emailed via Resend.</li>
-          <li><strong>Phone only</strong> — a WhatsApp message with the ticket link is sent via Twilio.</li>
+          <li><strong>Email provided</strong> — a PDF ticket is emailed via Resend. The success screen stays open (no auto-close) with quick links to About, Gallery, and Get Involved.</li>
+          <li><strong>Phone only</strong> — a WhatsApp message with the ticket link is sent.</li>
           <li>Both if the attendee provided both.</li>
         </ul>
         <p>The ticket page at <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">/ticket/[token]</code> is always publicly accessible and printable.</p>
 
+        <div className="bg-forest/6 border border-forest/15 rounded-xl px-4 py-3 space-y-1.5">
+          <p className="text-xs font-semibold text-forest">Support contact on the form</p>
+          <p className="text-xs text-charcoal/60">The registration form and success screen both show a WhatsApp and call link for attendees who have trouble signing up or receiving their ticket. The number is set in <code className="bg-charcoal/6 px-1 rounded">lib/constants.ts</code> → <code className="bg-charcoal/6 px-1 rounded">REGISTRATION_SUPPORT_WA</code>.</p>
+        </div>
+
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
           <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-charcoal/50">Duplicate prevention: a second sign-up with the same email or phone for the same event is rejected and the existing ticket link is resent.</p>
+        </div>
+
+        <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
+          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/50"><strong className="text-charcoal">Resend ticket from admin</strong> — on the Registrants table, every row with an email address has a small send icon. Clicking it immediately re-sends the PDF ticket email to that person. Useful when someone says they never received it.</p>
         </div>
       </div>
     ),
@@ -136,6 +146,51 @@ const SECTIONS = [
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
           <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
           <p className="text-xs text-charcoal/50">The same song library is available across all events. When you add a song to a section, you can pick from the library or create a new one.</p>
+        </div>
+      </div>
+    ),
+  },
+  {
+    id:    "library",
+    icon:  Images,
+    title: "Library",
+    color: "bg-amber-50 text-amber-700",
+    content: (
+      <div className="space-y-4 text-sm text-charcoal/70 leading-relaxed">
+        <p>The Library (<strong>sidebar → Library</strong>) is a shared media and content store that spans all events. It has five tabs:</p>
+
+        <div className="space-y-3">
+          <div className="border border-mist rounded-xl p-4">
+            <p className="text-xs font-semibold text-charcoal mb-1.5">Event Photos</p>
+            <p className="text-xs text-charcoal/60 mb-2">Upload and manage photos for each session. These appear in the Gallery scene on the projection display and on the public Gallery page.</p>
+            <ul className="text-xs text-charcoal/55 space-y-1 pl-3 list-disc">
+              <li>Select an event using the <strong>card picker</strong> at the top. Each card shows the session name, date (Past / Upcoming badge), and — once loaded — the photo count and total storage size for that event.</li>
+              <li>Drag photos into the upload zone or click to browse. Multiple files can be queued. JPEG, PNG, or WebP, max 15 MB each.</li>
+              <li>Add an optional caption before uploading — it applies to all photos in that batch.</li>
+              <li>Each uploaded photo is auto-compressed server-side (max 1200 px wide, 80% JPEG quality, EXIF rotation applied).</li>
+              <li>Each photo in the grid shows its file size and pixel dimensions. Click the <strong>↗</strong> icon to open the full-resolution image; click the trash icon to permanently delete it.</li>
+            </ul>
+          </div>
+
+          <div className="border border-mist rounded-xl p-4">
+            <p className="text-xs font-semibold text-charcoal mb-1.5">Songs</p>
+            <p className="text-xs text-charcoal/60">A searchable library of all songs used across sessions. Add new songs here or inline when building the program. Songs are reusable — adding a song to Session 03's program does not duplicate it.</p>
+          </div>
+
+          <div className="border border-mist rounded-xl p-4">
+            <p className="text-xs font-semibold text-charcoal mb-1.5">Themes</p>
+            <p className="text-xs text-charcoal/60">Create and manage reusable themes (title, scripture, description). Themes can be assigned to events from the event details page. The active theme appears on the Theme scene of the projection display and on the attendee live page.</p>
+          </div>
+
+          <div className="border border-mist rounded-xl p-4">
+            <p className="text-xs font-semibold text-charcoal mb-1.5">Attendee Photos</p>
+            <p className="text-xs text-charcoal/60">Attendees can submit their own photos from the live page during the gathering. This tab shows submitted photos pending approval. Approve photos to make them appear in the public gallery; reject to discard.</p>
+          </div>
+
+          <div className="border border-mist rounded-xl p-4">
+            <p className="text-xs font-semibold text-charcoal mb-1.5">Trivia</p>
+            <p className="text-xs text-charcoal/60">Build the question bank used during live trivia rounds. See the <strong>Trivia</strong> section below for the full workflow.</p>
+          </div>
         </div>
       </div>
     ),
@@ -265,7 +320,7 @@ const SECTIONS = [
         <p><strong>To use your own images:</strong></p>
         <div className="space-y-2 pl-1">
           <Step n={1} title="Upload photos">
-            Go to the event's <strong>Details tab</strong> → <strong>Gallery Images</strong> section. Upload photos (JPGs/PNGs). They are compressed and stored in Supabase Storage. Set a sort order to control the collage layout.
+            Go to <strong>Library → Event Photos</strong>. Select the event using the card picker at the top (cards show photo count and total storage size). Drop or browse photos — JPEG, PNG, or WebP up to 15 MB each. Multiple files can be queued at once. Each image is auto-compressed server-side (max 1200 px wide, 80% quality) before storing.
           </Step>
           <Step n={2} title="Activate the scene">
             On the control panel, tap <strong>Gallery</strong> in the scene switcher. The display switches to the collage view with your uploaded photos floating at different angles.
@@ -320,15 +375,45 @@ const SECTIONS = [
     title: "Communications",
     color: "bg-pink-50 text-pink-600",
     content: (
-      <div className="space-y-3 text-sm text-charcoal/70 leading-relaxed">
-        <p>Send bulk emails or WhatsApp messages from an event's <strong>Tools tab</strong> or the global <strong>Comms</strong> page.</p>
-        <ul className="pl-4 list-disc space-y-1">
-          <li>Choose channel: Email or WhatsApp</li>
-          <li>Choose scope: All registrants, or WhatsApp opt-ins only</li>
-          <li>Write and preview the message before sending</li>
-          <li>All sends are logged with status and timestamps</li>
-        </ul>
-        <p>Individual ticket emails are sent automatically on registration. The broadcast is for announcements: venue change, session start reminder, post-event thank you.</p>
+      <div className="space-y-4 text-sm text-charcoal/70 leading-relaxed">
+
+        <div>
+          <p className="font-medium text-charcoal mb-1">Sending a broadcast</p>
+          <p>Open <strong>Send broadcast</strong> from the Comms page header or an event's Tools tab. The dialog has:</p>
+          <ul className="pl-4 list-disc space-y-1 mt-1">
+            <li><strong>Event</strong> — dropdown to pick which event's registrant list to message.</li>
+            <li><strong>Channel</strong> — button toggle: <strong>Email</strong> or <strong>WhatsApp</strong>. Email shows a Subject field; WhatsApp does not.</li>
+            <li><strong>Send to</strong> — button toggle: <strong>All registrants</strong> (everyone on that event's list) or <strong>Opted-in only</strong> (registrants who ticked "Keep me updated" at sign-up). Use "Opted-in only" for ongoing news and community updates; use "All registrants" for event-specific announcements like a venue change.</li>
+            <li>Write the message, then tap <strong>Send message</strong>. A green banner confirms how many recipients were reached; red if something failed.</li>
+          </ul>
+        </div>
+
+        <div>
+          <p className="font-medium text-charcoal mb-1">Automatic post-event emails</p>
+          <p>A cron job runs after each event ends and sends two batches automatically — no manual action needed:</p>
+          <ul className="pl-4 list-disc space-y-1 mt-1">
+            <li><strong>Thank-you email</strong> — sent to every registrant who was checked in as present.</li>
+            <li><strong>Missed-you email</strong> — sent to registrants who were not checked in. Encourages them to join the next session.</li>
+          </ul>
+          <p>Both are logged in the Comms log with status and timestamps. The event is marked <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">post_event_email_sent = true</code> once both batches complete, so they are never sent twice.</p>
+        </div>
+
+        <div>
+          <p className="font-medium text-charcoal mb-1">Message log</p>
+          <p>The Comms page shows a scrollable, filterable table of every message ever sent — automatic or manual.</p>
+          <ul className="pl-4 list-disc space-y-1 mt-1">
+            <li><strong>Channel tabs</strong> at the top — All / Email / WhatsApp — with live counts.</li>
+            <li><strong>Status dropdown</strong> — filter to Sent, Failed, or Pending.</li>
+            <li><strong>Event dropdown</strong> — filter by a specific event title.</li>
+            <li>20 rows per page with Previous / Next pagination. Total result count shown in the footer.</li>
+            <li>Table header sticks to the top and casts a shadow once you scroll.</li>
+          </ul>
+        </div>
+
+        <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
+          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/50">Individual ticket emails are sent automatically on registration and are also logged here. Use broadcasts for event-wide announcements: venue change, session start reminder, post-event community update.</p>
+        </div>
       </div>
     ),
   },
@@ -447,8 +532,10 @@ const SECTIONS = [
 
           <JourneyPhase title="After the gathering" color="border-charcoal/20">
             <JourneyStep>Change event status to <strong>Past</strong>.</JourneyStep>
+            <JourneyStep>The post-event email cron runs automatically — a thank-you to checked-in attendees and a missed-you to absentees. No action needed; check the Comms log to confirm delivery.</JourneyStep>
+            <JourneyStep>Upload session photos via <strong>Library → Event Photos</strong> for the gallery and next session's display.</JourneyStep>
             <JourneyStep>Download registrant CSV / PDF from the Registrants tab.</JourneyStep>
-            <JourneyStep>Send a thank-you broadcast from Tools → Comms.</JourneyStep>
+            <JourneyStep>Send any additional broadcast from Tools → Comms (community update, next session teaser, etc.).</JourneyStep>
             <JourneyStep>Review attendance rate on the Dashboard.</JourneyStep>
           </JourneyPhase>
         </div>
