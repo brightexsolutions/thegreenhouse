@@ -16,14 +16,31 @@ export async function GET(_req: NextRequest, { params }: Props) {
   if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await params;
-  const { data, error } = await supabase
-    .from("event_images")
-    .select("id, path, caption, sort_order, is_cover, created_at")
-    .eq("event_id", id)
-    .order("sort_order", { ascending: true });
+
+  const [{ data, error }, { data: storageItems }] = await Promise.all([
+    supabase
+      .from("event_images")
+      .select("id, path, caption, sort_order, is_cover, created_at")
+      .eq("event_id", id)
+      .order("sort_order", { ascending: true }),
+    supabase.storage.from("event-images").list(`events/${id}/gallery`, { limit: 1000 }),
+  ]);
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ photos: data ?? [] });
+
+  // Build filename → size_kb lookup from storage metadata
+  const sizeByFilename: Record<string, number> = {};
+  for (const obj of storageItems ?? []) {
+    const sizeBytes = (obj.metadata as { size?: number } | null)?.size ?? 0;
+    sizeByFilename[obj.name] = Math.round(sizeBytes / 1024);
+  }
+
+  const photos = (data ?? []).map(p => {
+    const filename = p.path.split("/").pop() ?? "";
+    return { ...p, size_kb: sizeByFilename[filename] ?? null };
+  });
+
+  return NextResponse.json({ photos });
 }
 
 export async function POST(req: NextRequest, { params }: Props) {

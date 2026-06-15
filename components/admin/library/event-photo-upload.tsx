@@ -20,6 +20,7 @@ interface Photo {
   sort_order: number;
   is_cover:   boolean;
   created_at: string;
+  size_kb:    number | null;
 }
 
 interface PhotoMeta {
@@ -44,6 +45,11 @@ function photoFullUrl(path: string) {
 function formatSize(bytes: number): string {
   if (bytes >= 1024 * 1024) return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   return `${Math.round(bytes / 1024)} KB`;
+}
+
+function formatKb(kb: number): string {
+  if (kb >= 1024) return `${(kb / 1024).toFixed(1)} MB`;
+  return `${kb} KB`;
 }
 
 function shortTitle(title: string) {
@@ -145,7 +151,8 @@ export function EventPhotoUpload({ events }: Props) {
 
       if (res.ok) {
         const data = await res.json();
-        setPhotos(prev => [...prev, data.photo]);
+        const sizeKb = data.meta?.size_kb ?? null;
+        setPhotos(prev => [...prev, { ...data.photo, size_kb: sizeKb }]);
         if (data.meta) {
           setPhotoMeta(prev => ({ ...prev, [data.photo.id]: data.meta }));
         }
@@ -240,12 +247,18 @@ export function EventPhotoUpload({ events }: Props) {
                   {isPast ? "Past" : "Upcoming"}
                 </div>
 
-                {/* Photo count badge — shown once loaded */}
+                {/* Photo count + size — shown once loaded */}
                 {isSelected && loaded === event.id && (
-                  <div className="absolute top-3 right-3 flex items-center gap-1">
-                    <span className="text-[10px] font-semibold text-forest bg-forest/10 px-2 py-0.5 rounded-full">
+                  <div className="mt-2.5 flex flex-col gap-0.5">
+                    <span className="text-[11px] font-semibold text-forest">
                       {photos.length} photo{photos.length !== 1 ? "s" : ""}
                     </span>
+                    {photos.length > 0 && (() => {
+                      const totalKb = photos.reduce((sum, p) => sum + (p.size_kb ?? 0), 0);
+                      return totalKb > 0 ? (
+                        <span className="text-[10px] text-charcoal/35">{formatKb(totalKb)} total</span>
+                      ) : null;
+                    })()}
                   </div>
                 )}
 
