@@ -207,7 +207,7 @@ function RichText({ text }: { text: string }) {
 // ─── Constants ────────────────────────────────────────────────────────────────
 
 const POPUP_DELAY = 2800;
-const POPUP_TTL   = 7500;
+const POPUP_TTL   = 14000;
 const TYPING_MS   = 520;
 
 const WELCOME: Msg = {
