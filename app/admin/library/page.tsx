@@ -70,22 +70,24 @@ export default async function LibraryPage({ searchParams }: Props) {
           <p className="text-sm text-charcoal/40 mt-1">Manage songs, event photos, and themes</p>
         </div>
 
-        {/* Tab bar */}
-        <div className="flex items-center gap-1 bg-white rounded-2xl border border-mist p-1 w-fit">
-          {TABS.map(({ key, label, icon: Icon }) => (
-            <Link
-              key={key}
-              href={`/admin/library?tab=${key}`}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
-                activeTab === key
-                  ? "bg-forest text-cream shadow-sm"
-                  : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
-              }`}
-            >
-              <Icon size={14} />
-              {label}
-            </Link>
-          ))}
+        {/* Tab bar — scrollable on mobile */}
+        <div className="overflow-x-auto -mx-6 px-6">
+          <div className="flex items-center gap-1 bg-white rounded-2xl border border-mist p-1 w-max">
+            {TABS.map(({ key, label, icon: Icon }) => (
+              <Link
+                key={key}
+                href={`/admin/library?tab=${key}`}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
+                  activeTab === key
+                    ? "bg-forest text-cream shadow-sm"
+                    : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
+                }`}
+              >
+                <Icon size={14} />
+                {label}
+              </Link>
+            ))}
+          </div>
         </div>
 
       </div>

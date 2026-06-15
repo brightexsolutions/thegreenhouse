@@ -79,8 +79,9 @@ export default function TrashPage() {
         </div>
       </div>
 
-      {/* Tabs */}
-      <div className="flex gap-1 bg-off-white rounded-xl p-1 w-fit mb-6">
+      {/* Tabs — scrollable on mobile */}
+      <div className="overflow-x-auto mb-6">
+      <div className="flex gap-1 bg-off-white rounded-xl p-1 w-max">
         {tabs.map(({ key, label, icon: Icon, count }) => (
           <button
             key={key}
@@ -98,6 +99,7 @@ export default function TrashPage() {
             )}
           </button>
         ))}
+      </div>
       </div>
 
       {loading ? (

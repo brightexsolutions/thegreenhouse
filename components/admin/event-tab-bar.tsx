@@ -17,26 +17,28 @@ export function EventTabBar({ eventId }: { eventId: string }) {
   const pathname = usePathname();
 
   return (
-    <div className="flex items-center gap-1 bg-white rounded-2xl border border-mist p-1 w-fit flex-shrink-0 mt-3">
-      {TABS.map(({ href, label, icon: Icon, exact }) => {
-        const to     = href(eventId);
-        const active = exact ? pathname === to : pathname.startsWith(to);
-        return (
-          <Link
-            key={to}
-            href={to}
-            className={cn(
-              "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all",
-              active
-                ? "bg-forest text-cream shadow-sm"
-                : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
-            )}
-          >
-            <Icon size={13} />
-            {label}
-          </Link>
-        );
-      })}
+    <div className="overflow-x-auto mt-3 -mx-4 px-4 sm:mx-0 sm:px-0">
+      <div className="flex items-center gap-1 bg-white rounded-2xl border border-mist p-1 w-max">
+        {TABS.map(({ href, label, icon: Icon, exact }) => {
+          const to     = href(eventId);
+          const active = exact ? pathname === to : pathname.startsWith(to);
+          return (
+            <Link
+              key={to}
+              href={to}
+              className={cn(
+                "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
+                active
+                  ? "bg-forest text-cream shadow-sm"
+                  : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
+              )}
+            >
+              <Icon size={13} />
+              {label}
+            </Link>
+          );
+        })}
+      </div>
     </div>
   );
 }

@@ -87,9 +87,9 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
 
   return (
     <div className="flex flex-col gap-3">
-      {/* Toolbar */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-        <div className="relative flex-1 w-full sm:max-w-xs">
+      {/* Toolbar row 1: search + refresh */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
           <input
             value={query}
@@ -98,7 +98,18 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
             className="w-full pl-9 pr-4 py-2 rounded-xl border border-mist bg-white text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
           />
         </div>
-        <div className="flex items-center gap-1 bg-white rounded-xl border border-mist p-1 flex-shrink-0 flex-wrap">
+        <button
+          onClick={refresh}
+          title="Refresh"
+          className="flex-shrink-0 p-2 rounded-xl border border-mist bg-white text-charcoal/40 hover:text-forest hover:border-forest/30 transition-all"
+        >
+          <RefreshCw size={14} className={cn("transition-transform", spinning && "animate-spin")} />
+        </button>
+      </div>
+
+      {/* Toolbar row 2: status filter pills — scrollable on mobile */}
+      <div className="overflow-x-auto">
+        <div className="flex items-center gap-1 bg-white rounded-xl border border-mist p-1 w-max">
           {STATUS_FILTERS.map(({ key, label }) => (
             <button
               key={key}
@@ -114,13 +125,6 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
             </button>
           ))}
         </div>
-        <button
-          onClick={refresh}
-          title="Refresh"
-          className="flex-shrink-0 p-2 rounded-xl border border-mist bg-white text-charcoal/40 hover:text-forest hover:border-forest/30 transition-all"
-        >
-          <RefreshCw size={14} className={cn("transition-transform", spinning && "animate-spin")} />
-        </button>
       </div>
 
       {/* Table */}
