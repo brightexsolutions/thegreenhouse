@@ -1,22 +1,31 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
+import { usePathname } from "next/navigation";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Leaf } from "lucide-react";
+import { MessageCircle, X, Send, Leaf, ArrowRight } from "lucide-react";
 import { SESSION_FREQUENCY, CONTACT_EMAIL, SITE_NAME } from "@/lib/constants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
+interface Action {
+  label: string;
+  href:  string;
+}
+
 interface Msg {
-  id:     number;
-  role:   "user" | "bot";
-  text:   string;
-  chips?: string[];
+  id:      number;
+  role:    "user" | "bot";
+  text:    string;
+  chips?:  string[];
+  action?: Action;
 }
 
 interface BotReply {
   text:        string;
   chips?:      string[];
+  action?:     Action;
   isGreeting?: boolean;
 }
 
@@ -28,43 +37,49 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /what\s*(is|'?s)?\s*(the\s*)?green\s*house|about\s*(you|green\s*house|this)|tell\s*me\s*more|who\s*are\s*you/i,
     reply: () => ({
-      text:  "The Green House is a cross-church worship and sharing community in Nairobi, Kenya. We gather **quarterly** for an evening of low-pressure worship, prayer, and genuine connection — no performance, no pressure, just real community across different churches.",
-      chips: ["Who can attend?", "When is the next session?", "Is it free?"],
+      text:   "The Green House is a cross-church worship and sharing community in Nairobi, Kenya. We gather **quarterly** for an evening of low-pressure worship, prayer, and genuine connection — no performance, no pressure, just real community across different churches.",
+      chips:  ["Who can attend?", "When is the next session?", "Is it free?"],
+      action: { label: "Learn more about us", href: "/about" },
     }),
   },
   {
     re: /when|next\s*session|date|schedule|upcoming|session\s*0?2/i,
     reply: () => ({
-      text:  "The next gathering is **Session 02** on **June 26, 2026** at 7:00 PM. Venue details will be shared soon — register and we'll notify you directly!",
-      chips: ["How do I register?", "Where will it be held?", "What's the theme?"],
+      text:   "The next gathering is **Session 02** on **June 26, 2026** at 7:00 PM. Venue details will be shared soon — register and we'll notify you directly!",
+      chips:  ["How do I register?", "Where will it be held?", "What's the theme?"],
+      action: { label: "View Session 02", href: "/events/session-02" },
     }),
   },
   {
     re: /where|venue|location|address|place/i,
     reply: () => ({
-      text:  "The venue for Session 02 will be announced closer to the date. Register on our Events page and we'll send you all the details via email or WhatsApp.",
-      chips: ["How do I register?", "When is the next session?"],
+      text:   "The venue for Session 02 will be announced closer to the date. Register on our Events page and we'll send you all the details via email or WhatsApp.",
+      chips:  ["How do I register?", "When is the next session?"],
+      action: { label: "Register for updates", href: "/events/session-02" },
     }),
   },
   {
     re: /how\s*(do\s*i|to|can\s*i)?\s*(register|sign\s*up|book|get\s*a?\s*ticket)/i,
     reply: () => ({
-      text:  "Head to our **Events** page, click on Session 02, and fill in your details. You'll get a digital ticket via email (PDF) or WhatsApp link — bring it on your phone to the door!",
-      chips: ["Is it free?", "What do I receive after registering?"],
+      text:   "Head to our **Events** page, click on Session 02, and fill in your details. You'll get a digital ticket via email (PDF) or WhatsApp link — bring it on your phone to the door!",
+      chips:  ["Is it free?", "What do I receive after registering?"],
+      action: { label: "Register for Session 02", href: "/events/session-02" },
     }),
   },
   {
     re: /free|cost|price|pay|charge|fee/i,
     reply: () => ({
-      text:  "Yes — entry is completely free. Some future sessions may include a small venue contribution, but this will always be communicated clearly in advance.",
-      chips: ["How do I register?", "Who can attend?"],
+      text:   "Yes — entry is completely free. Some future sessions may include a small venue contribution, but this will always be communicated clearly in advance.",
+      chips:  ["How do I register?", "Who can attend?"],
+      action: { label: "Register for free", href: "/events/session-02" },
     }),
   },
   {
     re: /ticket|receive|get\s*(after|my)|confirmation/i,
     reply: () => ({
-      text:  "After registering, you'll get a digital ticket — as a **PDF via email** or a **link via WhatsApp**. Bring it on your phone screen to the door.",
-      chips: ["Where will it be held?", "When is the next session?"],
+      text:   "After registering, you'll get a digital ticket — as a **PDF via email** or a **link via WhatsApp**. Bring it on your phone screen to the door.",
+      chips:  ["Where will it be held?", "When is the next session?"],
+      action: { label: "Register now", href: "/events/session-02" },
     }),
   },
   {
@@ -119,8 +134,9 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /stay\s*inform|notify|notification|news|announce|update|broadcast|mailing/i,
     reply: () => ({
-      text:  "Register on the site and you'll receive updates via email or WhatsApp before each session. You can also follow us on Instagram **@thegreenhouseke**.",
-      chips: ["Follow on Instagram", "How do I register?"],
+      text:   "Register on the site and you'll receive updates via email or WhatsApp before each session. You can also follow us on Instagram **@thegreenhouseke**.",
+      chips:  ["Follow on Instagram", "How do I register?"],
+      action: { label: "Get involved", href: "/get-involved" },
     }),
   },
   {
@@ -133,15 +149,17 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /contact|reach|email|reach\s*out|talk\s*to|get\s*in\s*touch/i,
     reply: () => ({
-      text:  `You can reach the team at **${CONTACT_EMAIL}**, or use the **'Get Involved'** form on our website. We'd love to hear from you!`,
-      chips: ["What is The Green House?", "How do I register?"],
+      text:   `You can reach the team at **${CONTACT_EMAIL}**, or use the **'Get Involved'** form on our website. We'd love to hear from you!`,
+      chips:  ["What is The Green House?", "How do I register?"],
+      action: { label: "Get in touch", href: "/get-involved" },
     }),
   },
   {
     re: /partner|support|sponsor|volunteer|get\s*involv|contribute|serve/i,
     reply: () => ({
-      text:  "We'd love to have you involved! Whether you'd like to serve, partner, or support the vision — fill in the 'Get Involved' form on the website and the team will be in touch.",
-      chips: ["Contact the team", "What is The Green House?"],
+      text:   "We'd love to have you involved! Whether you'd like to serve, partner, or support the vision — fill in the 'Get Involved' form on the website and the team will be in touch.",
+      chips:  ["Contact the team", "What is The Green House?"],
+      action: { label: "Get involved", href: "/get-involved" },
     }),
   },
 ];
@@ -230,6 +248,10 @@ export function ChatFab() {
   const bottomRef = useRef<HTMLDivElement>(null);
   const inputRef  = useRef<HTMLInputElement>(null);
   const nextId    = useRef(1);
+  const pathname  = usePathname();
+
+  // Close chat pane on navigation
+  useEffect(() => { setOpen(false); }, [pathname]);
 
   // Show popup on every page load
   useEffect(() => {
@@ -272,7 +294,7 @@ export function ChatFab() {
     setTimeout(() => {
       setMsgs(prev => [
         ...prev,
-        { id: nextId.current++, role: "bot", text: reply.text, chips: reply.chips },
+        { id: nextId.current++, role: "bot", text: reply.text, chips: reply.chips, action: reply.action },
       ]);
       setTyping(false);
     }, TYPING_MS);
@@ -338,6 +360,15 @@ export function ChatFab() {
                             </button>
                           ))}
                         </div>
+                      )}
+                      {msg.action && (
+                        <Link
+                          href={msg.action.href}
+                          className="inline-flex items-center gap-1.5 text-xs font-semibold bg-forest text-cream px-3.5 py-2 rounded-xl hover:bg-moss transition-colors mt-0.5"
+                        >
+                          {msg.action.label}
+                          <ArrowRight size={12} />
+                        </Link>
                       )}
                     </div>
                   </div>
