@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { AdminSidebar } from "./admin-sidebar";
 import { AdminTopbar } from "./admin-topbar";
+import { NotificationListener } from "@/components/admin/notification-listener";
 
 interface Props {
   role:      string;
@@ -24,6 +25,7 @@ export function AdminShell({ role, liveSlug, liveName, fullName, children }: Pro
 
   return (
     <div className="flex h-screen overflow-hidden bg-off-white">
+      <NotificationListener />
 
       {/* Mobile backdrop */}
       {sidebarOpen && (

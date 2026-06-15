@@ -3,7 +3,49 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { LogOut, User, RefreshCw, Menu } from "lucide-react";
+import { Bell, BellOff, LogOut, User, RefreshCw, Menu } from "lucide-react";
+
+function NotificationBell() {
+  const [permission, setPermission] = useState<NotificationPermission | "unsupported" | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !("Notification" in window)) {
+      setPermission("unsupported");
+    } else {
+      setPermission(Notification.permission);
+    }
+  }, []);
+
+  if (permission === null || permission === "unsupported" || permission === "granted") return null;
+
+  async function enable() {
+    const result = await Notification.requestPermission();
+    setPermission(result);
+  }
+
+  if (permission === "denied") {
+    return (
+      <button
+        disabled
+        title="Notifications blocked — allow them in your browser settings"
+        className="w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/25 cursor-not-allowed"
+      >
+        <BellOff size={13} />
+      </button>
+    );
+  }
+
+  return (
+    <button
+      onClick={enable}
+      title="Enable notifications for new registrations and enquiries"
+      className="relative w-8 h-8 rounded-lg border border-amber-200 bg-amber-50 flex items-center justify-center text-amber-600 hover:bg-amber-100 transition-colors"
+    >
+      <Bell size={13} />
+      <span className="absolute top-0.5 right-0.5 w-2 h-2 rounded-full bg-amber-400" />
+    </button>
+  );
+}
 
 interface AdminTopbarProps {
   fullName:    string;
@@ -57,6 +99,9 @@ export function AdminTopbar({ fullName, role, onMenuOpen }: AdminTopbarProps) {
       <div className="hidden md:block" />
 
       <div className="flex items-center gap-2">
+        {/* Notification permission bell */}
+        <NotificationBell />
+
         {/* Manual refresh */}
         <button
           onClick={handleRefresh}
