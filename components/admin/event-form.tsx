@@ -187,8 +187,8 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
           <p className="text-xs text-charcoal/45 mt-0.5">Banner: wide hero background. Poster: portrait shown in event details.</p>
         </div>
 
-        {/* Banner + Poster — side by side */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Banner + Poster — stacked on mobile, side by side on sm+ */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
 
           {/* Banner */}
           <div>
