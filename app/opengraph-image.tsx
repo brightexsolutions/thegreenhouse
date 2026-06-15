@@ -36,23 +36,23 @@ export default function Image() {
         fontFamily: "sans-serif",
         fontWeight: 600,
       }}>
-        The Green House
+        Nairobi, Kenya
       </div>
 
       {/* Headline */}
       <div style={{
         color: "#f7f2e8",
-        fontSize: 68,
+        fontSize: 64,
         fontWeight: 700,
         textAlign: "center",
         lineHeight: 1.05,
         fontFamily: "serif",
         marginBottom: 24,
       }}>
-        Worship Community
+        Greenhouse Worship Community
       </div>
 
-      {/* Location */}
+      {/* Tagline */}
       <div style={{
         color: "rgba(247,242,232,0.45)",
         fontSize: 22,
@@ -60,7 +60,7 @@ export default function Image() {
         letterSpacing: 3,
         textTransform: "uppercase",
       }}>
-        Nairobi, Kenya
+        Low pressure · Real connection
       </div>
 
       {/* Gold bottom accent line */}

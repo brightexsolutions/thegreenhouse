@@ -59,8 +59,9 @@ export const metadata: Metadata = {
     locale:   "en_KE",
     siteName: "The Green House Worship Community",
     url:      SITE_BASE,
+    images:   [{ url: "/opengraph-image", width: 1200, height: 630, alt: "Greenhouse Worship Community — Nairobi, Kenya" }],
   },
-  twitter: { card: "summary_large_image" },
+  twitter: { card: "summary_large_image", images: ["/opengraph-image"] },
   robots:  { index: true, follow: true },
 };
 

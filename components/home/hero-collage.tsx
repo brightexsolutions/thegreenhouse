@@ -15,14 +15,14 @@ const PHOTOS = {
 };
 
 const PARTICLES = [
-  { left: "12%",  top: "22%", size: 2,   dur: 7,   delay: 0,   color: "rgba(201,162,74,0.55)" },
-  { left: "88%",  top: "36%", size: 1.5, dur: 9,   delay: 2,   color: "rgba(201,162,74,0.45)" },
-  { left: "65%",  top: "14%", size: 1,   dur: 6,   delay: 4,   color: "rgba(247,242,232,0.40)" },
-  { left: "22%",  top: "62%", size: 2,   dur: 8,   delay: 1,   color: "rgba(201,162,74,0.50)" },
-  { left: "78%",  top: "72%", size: 1.5, dur: 10,  delay: 3,   color: "rgba(247,242,232,0.35)" },
-  { left: "42%",  top: "80%", size: 1,   dur: 7.5, delay: 5,   color: "rgba(201,162,74,0.40)" },
-  { left: "18%",  top: "46%", size: 1.5, dur: 11,  delay: 2.5, color: "rgba(247,242,232,0.28)" },
-  { left: "56%",  top: "56%", size: 1,   dur: 8.5, delay: 6,   color: "rgba(201,162,74,0.42)" },
+  { left: "12%",  top: "22%", size: 4,   dur: 7,   delay: 0,   color: "rgba(201,162,74,0.80)" },
+  { left: "88%",  top: "36%", size: 3,   dur: 9,   delay: 2,   color: "rgba(201,162,74,0.70)" },
+  { left: "65%",  top: "14%", size: 3,   dur: 6,   delay: 4,   color: "rgba(247,242,232,0.65)" },
+  { left: "22%",  top: "62%", size: 4,   dur: 8,   delay: 1,   color: "rgba(201,162,74,0.75)" },
+  { left: "78%",  top: "72%", size: 3,   dur: 10,  delay: 3,   color: "rgba(247,242,232,0.60)" },
+  { left: "42%",  top: "80%", size: 3,   dur: 7.5, delay: 5,   color: "rgba(201,162,74,0.70)" },
+  { left: "18%",  top: "46%", size: 3,   dur: 11,  delay: 2.5, color: "rgba(247,242,232,0.55)" },
+  { left: "56%",  top: "56%", size: 3,   dur: 8.5, delay: 6,   color: "rgba(201,162,74,0.72)" },
 ];
 
 function AnimatedBackground() {
@@ -95,9 +95,9 @@ function AnimatedBackground() {
       {/* Ripple ring — expands and fades on loop */}
       {!reduce && (
         <motion.div
-          animate={{ scale: [1, 1.65], opacity: [0.15, 0] }}
+          animate={{ scale: [1, 1.7], opacity: [0.5, 0] }}
           transition={{ duration: 5, repeat: Infinity, ease: "easeOut", delay: 1.5 }}
-          className="absolute top-[22%] right-[40%] w-24 h-24 rounded-full border border-gold/40 hidden lg:block"
+          className="absolute top-[22%] right-[40%] w-24 h-24 rounded-full border-2 border-gold/70 hidden lg:block"
         />
       )}
 
@@ -105,10 +105,10 @@ function AnimatedBackground() {
       {!reduce && PARTICLES.map(({ left, top, size, dur, delay, color }, i) => (
         <motion.div
           key={i}
-          animate={{ y: [0, -16, 0], opacity: [0.5, 1, 0.5] }}
+          animate={{ y: [0, -16, 0], opacity: [0.65, 1, 0.65] }}
           transition={{ duration: dur, repeat: Infinity, ease: "easeInOut", delay }}
           className="absolute rounded-full"
-          style={{ left, top, width: size, height: size, backgroundColor: color }}
+          style={{ left, top, width: size, height: size, backgroundColor: color, boxShadow: `0 0 ${size * 3}px ${color}` }}
         />
       ))}
     </div>
