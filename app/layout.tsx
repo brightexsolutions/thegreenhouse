@@ -5,7 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { MobileScrollFix } from "@/components/mobile-scroll-fix";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { GOOGLE_SITE_VERIFICATION } from "@/lib/constants";
+import { GOOGLE_SITE_VERIFICATION, SOCIAL_INSTAGRAM } from "@/lib/constants";
 
 const displayFont = Cormorant_Garamond({
   variable: "--font-display",
@@ -22,41 +22,75 @@ const bodyFont = DM_Sans({
   display: "swap",
 });
 
+const SITE_BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.greenhousews.co.ke";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? "https://greenhousews.co.ke"
-  ),
+  metadataBase: new URL(SITE_BASE),
   verification: {
     google: GOOGLE_SITE_VERIFICATION,
   },
   title: {
-    default: "Green House Worship Community",
-    template: "%s | Green House Worship Community",
+    default: "The Green House — Worship Community · Nairobi, Kenya",
+    template: "%s | The Green House",
   },
   description:
     "A cross-church worship community in Nairobi, Kenya. Quarterly gatherings for worship, prayer, and real connection across churches. Low pressure. Everyone welcome.",
   keywords: [
-    "worship community nairobi",
-    "cross-church worship kenya",
+    "greenhouse worship community nairobi",
+    "the green house worship kenya",
+    "cross-church worship nairobi",
     "nairobi worship gathering",
+    "worship community nairobi kenya",
     "christian community nairobi",
     "worship night nairobi",
-    "green house worship",
     "nairobi church fellowship",
-    "worship and prayer nairobi",
+    "worship and prayer nairobi kenya",
     "quarterly worship nairobi",
-    "nairobi community worship",
     "interdenominational worship kenya",
     "nairobi christian gathering",
+    "greenhousews",
   ],
+  icons: {
+    icon:     "/icon.svg",
+    shortcut: "/icon.svg",
+  },
   openGraph: {
-    type: "website",
-    locale: "en_KE",
-    siteName: "Green House Worship Community",
-    images: [{ url: "/og-default.jpg", width: 1200, height: 630 }],
+    type:     "website",
+    locale:   "en_KE",
+    siteName: "The Green House Worship Community",
+    url:      SITE_BASE,
   },
   twitter: { card: "summary_large_image" },
-  robots: { index: true, follow: true },
+  robots:  { index: true, follow: true },
+};
+
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "The Green House Worship Community",
+  "alternateName": [
+    "Green House Worship Community",
+    "The Green House",
+    "The Greenhouse Worship Session",
+    "Green House Worship Session",
+    "greenhousews",
+  ],
+  "url": SITE_BASE,
+  "logo": `${SITE_BASE}/icon.svg`,
+  "description": "A cross-church worship community in Nairobi, Kenya. Quarterly gatherings for worship, prayer, and real connection across churches.",
+  "foundingDate": "2026",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Nairobi",
+    "addressRegion": "Nairobi County",
+    "addressCountry": "KE",
+  },
+  "areaServed": {
+    "@type": "City",
+    "name": "Nairobi",
+    "sameAs": "https://www.wikidata.org/wiki/Q3870",
+  },
+  "sameAs": [SOCIAL_INSTAGRAM],
 };
 
 export default function RootLayout({
@@ -64,7 +98,11 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={cn(displayFont.variable, bodyFont.variable)}>
-      <body className="antialiased force-light grain">
+      <body className="antialiased force-light grain" suppressHydrationWarning>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+        />
         <MobileScrollFix />
         {children}
         <Toaster

@@ -3,14 +3,15 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { LogOut, User, RefreshCw } from "lucide-react";
+import { LogOut, User, RefreshCw, Menu } from "lucide-react";
 
 interface AdminTopbarProps {
-  fullName: string;
-  role:     string;
+  fullName:    string;
+  role:        string;
+  onMenuOpen?: () => void;
 }
 
-export function AdminTopbar({ fullName, role }: AdminTopbarProps) {
+export function AdminTopbar({ fullName, role, onMenuOpen }: AdminTopbarProps) {
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
 
@@ -41,8 +42,19 @@ export function AdminTopbar({ fullName, role }: AdminTopbarProps) {
   }
 
   return (
-    <header className="h-14 border-b border-mist bg-white flex items-center justify-between px-6 flex-shrink-0">
-      <div />
+    <header className="h-14 border-b border-mist bg-white flex items-center justify-between px-4 sm:px-6 flex-shrink-0">
+      {/* Hamburger — mobile only */}
+      {onMenuOpen && (
+        <button
+          onClick={onMenuOpen}
+          className="md:hidden w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/50 hover:text-charcoal hover:border-charcoal/20 transition-all"
+          aria-label="Open menu"
+        >
+          <Menu size={15} />
+        </button>
+      )}
+      {/* Spacer on desktop (keeps right-side items right-aligned) */}
+      <div className="hidden md:block" />
 
       <div className="flex items-center gap-2">
         {/* Manual refresh */}

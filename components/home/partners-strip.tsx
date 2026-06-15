@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, Code2, Terminal, Cpu, Braces, Cake, UtensilsCrossed, Cookie } from "lucide-react";
+import { ArrowRight, Code2, Terminal, Cpu, Braces, Cake, UtensilsCrossed, Cookie, ExternalLink } from "lucide-react";
 import { PARTNERS, SITE_NAME } from "@/lib/constants";
 import { FadeIn } from "@/components/motion/fade-in";
 import { createAdminClient } from "@/lib/supabase/server";
@@ -139,8 +139,8 @@ export async function PartnersStrip() {
             return (
               <FadeIn key={partner.name} delay={i * 0.1}>
                 <div
-                  className={`group relative rounded-3xl overflow-hidden flex flex-col items-center justify-center min-h-[180px] sm:min-h-[200px] px-6 py-7 text-center
-                    ${partner.url ? "cursor-pointer" : ""}
+                  className={`group relative rounded-3xl overflow-hidden flex flex-col items-center justify-center min-h-[180px] sm:min-h-[200px] px-6 py-7 text-center transition-all duration-300
+                    ${partner.url ? "cursor-pointer hover:-translate-y-1 hover:shadow-2xl" : ""}
                   `}
                 >
                   {/* Gradient background */}
@@ -163,6 +163,14 @@ export async function PartnersStrip() {
 
                   {/* Top fade for depth */}
                   <div className="absolute top-0 inset-x-0 h-16 bg-gradient-to-b from-black/20 to-transparent" />
+
+                  {/* External link badge — always visible when card has URL */}
+                  {partner.url && (
+                    <div className="absolute top-3.5 right-3.5 z-10 flex items-center gap-1 px-2 py-1 rounded-full bg-white/10 border border-white/15 backdrop-blur-sm transition-all duration-200 group-hover:bg-white/18 group-hover:border-white/25">
+                      <ExternalLink size={9} className="text-white/70 group-hover:text-white/90 transition-colors" />
+                      <span className="text-[9px] font-semibold text-white/60 group-hover:text-white/85 transition-colors uppercase tracking-wide">Visit</span>
+                    </div>
+                  )}
 
                   {/* Content */}
                   <div className="relative z-10 flex flex-col items-center gap-4">
@@ -187,8 +195,8 @@ export async function PartnersStrip() {
                     </span>
                   </div>
 
-                  {/* Hover: subtle border glow */}
-                  <div className="absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/5 group-hover:ring-white/12 transition-all duration-400" />
+                  {/* Hover: border glow */}
+                  <div className="absolute inset-0 rounded-3xl ring-1 ring-inset ring-white/5 group-hover:ring-white/18 transition-all duration-300" />
 
                   {/* Clickable overlay */}
                   {partner.url && (

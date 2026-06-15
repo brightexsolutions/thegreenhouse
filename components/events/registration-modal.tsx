@@ -120,7 +120,7 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
               venue_name:  event.venue_name,
               theme_title: (event as { theme_title?: string | null }).theme_title ?? null,
             }}
-            onSuccess={(hasEmail) => { if (hasEmail) setTimeout(() => setOpen(false), 3500); }}
+            onSuccess={() => {}}
           />
         </div>
       </div>

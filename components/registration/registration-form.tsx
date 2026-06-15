@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, CheckCircle2, Leaf, Download, Mail, Sparkles, AlertCircle } from "lucide-react";
+import { Loader2, CheckCircle2, Leaf, Download, Mail, Sparkles, AlertCircle, Users, ImageIcon, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { normalisePhone } from "@/lib/phone";
 import { REGISTRATION_SUPPORT_WA } from "@/lib/constants";
@@ -187,6 +187,27 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
           </>
         )}
 
+        {/* Support note — shown for all registrants */}
+        <p className="text-[11px] text-charcoal/38 mt-5 leading-relaxed">
+          Didn&apos;t receive your ticket?{" "}
+          <a
+            href={`https://wa.me/${REGISTRATION_SUPPORT_WA}?text=${encodeURIComponent("Hi, I registered for The Green House but didn't receive my ticket.")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-forest/65 underline underline-offset-2 hover:text-forest font-medium"
+          >
+            Message us on WhatsApp
+          </a>
+          {" "}or call{" "}
+          <a
+            href={`tel:+${REGISTRATION_SUPPORT_WA}`}
+            className="text-forest/65 underline underline-offset-2 hover:text-forest font-medium"
+          >
+            +{REGISTRATION_SUPPORT_WA}
+          </a>
+          {" "}and we&apos;ll help.
+        </p>
+
         {/* Badge teaser — shown for all registrants */}
         {ticketPageUrl && (
           <div className="mt-6 max-w-xs mx-auto">
@@ -205,6 +226,29 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
             </a>
           </div>
         )}
+
+        {/* Where next? */}
+        <div className="mt-8 max-w-xs mx-auto w-full">
+          <p className="text-[10px] uppercase tracking-widest text-charcoal/30 font-semibold mb-3">While you wait</p>
+          <div className="grid grid-cols-3 gap-2">
+            {[
+              { href: "/about",        Icon: Users,     label: "About us" },
+              { href: "/gallery",      Icon: ImageIcon, label: "Gallery"  },
+              { href: "/get-involved", Icon: Heart,     label: "Get involved" },
+            ].map(({ href, Icon, label }) => (
+              <a
+                key={href}
+                href={href}
+                className="flex flex-col items-center gap-2 px-2 py-3.5 rounded-2xl border border-mist hover:border-forest/25 hover:bg-forest/5 transition-all group"
+              >
+                <div className="w-8 h-8 rounded-xl bg-forest/8 group-hover:bg-forest/14 flex items-center justify-center transition-colors">
+                  <Icon size={14} className="text-forest/60 group-hover:text-forest transition-colors" />
+                </div>
+                <span className="text-[11px] text-charcoal/55 group-hover:text-charcoal font-medium text-center leading-tight transition-colors">{label}</span>
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
@@ -358,6 +402,26 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
 
       <p className="text-center text-[11px] text-charcoal/45">
         {emailValue ? "Ticket will be sent to your email." : "Provide an email or phone to receive your ticket."}
+      </p>
+
+      {/* Support contact */}
+      <p className="text-center text-[11px] text-charcoal/40 leading-relaxed">
+        Having trouble?{" "}
+        <a
+          href={`https://wa.me/${REGISTRATION_SUPPORT_WA}?text=${encodeURIComponent("Hi, I need help registering for The Green House.")}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-forest/70 underline underline-offset-2 hover:text-forest font-medium"
+        >
+          WhatsApp us
+        </a>
+        {" "}or call{" "}
+        <a
+          href={`tel:+${REGISTRATION_SUPPORT_WA}`}
+          className="text-forest/70 underline underline-offset-2 hover:text-forest font-medium"
+        >
+          +{REGISTRATION_SUPPORT_WA}
+        </a>
       </p>
     </form>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Mail, Phone, CheckCircle2, Circle, Share2, Loader2 } from "lucide-react";
+import { Search, Mail, Phone, CheckCircle2, Circle, Share2, Loader2, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Registrant {
@@ -32,11 +32,13 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export function RegistrantsTable({ registrants, eventId }: RegistrantsTableProps) {
-  const [query,      setQuery]      = useState("");
-  const [filter,     setFilter]     = useState<"all" | "present" | "absent">("all");
-  const [shareEmail, setShareEmail] = useState("");
-  const [sharing,    setSharing]    = useState(false);
-  const [shareMsg,   setShareMsg]   = useState<string | null>(null);
+  const [query,        setQuery]        = useState("");
+  const [filter,       setFilter]       = useState<"all" | "present" | "absent">("all");
+  const [shareEmail,   setShareEmail]   = useState("");
+  const [sharing,      setSharing]      = useState(false);
+  const [shareMsg,     setShareMsg]     = useState<string | null>(null);
+  const [resending,    setResending]    = useState<Record<string, boolean>>({});
+  const [resendStatus, setResendStatus] = useState<Record<string, "ok" | "err">>({});
 
   const filtered = registrants.filter((r) => {
     const matchesQuery =
@@ -47,6 +49,18 @@ export function RegistrantsTable({ registrants, eventId }: RegistrantsTableProps
       (filter === "absent" && !r.checked_in);
     return matchesQuery && matchesFilter;
   });
+
+  async function handleResend(registrantId: string) {
+    setResending(prev => ({ ...prev, [registrantId]: true }));
+    setResendStatus(prev => { const n = { ...prev }; delete n[registrantId]; return n; });
+    try {
+      const res = await fetch(`/api/admin/registrations/${registrantId}/resend-ticket`, { method: "POST" });
+      setResendStatus(prev => ({ ...prev, [registrantId]: res.ok ? "ok" : "err" }));
+      setTimeout(() => setResendStatus(prev => { const n = { ...prev }; delete n[registrantId]; return n; }), 3000);
+    } finally {
+      setResending(prev => ({ ...prev, [registrantId]: false }));
+    }
+  }
 
   async function handleShare() {
     if (!shareEmail.trim()) return;
@@ -160,9 +174,29 @@ export function RegistrantsTable({ registrants, eventId }: RegistrantsTableProps
                   {ROLE_LABELS[r.role] ?? r.role}
                 </span>
 
-                {/* Ticket sent */}
-                <div className={cn("flex-shrink-0", r.ticket_sent ? "text-green-500" : "text-charcoal/20")} title={r.ticket_sent ? "Ticket sent" : "Not sent"}>
-                  {r.ticket_sent ? <CheckCircle2 size={14} /> : <Circle size={14} />}
+                {/* Ticket sent + resend */}
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  <div className={cn(r.ticket_sent ? "text-green-500" : "text-charcoal/20")} title={r.ticket_sent ? "Ticket sent" : "Not sent"}>
+                    {r.ticket_sent ? <CheckCircle2 size={14} /> : <Circle size={14} />}
+                  </div>
+                  {r.email && (
+                    <button
+                      onClick={() => handleResend(r.id)}
+                      disabled={resending[r.id]}
+                      title={resendStatus[r.id] === "ok" ? "Sent!" : resendStatus[r.id] === "err" ? "Failed" : "Resend ticket"}
+                      className={cn(
+                        "w-6 h-6 rounded-lg flex items-center justify-center transition-colors",
+                        resendStatus[r.id] === "ok"  ? "bg-green-100 text-green-600" :
+                        resendStatus[r.id] === "err" ? "bg-red-100 text-red-500" :
+                        "bg-charcoal/5 hover:bg-forest/10 text-charcoal/35 hover:text-forest"
+                      )}
+                    >
+                      {resending[r.id]
+                        ? <Loader2 size={10} className="animate-spin" />
+                        : <Send size={10} />
+                      }
+                    </button>
+                  )}
                 </div>
 
                 {/* Checked in */}
