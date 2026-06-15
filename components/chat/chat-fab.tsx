@@ -206,7 +206,6 @@ function RichText({ text }: { text: string }) {
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-const SEEN_KEY    = "gh_chat_seen";
 const POPUP_DELAY = 2800;
 const POPUP_TTL   = 7500;
 const TYPING_MS   = 520;
@@ -232,10 +231,8 @@ export function ChatFab() {
   const inputRef  = useRef<HTMLInputElement>(null);
   const nextId    = useRef(1);
 
-  // First-visit popup
+  // Show popup on every page load
   useEffect(() => {
-    if (typeof window === "undefined") return;
-    if (localStorage.getItem(SEEN_KEY)) return;
     const t = setTimeout(() => setPopup(true), POPUP_DELAY);
     return () => clearTimeout(t);
   }, []);
@@ -258,7 +255,6 @@ export function ChatFab() {
 
   function openChat() {
     setPopup(false);
-    if (typeof window !== "undefined") localStorage.setItem(SEEN_KEY, "1");
     setOpen(true);
     if (msgs.length === 0) setMsgs([WELCOME]);
   }
