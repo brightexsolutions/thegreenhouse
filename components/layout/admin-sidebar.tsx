@@ -51,7 +51,7 @@ export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
   }
 
   return (
-    <aside className="w-56 bg-forest flex flex-col flex-shrink-0 border-r border-cream/5">
+    <aside className="h-full w-56 bg-forest flex flex-col flex-shrink-0 border-r border-cream/5">
       {/* Logo */}
       <div className="px-5 py-6 border-b border-cream/8">
         <Link href="/admin/dashboard" className="flex items-center gap-2.5">

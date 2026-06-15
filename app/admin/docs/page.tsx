@@ -1,5 +1,6 @@
 import { BookOpen } from "lucide-react";
 import { SECTIONS } from "@/components/docs/docs-shared";
+import { DocsNav } from "@/components/docs/docs-nav";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +14,7 @@ export default function AdminDocsPage() {
     <div className="flex -m-6 h-[calc(100vh-3.5rem)] overflow-hidden">
 
       {/* ── Scrollable main content ── */}
-      <div className="flex-1 min-w-0 overflow-y-auto px-6 pt-6 pb-12">
+      <div id="docs-content" className="flex-1 min-w-0 overflow-y-auto px-6 pt-6 pb-12">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -55,23 +56,10 @@ export default function AdminDocsPage() {
         </div>
       </div>
 
-      {/* ── Fixed right sidebar: Jump to section ── */}
+      {/* ── Right sidebar: Jump to section with scroll tracking ── */}
       <div className="w-52 flex-shrink-0 border-l border-mist overflow-y-auto px-4 py-6 hidden lg:block">
         <p className="text-[10px] font-bold text-charcoal/35 uppercase tracking-widest mb-3 pl-1">Jump to section</p>
-        <div className="space-y-0.5">
-          {SECTIONS.map(({ id, icon: Icon, title, color }) => (
-            <a
-              key={id}
-              href={`#${id}`}
-              className="group flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-charcoal/55 hover:text-forest hover:bg-forest/5 transition-all"
-            >
-              <div className={`w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 ${color} opacity-70 group-hover:opacity-100 transition-opacity`}>
-                <Icon size={10} />
-              </div>
-              <span className="leading-tight">{title}</span>
-            </a>
-          ))}
-        </div>
+        <DocsNav scrollContainerId="docs-content" />
       </div>
 
     </div>

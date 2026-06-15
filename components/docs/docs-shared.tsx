@@ -157,8 +157,6 @@ export const SECTIONS = [
         <p>After successful registration:</p>
         <ul className="pl-4 list-disc space-y-1">
           <li><strong>Email provided</strong> — a PDF ticket is emailed via Resend. The success screen stays open (no auto-close) with quick links to About, Gallery, and Get Involved.</li>
-          <li><strong>Phone only</strong> — a WhatsApp message with the ticket link is sent.</li>
-          <li>Both if the attendee provided both.</li>
         </ul>
         <p>The ticket page at <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">/ticket/[token]</code> is always publicly accessible and printable.</p>
 
@@ -169,7 +167,7 @@ export const SECTIONS = [
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
           <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-charcoal/50">Duplicate prevention: a second sign-up with the same email or phone for the same event is rejected and the existing ticket link is resent.</p>
+          <p className="text-xs text-charcoal/50">Duplicate prevention: a second sign-up with the same email for the same event is rejected and the ticket is resent to that email address.</p>
         </div>
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
@@ -318,7 +316,7 @@ export const SECTIONS = [
         <p>Attendees reach it by:</p>
         <ul className="pl-4 list-disc space-y-1">
           <li>Scanning the QR code shown on the projection screen (control panel → &quot;Show QR code&quot;)</li>
-          <li>Opening the link directly: <strong>thegreenhouseke.com/live/session-02</strong></li>
+          <li>Opening the link directly: <strong>greenhousews.co.ke/live/session-02</strong></li>
           <li>From a WhatsApp message or Instagram story you&apos;ve shared</li>
         </ul>
 
@@ -871,7 +869,7 @@ export const SECTIONS = [
               <p>NEXT_PUBLIC_SUPABASE_URL=https://eperecxwzmxsoiudkucb.supabase.co</p>
               <p>NEXT_PUBLIC_SUPABASE_ANON_KEY=<span className="text-charcoal/40">[your anon key]</span></p>
               <p>SUPABASE_SERVICE_ROLE_KEY=<span className="text-charcoal/40">[your service role key]</span></p>
-              <p>NEXT_PUBLIC_SITE_URL=https://thegreenhouseke.com</p>
+              <p>NEXT_PUBLIC_SITE_URL=https://greenhousews.co.ke</p>
               <p>RESEND_API_KEY=<span className="text-charcoal/40">[your Resend key]</span></p>
               <p>RESEND_FROM_EMAIL=The Green House &lt;hello@greenhousews.co.ke&gt;</p>
               <p>CRON_SECRET=<span className="text-charcoal/40">[generate a strong random string]</span></p>
@@ -881,8 +879,8 @@ export const SECTIONS = [
             </div>
             <div className="space-y-1.5 pl-1">
               <Step n={3} title="Deploy">Click Deploy. Vercel builds and serves the site. Note the *.vercel.app URL — this is your staging URL.</Step>
-              <Step n={4} title="Add your custom domain">Project Settings → Domains → Add Domain → enter <strong>thegreenhouseke.com</strong>. Follow the instructions to add a CNAME/A record at your registrar. HTTPS is automatic.</Step>
-              <Step n={5} title="Update NEXT_PUBLIC_SITE_URL">Once the domain resolves, update the <code>NEXT_PUBLIC_SITE_URL</code> env var in Vercel to <code>https://thegreenhouseke.com</code> (no trailing slash). Trigger a redeploy.</Step>
+              <Step n={4} title="Add your custom domain">Project Settings → Domains → Add Domain → enter <strong>greenhousews.co.ke</strong>. Follow the instructions to add a CNAME/A record at your registrar. HTTPS is automatic.</Step>
+              <Step n={5} title="Update NEXT_PUBLIC_SITE_URL">Once the domain resolves, update the <code>NEXT_PUBLIC_SITE_URL</code> env var in Vercel to <code>https://greenhousews.co.ke</code> (no trailing slash). Trigger a redeploy.</Step>
             </div>
           </div>
         </DeploySection>
@@ -897,10 +895,10 @@ export const SECTIONS = [
             <Step n={1} title="Open Supabase project">supabase.com → your project → Authentication → URL Configuration.</Step>
             <Step n={2} title="Add redirect URLs">
               Under &quot;Redirect URLs&quot;, add:<br />
-              <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">https://thegreenhouseke.com/auth/callback</code><br />
+              <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">https://greenhousews.co.ke/auth/callback</code><br />
               <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">https://your-project.vercel.app/auth/callback</code>
             </Step>
-            <Step n={3} title="Set Site URL">In the same section, set <strong>Site URL</strong> to <code>https://thegreenhouseke.com</code>.</Step>
+            <Step n={3} title="Set Site URL">In the same section, set <strong>Site URL</strong> to <code>https://greenhousews.co.ke</code>.</Step>
           </div>
         </DeploySection>
 
@@ -924,19 +922,19 @@ export const SECTIONS = [
         >
           <div className="space-y-2">
             <div className="space-y-1.5 pl-1">
-              <Step n={1} title="Add property">Go to search.google.com/search-console → Add property → URL prefix → enter <code>https://thegreenhouseke.com</code>.</Step>
+              <Step n={1} title="Add property">Go to search.google.com/search-console → Add property → URL prefix → enter <code>https://greenhousews.co.ke</code>.</Step>
               <Step n={2} title="Verify ownership — HTML file method">
                 Google gives you a file like <code>googleXXXXXX.html</code>. Download it and place it in the project&apos;s <code>/public</code> folder. Push to GitHub — Vercel auto-deploys. Click Verify in Search Console.
               </Step>
-              <Step n={3} title="Submit your sitemap">In Search Console → Sitemaps → enter <code>https://thegreenhouseke.com/sitemap.xml</code> → Submit. This tells Google about all your public pages including event detail pages.</Step>
+              <Step n={3} title="Submit your sitemap">In Search Console → Sitemaps → enter <code>https://greenhousews.co.ke/sitemap.xml</code> → Submit. This tells Google about all your public pages including event detail pages.</Step>
               <Step n={4} title="Request indexing for key pages">
                 Go to the URL Inspection tool. Enter each of these URLs and click &quot;Request indexing&quot;:
                 <ul className="pl-4 list-disc space-y-0.5 mt-1">
-                  <li><code>https://thegreenhouseke.com/</code></li>
-                  <li><code>https://thegreenhouseke.com/about</code></li>
-                  <li><code>https://thegreenhouseke.com/events</code></li>
-                  <li><code>https://thegreenhouseke.com/gallery</code></li>
-                  <li><code>https://thegreenhouseke.com/get-involved</code></li>
+                  <li><code>https://greenhousews.co.ke/</code></li>
+                  <li><code>https://greenhousews.co.ke/about</code></li>
+                  <li><code>https://greenhousews.co.ke/events</code></li>
+                  <li><code>https://greenhousews.co.ke/gallery</code></li>
+                  <li><code>https://greenhousews.co.ke/get-involved</code></li>
                   <li>Each published event: <code>/events/session-02</code> etc.</li>
                 </ul>
               </Step>
