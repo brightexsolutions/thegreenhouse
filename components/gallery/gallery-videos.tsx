@@ -218,15 +218,13 @@ export function GalleryVideos() {
                   {/* Play button — idle pulse rings */}
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="relative w-10 h-10 rounded-full bg-gold/80 group-hover:bg-gold group-hover:scale-110 transition-all duration-300 flex items-center justify-center shadow-lg shadow-black/50">
-                      <motion.span
-                        animate={{ scale: [1, 1.75], opacity: [0.35, 0] }}
-                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut" }}
-                        className="absolute inset-0 rounded-full bg-gold/40 pointer-events-none"
+                      <span
+                        className="absolute inset-0 rounded-full pointer-events-none"
+                        style={{ backgroundColor: "rgba(201,162,74,0.40)", animation: "play-pulse 2.2s ease-out infinite" }}
                       />
-                      <motion.span
-                        animate={{ scale: [1, 1.5], opacity: [0.2, 0] }}
-                        transition={{ duration: 2.2, repeat: Infinity, ease: "easeOut", delay: 0.6 }}
-                        className="absolute inset-0 rounded-full bg-gold/30 pointer-events-none"
+                      <span
+                        className="absolute inset-0 rounded-full pointer-events-none"
+                        style={{ backgroundColor: "rgba(201,162,74,0.22)", animation: "play-pulse 2.2s 0.6s ease-out infinite" }}
                       />
                       <Play size={13} className="text-forest ml-[2px] relative z-10" fill="currentColor" />
                     </div>

@@ -129,15 +129,13 @@ export function EventHighlightVideo({
                   aria-label="Play highlight video"
                 >
                   <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-gold/85 group-hover:bg-gold group-hover:scale-110 transition-all duration-300 flex items-center justify-center shadow-2xl shadow-black/50">
-                    <motion.span
-                      animate={{ scale: [1, 1.8], opacity: [0.30, 0] }}
-                      transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut" }}
-                      className="absolute inset-0 rounded-full bg-gold/35 pointer-events-none"
+                    <span
+                      className="absolute inset-0 rounded-full pointer-events-none"
+                      style={{ backgroundColor: "rgba(201,162,74,0.35)", animation: "play-pulse 2.4s ease-out infinite" }}
                     />
-                    <motion.span
-                      animate={{ scale: [1, 1.55], opacity: [0.18, 0] }}
-                      transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut", delay: 0.65 }}
-                      className="absolute inset-0 rounded-full bg-gold/25 pointer-events-none"
+                    <span
+                      className="absolute inset-0 rounded-full pointer-events-none"
+                      style={{ backgroundColor: "rgba(201,162,74,0.20)", animation: "play-pulse 2.4s 0.65s ease-out infinite" }}
                     />
                     <Play size={20} className="text-forest ml-1 relative z-10 sm:hidden" fill="currentColor" />
                     <Play size={24} className="text-forest ml-1 relative z-10 hidden sm:block" fill="currentColor" />

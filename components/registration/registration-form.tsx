@@ -139,7 +139,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         {!hasEmail && (
           <>
             <p className="text-charcoal/60 text-sm max-w-xs mx-auto leading-relaxed mb-6">
-              Your spot is confirmed. Download your ticket below or send it to yourself on WhatsApp — you&apos;ll need it at the door.
+              Your spot is confirmed. Download your ticket below or copy the link to save it somewhere handy — you&apos;ll need it at the door.
             </p>
 
             <div className="space-y-3 max-w-xs mx-auto">
@@ -367,7 +367,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
           {apiError.toLowerCase().includes("already registered") && (
             <div className="pl-[22px] space-y-1.5">
               <p className="text-xs text-amber-700 leading-relaxed">
-                If you registered earlier, check your email or WhatsApp for your ticket.
+                If you registered earlier, check your email for your ticket.
                 If someone else used your details, or you need help, reach out below —
                 we&apos;ll sort it out before the session.
               </p>
