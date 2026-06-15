@@ -3,7 +3,7 @@ import {
   BookOpen, Calendar, Users, MessageSquare, Monitor,
   Music, Settings2, Radio, QrCode, CheckSquare,
   ChevronRight, Info, Leaf, Zap, Shield, Images,
-  Rocket, Globe, Mail, Server, SearchCode, Sparkles,
+  Rocket, Globe, Mail, Server, SearchCode, Sparkles, Palette,
 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -593,6 +593,165 @@ const SECTIONS = [
     ),
   },
   {
+    id:    "design-system",
+    icon:  Palette,
+    title: "Design system & brand guide",
+    color: "bg-gold/10 text-amber-700",
+    content: (
+      <div className="space-y-6 text-sm text-charcoal/70 leading-relaxed">
+
+        <p>Use this guide when creating posters, social media graphics, slides, or any visual material for The Green House. Consistency makes the brand instantly recognisable across sessions.</p>
+
+        {/* ── Colour palette ── */}
+        <div>
+          <p className="text-xs font-bold text-charcoal uppercase tracking-wider mb-3">Colour palette</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { name: "Forest",     hex: "#1b3a2a", css: "--forest",     usage: "Primary green — headlines, buttons, backgrounds",    dark: true },
+              { name: "Gold",       hex: "#c9a24a", css: "--gold",       usage: "Accent — decorative lines, highlights, active states", dark: false },
+              { name: "Moss",       hex: "#2d5240", css: "--moss",       usage: "Secondary green — hover states, gradients",           dark: true },
+              { name: "Sage",       hex: "#4e7a5e", css: "--sage",       usage: "Mid-tone green — supporting elements",                dark: true },
+              { name: "Cream",      hex: "#f7f2e8", css: "--cream",      usage: "Background / text on dark — never use pure white",    dark: false },
+              { name: "Charcoal",   hex: "#1a1a18", css: "--charcoal",   usage: "Body text — use instead of pure black",               dark: true },
+              { name: "Gold Light", hex: "#e4c97e", css: "--gold-light", usage: "Softer gold — secondary accents, divider lines",      dark: false },
+              { name: "Gold Pale",  hex: "#f5edce", css: "--gold-pale",  usage: "Very faint gold tint — section backgrounds",          dark: false },
+              { name: "Bark",       hex: "#5c4a35", css: "--bark",       usage: "Warm brown — earthy details, occasional text",        dark: true },
+            ].map(({ name, hex, css, usage, dark }) => (
+              <div key={hex} className="rounded-xl overflow-hidden border border-mist">
+                <div
+                  className="h-12 w-full flex items-end px-2.5 pb-1.5"
+                  style={{ backgroundColor: hex }}
+                >
+                  <span className={`text-[9px] font-mono font-bold ${dark ? "text-white/60" : "text-black/40"}`}>{hex}</span>
+                </div>
+                <div className="px-2.5 py-2 bg-white">
+                  <p className="text-[11px] font-semibold text-charcoal">{name}</p>
+                  <p className="text-[9px] font-mono text-charcoal/40 mt-0.5">{css}</p>
+                  <p className="text-[10px] text-charcoal/50 mt-1 leading-snug">{usage}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── Typography ── */}
+        <div>
+          <p className="text-xs font-bold text-charcoal uppercase tracking-wider mb-3">Typography</p>
+          <div className="space-y-3">
+            <div className="border border-mist rounded-xl p-4">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold text-charcoal mb-1">Cormorant Garamond — Display / Headings</p>
+                  <p className="text-xs text-charcoal/50 mb-3">Elegant, high-contrast serif. Use for event titles, section headings, hero text, pull quotes, and poster headlines. Feels timeless and warm.</p>
+                  <p className="font-display text-4xl font-light text-charcoal leading-none">The Green House</p>
+                  <p className="font-display text-xl font-semibold text-charcoal/60 italic mt-1">Session 02 — Delusion</p>
+                </div>
+              </div>
+              <div className="mt-3 pt-3 border-t border-mist grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-charcoal/50">
+                <div><span className="font-display font-light text-charcoal text-sm">Light 300</span> — large text</div>
+                <div><span className="font-display font-normal text-charcoal text-sm">Regular 400</span> — subheads</div>
+                <div><span className="font-display font-semibold text-charcoal text-sm">Semi 600</span> — titles</div>
+                <div><span className="font-display font-bold italic text-charcoal text-sm">Bold Italic</span> — emphasis</div>
+              </div>
+            </div>
+            <div className="border border-mist rounded-xl p-4">
+              <div>
+                <p className="text-xs font-semibold text-charcoal mb-1">DM Sans — Body / UI</p>
+                <p className="text-xs text-charcoal/50 mb-3">Clean, geometric sans-serif. Use for body text, captions, labels, buttons, and all UI elements. Highly legible at small sizes.</p>
+                <p className="text-charcoal text-base font-normal leading-relaxed">A cross-church worship community in Nairobi — quarterly gatherings for real connection.</p>
+                <p className="text-charcoal/50 text-xs font-medium uppercase tracking-widest mt-2">Section Label · Event Name · Caption Text</p>
+              </div>
+              <div className="mt-3 pt-3 border-t border-mist grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-charcoal/50">
+                <div><span className="font-medium text-charcoal text-sm">Light 300</span> — captions</div>
+                <div><span className="font-medium text-charcoal text-sm">Regular 400</span> — body</div>
+                <div><span className="font-semibold text-charcoal text-sm">Medium 500</span> — labels</div>
+                <div><span className="font-bold text-charcoal text-sm">Bold 700</span> — buttons</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Poster guide ── */}
+        <div>
+          <p className="text-xs font-bold text-charcoal uppercase tracking-wider mb-3">Poster & social graphics guide</p>
+          <div className="grid sm:grid-cols-2 gap-3">
+            <div className="bg-forest/6 border border-forest/15 rounded-xl p-4">
+              <p className="text-xs font-semibold text-forest mb-2">✓ Do</p>
+              <ul className="text-xs text-charcoal/65 space-y-1.5 pl-3 list-disc">
+                <li>Use <strong>Forest (#1b3a2a)</strong> or <strong>Charcoal (#1a1a18)</strong> as the primary background — they feel warm and intentional, not generic.</li>
+                <li>Use <strong>Gold (#c9a24a)</strong> sparingly as an accent — a single line, a date chip, or a divider. Don&apos;t fill with it.</li>
+                <li>Use <strong>Cormorant Garamond</strong> for the event name and theme — it&apos;s what makes the brand feel distinct.</li>
+                <li>Use <strong>Cream (#f7f2e8)</strong> for text on dark backgrounds — never pure white (#ffffff).</li>
+                <li>Add a subtle grain texture or dot-grid overlay at 5–8% opacity to give depth.</li>
+                <li>Include: event name, date, time, venue, and registration link or QR code.</li>
+                <li>Keep the layout minimal — one bold headline, supporting details small.</li>
+              </ul>
+            </div>
+            <div className="bg-red-50 border border-red-100 rounded-xl p-4">
+              <p className="text-xs font-semibold text-red-600 mb-2">✕ Avoid</p>
+              <ul className="text-xs text-charcoal/65 space-y-1.5 pl-3 list-disc">
+                <li>Bright or saturated colours not in the palette (neon greens, electric blues) — they break the aesthetic.</li>
+                <li>Pure black (#000000) or pure white (#ffffff) backgrounds — use Forest or Cream instead.</li>
+                <li>Too many fonts — stick to Cormorant Garamond for headings and DM Sans for everything else.</li>
+                <li>Cluttered layouts with too much text — let the design breathe.</li>
+                <li>Low-contrast text — dark text on dark background, or light text on light background.</li>
+                <li>Misaligned or inconsistent logo placement — logo should always be clearly readable.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        {/* ── Colour combos ── */}
+        <div>
+          <p className="text-xs font-bold text-charcoal uppercase tracking-wider mb-3">Recommended colour combinations</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+            {[
+              { bg: "#1b3a2a", text: "#f7f2e8", accent: "#c9a24a", label: "Forest + Cream + Gold",  note: "Primary — most posters"        },
+              { bg: "#1a1a18", text: "#f7f2e8", accent: "#c9a24a", label: "Charcoal + Cream + Gold", note: "Strong, bold events"            },
+              { bg: "#f7f2e8", text: "#1b3a2a", accent: "#c9a24a", label: "Cream + Forest + Gold",   note: "Light variant — daytime events" },
+            ].map(({ bg, text, accent, label, note }) => (
+              <div key={label} className="rounded-xl overflow-hidden border border-mist">
+                <div className="h-20 px-3 py-2.5 flex flex-col justify-between" style={{ backgroundColor: bg }}>
+                  <span className="font-display text-xl font-semibold leading-none" style={{ color: text }}>The Green</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-widest" style={{ color: accent }}>House · Session</span>
+                </div>
+                <div className="px-3 py-2 bg-white">
+                  <p className="text-[11px] font-semibold text-charcoal">{label}</p>
+                  <p className="text-[10px] text-charcoal/45 mt-0.5">{note}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* ── CSS variables reference ── */}
+        <div className="bg-charcoal/4 rounded-xl p-4">
+          <p className="text-xs font-semibold text-charcoal mb-2">CSS variables (for developers)</p>
+          <div className="font-mono text-[11px] text-charcoal/60 grid grid-cols-2 gap-x-6 gap-y-0.5">
+            {[
+              ["--forest",     "#1b3a2a"],
+              ["--moss",       "#2d5240"],
+              ["--sage",       "#4e7a5e"],
+              ["--sage-light", "#7fa98a"],
+              ["--gold",       "#c9a24a"],
+              ["--gold-light", "#e4c97e"],
+              ["--gold-pale",  "#f5edce"],
+              ["--cream",      "#f7f2e8"],
+              ["--charcoal",   "#1a1a18"],
+              ["--bark",       "#5c4a35"],
+            ].map(([v, h]) => (
+              <div key={v} className="flex gap-2">
+                <span className="text-charcoal/40">{v}:</span>
+                <span className="text-charcoal">{h}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
+    ),
+  },
+  {
     id:    "deployment",
     icon:  Rocket,
     title: "Deployment & setup guide",
@@ -752,10 +911,15 @@ const SECTIONS = [
 
 export default function AdminDocsPage() {
   return (
-    <div className="flex gap-8 items-start -mr-6">
+    /*
+     * -m-6 escapes the main's p-6 padding so we can set up two independent
+     * scroll columns that together fill the full admin content height.
+     * Left column scrolls the docs; right sidebar stays fixed.
+     */
+    <div className="flex -m-6 h-[calc(100vh-3.5rem)] overflow-hidden">
 
-      {/* ── Main content ── */}
-      <div className="flex-1 min-w-0 pb-12">
+      {/* ── Scrollable main content ── */}
+      <div className="flex-1 min-w-0 overflow-y-auto px-6 pt-6 pb-12">
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
@@ -788,24 +952,22 @@ export default function AdminDocsPage() {
       </div>
 
       {/* ── Fixed right sidebar: Jump to section ── */}
-      <div className="w-52 flex-shrink-0">
-        <nav className="sticky top-0 pt-1">
-          <p className="text-[10px] font-bold text-charcoal/35 uppercase tracking-widest mb-3 pl-1">Jump to section</p>
-          <div className="space-y-0.5">
-            {SECTIONS.map(({ id, icon: Icon, title, color }) => (
-              <a
-                key={id}
-                href={`#${id}`}
-                className="group flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-charcoal/55 hover:text-forest hover:bg-forest/5 transition-all"
-              >
-                <div className={`w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 ${color} opacity-70 group-hover:opacity-100 transition-opacity`}>
-                  <Icon size={10} />
-                </div>
-                <span className="leading-tight">{title}</span>
-              </a>
-            ))}
-          </div>
-        </nav>
+      <div className="w-52 flex-shrink-0 border-l border-mist overflow-y-auto px-4 py-6 hidden lg:block">
+        <p className="text-[10px] font-bold text-charcoal/35 uppercase tracking-widest mb-3 pl-1">Jump to section</p>
+        <div className="space-y-0.5">
+          {SECTIONS.map(({ id, icon: Icon, title, color }) => (
+            <a
+              key={id}
+              href={`#${id}`}
+              className="group flex items-center gap-2 px-3 py-2 rounded-xl text-xs text-charcoal/55 hover:text-forest hover:bg-forest/5 transition-all"
+            >
+              <div className={`w-5 h-5 rounded-lg flex items-center justify-center flex-shrink-0 ${color} opacity-70 group-hover:opacity-100 transition-opacity`}>
+                <Icon size={10} />
+              </div>
+              <span className="leading-tight">{title}</span>
+            </a>
+          ))}
+        </div>
       </div>
 
     </div>
