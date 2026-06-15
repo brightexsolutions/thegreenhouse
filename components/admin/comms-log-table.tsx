@@ -74,8 +74,9 @@ export function CommsLogTable({ logs }: Props) {
       {/* ── Filter bar ── */}
       <div className="flex-shrink-0 px-4 pt-3.5 pb-0 border-b border-mist space-y-0">
 
-        {/* Row 1: channel + status chips */}
-        <div className="flex items-center justify-between gap-3 pb-3">
+        {/* Filter bar — channel tabs top, selects below on mobile; side-by-side on sm+ */}
+        <div className="flex flex-col gap-2 pb-3 sm:flex-row sm:items-center sm:justify-between">
+          {/* Channel tabs */}
           <div className="flex items-center gap-1">
             {([
               { key: "all",      label: "All",       count: counts.all     },
@@ -103,12 +104,12 @@ export function CommsLogTable({ logs }: Props) {
             ))}
           </div>
 
+          {/* Selects */}
           <div className="flex items-center gap-2">
-            {/* Status filter */}
             <select
               value={statusFilter}
               onChange={e => { setStatusFilter(e.target.value as StatusFilter); resetPage(); }}
-              className="text-xs border border-mist rounded-lg px-2.5 py-1.5 text-charcoal/60 bg-white focus:outline-none focus:ring-1 focus:ring-forest/30"
+              className="text-xs border border-mist rounded-lg px-2.5 py-1.5 text-charcoal/60 bg-white focus:outline-none focus:ring-1 focus:ring-forest/30 flex-1 sm:flex-none"
             >
               <option value="all">All statuses</option>
               <option value="sent">Sent ({counts.sent})</option>
@@ -116,12 +117,11 @@ export function CommsLogTable({ logs }: Props) {
               <option value="pending">Pending</option>
             </select>
 
-            {/* Event filter */}
             {uniqueEventTitles.length > 0 && (
               <select
                 value={eventFilter}
                 onChange={e => { setEventFilter(e.target.value); resetPage(); }}
-                className="text-xs border border-mist rounded-lg px-2.5 py-1.5 text-charcoal/60 bg-white focus:outline-none focus:ring-1 focus:ring-forest/30 max-w-[160px] truncate"
+                className="text-xs border border-mist rounded-lg px-2.5 py-1.5 text-charcoal/60 bg-white focus:outline-none focus:ring-1 focus:ring-forest/30 flex-1 sm:flex-none sm:max-w-[160px] truncate"
               >
                 <option value="all">All events</option>
                 {uniqueEventTitles.map(t => (

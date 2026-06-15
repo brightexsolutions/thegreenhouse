@@ -93,9 +93,10 @@ export function SiteFooter() {
             <p className="label-caps text-gold/80 mb-4">Navigate</p>
             <ul className="space-y-2.5 text-sm">
               {[
-                { label: "Home",   href: "/" },
-                { label: "About",  href: "/about" },
-                { label: "Events", href: "/events" },
+                { label: "Home",         href: "/" },
+                { label: "About",        href: "/about" },
+                { label: "Events",       href: "/events" },
+                { label: "Brand System", href: "/design-system" },
               ].map((l) => (
                 <li key={l.href}>
                   <Link href={l.href} className="text-cream/60 hover:text-cream transition-colors">
