@@ -14,6 +14,107 @@ const PHOTOS = {
   reflect: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=700&q=80",
 };
 
+const PARTICLES = [
+  { left: "12%",  top: "22%", size: 2,   dur: 7,   delay: 0,   color: "rgba(201,162,74,0.55)" },
+  { left: "88%",  top: "36%", size: 1.5, dur: 9,   delay: 2,   color: "rgba(201,162,74,0.45)" },
+  { left: "65%",  top: "14%", size: 1,   dur: 6,   delay: 4,   color: "rgba(247,242,232,0.40)" },
+  { left: "22%",  top: "62%", size: 2,   dur: 8,   delay: 1,   color: "rgba(201,162,74,0.50)" },
+  { left: "78%",  top: "72%", size: 1.5, dur: 10,  delay: 3,   color: "rgba(247,242,232,0.35)" },
+  { left: "42%",  top: "80%", size: 1,   dur: 7.5, delay: 5,   color: "rgba(201,162,74,0.40)" },
+  { left: "18%",  top: "46%", size: 1.5, dur: 11,  delay: 2.5, color: "rgba(247,242,232,0.28)" },
+  { left: "56%",  top: "56%", size: 1,   dur: 8.5, delay: 6,   color: "rgba(201,162,74,0.42)" },
+];
+
+function AnimatedBackground() {
+  const reduce = useReducedMotion();
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none" aria-hidden>
+      {/* Rich dark multi-stop gradient base */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: "linear-gradient(150deg, #050d07 0%, #0c1c11 35%, #162c1e 65%, #090f0b 100%)",
+        }}
+      />
+
+      {/* Layered depth radials — gold bloom top-right, moss bloom bottom-left, cream shimmer top-center */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: [
+            "radial-gradient(ellipse 75% 55% at 72% 22%, rgba(201,162,74,0.11) 0%, transparent 65%)",
+            "radial-gradient(ellipse 60% 75% at 8% 90%, rgba(45,82,64,0.30) 0%, transparent 55%)",
+            "radial-gradient(ellipse 50% 42% at 50% -5%, rgba(247,242,232,0.05) 0%, transparent 58%)",
+          ].join(", "),
+        }}
+      />
+
+      {/* Animated glowing orbs */}
+      {!reduce && (
+        <>
+          {/* Gold orb — drifts top-right */}
+          <motion.div
+            animate={{ x: [0, 28, -14, 8, 0], y: [0, -22, 16, -8, 0] }}
+            transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
+            className="absolute top-[-12%] right-[8%] w-[60%] h-[65%]"
+            style={{
+              background: "radial-gradient(circle at 50% 50%, rgba(201,162,74,0.20) 0%, transparent 65%)",
+              filter: "blur(72px)",
+            }}
+          />
+
+          {/* Moss orb — bottom-left */}
+          <motion.div
+            animate={{ x: [0, -20, 12, 0], y: [0, 22, -14, 0] }}
+            transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 5 }}
+            className="absolute bottom-[-8%] left-[-8%] w-[55%] h-[65%]"
+            style={{
+              background: "radial-gradient(circle at 50% 50%, rgba(45,82,64,0.55) 0%, transparent 65%)",
+              filter: "blur(80px)",
+            }}
+          />
+
+          {/* Cream pulse — center-top, breathes */}
+          <motion.div
+            animate={{ scale: [1, 1.18, 1], opacity: [0.05, 0.10, 0.05] }}
+            transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }}
+            className="absolute top-0 left-[35%] w-[50%] h-[38%]"
+            style={{
+              background: "radial-gradient(circle at 50% 20%, rgba(247,242,232,1) 0%, transparent 65%)",
+              filter: "blur(90px)",
+            }}
+          />
+        </>
+      )}
+
+      {/* Static decorative rings */}
+      <div className="absolute top-12 right-[38%] w-48 h-48 rounded-full border border-cream/[0.05] hidden lg:block" />
+      <div className="absolute bottom-16 left-8 w-32 h-32 rounded-full border border-gold/[0.10] hidden lg:block" />
+      <div className="absolute top-[32%] left-[18%] w-72 h-72 rounded-full border border-cream/[0.03] hidden lg:block" />
+
+      {/* Ripple ring — expands and fades on loop */}
+      {!reduce && (
+        <motion.div
+          animate={{ scale: [1, 1.65], opacity: [0.15, 0] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeOut", delay: 1.5 }}
+          className="absolute top-[22%] right-[40%] w-24 h-24 rounded-full border border-gold/40 hidden lg:block"
+        />
+      )}
+
+      {/* Floating particles */}
+      {!reduce && PARTICLES.map(({ left, top, size, dur, delay, color }, i) => (
+        <motion.div
+          key={i}
+          animate={{ y: [0, -16, 0], opacity: [0.5, 1, 0.5] }}
+          transition={{ duration: dur, repeat: Infinity, ease: "easeInOut", delay }}
+          className="absolute rounded-full"
+          style={{ left, top, width: size, height: size, backgroundColor: color }}
+        />
+      ))}
+    </div>
+  );
+}
+
 /**
  * Outer div: entrance slide-up. Inner div: infinite float.
  * Separating them prevents the float loop from resetting the entrance.
@@ -85,9 +186,7 @@ export function HeroCollage() {
 
   return (
     <section className="relative min-h-[100svh] bg-forest-dark flex items-center overflow-hidden pt-20">
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_60%_40%,rgba(201,162,74,0.10),transparent)]" />
-      <div className="absolute top-12 right-[38%] w-48 h-48 rounded-full border border-cream/5 hidden lg:block" />
-      <div className="absolute bottom-16 left-8 w-32 h-32 rounded-full border border-gold/10 hidden lg:block" />
+      <AnimatedBackground />
 
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-16 lg:py-24">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
