@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Leaf } from "lucide-react";
-import { SESSION_FREQUENCY, CONTACT_EMAIL } from "@/lib/constants";
+import { SESSION_FREQUENCY, CONTACT_EMAIL, SITE_NAME } from "@/lib/constants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -302,7 +302,7 @@ export function ChatFab() {
                 <Leaf size={15} className="text-gold-light" />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-white font-semibold text-sm leading-none">The Green House</p>
+                <p className="text-white font-semibold text-sm leading-none">{SITE_NAME}</p>
                 <p className="text-white/45 text-[11px] mt-0.5">Community assistant</p>
               </div>
               <button
