@@ -53,7 +53,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /where|venue|location|address|place/i,
     reply: () => ({
-      text:   "The venue for Session 02 will be announced closer to the date. Register on our Events page and we'll send you all the details via email or WhatsApp.",
+      text:   "The venue for Session 02 will be announced closer to the date. Register on our Events page and we'll send you all the details via email once confirmed.",
       chips:  ["How do I register?", "When is the next session?"],
       action: { label: "Register for updates", href: "/events/session-02" },
     }),
@@ -61,7 +61,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /how\s*(do\s*i|to|can\s*i)?\s*(register|sign\s*up|book|get\s*a?\s*ticket)/i,
     reply: () => ({
-      text:   "Head to our **Events** page, click on Session 02, and fill in your details. You'll get a digital ticket via email (PDF) or WhatsApp link — bring it on your phone to the door!",
+      text:   "Head to our **Events** page, click on Session 02, and fill in your details. You'll receive a **PDF ticket via email** — you can also copy your ticket link to save it anywhere.",
       chips:  ["Is it free?", "What do I receive after registering?"],
       action: { label: "Register for Session 02", href: "/events/session-02" },
     }),
@@ -77,7 +77,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /ticket|receive|get\s*(after|my)|confirmation/i,
     reply: () => ({
-      text:   "After registering, you'll get a digital ticket — as a **PDF via email** or a **link via WhatsApp**. Bring it on your phone screen to the door.",
+      text:   "After registering, you'll get a **PDF ticket via email**. You can also copy your ticket link to save it somewhere handy — bring it on your phone screen to the door.",
       chips:  ["Where will it be held?", "When is the next session?"],
       action: { label: "Register now", href: "/events/session-02" },
     }),
@@ -134,7 +134,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /stay\s*inform|notify|notification|news|announce|update|broadcast|mailing/i,
     reply: () => ({
-      text:   "Register on the site and you'll receive updates via email or WhatsApp before each session. You can also follow us on Instagram **@thegreenhouseke**.",
+      text:   "Register on the site and you'll receive updates via email before each session. You can also follow us on Instagram **@thegreenhouseke** for announcements.",
       chips:  ["Follow on Instagram", "How do I register?"],
       action: { label: "Get involved", href: "/get-involved" },
     }),
