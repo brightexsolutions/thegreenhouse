@@ -178,6 +178,12 @@
   100% { transform: scale(2.3); opacity: 0;    }
 }
 
+/* ─── Video play-button pulse rings ───────────────────────────────────── */
+@keyframes play-pulse {
+  0%   { transform: scale(1);    opacity: 1; }
+  100% { transform: scale(1.85); opacity: 0; }
+}
+
 /* ─── Accordion keyframes (shadcn Radix) ──────────────────────────────── */
 @keyframes accordion-down {
   from { height: 0; }
