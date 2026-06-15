@@ -1,15 +1,16 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Upload, Trash2, ImageIcon, Loader2, ExternalLink, X } from "lucide-react";
+import { Upload, Trash2, ImageIcon, Loader2, ExternalLink, X, Check, Images } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 
 interface Event {
-  id:         string;
-  title:      string;
-  slug:       string;
-  event_date: string;
+  id:          string;
+  title:       string;
+  slug:        string;
+  event_date:  string;
+  photoCount?: number;
 }
 
 interface Photo {
@@ -45,12 +46,15 @@ function formatSize(bytes: number): string {
   return `${Math.round(bytes / 1024)} KB`;
 }
 
+function shortTitle(title: string) {
+  return title
+    .replace(/^The Green House\s*[—–-]\s*/i, "")
+    .replace(/^Greenhouse\s*[—–-]\s*/i, "");
+}
+
 export function EventPhotoUpload({ events }: Props) {
   const confirm = useConfirm();
 
-  // Default to the most recent past event — that's almost always what you're
-  // uploading photos for right after a session. Fall back to the first event
-  // in the list if there are no past events yet.
   const now = new Date();
   const defaultId =
     events.find(e => new Date(e.event_date) < now)?.id ?? events[0]?.id ?? "";
@@ -64,10 +68,9 @@ export function EventPhotoUpload({ events }: Props) {
   const [caption,         setCaption]         = useState("");
   const [lightbox,        setLightbox]        = useState<string | null>(null);
 
-  // Upload queue — async for...of approach, avoids useEffect re-trigger bug
   const [uploadState, setUploadState] = useState<{
-    current: string | null;  // current file name
-    currentSize: number;     // bytes
+    current: string | null;
+    currentSize: number;
     done: number;
     total: number;
   }>({ current: null, currentSize: 0, done: 0, total: 0 });
@@ -77,7 +80,6 @@ export function EventPhotoUpload({ events }: Props) {
   const captionRef    = useRef(caption);
   const inputRef      = useRef<HTMLInputElement>(null);
 
-  // Keep captionRef in sync so processFiles() closure reads latest value
   useEffect(() => { captionRef.current = caption; }, [caption]);
 
   useEffect(() => {
@@ -98,6 +100,7 @@ export function EventPhotoUpload({ events }: Props) {
   }
 
   async function handleSelectEvent(id: string) {
+    if (id === selectedEventId) return;
     setSelectedEventId(id);
     setPhotos([]);
     setLoaded(null);
@@ -120,13 +123,13 @@ export function EventPhotoUpload({ events }: Props) {
     processingRef.current = true;
 
     while (pendingRef.current.length > 0) {
-      const file = pendingRef.current[0];
+      const file  = pendingRef.current[0];
       const total = pendingRef.current.length;
 
       setUploadState(prev => ({
         current: file.name,
         currentSize: file.size,
-        done: prev.current === null ? 0 : prev.done, // reset on fresh batch
+        done: prev.current === null ? 0 : prev.done,
         total,
       }));
 
@@ -148,16 +151,14 @@ export function EventPhotoUpload({ events }: Props) {
         }
       }
 
-      // Remove the uploaded file from queue
       pendingRef.current = pendingRef.current.slice(1);
       setUploadState(prev => ({
         ...prev,
-        done: prev.done + 1,
+        done:  prev.done + 1,
         total: pendingRef.current.length,
       }));
     }
 
-    // All done
     processingRef.current = false;
     setUploadState({ current: null, currentSize: 0, done: 0, total: 0 });
     setCaption("");
@@ -180,36 +181,89 @@ export function EventPhotoUpload({ events }: Props) {
   const isUploading = uploadState.current !== null;
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Event selector */}
-      <div className="bg-white rounded-2xl border border-mist p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
-        <div className="flex-1 min-w-0">
-          <label className="block text-[10px] font-semibold text-charcoal/50 uppercase tracking-wider mb-1.5">
-            Select event
-          </label>
-          <select
-            value={selectedEventId}
-            onChange={e => handleSelectEvent(e.target.value)}
-            className="w-full px-3 py-2 rounded-xl border border-mist text-sm text-charcoal focus:outline-none focus:border-forest transition-colors"
-          >
-            {events.map(e => (
-              <option key={e.id} value={e.id}>
-                {e.title.replace("The Green House — ", "")} —{" "}
-                {new Date(e.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
-              </option>
-            ))}
-          </select>
+    <div className="flex flex-col gap-5">
+
+      {/* ── Event picker ── */}
+      <div>
+        <p className="text-[10px] font-semibold text-charcoal/45 uppercase tracking-wider mb-2.5 px-0.5">
+          Select event
+        </p>
+        <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
+          {events.map(event => {
+            const isPast     = new Date(event.event_date) < now;
+            const isSelected = event.id === selectedEventId;
+            const isLoading  = isSelected && loading;
+            return (
+              <button
+                key={event.id}
+                onClick={() => handleSelectEvent(event.id)}
+                className={cn(
+                  "relative flex-shrink-0 w-44 text-left rounded-2xl border-2 p-3.5 transition-all",
+                  isSelected
+                    ? "border-forest bg-forest/4 shadow-sm"
+                    : "border-mist bg-white hover:border-forest/30 hover:bg-forest/2"
+                )}
+              >
+                {/* Session icon */}
+                <div className={cn(
+                  "w-8 h-8 rounded-xl flex items-center justify-center mb-2.5",
+                  isSelected ? "bg-forest text-cream" : "bg-charcoal/6 text-charcoal/35"
+                )}>
+                  {isLoading
+                    ? <Loader2 size={14} className="animate-spin" />
+                    : <Images size={14} />
+                  }
+                </div>
+
+                {/* Title */}
+                <p className={cn(
+                  "text-[13px] font-semibold leading-tight line-clamp-2",
+                  isSelected ? "text-forest" : "text-charcoal"
+                )}>
+                  {shortTitle(event.title)}
+                </p>
+
+                {/* Date */}
+                <p className="text-[10px] text-charcoal/40 mt-1">
+                  {new Date(event.event_date).toLocaleDateString("en-KE", {
+                    day: "numeric", month: "short", year: "numeric"
+                  })}
+                </p>
+
+                {/* Past / upcoming badge */}
+                <div className={cn(
+                  "mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide",
+                  isPast
+                    ? "bg-charcoal/6 text-charcoal/40"
+                    : "bg-gold/12 text-gold-dark"
+                )}>
+                  {isPast ? "Past" : "Upcoming"}
+                </div>
+
+                {/* Photo count badge — shown once loaded */}
+                {isSelected && loaded === event.id && (
+                  <div className="absolute top-3 right-3 flex items-center gap-1">
+                    <span className="text-[10px] font-semibold text-forest bg-forest/10 px-2 py-0.5 rounded-full">
+                      {photos.length} photo{photos.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+                )}
+
+                {/* Selected checkmark */}
+                {isSelected && !isLoading && (
+                  <div className="absolute top-3 right-3 w-5 h-5 rounded-full bg-forest flex items-center justify-center">
+                    <Check size={10} className="text-cream" />
+                  </div>
+                )}
+              </button>
+            );
+          })}
         </div>
-        {loading && (
-          <div className="flex items-center gap-2 text-xs text-charcoal/40">
-            <Loader2 size={13} className="animate-spin" /> Loading…
-          </div>
-        )}
       </div>
 
       {loaded === selectedEventId && (
         <>
-          {/* Upload zone */}
+          {/* ── Upload zone ── */}
           <div className="bg-white rounded-2xl border border-mist p-5 space-y-3">
             <p className="text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Upload photos</p>
             <div
@@ -281,7 +335,7 @@ export function EventPhotoUpload({ events }: Props) {
             />
           </div>
 
-          {/* Photo grid */}
+          {/* ── Photo grid ── */}
           {photos.length > 0 ? (
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {photos.map(photo => {
@@ -295,7 +349,6 @@ export function EventPhotoUpload({ events }: Props) {
                       className="w-full h-full object-cover object-top"
                     />
 
-                    {/* Size/resolution badge — top left */}
                     {meta && (
                       <div className="absolute top-2 left-2 flex items-center gap-1">
                         <span className="px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-medium leading-none">
@@ -311,7 +364,6 @@ export function EventPhotoUpload({ events }: Props) {
                       </div>
                     )}
 
-                    {/* Always-visible action bar at bottom */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent px-2.5 pt-6 pb-2.5 flex items-end justify-between gap-2">
                       {photo.caption && (
                         <p className="text-[10px] text-cream/80 leading-relaxed flex-1 mr-1 line-clamp-2">
@@ -349,7 +401,7 @@ export function EventPhotoUpload({ events }: Props) {
         </>
       )}
 
-      {/* Lightbox */}
+      {/* ── Lightbox ── */}
       {lightbox && (
         <div
           className="fixed inset-0 z-[9999] bg-black/90 flex items-center justify-center p-4"
