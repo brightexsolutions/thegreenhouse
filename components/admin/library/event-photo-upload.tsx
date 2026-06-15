@@ -47,7 +47,15 @@ function formatSize(bytes: number): string {
 
 export function EventPhotoUpload({ events }: Props) {
   const confirm = useConfirm();
-  const [selectedEventId, setSelectedEventId] = useState(events[0]?.id ?? "");
+
+  // Default to the most recent past event — that's almost always what you're
+  // uploading photos for right after a session. Fall back to the first event
+  // in the list if there are no past events yet.
+  const now = new Date();
+  const defaultId =
+    events.find(e => new Date(e.event_date) < now)?.id ?? events[0]?.id ?? "";
+
+  const [selectedEventId, setSelectedEventId] = useState(defaultId);
   const [photos,          setPhotos]          = useState<Photo[]>([]);
   const [photoMeta,       setPhotoMeta]       = useState<Record<string, PhotoMeta>>({});
   const [loading,         setLoading]         = useState(false);
@@ -73,7 +81,7 @@ export function EventPhotoUpload({ events }: Props) {
   useEffect(() => { captionRef.current = caption; }, [caption]);
 
   useEffect(() => {
-    if (events[0]?.id) loadPhotos(events[0].id);
+    if (defaultId) loadPhotos(defaultId);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
