@@ -57,25 +57,25 @@ export function DocsBanner() {
       <div
         className={cn(
           "fixed top-0 left-0 right-0 z-50 transition-all duration-300 ease-out",
-          "bg-forest/96 backdrop-blur-md border-b border-cream/10 shadow-lg",
+          "bg-forest border-b border-cream/15 shadow-[0_2px_16px_rgba(27,58,42,0.35)]",
           scrolled ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0 pointer-events-none"
         )}
       >
-        <div className="max-w-5xl mx-auto px-6 py-2.5 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-6 h-6 rounded-lg bg-cream/10 flex items-center justify-center flex-shrink-0">
-              <Leaf size={11} className="text-gold" />
+        <div className="max-w-5xl mx-auto px-6 py-3 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-7 h-7 rounded-lg bg-cream/10 flex items-center justify-center flex-shrink-0">
+              <Leaf size={13} className="text-gold" />
             </div>
-            <span className="text-xs font-semibold text-cream truncate">The Green House</span>
-            <span className="text-cream/25 text-[10px] hidden sm:inline">·</span>
-            <span className="text-[11px] text-cream/55 hidden sm:inline truncate">Platform Documentation</span>
+            <span className="text-sm font-semibold text-cream truncate">The Green House</span>
+            <span className="text-cream/30 text-xs hidden sm:inline">·</span>
+            <span className="text-xs text-cream/65 hidden sm:inline truncate">Platform Documentation</span>
           </div>
-          <div className="flex items-center gap-2 text-[10px] text-cream/40 flex-shrink-0">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-cream/8 border border-cream/15 font-semibold text-cream/60">
+          <div className="flex items-center gap-2.5 flex-shrink-0">
+            <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-cream/10 border border-cream/20 text-xs font-semibold text-cream/80">
               {VERSION}
             </span>
-            <span className="text-cream/20 hidden sm:inline">·</span>
-            <span className="hidden sm:inline">Updated {DATE_UPDATED}</span>
+            <span className="text-cream/25 text-xs hidden sm:inline">·</span>
+            <span className="text-xs text-cream/55 hidden sm:inline">Updated {DATE_UPDATED}</span>
           </div>
         </div>
       </div>

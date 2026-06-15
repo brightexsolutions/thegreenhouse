@@ -4,6 +4,8 @@ import { SECTIONS } from "@/components/docs/docs-shared";
 import { DocsNav } from "@/components/docs/docs-nav";
 import { DocsBanner } from "@/components/docs/docs-banner";
 
+const PUBLIC_EXCLUDE = ["deployment"] as const;
+
 export const metadata: Metadata = {
   title: "Platform Documentation — The Green House",
   robots: { index: false, follow: false },
@@ -25,12 +27,12 @@ export default function PublicDocsPage() {
         {/* Sticky sidebar — offset accounts for the compact sticky banner height */}
         <nav className="hidden lg:block w-48 flex-shrink-0 sticky top-14 self-start">
           <p className="text-[10px] font-bold text-charcoal/35 uppercase tracking-widest mb-3 pl-1">Contents</p>
-          <DocsNav />
+          <DocsNav excludeIds={[...PUBLIC_EXCLUDE]} />
         </nav>
 
-        {/* Sections */}
+        {/* Sections — deployment section hidden on public page */}
         <div className="flex-1 min-w-0 space-y-6 pb-12">
-          {SECTIONS.map(({ id, icon: Icon, title, color, content }) => (
+          {SECTIONS.filter(({ id }) => !PUBLIC_EXCLUDE.includes(id as typeof PUBLIC_EXCLUDE[number])).map(({ id, icon: Icon, title, color, content }) => (
             <div key={id} id={id} className="bg-white rounded-2xl border border-mist overflow-hidden scroll-mt-20">
               <div className="flex items-center gap-3 px-5 py-4 border-b border-mist bg-off-white/50">
                 <div className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 ${color}`}>

@@ -7,10 +7,13 @@ import { SECTIONS } from "@/components/docs/docs-shared";
 interface Props {
   /** ID of the scrollable container. Omit to observe against the viewport (public docs). */
   scrollContainerId?: string;
+  /** Section IDs to hide from the nav and not observe. */
+  excludeIds?: string[];
 }
 
-export function DocsNav({ scrollContainerId }: Props) {
-  const [activeId, setActiveId] = useState<string>(SECTIONS[0]?.id ?? "");
+export function DocsNav({ scrollContainerId, excludeIds = [] }: Props) {
+  const visible = SECTIONS.filter(({ id }) => !excludeIds.includes(id));
+  const [activeId, setActiveId] = useState<string>(visible[0]?.id ?? "");
 
   useEffect(() => {
     const root = scrollContainerId
@@ -19,10 +22,10 @@ export function DocsNav({ scrollContainerId }: Props) {
 
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries
+        const intersecting = entries
           .filter((e) => e.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible.length > 0) setActiveId(visible[0].target.id);
+        if (intersecting.length > 0) setActiveId(intersecting[0].target.id);
       },
       {
         root,
@@ -31,17 +34,18 @@ export function DocsNav({ scrollContainerId }: Props) {
       }
     );
 
-    SECTIONS.forEach(({ id }) => {
+    visible.forEach(({ id }) => {
       const el = document.getElementById(id);
       if (el) observer.observe(el);
     });
 
     return () => observer.disconnect();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scrollContainerId]);
 
   return (
     <div className="space-y-0.5">
-      {SECTIONS.map(({ id, icon: Icon, title, color }) => {
+      {visible.map(({ id, icon: Icon, title, color }) => {
         const active = activeId === id;
         return (
           <a
