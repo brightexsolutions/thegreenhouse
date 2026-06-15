@@ -435,12 +435,13 @@ export function ChatFab() {
         <div className="relative flex items-center justify-center">
           {/* Continuous ripple rings — only shown when closed */}
           {!open && [0, 0.85, 1.7].map((delay, i) => (
-            <motion.span
+            <span
               key={i}
               className="absolute inset-0 rounded-full pointer-events-none"
-              style={{ backgroundColor: "rgba(201,162,74,0.20)" }}
-              animate={{ scale: [1, 2.2], opacity: [0.6, 0] }}
-              transition={{ duration: 2.5, repeat: Infinity, delay, ease: "easeOut" }}
+              style={{
+                backgroundColor: "rgba(201,162,74,0.22)",
+                animation: `ripple-out 2.5s ${delay}s ease-out infinite`,
+              }}
             />
           ))}
 
