@@ -9,7 +9,7 @@ async function getUpcomingEvent() {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("events")
-      .select("slug, title, event_date, event_time, venue_name, theme_title, type, price_kes, status")
+      .select("slug, title, event_date, event_time, venue_name, venue_address, theme_title, theme_scripture, type, price_kes, status")
       .in("status", ["published", "live"])
       .is("deleted_at", null)
       .gte("event_date", new Date().toISOString().split("T")[0])
@@ -32,7 +32,7 @@ export default async function PublicLayout({ children }: { children: React.React
       <main>{children}</main>
       <SiteFooter />
       {upcomingEvent && <SessionPromptDialog event={upcomingEvent} />}
-      <ChatFab />
+      <ChatFab event={upcomingEvent} />
     </>
   );
 }
