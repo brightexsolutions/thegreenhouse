@@ -125,7 +125,7 @@ export function PartnersCarousel({ partners }: { partners: Partner[] }) {
 
   // On desktop ≤3: no controls needed; on mobile or >3: show controls
   const showControls = isMobile || partners.length > 3;
-  const showDots     = partners.length > 1;
+  const showDots     = isMobile || partners.length > 3;
 
   // Card width class: mobile = 82vw (peek next), desktop = equal fill if ≤3, fixed 280px if >3
   const cardClass = isMobile
