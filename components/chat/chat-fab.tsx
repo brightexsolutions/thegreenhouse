@@ -29,6 +29,35 @@ interface BotReply {
   isGreeting?: boolean;
 }
 
+interface UpcomingEvent {
+  slug:              string;
+  title:             string;
+  event_date:        string;
+  event_time:        string;
+  venue_name:        string | null;
+  venue_address?:    string | null;
+  theme_title?:      string | null;
+  theme_scripture?:  string | null;
+}
+
+// ─── Helpers ──────────────────────────────────────────────────────────────────
+
+function fmtDate(dateStr: string): string {
+  return new Date(dateStr + "T00:00:00").toLocaleDateString("en-KE", {
+    weekday: "long", year: "numeric", month: "long", day: "numeric",
+  });
+}
+
+function fmtTime(timeStr: string): string {
+  const [h, m] = timeStr.split(":").map(Number);
+  const hour12 = h % 12 || 12;
+  return `${hour12}:${String(m).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
+}
+
+function hasVenue(e: UpcomingEvent | null | undefined): boolean {
+  return !!e?.venue_name && e.venue_name.trim().toUpperCase() !== "TBA";
+}
+
 // ─── Intent engine ────────────────────────────────────────────────────────────
 
 const GREET_RE = /\b(hi+|hello+|hey+|hiya|howdy|yo+|sup|greetings|good\s+(morning|afternoon|evening|day)|wassup|what'?s\s*up|peace)\b/i;
@@ -40,22 +69,6 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
       text:   "The Green House is a cross-church worship and sharing community in Nairobi, Kenya. We gather **quarterly** for an evening of low-pressure worship, prayer, and genuine connection — no performance, no pressure, just real community across different churches.",
       chips:  ["Who can attend?", "When is the next session?", "Is it free?"],
       action: { label: "Learn more about us", href: "/about" },
-    }),
-  },
-  {
-    re: /when|next\s*session|date|schedule|upcoming|session\s*0?2/i,
-    reply: () => ({
-      text:   "The next gathering is **Session 02** on **June 26, 2026** at 7:00 PM. Venue details will be shared soon — register and we'll notify you directly!",
-      chips:  ["How do I register?", "Where will it be held?", "What's the theme?"],
-      action: { label: "View Session 02", href: "/events/session-02" },
-    }),
-  },
-  {
-    re: /where|venue|location|address|place/i,
-    reply: () => ({
-      text:   "The venue for Session 02 will be announced closer to the date. Register on our Events page and we'll send you all the details via email once confirmed.",
-      chips:  ["How do I register?", "When is the next session?"],
-      action: { label: "Register for updates", href: "/events/session-02" },
     }),
   },
   {
@@ -94,13 +107,6 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
     reply: () => ({
       text:  "A Green House evening includes live worship, prayer, open sharing, and genuine connection time. It's relaxed and intimate — more like a gathering of friends than a formal service.",
       chips: ["What's the theme for Session 02?", "Who can attend?"],
-    }),
-  },
-  {
-    re: /theme|topic|delusion|2\s*timothy|scripture|verse/i,
-    reply: () => ({
-      text:  "The theme for Session 02 is **'Delusion'**, drawn from **2 Timothy 4:3–6** — a conversation about truth, comfort, and what we choose to hear.",
-      chips: ["When is the next session?", "How do I register?"],
     }),
   },
   {
@@ -182,7 +188,7 @@ const CHIP_MAP: Record<string, string> = {
   "What is The Green House?":         "what is the green house",
 };
 
-function getBotReply(input: string, hasGreeted: boolean): BotReply {
+function getBotReply(input: string, hasGreeted: boolean, event?: UpcomingEvent | null): BotReply {
   const t = input.toLowerCase().trim();
 
   if (GREET_RE.test(t)) {
@@ -196,6 +202,60 @@ function getBotReply(input: string, hasGreeted: boolean): BotReply {
     return {
       text:  "Still here! 😊 What would you like to know?",
       chips: ["What is The Green House?", "When is the next session?", "How do I register?"],
+    };
+  }
+
+  // ── Dynamic: when / date ────────────────────────────────────────────────────
+  if (/when|next\s*session|date|schedule|upcoming|session\s*0?2/i.test(t)) {
+    if (event) {
+      const date = fmtDate(event.event_date);
+      const time = fmtTime(event.event_time);
+      const venueLine = hasVenue(event)
+        ? ` It will be held at **${event.venue_name}**.`
+        : " Venue details will be shared soon — register and we'll notify you via email.";
+      return {
+        text:   `The next gathering is **${event.title}** on **${date}** at **${time}**.${venueLine}`,
+        chips:  ["How do I register?", "Where will it be held?", "What's the theme?"],
+        action: { label: `View ${event.title}`, href: `/events/${event.slug}` },
+      };
+    }
+    return {
+      text:   "The next gathering is **Session 02** on **June 26, 2026** at **7:00 PM**. Venue details will be shared soon — register and we'll notify you via email.",
+      chips:  ["How do I register?", "Where will it be held?", "What's the theme?"],
+      action: { label: "View Session 02", href: "/events/session-02" },
+    };
+  }
+
+  // ── Dynamic: venue / location ───────────────────────────────────────────────
+  if (/where|venue|location|address|place/i.test(t)) {
+    if (hasVenue(event)) {
+      const loc = [event!.venue_name, event?.venue_address].filter(Boolean).join(", ");
+      return {
+        text:   `**${event!.title}** will be held at **${loc}**. We look forward to seeing you there!`,
+        chips:  ["How do I register?", "When is the next session?"],
+        action: { label: "Register now", href: `/events/${event!.slug}` },
+      };
+    }
+    return {
+      text:   "The venue will be announced closer to the date. Register on our Events page and we'll send you the details via email once confirmed.",
+      chips:  ["How do I register?", "When is the next session?"],
+      action: { label: "Register for updates", href: event ? `/events/${event.slug}` : "/events" },
+    };
+  }
+
+  // ── Dynamic: theme / scripture ──────────────────────────────────────────────
+  if (/theme|topic|scripture|verse|delusion|2\s*timothy/i.test(t)) {
+    if (event?.theme_title) {
+      const scripture = event.theme_scripture ? `, drawn from **${event.theme_scripture}**` : "";
+      return {
+        text:   `The theme for this session is **'${event.theme_title}'**${scripture}. Expect worship, honest dialogue, and space to reflect.`,
+        chips:  ["When is the next session?", "How do I register?"],
+        action: { label: `View ${event.title}`, href: `/events/${event.slug}` },
+      };
+    }
+    return {
+      text:  "The theme for Session 02 is **'Delusion'**, drawn from **2 Timothy 4:3–6** — a conversation about truth, comfort, and what we choose to hear.",
+      chips: ["When is the next session?", "How do I register?"],
     };
   }
 
@@ -237,7 +297,7 @@ const WELCOME: Msg = {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function ChatFab() {
+export function ChatFab({ event }: { event?: UpcomingEvent | null }) {
   const [open,    setOpen]    = useState(false);
   const [msgs,    setMsgs]    = useState<Msg[]>([]);
   const [input,   setInput]   = useState("");
@@ -287,7 +347,7 @@ export function ChatFab() {
     setMsgs(prev => [...prev, userMsg]);
     setInput("");
 
-    const reply = getBotReply(text, greeted);
+    const reply = getBotReply(text, greeted, event);
     if (reply.isGreeting) setGreeted(true);
 
     setTyping(true);
