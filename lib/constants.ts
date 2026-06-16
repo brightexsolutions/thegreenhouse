@@ -50,6 +50,13 @@ export const PARTNERS: Array<{
     logoUrl:     null,
     url:         "https://www.instagram.com/glace.confectionary?igsh=MWV3emxxcGJmMnFkbA==",
   },
+  {
+    name:        "Calm Front",
+    role:        "Psychology & Mental Wellness",
+    description: "Providing professional psychological support and mental wellness perspective to the community.",
+    logoUrl:     null,
+    url:         "https://www.linkedin.com/in/debra-odiwuor-ab42351b2",
+  },
 ];
 
 /** Build a WhatsApp link with optional pre-filled message */
