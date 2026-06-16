@@ -58,20 +58,20 @@ function CardDecoration({ index }: { index: number }) {
   if (index === 0) {
     return (
       <>
-        <div className="absolute top-4 right-4 text-white/20 pointer-events-none"><Code2 size={62} strokeWidth={1} /></div>
-        <div className="absolute bottom-4 left-4 text-white/15 pointer-events-none"><Terminal size={38} strokeWidth={1} /></div>
-        <div className="absolute top-5 left-5 text-white/10 pointer-events-none"><Cpu size={24} strokeWidth={1} /></div>
-        <div className="absolute bottom-5 right-5 text-white/10 pointer-events-none"><Braces size={20} strokeWidth={1} /></div>
+        <div className="absolute top-4 right-4 text-white/45 pointer-events-none"><Code2 size={62} strokeWidth={1} /></div>
+        <div className="absolute bottom-4 left-4 text-white/35 pointer-events-none"><Terminal size={38} strokeWidth={1} /></div>
+        <div className="absolute top-5 left-5 text-white/25 pointer-events-none"><Cpu size={24} strokeWidth={1} /></div>
+        <div className="absolute bottom-5 right-5 text-white/20 pointer-events-none"><Braces size={20} strokeWidth={1} /></div>
       </>
     );
   }
   if (index === 1) {
     return (
       <>
-        <div className="absolute top-3 right-4 text-white/22 pointer-events-none"><Cake size={58} strokeWidth={1} /></div>
-        <div className="absolute bottom-4 left-4 text-white/16 pointer-events-none"><UtensilsCrossed size={36} strokeWidth={1} /></div>
-        <div className="absolute top-5 left-5 text-white/12 pointer-events-none"><Cookie size={22} strokeWidth={1} /></div>
-        <div className="absolute bottom-5 right-5 text-white/10 pointer-events-none"><Cookie size={17} strokeWidth={1} /></div>
+        <div className="absolute top-3 right-4 text-white/45 pointer-events-none"><Cake size={58} strokeWidth={1} /></div>
+        <div className="absolute bottom-4 left-4 text-white/35 pointer-events-none"><UtensilsCrossed size={36} strokeWidth={1} /></div>
+        <div className="absolute top-5 left-5 text-white/25 pointer-events-none"><Cookie size={22} strokeWidth={1} /></div>
+        <div className="absolute bottom-5 right-5 text-white/20 pointer-events-none"><Cookie size={17} strokeWidth={1} /></div>
       </>
     );
   }
@@ -209,14 +209,14 @@ export function PartnersCarousel({ partners }: { partners: Partner[] }) {
           <button
             onClick={() => { setPaused(false); goTo(current - 1); }}
             aria-label="Previous partner"
-            className="absolute -left-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-mist flex items-center justify-center text-charcoal/50 hover:text-forest hover:border-forest/20 hover:shadow-lg transition-all z-10"
+            className="absolute -left-5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-white/65 backdrop-blur-sm shadow-md border border-charcoal/10 flex items-center justify-center text-charcoal/60 hover:bg-white/90 hover:text-forest hover:shadow-lg transition-all z-30"
           >
             <ChevronLeft size={16} />
           </button>
           <button
             onClick={() => { setPaused(false); goTo(current + 1); }}
             aria-label="Next partner"
-            className="absolute -right-4 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white shadow-md border border-mist flex items-center justify-center text-charcoal/50 hover:text-forest hover:border-forest/20 hover:shadow-lg transition-all z-10"
+            className="absolute -right-5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-white/65 backdrop-blur-sm shadow-md border border-charcoal/10 flex items-center justify-center text-charcoal/60 hover:bg-white/90 hover:text-forest hover:shadow-lg transition-all z-30"
           >
             <ChevronRight size={16} />
           </button>
