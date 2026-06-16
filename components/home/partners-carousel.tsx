@@ -78,9 +78,9 @@ function CardDecoration({ index }: { index: number }) {
   if (index === 2) {
     return (
       <>
-        <div className="absolute top-3 right-4 text-white/22 pointer-events-none"><Brain size={58} strokeWidth={1} /></div>
-        <div className="absolute bottom-4 left-4 text-white/16 pointer-events-none"><Heart size={36} strokeWidth={1} /></div>
-        <div className="absolute top-5 left-5 text-white/10 pointer-events-none"><Smile size={22} strokeWidth={1} /></div>
+        <div className="absolute top-3 right-4 text-white/40 pointer-events-none"><Brain size={62} strokeWidth={1} /></div>
+        <div className="absolute bottom-4 left-4 text-white/30 pointer-events-none"><Heart size={38} strokeWidth={1} /></div>
+        <div className="absolute top-5 left-5 text-white/22 pointer-events-none"><Smile size={24} strokeWidth={1} /></div>
       </>
     );
   }
