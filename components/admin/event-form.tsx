@@ -132,9 +132,9 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
     setSubmitError(null);
     const payload = {
       ...data,
-      cover_image:      coverPath  ?? undefined,
-      banner_image:     bannerPath ?? undefined,
-      highlight_video:  videoPath  ?? undefined,
+      cover_image:      coverPath,
+      banner_image:     bannerPath,
+      highlight_video:  videoPath,
       price_kes:   data.type === "paid" ? (data.price_kes ?? 0) : 0,
       // empty strings → null
       venue_map_url:     data.venue_map_url || null,
