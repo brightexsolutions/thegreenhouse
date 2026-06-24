@@ -78,20 +78,19 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
     .filter(s => !(s as { deleted_at?: string | null }).deleted_at)
     .sort((a, b) => a.sort_order - b.sort_order);
 
-  // TODO: re-enable before go-live — gate removed for testing
-  // if (typedEvent.status !== "live") {
-  //   return (
-  //     <PreEventView
-  //       eventTitle={typedEvent.title}
-  //       eventDate={typedEvent.event_date}
-  //       eventTime={typedEvent.event_time}
-  //       venueName={typedEvent.venue_name}
-  //       themeTitle={typedEvent.theme_title}
-  //       themeScripture={typedEvent.theme_scripture}
-  //       isPast={typedEvent.status === "past"}
-  //     />
-  //   );
-  // }
+  if (typedEvent.status !== "live") {
+    return (
+      <PreEventView
+        eventTitle={typedEvent.title}
+        eventDate={typedEvent.event_date}
+        eventTime={typedEvent.event_time}
+        venueName={typedEvent.venue_name}
+        themeTitle={typedEvent.theme_title}
+        themeScripture={typedEvent.theme_scripture}
+        isPast={typedEvent.status === "past"}
+      />
+    );
+  }
 
   return (
     <div className="min-h-screen bg-cream">
