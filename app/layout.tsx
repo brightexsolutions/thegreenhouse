@@ -5,8 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { MobileScrollFix } from "@/components/mobile-scroll-fix";
 import "./globals.css";
 import { cn } from "@/lib/utils";
-import { GOOGLE_SITE_VERIFICATION } from "@/lib/constants";
-import { getSocialLinks } from "@/lib/site-settings";
+import { GOOGLE_SITE_VERIFICATION, SOCIAL_INSTAGRAM, SOCIAL_TIKTOK, SOCIAL_YOUTUBE, SOCIAL_FACEBOOK, SOCIAL_TWITTER } from "@/lib/constants";
 
 const displayFont = Cormorant_Garamond({
   variable: "--font-display",
@@ -66,41 +65,40 @@ export const metadata: Metadata = {
   robots:  { index: true, follow: true },
 };
 
-export default async function RootLayout({
+const sameAs = [SOCIAL_INSTAGRAM, SOCIAL_TIKTOK, SOCIAL_YOUTUBE, SOCIAL_FACEBOOK, SOCIAL_TWITTER].filter(Boolean);
+
+const orgJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  "name": "The Green House Worship Community",
+  "alternateName": [
+    "Green House Worship Community",
+    "The Green House",
+    "The Greenhouse Worship Session",
+    "Green House Worship Session",
+    "greenhousews",
+  ],
+  "url": SITE_BASE,
+  "logo": `${SITE_BASE}/icon.svg`,
+  "description": "A cross-church worship community in Nairobi, Kenya. Quarterly gatherings for worship, prayer, and real connection across churches.",
+  "foundingDate": "2026",
+  "address": {
+    "@type": "PostalAddress",
+    "addressLocality": "Nairobi",
+    "addressRegion": "Nairobi County",
+    "addressCountry": "KE",
+  },
+  "areaServed": {
+    "@type": "City",
+    "name": "Nairobi",
+    "sameAs": "https://www.wikidata.org/wiki/Q3870",
+  },
+  ...(sameAs.length > 0 ? { "sameAs": sameAs } : {}),
+};
+
+export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
-  const socials = await getSocialLinks();
-  const sameAs = [socials.instagram, socials.tiktok, socials.youtube, socials.facebook, socials.twitter].filter(Boolean);
-
-  const orgJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    "name": "The Green House Worship Community",
-    "alternateName": [
-      "Green House Worship Community",
-      "The Green House",
-      "The Greenhouse Worship Session",
-      "Green House Worship Session",
-      "greenhousews",
-    ],
-    "url": SITE_BASE,
-    "logo": `${SITE_BASE}/icon.svg`,
-    "description": "A cross-church worship community in Nairobi, Kenya. Quarterly gatherings for worship, prayer, and real connection across churches.",
-    "foundingDate": "2026",
-    "address": {
-      "@type": "PostalAddress",
-      "addressLocality": "Nairobi",
-      "addressRegion": "Nairobi County",
-      "addressCountry": "KE",
-    },
-    "areaServed": {
-      "@type": "City",
-      "name": "Nairobi",
-      "sameAs": "https://www.wikidata.org/wiki/Q3870",
-    },
-    ...(sameAs.length > 0 ? { "sameAs": sameAs } : {}),
-  };
-
   return (
     <html lang="en" className={cn(displayFont.variable, bodyFont.variable)}>
       <body className="antialiased force-light grain" suppressHydrationWarning>

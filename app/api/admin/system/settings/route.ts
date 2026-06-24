@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { revalidateTag } from "next/cache";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 async function guardSuperAdmin() {
@@ -48,6 +47,5 @@ export async function POST(req: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-  revalidateTag("site-settings");
   return NextResponse.json({ saved: true });
 }
