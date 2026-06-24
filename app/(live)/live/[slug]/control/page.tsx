@@ -7,7 +7,7 @@ import {
   Tv2, Music, ChevronLeft, ChevronRight, ChevronDown, Clock, Users,
   BookOpen, Heart, Zap, AlignLeft, MessageSquare, Loader2,
   ExternalLink, QrCode, Sun, Moon, Leaf, Images,
-  CheckCircle2, X, Sparkles, Play, Eye, Trophy,
+  CheckCircle2, X, Sparkles, Play, Eye, Trophy, Film,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -60,7 +60,8 @@ type SessionItem = {
   songs:     Song | null;
 };
 
-type PlannedTrivia = { id: string; question: string; category: string };
+type PlannedTrivia  = { id: string; question: string; category: string };
+type OpenResponse   = { id: string; attendee_name: string | null; answer_text: string; is_correct: boolean | null };
 
 type EventData = {
   id:          string;
@@ -95,6 +96,7 @@ const SCENES = [
   { key: "prayer",      label: "Prayer",      icon: Heart     },
   { key: "community",   label: "Community",   icon: Users     },
   { key: "gallery",     label: "Gallery",     icon: Images    },
+  { key: "highlight",   label: "Highlight",   icon: Film      },
   { key: "custom",      label: "Custom",      icon: MessageSquare },
   { key: "trivia",      label: "Trivia",      icon: Sparkles  },
 ] as const;
@@ -152,6 +154,13 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const [triviaTimer,      setTriviaTimer]     = useState<number | null>(null);
   const [triviaLoading,    setTriviaLoading]   = useState(false);
   const [usedQIds,         setUsedQIds]        = useState<Set<string>>(new Set());
+
+  // Open-input response scoring
+  const [openResponses,   setOpenResponses]   = useState<OpenResponse[]>([]);
+  const [localScores,     setLocalScores]     = useState<Record<string, boolean | null>>({});
+  const [openKeywords,    setOpenKeywords]    = useState<string | null>(null);
+  const [scoringLoading,  setScoringLoading]  = useState(false);
+  const [scoringSaved,    setScoringSaved]    = useState(false);
 
   // Auth check — admin session OR valid control token
   useEffect(() => {
@@ -295,6 +304,78 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     } catch { /* ignore */ }
   }, []);
 
+  // Load open_input responses when round is revealing / closed
+  useEffect(() => {
+    const roundId = triviaRound?.id;
+    if (!roundId || triviaRound?.type !== "open_input" || !["revealing", "closed"].includes(triviaRound.status)) {
+      setOpenResponses([]);
+      setLocalScores({});
+      setOpenKeywords(null);
+      return;
+    }
+    let cancelled = false;
+    async function load() {
+      const res = await fetch(`/api/admin/trivia/rounds/${roundId}`);
+      if (!res.ok || cancelled) return;
+      const d = await res.json() as { round: { trivia_questions: unknown }; responses: OpenResponse[]; correctCount: number };
+      if (cancelled) return;
+      setOpenResponses(d.responses ?? []);
+      setTriviaCorrect(d.correctCount ?? 0);
+      const tq = (Array.isArray(d.round?.trivia_questions) ? d.round.trivia_questions[0] : d.round?.trivia_questions) as { answer_keywords?: string | null; correct_answer?: string | null } | null;
+      setOpenKeywords(tq?.answer_keywords ?? tq?.correct_answer ?? null);
+      setLocalScores(prev => {
+        if (Object.keys(prev).length > 0) return prev;
+        const init: Record<string, boolean | null> = {};
+        for (const r of d.responses ?? []) init[r.id] = r.is_correct;
+        return init;
+      });
+    }
+    load();
+    const id = setInterval(load, 8000);
+    return () => { cancelled = true; clearInterval(id); };
+  }, [triviaRound?.id, triviaRound?.type, triviaRound?.status]);
+
+  function applyKeywordDetection() {
+    if (!openKeywords) return;
+    const kws = openKeywords.split(",").map(k => k.trim().toLowerCase()).filter(Boolean);
+    setLocalScores(prev => {
+      const next = { ...prev };
+      for (const r of openResponses) {
+        const text = r.answer_text.toLowerCase();
+        if (kws.every(k => text.includes(k))) next[r.id] = true;
+      }
+      return next;
+    });
+  }
+
+  async function saveOpenScores() {
+    const roundId = triviaRound?.id;
+    if (!roundId) return;
+    setScoringLoading(true);
+    const scores = Object.entries(localScores)
+      .filter(([, v]) => v !== null)
+      .map(([id, is_correct]) => ({ id, is_correct: is_correct as boolean }));
+    if (scores.length > 0) {
+      await fetch(`/api/admin/trivia/rounds/${roundId}/score`, {
+        method:  "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify({ scores }),
+      });
+    }
+    const res = await fetch(`/api/admin/trivia/rounds/${roundId}`);
+    if (res.ok) {
+      const d = await res.json() as { correctCount: number; responses: OpenResponse[] };
+      setOpenResponses(d.responses ?? []);
+      setTriviaCorrect(d.correctCount ?? 0);
+      const refreshed: Record<string, boolean | null> = {};
+      for (const r of d.responses ?? []) refreshed[r.id] = r.is_correct;
+      setLocalScores(refreshed);
+    }
+    setScoringLoading(false);
+    setScoringSaved(true);
+    setTimeout(() => setScoringSaved(false), 2500);
+  }
+
   // Load trivia question library + used question history once authed
   useEffect(() => {
     if (authed !== true || !event) return;
@@ -321,21 +402,35 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
         fetch(`/api/trivia/${roundId}/results`),
       ]);
       if (cancelled) return;
-      if (rRes.ok)   setTriviaRound(await rRes.json() as TriviaRound);
+      if (rRes.ok) {
+        const round = await rRes.json() as TriviaRound;
+        // Never let a stale poll response downgrade the status (e.g. active after we already
+        // moved to revealing). Status only moves forward: active → revealing → closed.
+        const ORDER: Record<string, number> = { active: 0, revealing: 1, closed: 2 };
+        setTriviaRound(prev => {
+          if (prev && (ORDER[round.status] ?? 0) < (ORDER[prev.status] ?? 0)) return prev;
+          return round;
+        });
+      }
       if (resRes.ok) {
         const d = await resRes.json() as { total: number; correct: number };
         setTriviaCount(d.total);
-        setTriviaCorrect(d.correct);
+        // For open_input, is_correct is set via admin scoring — don't let the public
+        // results endpoint (which counts is_correct=true) reset what admin just saved.
+        // The openResponses effect manages triviaCorrect for open_input independently.
+        if (triviaRound?.type !== "open_input") setTriviaCorrect(d.correct);
       }
     }
     pollRound();
     const id = setInterval(pollRound, 4000);
     return () => { cancelled = true; clearInterval(id); };
-  }, [triviaRound?.id, display?.trivia_round_id]);
+  }, [triviaRound?.id, triviaRound?.type, display?.trivia_round_id]);
 
   async function startTriviaRound() {
     if (!event || !selectedQId) return;
     setTriviaLoading(true);
+    setTriviaCount(0);
+    setTriviaCorrect(0);
     const res = await fetch("/api/admin/trivia/rounds", {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
@@ -391,14 +486,19 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     const roundId = display?.trivia_round_id ?? triviaRound?.id;
     if (!roundId || !event) return;
     setTriviaLoading(true);
+    // Clear optimistically so the poll effect doesn't race and restore the old closed round
+    setTriviaRound(null);
+    setTriviaCount(0);
+    setTriviaCorrect(0);
+    setOpenResponses([]);
+    setLocalScores({});
+    setOpenKeywords(null);
+    setDisplay(prev => prev ? { ...prev, trivia_round_id: null } : prev);
     await fetch(`/api/admin/trivia/rounds/${roundId}`, {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ action: "dismiss" }),
     });
-    setTriviaRound(null);
-    setTriviaCount(0);
-    setTriviaCorrect(0);
     const { data } = await supabase.from("display_state").select("*").eq("event_id", event.id).maybeSingle();
     if (data) setDisplay(data as DisplayState);
     loadUsedQIds(event.id);
@@ -409,14 +509,19 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     const roundId = display?.trivia_round_id ?? triviaRound?.id;
     if (!roundId || !event) return;
     setTriviaLoading(true);
+    // Clear optimistically so the poll effect doesn't race and restore the old closed round
+    setTriviaRound(null);
+    setTriviaCount(0);
+    setTriviaCorrect(0);
+    setOpenResponses([]);
+    setLocalScores({});
+    setOpenKeywords(null);
+    setDisplay(prev => prev ? { ...prev, trivia_round_id: null } : prev);
     await fetch(`/api/admin/trivia/rounds/${roundId}`, {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ action: "finalize", event_id: event.id }),
     });
-    setTriviaRound(null);
-    setTriviaCount(0);
-    setTriviaCorrect(0);
     const { data } = await supabase.from("display_state").select("*").eq("event_id", event.id).maybeSingle();
     if (data) setDisplay(data as DisplayState);
     loadUsedQIds(event.id);
@@ -570,6 +675,20 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     }
   }
   const verses = getLyricsVerses(activeSong?.lyrics ?? null);
+
+  // Trivia question picker — planned questions (from sessions) first, then rest of library
+  const triviaPlanned = event.event_sessions
+    .filter(s => s.trivia_question_id && s.trivia_questions)
+    .map(s => ({
+      id:           s.trivia_question_id!,
+      question:     s.trivia_questions!.question,
+      category:     s.trivia_questions!.category,
+      sessionLabel: s.title,
+    }));
+  const triviaPlannedIds = new Set(triviaPlanned.map(p => p.id));
+  const triviaLibrary = triviaQuestions
+    .filter(q => !triviaPlannedIds.has(q.id))
+    .map(q => ({ id: q.id, question: q.question, category: q.category, sessionLabel: null as string | null }));
 
   return (
     <div className="min-h-screen bg-forest text-cream max-w-md mx-auto px-4 py-5 pb-28">
@@ -938,7 +1057,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                   <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">Revealing</span>
                 )}
                 {triviaRound && triviaRound.status === "closed" && (
-                  <span className="text-[10px] text-gold font-bold bg-gold/20 px-2 py-0.5 rounded-full">🏆 Leaderboard</span>
+                  <span className="text-[10px] text-gold font-bold bg-gold/20 px-2 py-0.5 rounded-full">Scores up</span>
                 )}
                 <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${openSection === "trivia" ? "rotate-180" : ""}`} />
               </div>
@@ -946,9 +1065,8 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
 
             {openSection === "trivia" && (
               <div className="space-y-3">
-                {/* Active / revealing round controls */}
+                {/* Scores on display — next question or end trivia */}
                 {triviaRound && triviaRound.status === "closed" ? (
-                  /* Leaderboard showing — next question or end trivia */
                   <div className="bg-gold/10 border border-gold/25 rounded-2xl p-3 space-y-3">
                     <div className="flex items-center gap-2">
                       <span className="text-lg">🏆</span>
@@ -973,27 +1091,31 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                         className="flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gold text-forest hover:bg-gold-light text-xs font-semibold transition-colors disabled:opacity-50"
                       >
                         {triviaLoading ? <Loader2 size={12} className="animate-spin" /> : <Trophy size={12} />}
-                        Final leaderboard
+                        End trivia
                       </button>
                     </div>
                   </div>
                 ) : triviaRound && ["active", "revealing"].includes(triviaRound.status) ? (
+                  /* Active round controls */
                   <div className="bg-cream/8 rounded-2xl p-3 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs font-semibold text-gold">Round in progress</p>
                         <p className="text-[10px] text-cream/40 mt-0.5">
-                          {triviaCount} answered · {triviaCorrect} correct
+                          {triviaCount} answered
+                          {triviaRound.type !== "open_input" && ` · ${triviaCorrect} correct`}
+                          {triviaRound.type === "open_input" && triviaCorrect > 0 && ` · ${triviaCorrect} scored`}
                         </p>
                       </div>
                       <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
                         triviaRound.status === "active" ? "bg-green-500/20 text-green-300" : "bg-gold/20 text-gold"
                       }`}>
-                        {triviaRound.status}
+                        {triviaRound.status === "active" ? "Live" : "Revealing"}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2">
-                      {triviaRound.status === "active" && (
+                    {/* Action buttons — MC gets 2 buttons (reveal + end), open_input gets 1 */}
+                    <div className={cn("grid gap-2", triviaRound.status === "active" && triviaRound.type === "multiple_choice" ? "grid-cols-2" : "grid-cols-1")}>
+                      {triviaRound.status === "active" && triviaRound.type === "multiple_choice" && (
                         <button
                           onClick={() => patchTriviaRound("reveal")}
                           disabled={triviaLoading}
@@ -1003,48 +1125,197 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                         </button>
                       )}
                       <button
-                        onClick={() => patchTriviaRound("close")}
+                        onClick={() => patchTriviaRound(
+                          // open_input "End round": go to revealing so the response scorer appears
+                          // MC "End round" or any "Show scores": go straight to closed
+                          triviaRound.status === "active" && triviaRound.type === "open_input" ? "reveal" : "close"
+                        )}
                         disabled={triviaLoading}
-                        className={`flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-colors disabled:opacity-50 ${
+                        className={cn(
+                          "flex items-center justify-center gap-1.5 py-2.5 rounded-xl text-xs font-semibold transition-colors disabled:opacity-50",
                           triviaRound.status === "active"
-                            ? "bg-green-500/20 text-green-300 hover:bg-green-500/30"
-                            : "col-span-2 bg-gold text-forest hover:bg-gold-light"
-                        }`}
+                            ? "bg-cream/15 text-cream/70 hover:bg-cream/25"
+                            : "bg-gold text-forest hover:bg-gold-light"
+                        )}
                       >
-                        <Trophy size={12} />
-                        {triviaRound.status === "active" ? "End & show results" : "Show leaderboard"}
+                        {triviaLoading ? <Loader2 size={12} className="animate-spin" /> : <Trophy size={12} />}
+                        {triviaRound.status === "active" ? "End round" : "Show scores"}
                       </button>
                     </div>
+
+                    {/* Open-input response reviewer — shown while revealing so admin can score before closing */}
+                    {triviaRound.type === "open_input" && triviaRound.status === "revealing" && (
+                      <div className="space-y-2 pt-1 border-t border-cream/10">
+                        <div className="flex items-center justify-between">
+                          <p className="text-[10px] text-cream/35 uppercase tracking-wider">Responses</p>
+                          {openKeywords && openResponses.length > 0 && (
+                            <button
+                              onClick={applyKeywordDetection}
+                              className="text-[9px] text-gold/55 hover:text-gold transition-colors"
+                            >
+                              Auto-detect
+                            </button>
+                          )}
+                        </div>
+                        {openResponses.length === 0 ? (
+                          <p className="text-[11px] text-cream/25 text-center py-2">No responses yet</p>
+                        ) : (
+                          <div className="space-y-1 max-h-48 overflow-y-auto pr-0.5">
+                            {openResponses.map(r => {
+                              const score = localScores[r.id] ?? null;
+                              return (
+                                <div key={r.id} className={cn(
+                                  "flex items-center gap-2 px-2.5 py-2 rounded-xl border transition-all",
+                                  score === true  ? "bg-green-500/12 border-green-500/20" :
+                                  score === false ? "bg-red-500/10 border-red-500/15" :
+                                                    "bg-cream/6 border-transparent"
+                                )}>
+                                  <div className="flex-1 min-w-0">
+                                    <p className="text-[11px] text-cream/85 leading-snug break-words">{r.answer_text}</p>
+                                    <p className="text-[9px] text-cream/30 mt-0.5">{r.attendee_name ?? "Anonymous"}</p>
+                                  </div>
+                                  <div className="flex items-center gap-1 flex-shrink-0">
+                                    <button
+                                      onClick={() => setLocalScores(prev => ({ ...prev, [r.id]: score === true ? null : true }))}
+                                      className={cn(
+                                        "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all",
+                                        score === true ? "bg-green-500/40 text-green-300" : "bg-cream/10 text-cream/30 hover:bg-green-500/20 hover:text-green-400"
+                                      )}
+                                    >✓</button>
+                                    <button
+                                      onClick={() => setLocalScores(prev => ({ ...prev, [r.id]: score === false ? null : false }))}
+                                      className={cn(
+                                        "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all",
+                                        score === false ? "bg-red-500/35 text-red-300" : "bg-cream/10 text-cream/30 hover:bg-red-500/20 hover:text-red-400"
+                                      )}
+                                    >✗</button>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                        <button
+                          onClick={saveOpenScores}
+                          disabled={scoringLoading}
+                          className="w-full py-2 rounded-xl bg-gold/20 text-gold text-xs font-semibold hover:bg-gold/30 disabled:opacity-40 transition-colors flex items-center justify-center gap-1.5"
+                        >
+                          {scoringLoading
+                            ? <Loader2 size={11} className="animate-spin" />
+                            : scoringSaved ? <CheckCircle2 size={11} /> : null
+                          }
+                          {scoringSaved ? "Scores saved" : "Save scores"}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ) : (
                   /* Launch controls */
-                  <div className="space-y-2">
+                  <div className="space-y-3">
+                    {/* Final leaderboard is on display — close it before starting anything new */}
+                    {display?.scene === "trivia" && display?.custom_text === "__final_leaderboard__" && (
+                      <div className="bg-gold/10 border border-gold/25 rounded-2xl p-3 space-y-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base">🏆</span>
+                          <div>
+                            <p className="text-xs font-semibold text-gold">Final leaderboard on display</p>
+                            <p className="text-[10px] text-cream/35 mt-0.5">Close when you&apos;re ready to move on</p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => upsertDisplay({ scene: "branding", custom_text: null })}
+                          disabled={saving}
+                          className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-xl bg-gold text-forest text-xs font-semibold hover:bg-gold-light transition-colors disabled:opacity-50"
+                        >
+                          {saving ? <Loader2 size={12} className="animate-spin" /> : <X size={12} />}
+                          Close trivia session
+                        </button>
+                      </div>
+                    )}
                     {triviaQuestions.length === 0 ? (
                       <p className="text-[11px] text-cream/30 text-center py-3">
                         No trivia questions yet — add some in Library → Trivia
                       </p>
                     ) : (
                       <>
-                        <select
-                          value={selectedQId}
-                          onChange={e => setSelectedQId(e.target.value)}
-                          className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-xs text-cream focus:outline-none focus:border-gold"
-                        >
-                          {triviaQuestions.map(q => {
-                            const played = usedQIds.has(q.id);
-                            const label  = q.question.length > 50 ? q.question.slice(0, 50) + "…" : q.question;
-                            return (
-                              <option key={q.id} value={q.id} className="bg-forest text-cream">
-                                {played ? "✓ " : ""}{label} [{q.category}]
-                              </option>
-                            );
-                          })}
-                        </select>
+                        {/* Unified question picker: planned questions first, then rest of library */}
+                        <div className="space-y-1 max-h-56 overflow-y-auto pr-0.5">
+                          {triviaPlanned.length > 0 && (
+                            <p className="text-[9px] text-cream/30 uppercase tracking-wider px-0.5 pb-0.5">Planned</p>
+                          )}
+                          {triviaPlanned.map(entry => (
+                            <button
+                              key={entry.id}
+                              onClick={() => setSelectedQId(entry.id)}
+                              className={cn(
+                                "w-full text-left px-3 py-2 rounded-xl border transition-all",
+                                selectedQId === entry.id
+                                  ? "bg-gold/15 border-gold/40"
+                                  : "bg-cream/6 border-transparent text-cream/60 hover:bg-cream/12 hover:text-cream/80"
+                              )}
+                            >
+                              <div className="flex items-start gap-2">
+                                <div className={cn(
+                                  "w-3 h-3 rounded-full border-2 flex-shrink-0 mt-0.5 transition-all",
+                                  selectedQId === entry.id ? "bg-gold border-gold" : "border-cream/25"
+                                )} />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-[11px] leading-snug line-clamp-2 text-cream/80">{entry.question}</p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-[9px] text-gold/50 uppercase tracking-wide">{entry.category}</span>
+                                    <span className="text-[9px] text-cream/30">· {entry.sessionLabel}</span>
+                                    {usedQIds.has(entry.id) && (
+                                      <span className="text-[9px] text-cream/25">· played</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+
+                          {triviaLibrary.length > 0 && (
+                            <p className={cn(
+                              "text-[9px] text-cream/30 uppercase tracking-wider px-0.5 pb-0.5",
+                              triviaPlanned.length > 0 && "pt-2"
+                            )}>
+                              {triviaPlanned.length > 0 ? "Library" : "Questions"}
+                            </p>
+                          )}
+                          {triviaLibrary.map(entry => (
+                            <button
+                              key={entry.id}
+                              onClick={() => setSelectedQId(entry.id)}
+                              className={cn(
+                                "w-full text-left px-3 py-2 rounded-xl border transition-all",
+                                selectedQId === entry.id
+                                  ? "bg-gold/15 border-gold/40"
+                                  : "bg-cream/6 border-transparent text-cream/60 hover:bg-cream/12 hover:text-cream/80"
+                              )}
+                            >
+                              <div className="flex items-start gap-2">
+                                <div className={cn(
+                                  "w-3 h-3 rounded-full border-2 flex-shrink-0 mt-0.5 transition-all",
+                                  selectedQId === entry.id ? "bg-gold border-gold" : "border-cream/25"
+                                )} />
+                                <div className="min-w-0 flex-1">
+                                  <p className="text-[11px] leading-snug line-clamp-2 text-cream/80">{entry.question}</p>
+                                  <div className="flex items-center gap-2 mt-0.5">
+                                    <span className="text-[9px] text-gold/50 uppercase tracking-wide">{entry.category}</span>
+                                    {usedQIds.has(entry.id) && (
+                                      <span className="text-[9px] text-cream/25">· played</span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+
                         {selectedQId && usedQIds.has(selectedQId) && (
                           <p className="text-[10px] text-gold/50">This question was already played this event.</p>
                         )}
 
-                        {/* Optional timer */}
+                        {/* Timer + Launch */}
                         <div className="flex items-center gap-2">
                           <select
                             value={triviaTimer ?? ""}
@@ -1068,43 +1339,8 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                           </button>
                         </div>
                         <p className="text-[10px] text-cream/20 leading-relaxed">
-                          Launching switches the display to Trivia scene and opens answering for attendees.
+                          Switching to Trivia scene opens answering for attendees.
                         </p>
-
-                        {/* Planned trivia per section */}
-                        {event && event.event_sessions.some(s => s.trivia_question_id) && (
-                          <div className="mt-3 pt-3 border-t border-cream/10">
-                            <p className="text-[10px] text-cream/35 uppercase tracking-wider mb-2">Planned for this event</p>
-                            <div className="space-y-1.5">
-                              {event.event_sessions
-                                .filter(s => s.trivia_question_id && s.trivia_questions)
-                                .map(s => {
-                                  const q     = s.trivia_questions!;
-                                  const played = usedQIds.has(s.trivia_question_id!);
-                                  return (
-                                    <div key={s.id} className="flex items-center gap-2 bg-cream/6 rounded-xl px-3 py-2">
-                                      <div className="flex-1 min-w-0">
-                                        <p className={cn("text-[10px] font-medium truncate", played ? "text-cream/30 line-through" : "text-cream/70")}>
-                                          {s.title}
-                                        </p>
-                                        <p className="text-[9px] text-cream/35 truncate">{q.question}</p>
-                                      </div>
-                                      {played ? (
-                                        <span className="text-[9px] text-gold/40 flex-shrink-0">played</span>
-                                      ) : (
-                                        <button
-                                          onClick={() => { setSelectedQId(s.trivia_question_id!); }}
-                                          className="text-[10px] font-semibold text-gold hover:text-gold-light flex-shrink-0 transition-colors"
-                                        >
-                                          Select →
-                                        </button>
-                                      )}
-                                    </div>
-                                  );
-                                })}
-                            </div>
-                          </div>
-                        )}
                       </>
                     )}
                   </div>

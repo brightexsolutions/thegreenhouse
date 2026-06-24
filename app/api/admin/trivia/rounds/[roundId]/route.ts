@@ -13,13 +13,14 @@ export async function GET(_: NextRequest, { params }: Params) {
   const [{ data: round }, { data: responses }] = await Promise.all([
     supabase
       .from("trivia_rounds")
-      .select("id, status, started_at, revealed_at, timer_seconds, question_id, trivia_questions(question, type, options, correct_index, points)")
+      .select("id, status, started_at, revealed_at, timer_seconds, question_id, trivia_questions(question, type, options, correct_index, points, hint, correct_answer, answer_keywords)")
       .eq("id", roundId)
       .single(),
     supabase
       .from("trivia_responses")
-      .select("answer_index, answer_text, is_correct, submitted_at")
-      .eq("round_id", roundId),
+      .select("id, answer_index, answer_text, is_correct, admin_override, submitted_at, attendee_name")
+      .eq("round_id", roundId)
+      .order("submitted_at", { ascending: true }),
   ]);
 
   if (!round) return NextResponse.json({ error: "Round not found" }, { status: 404 });
@@ -54,7 +55,8 @@ export async function PATCH(req: NextRequest, { params }: Params) {
 
   const now = new Date().toISOString();
 
-  // "dismiss" — clear trivia from display, go back to branding (next question flow)
+  // "dismiss" — clear the current round but keep the trivia scene so the display shows
+  //             "Trivia loading…" while the operator picks the next question
   if (action === "dismiss") {
     const { data: round } = await supabase
       .from("trivia_rounds")
@@ -64,7 +66,7 @@ export async function PATCH(req: NextRequest, { params }: Params) {
     if (round?.event_id) {
       await supabase
         .from("display_state")
-        .update({ scene: "branding", trivia_round_id: null, custom_text: null, updated_at: now })
+        .update({ scene: "trivia", trivia_round_id: null, custom_text: null, updated_at: now })
         .eq("event_id", round.event_id);
     }
     return NextResponse.json({ ok: true });

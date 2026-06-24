@@ -412,16 +412,23 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
         {/* Submission confirmation */}
         {submitted && !isRevealing && !isClosed && (
           <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
+            initial={{ opacity: 0, scale: 0.88 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="flex flex-col items-center gap-2 py-3 text-center"
+            transition={{ type: "spring", stiffness: 320, damping: 22 }}
+            className="flex flex-col items-center gap-4 py-6 text-center"
           >
-            <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-              <CheckCircle2 size={22} className="text-green-400" />
+            <div className="relative">
+              <div className="w-24 h-24 rounded-full bg-green-500/20 border border-green-500/30 flex items-center justify-center">
+                <CheckCircle2 size={44} className="text-green-400" />
+              </div>
+              {/* Pulse ring */}
+              <div className="absolute inset-0 rounded-full border border-green-400/30 animate-ping" style={{ animationDuration: "2s" }} />
             </div>
-            <p className="text-sm font-semibold text-cream">Answer locked in!</p>
-            <p className="text-xs text-cream/40">Playing as <span className="text-cream/70 font-semibold">{effectiveName}</span></p>
-            <p className="text-xs text-cream/30">Waiting for the host to reveal…</p>
+            <div className="space-y-1">
+              <p className="text-xl font-bold text-cream">Locked in!</p>
+              <p className="text-sm text-cream/50">Playing as <span className="text-cream/80 font-semibold">{effectiveName}</span></p>
+              <p className="text-xs text-cream/30 mt-2">Waiting for the host to reveal…</p>
+            </div>
           </motion.div>
         )}
 
