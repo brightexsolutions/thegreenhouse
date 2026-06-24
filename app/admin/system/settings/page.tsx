@@ -31,11 +31,13 @@ const SECTIONS = [
     key: "social",
     icon: Share2,
     title: "Social Links",
-    description: "Social media handles and links shown in the footer.",
+    description: "Full URLs shown in the footer and emails. Leave blank to hide that platform entirely.",
     fields: [
-      { key: "instagram_handle", label: "Instagram handle", placeholder: "@thegreenhouseke", type: "text" },
-      { key: "twitter_handle",   label: "X / Twitter handle", placeholder: "@thegreenhouseke", type: "text" },
-      { key: "facebook_url",     label: "Facebook page URL", placeholder: "https://facebook.com/...", type: "url" },
+      { key: "social_instagram", label: "Instagram URL", placeholder: "https://instagram.com/thegreenhouseke", type: "url" },
+      { key: "social_tiktok",    label: "TikTok URL",    placeholder: "https://tiktok.com/@thegreenhouseke",   type: "url" },
+      { key: "social_youtube",   label: "YouTube URL",   placeholder: "https://youtube.com/@thegreenhouseke",  type: "url" },
+      { key: "social_facebook",  label: "Facebook URL",  placeholder: "https://facebook.com/...",              type: "url" },
+      { key: "social_twitter",   label: "X / Twitter URL", placeholder: "https://x.com/thegreenhouseke",      type: "url" },
     ],
   },
   {
