@@ -3,7 +3,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import type { Metadata } from "next";
 import { LiveAttendeeView } from "@/components/live/live-attendee-view";
 import { DonationPrompt } from "@/components/live/donation-prompt";
-// import { PreEventView } from "@/components/live/pre-event-view"; // re-enable with gate
+import { PreEventView } from "@/components/live/pre-event-view";
 import { Wifi } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 
