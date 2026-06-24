@@ -123,7 +123,7 @@ export default function AboutPage() {
                 {/* Accent card bottom-left */}
                 <div className="absolute -bottom-5 -left-5 w-[45%] h-[38%] rounded-[1.5rem] overflow-hidden shadow-xl border-4 border-cream">
                   <Image
-                    src="https://res.cloudinary.com/dpjget2he/image/upload/v1781373355/IMG_4402_gwdrn1.jpg"
+                    src="https://res.cloudinary.com/dpjget2he/image/upload/w_600,q_auto,f_auto/v1781373355/IMG_4402_gwdrn1.jpg"
                     alt="People connecting"
                     fill
                     className="object-cover"

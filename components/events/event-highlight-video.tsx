@@ -15,7 +15,7 @@ interface Props {
 function derivePoster(src: string): string | null {
   if (src.includes("res.cloudinary.com")) {
     return src
-      .replace("/video/upload/", "/video/upload/so_2/")
+      .replace("/video/upload/", "/video/upload/so_2,w_960,q_auto,f_jpg/")
       .replace(/\.mp4$/, ".jpg")
       .replace(/\.mov$/, ".jpg");
   }
