@@ -1454,7 +1454,16 @@ function CountdownScene({
   sessionsRef.current = sessions;
 
   useEffect(() => {
-    const target = new Date(`${eventDate}T${eventTime}`);
+    // TESTING OVERRIDE — event appears to have started 40 min ago; revert on dev before go-live
+    const target = new Date(Date.now() - 40 * 60 * 1000);
+    // const target = new Date(`${eventDate}T${eventTime}`);
+
+    // TESTING OVERRIDE — fallback sessions so the countdown timer works without DB duration_min set
+    const TEST_SESSIONS: Session[] = [
+      { id: "__t1", title: "Opening Worship",   type: "worship",  sort_order: 1, duration_min: 20, deleted_at: null, session_songs: [] },
+      { id: "__t2", title: "The Word",           type: "teaching", sort_order: 2, duration_min: 30, deleted_at: null, session_songs: [] },
+      { id: "__t3", title: "Prayer & Response",  type: "prayer",   sort_order: 3, duration_min: 15, deleted_at: null, session_songs: [] },
+    ];
 
     function update() {
       const now  = Date.now();
@@ -1479,8 +1488,8 @@ function CountdownScene({
 
       const elapsedMs = now - target.getTime();
 
-      const timed = sessionsRef.current
-        .filter(s => !s.deleted_at && (s.duration_min ?? 0) > 0)
+      const realTimed = sessionsRef.current.filter(s => !s.deleted_at && (s.duration_min ?? 0) > 0);
+      const timed = (realTimed.length > 0 ? realTimed : TEST_SESSIONS)
         .sort((a, b) => a.sort_order - b.sort_order);
 
       if (timed.length === 0) { setSessionTimer(null); return; }
