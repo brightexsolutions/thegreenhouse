@@ -34,11 +34,10 @@ export async function DELETE(req: NextRequest) {
   if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const { id } = await req.json() as { id: string };
-  const { error } = await supabase
-    .from("songs")
-    .update({ deleted_at: new Date().toISOString() })
-    .eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  await Promise.all([
+    supabase.from("songs").update({ deleted_at: new Date().toISOString() }).eq("id", id),
+    supabase.from("session_songs").delete().eq("song_id", id),
+  ]);
   return NextResponse.json({ deleted: true });
 }
 

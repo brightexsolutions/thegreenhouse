@@ -21,9 +21,11 @@ export const SESSION_01_HIGHLIGHT_VIDEO = "https://res.cloudinary.com/dpjget2he/
 export const SESSION_01_UMWEMA_VIDEO    = "https://res.cloudinary.com/dpjget2he/video/upload/v1781426590/greenhouse-session-1-umwema_znsmuo.mp4";
 export const SESSION_01_EBENEZER_VIDEO  = "https://res.cloudinary.com/dpjget2he/video/upload/vc_h264,f_mp4/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.mp4";
 
-export const SOCIAL_INSTAGRAM = "https://instagram.com/thegreenhouseke";
-export const SOCIAL_TIKTOK    = "https://tiktok.com/@thegreenhouseke";
-export const SOCIAL_YOUTUBE   = "https://youtube.com/@thegreenhouseke";
+export const SOCIAL_INSTAGRAM = "https://www.instagram.com/the.greenhouse.ws?igsh=djVoc245d3pqMjJp";
+export const SOCIAL_TIKTOK    = "https://www.tiktok.com/@the.greenhouse.w?_r=1&_t=ZS-9450HyXrwGO";
+export const SOCIAL_YOUTUBE   = "https://youtube.com/@thegreenhousew.s?si=niTSCc_B0rcRlBMv";
+export const SOCIAL_FACEBOOK  = "https://www.facebook.com/share/1DkXAnNPKc/";
+export const SOCIAL_TWITTER   = "";
 
 /** Partners & Supporters — add new entries here as they come on board.
  *  logoUrl: public URL to partner logo image (PNG/SVG with transparency ideal).

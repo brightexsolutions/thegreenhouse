@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect, useCallback } from "react";
 import {
   DndContext,
   closestCenter,
@@ -214,6 +214,15 @@ export function SessionManager({ eventId, initialSessions }: Props) {
     ));
   }
 
+  function reorderItems(sessionId: string, reordered: Session["session_songs"]) {
+    setSessions(prev => prev.map(s => s.id === sessionId ? { ...s, session_songs: reordered } : s));
+    fetch(`/api/admin/events/${eventId}/sessions/${sessionId}/songs`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reorder: reordered.map((ss, i) => ({ id: ss.id, sort_order: i })) }),
+    });
+  }
+
   function toggleExpand(id: string) {
     setExpanded(prev => {
       const next = new Set(prev);
@@ -330,6 +339,7 @@ export function SessionManager({ eventId, initialSessions }: Props) {
                     onRemoveSong={ssId => removeSong(session.id, ssId)}
                     onUpdateLyrics={(songId, lyrics) => updateSongLyrics(session.id, songId, lyrics)}
                     onUpdateVocalist={(ssId, vocalist) => updateVocalist(session.id, ssId, vocalist)}
+                    onReorderItems={reordered => reorderItems(session.id, reordered)}
                   />
                 ))}
               </div>
@@ -337,6 +347,19 @@ export function SessionManager({ eventId, initialSessions }: Props) {
           </DndContext>
         </div>
       )}
+    </div>
+  );
+}
+
+function SortableProgramItem({ id, children }: { id: string; children: (handleProps: React.HTMLAttributes<HTMLElement>) => React.ReactNode }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={cn(isDragging && "opacity-50 z-10")}
+    >
+      {children({ ...attributes, ...listeners })}
     </div>
   );
 }
@@ -355,12 +378,13 @@ interface CardProps {
   onRemoveSong:     (ssId: string) => void;
   onUpdateLyrics:   (songId: string, lyrics: string) => void;
   onUpdateVocalist: (ssId: string, vocalist: string) => void;
+  onReorderItems:   (reordered: Session["session_songs"]) => void;
 }
 
 type LibrarySong = { id: string; title: string; artist: string | null; lyrics: string | null };
 
 function SortableSessionCard({
-  session, index, expanded, allSessions, triviaQuestions, onToggle, onUpdate, onDelete, onAddSong, onAddTextItem, onRemoveSong, onUpdateLyrics, onUpdateVocalist,
+  session, index, expanded, allSessions, triviaQuestions, onToggle, onUpdate, onDelete, onAddSong, onAddTextItem, onRemoveSong, onUpdateLyrics, onUpdateVocalist, onReorderItems,
 }: CardProps) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: session.id });
   const [addingSong,      setAddingSong]      = useState(false);
@@ -452,6 +476,17 @@ function SortableSessionCard({
     setEditingVocalist(null);
     setSavedVocalist(ssId);
     setTimeout(() => setSavedVocalist(null), 2000);
+  }
+
+  const itemSensors = useSensors(useSensor(PointerSensor));
+
+  function handleItemDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const items = session.session_songs;
+    const oldIndex = items.findIndex(ss => ss.id === active.id);
+    const newIndex  = items.findIndex(ss => ss.id === over.id);
+    onReorderItems(arrayMove(items, oldIndex, newIndex));
   }
 
   const style = { transform: CSS.Transform.toString(transform), transition };
@@ -645,11 +680,16 @@ function SortableSessionCard({
                 <p className="text-[11px] text-charcoal/35">No items in this section yet</p>
               </div>
             ) : (
+              <DndContext sensors={itemSensors} collisionDetection={closestCenter} onDragEnd={handleItemDragEnd}>
+              <SortableContext items={session.session_songs.map(ss => ss.id)} strategy={verticalListSortingStrategy}>
               <div className="divide-y divide-[#1b3a2a]/8">
                 {session.session_songs.map((ss, i) => (
-                  <div key={ss.id}>
-                    {ss.item_type !== "song" ? (
+                  <SortableProgramItem key={ss.id} id={ss.id}>
+                    {(handleProps) => ss.item_type !== "song" ? (
                       <div className="px-4 py-2.5 flex items-center gap-3 group hover:bg-blue-50/40 transition-colors">
+                        <span {...handleProps} className="cursor-grab active:cursor-grabbing text-charcoal/15 group-hover:text-charcoal/35 transition-colors flex-shrink-0 touch-none">
+                          <GripVertical size={13} />
+                        </span>
                         <span className="text-[11px] text-charcoal/30 w-5 text-center tabular-nums flex-shrink-0">
                           {i + 1}
                         </span>
@@ -677,6 +717,13 @@ function SortableSessionCard({
                           )}
                           onClick={() => setExpandedSong(expandedSong === ss.id ? null : ss.id)}
                         >
+                          <span
+                            {...handleProps}
+                            className="cursor-grab active:cursor-grabbing text-charcoal/15 group-hover:text-charcoal/30 transition-colors flex-shrink-0 touch-none"
+                            onClick={e => e.stopPropagation()}
+                          >
+                            <GripVertical size={13} />
+                          </span>
                           <span className="text-[11px] text-charcoal/30 w-5 text-center tabular-nums flex-shrink-0">
                             {i + 1}
                           </span>
@@ -805,9 +852,11 @@ function SortableSessionCard({
                         )}
                       </>
                     )}
-                  </div>
+                </SortableProgramItem>
                 ))}
               </div>
+              </SortableContext>
+              </DndContext>
             )}
 
             {/* Add text item inline form */}

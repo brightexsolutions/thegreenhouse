@@ -102,3 +102,18 @@ export async function POST(req: NextRequest, { params }: Props) {
   if (ssErr) return NextResponse.json({ error: ssErr.message }, { status: 500 });
   return NextResponse.json({ sessionSong: ss }, { status: 201 });
 }
+
+export async function PATCH(req: NextRequest, { params }: Props) {
+  const supabase = await guard();
+  if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  const { sessionId } = await params;
+  const { reorder } = await req.json() as { reorder: { id: string; sort_order: number }[] };
+
+  await Promise.all(
+    reorder.map(({ id, sort_order }) =>
+      supabase.from("session_songs").update({ sort_order }).eq("id", id).eq("session_id", sessionId)
+    )
+  );
+  return NextResponse.json({ ok: true });
+}
