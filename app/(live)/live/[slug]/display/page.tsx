@@ -6,6 +6,7 @@ import { createBrowserClient } from "@supabase/ssr";
 import { Maximize2, Minimize2, Music2, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
+import { SITE_NAME } from "@/lib/constants";
 
 type DisplayState = {
   scene:                    string;
@@ -34,6 +35,7 @@ type Session = {
   title:         string;
   type:          string;
   sort_order:    number;
+  duration_min:  number | null;
   deleted_at:    string | null;
   session_songs: Array<SessionSong>;
 };
@@ -45,19 +47,20 @@ type EventImage = {
 };
 
 type EventData = {
-  id:                 string;
-  title:              string;
-  subtitle:           string | null;
-  event_date:         string;
-  event_time:         string;
-  theme_title:        string | null;
-  theme_scripture:    string | null;
-  theme_description:  string | null;
-  venue_name:         string | null;
-  cover_image:        string | null;
-  slug:               string;
-  event_sessions:     Session[];
-  event_images:       EventImage[];
+  id:                  string;
+  title:               string;
+  subtitle:            string | null;
+  event_date:          string;
+  event_time:          string;
+  theme_title:         string | null;
+  theme_scripture:     string | null;
+  theme_description:   string | null;
+  venue_name:          string | null;
+  cover_image:         string | null;
+  highlight_video: string | null;
+  slug:                string;
+  event_sessions:      Session[];
+  event_images:        EventImage[];
 };
 
 type TriviaRound = {
@@ -226,29 +229,63 @@ const GALLERY_SLOTS = [
 ];
 
 function GalleryScene({ imageUrls, t }: { imageUrls: string[]; t: typeof THEMES[ThemeKey] }) {
-  const urls = (imageUrls.length > 0 ? [...imageUrls] : [...GALLERY_PRESETS]).slice(0, 5);
-  while (urls.length < 5) urls.push(GALLERY_PRESETS[urls.length % GALLERY_PRESETS.length]);
+  const NUM_SLOTS = GALLERY_SLOTS.length;
 
-  const [spotlight, setSpotlight] = useState<number | null>(null);
-  const cycleRef   = useRef(0);
+  // Full image pool — no slice. Fall back to presets only when truly empty.
+  const allUrls = imageUrls.length > 0 ? imageUrls : [...GALLERY_PRESETS];
+  const paddedUrls = [...allUrls];
+  while (paddedUrls.length < NUM_SLOTS) paddedUrls.push(GALLERY_PRESETS[paddedUrls.length % GALLERY_PRESETS.length]);
 
+  // Which url index each visible slot is currently showing
+  const [slotIndices, setSlotIndices] = useState<number[]>(() =>
+    Array.from({ length: NUM_SLOTS }, (_, i) => i % paddedUrls.length)
+  );
+  const nextImgRef  = useRef(NUM_SLOTS);
+  const nextSlotRef = useRef(0);
+
+  const [spotlight, setSpotlight]         = useState<number | null>(null);
+  const [showcaseStyle, setShowcaseStyle] = useState<"center" | "wipe-left" | "wipe-right">("center");
+  const cycleRef = useRef(0);
+
+  // Pre-fetch every image into the browser cache on mount so slot swaps are instant
   useEffect(() => {
-    if (urls.length === 0) return;
-    let cancelled = false;
+    const pool = imageUrls.length > 0 ? imageUrls : GALLERY_PRESETS;
+    pool.forEach(url => { const img = new Image(); img.src = url; });
+  }, [imageUrls]);
 
+  // Rotate one slot's image every 3.5 s so all photos eventually appear
+  useEffect(() => {
+    if (paddedUrls.length <= NUM_SLOTS) return;
+    const id = setInterval(() => {
+      const slot   = nextSlotRef.current % NUM_SLOTS;
+      const imgIdx = nextImgRef.current % paddedUrls.length;
+      setSlotIndices(prev => { const n = [...prev]; n[slot] = imgIdx; return n; });
+      nextSlotRef.current++;
+      nextImgRef.current = (imgIdx + 1) % paddedUrls.length;
+    }, 3500);
+    return () => clearInterval(id);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paddedUrls.length]);
+
+  // Showcase cycle — rotates through: center spring → wipe left → wipe right → …
+  useEffect(() => {
+    let cancelled = false;
     function showNext() {
       if (cancelled) return;
-      const idx = cycleRef.current % urls.length;
+      const n      = cycleRef.current;
+      const slot   = n % NUM_SLOTS;
+      const style  = (n % 3 === 0 ? "center" : n % 3 === 1 ? "wipe-left" : "wipe-right") as typeof showcaseStyle;
       cycleRef.current++;
-      setSpotlight(idx);
-      setTimeout(() => { if (!cancelled) setSpotlight(null); }, 3800);
+      setShowcaseStyle(style);
+      setSpotlight(slot);
+      setTimeout(() => { if (!cancelled) setSpotlight(null); }, 4000);
     }
-
     const first    = setTimeout(showNext, 5000);
-    const interval = setInterval(showNext, 10000);
+    const interval = setInterval(showNext, 11000);
     return () => { cancelled = true; clearTimeout(first); clearInterval(interval); };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [urls.length]);
+  }, []);
+
+  const spotlightUrl = spotlight !== null ? paddedUrls[slotIndices[spotlight]] : null;
 
   return (
     <div className="absolute inset-0 overflow-hidden">
@@ -256,76 +293,143 @@ function GalleryScene({ imageUrls, t }: { imageUrls: string[]; t: typeof THEMES[
       <div className="absolute inset-0 z-10 pointer-events-none"
         style={{ background: `radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, ${t.bg}BB 100%)` }} />
 
-      {GALLERY_SLOTS.map((slot, i) => (
-        <motion.div
-          key={i}
-          initial={{ opacity: 0, scale: 0.85 }}
-          animate={{ opacity: spotlight !== null && spotlight !== i ? 0.18 : 1, scale: 1 }}
-          transition={{ delay: spotlight === null ? slot.del + 0.1 : 0, duration: 0.5, ease: "easeOut" }}
-          style={{ position: "absolute", top: slot.top, left: slot.left, width: slot.w }}
-        >
-          <div style={{ animation: `galleryDrift ${slot.floatDur}s ${slot.del}s ease-in-out infinite` }}>
-            <div
-              className="rounded-2xl overflow-hidden shadow-2xl"
-              style={{ transform: `rotate(${slot.rotate}deg)` }}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={urls[i]}
-                alt=""
-                className="w-full object-cover"
-                style={{ aspectRatio: "3/4", display: "block" }}
-                draggable={false}
-              />
-              <div className="absolute inset-0"
-                style={{ background: `linear-gradient(to top, ${t.bg}90, transparent 55%)` }} />
-            </div>
-          </div>
-        </motion.div>
-      ))}
-
-      {/* Spotlight overlay — one image springs to center, holds, then exits */}
-      <AnimatePresence>
-        {spotlight !== null && (
+      {/* Scattered floating cards — cross-fade when their image changes */}
+      {GALLERY_SLOTS.map((slot, i) => {
+        const url = paddedUrls[slotIndices[i]];
+        return (
           <motion.div
-            key={`sp-${spotlight}`}
+            key={i}
+            initial={{ opacity: 0, scale: 0.85 }}
+            animate={{ opacity: spotlight !== null && spotlight !== i ? 0.14 : 1, scale: 1 }}
+            transition={{ delay: spotlight === null ? slot.del + 0.1 : 0, duration: 0.5, ease: "easeOut" }}
+            style={{ position: "absolute", top: slot.top, left: slot.left, width: slot.w }}
+          >
+            <div style={{ animation: `galleryDrift ${slot.floatDur}s ${slot.del}s ease-in-out infinite` }}>
+              <div
+                className="rounded-2xl overflow-hidden shadow-2xl relative"
+                style={{ transform: `rotate(${slot.rotate}deg)`, aspectRatio: "3/4" }}
+              >
+                <AnimatePresence>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <motion.img
+                    key={url}
+                    src={url}
+                    alt=""
+                    className="absolute inset-0 w-full h-full object-cover"
+                    draggable={false}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.75 }}
+                  />
+                </AnimatePresence>
+                <div className="absolute inset-0 z-10"
+                  style={{ background: `linear-gradient(to top, ${t.bg}90, transparent 55%)` }} />
+              </div>
+            </div>
+          </motion.div>
+        );
+      })}
+
+      {/* ── Showcase style 1: center spring ── */}
+      <AnimatePresence>
+        {spotlight !== null && showcaseStyle === "center" && spotlightUrl && (
+          <motion.div
+            key={`center-${spotlight}-${spotlightUrl}`}
             className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none"
-            style={{ background: "rgba(0,0,0,0.58)" }}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            style={{ background: "rgba(0,0,0,0.6)" }}
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
             transition={{ duration: 0.35 }}
           >
             <motion.div
               className="rounded-3xl overflow-hidden"
-              style={{
-                width: "38vw",
-                maxWidth: "560px",
-                boxShadow: "0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px rgba(0,0,0,0.75)",
-              }}
+              style={{ width: "38vw", maxWidth: "560px", boxShadow: "0 0 0 1px rgba(255,255,255,0.08), 0 32px 80px rgba(0,0,0,0.75)" }}
               initial={{ scale: 0.55, rotate: GALLERY_SLOTS[spotlight]?.rotate ?? 0, opacity: 0 }}
               animate={{ scale: 1,    rotate: 0,                                        opacity: 1 }}
               exit={{    scale: 0.65,                                                    opacity: 0 }}
               transition={{ type: "spring", stiffness: 170, damping: 22 }}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={urls[spotlight]}
-                alt=""
-                className="w-full object-cover"
-                style={{ aspectRatio: "3/4", display: "block" }}
-                draggable={false}
-              />
+              <img src={spotlightUrl} alt="" className="w-full object-cover" style={{ aspectRatio: "3/4", display: "block" }} draggable={false} />
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Centered label */}
+      {/* ── Showcase style 2: wipe from left ── */}
+      <AnimatePresence>
+        {spotlight !== null && showcaseStyle === "wipe-left" && spotlightUrl && (
+          <motion.div
+            key={`wipe-left-${spotlight}-${spotlightUrl}`}
+            className="absolute top-0 bottom-0 left-0 z-30 pointer-events-none overflow-hidden"
+            style={{ width: "50%" }}
+            initial={{ x: "-100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "-100%" }}
+            transition={{ type: "spring", stiffness: 120, damping: 22 }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={spotlightUrl} alt="" className="w-full h-full object-cover" draggable={false} />
+            {/* right-edge fade */}
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: "linear-gradient(to right, transparent 45%, rgba(0,0,0,0.9) 100%)" }} />
+            {/* vignette */}
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: "radial-gradient(ellipse at 35% 50%, transparent 40%, rgba(0,0,0,0.45) 100%)" }} />
+            {/* gold seam line on right edge */}
+            <motion.div
+              className="absolute top-0 bottom-0 right-0 w-[2px]"
+              style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(201,162,74,0.55) 25%, rgba(201,162,74,0.55) 75%, transparent 100%)" }}
+              initial={{ scaleY: 0, transformOrigin: "top" }}
+              animate={{ scaleY: 1 }}
+              transition={{ delay: 0.25, duration: 0.5, ease: "easeOut" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Showcase style 3: wipe from right ── */}
+      <AnimatePresence>
+        {spotlight !== null && showcaseStyle === "wipe-right" && spotlightUrl && (
+          <motion.div
+            key={`wipe-right-${spotlight}-${spotlightUrl}`}
+            className="absolute top-0 bottom-0 right-0 z-30 pointer-events-none overflow-hidden"
+            style={{ width: "50%" }}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 120, damping: 22 }}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={spotlightUrl} alt="" className="w-full h-full object-cover" draggable={false} />
+            {/* left-edge fade */}
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: "linear-gradient(to left, transparent 45%, rgba(0,0,0,0.9) 100%)" }} />
+            {/* vignette */}
+            <div className="absolute inset-0 pointer-events-none"
+              style={{ background: "radial-gradient(ellipse at 65% 50%, transparent 40%, rgba(0,0,0,0.45) 100%)" }} />
+            {/* gold seam line on left edge */}
+            <motion.div
+              className="absolute top-0 bottom-0 left-0 w-[2px]"
+              style={{ background: "linear-gradient(to bottom, transparent 0%, rgba(201,162,74,0.55) 25%, rgba(201,162,74,0.55) 75%, transparent 100%)" }}
+              initial={{ scaleY: 0, transformOrigin: "top" }}
+              animate={{ scaleY: 1 }}
+              transition={{ delay: 0.25, duration: 0.5, ease: "easeOut" }}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Site name — breathing */}
       <div className="absolute inset-x-0 bottom-12 text-center z-20">
-        <p className="text-base md:text-xl uppercase tracking-[0.5em] font-semibold" style={{ color: t.sub, opacity: 0.75 }}>
-          The Green House
-        </p>
+        <motion.p
+          className="text-base md:text-xl uppercase tracking-[0.5em] font-semibold"
+          style={{ color: t.sub }}
+          animate={{ opacity: [0.45, 0.9, 0.45] }}
+          transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+        >
+          {SITE_NAME}
+        </motion.p>
       </div>
     </div>
   );
@@ -355,7 +459,8 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
   const [activeSong,   setActiveSong]  = useState<Song | null>(null);
   const [activeVocalist, setActiveVocalist] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [galleryUrls,  setGalleryUrls] = useState<string[]>([]);
+  const [galleryUrls,      setGalleryUrls]      = useState<string[]>([]);
+  const [highlightVideoUrl, setHighlightVideoUrl] = useState<string | null>(null);
   const [communityAttendees, setCommunityAttendees] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
   const [triviaRound,  setTriviaRound] = useState<TriviaRound | null>(null);
   const [triviaResults, setTriviaResults] = useState<TriviaResults | null>(null);
@@ -365,7 +470,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
   async function loadEvent(eventId?: string) {
     const { data: ev } = await supabase
       .from("events")
-      .select("id, title, subtitle, event_date, event_time, theme_title, theme_scripture, theme_description, venue_name, cover_image, slug, event_sessions(id, title, type, sort_order, deleted_at, session_songs(vocalist, songs(id, title, artist, lyrics))), event_images(id, path, sort_order)")
+      .select("id, title, subtitle, event_date, event_time, theme_title, theme_scripture, theme_description, venue_name, cover_image, highlight_video, slug, event_sessions(id, title, type, sort_order, duration_min, deleted_at, session_songs(vocalist, songs(id, title, artist, lyrics))), event_images(id, path, sort_order)")
       .eq("slug", slug)
       .single();
     if (!ev) return;
@@ -374,9 +479,46 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
     setEvent(evTyped);
 
     const baseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? "";
-    const imgs = [...(evTyped.event_images ?? [])].sort((a, b) => a.sort_order - b.sort_order);
-    if (imgs.length > 0) {
-      setGalleryUrls(imgs.map(img => `${baseUrl}/storage/v1/object/public/event-images/${img.path}`));
+
+    // Current event images (sorted by sort_order)
+    const currentImgs = [...(evTyped.event_images ?? [])]
+      .sort((a, b) => a.sort_order - b.sort_order)
+      .map(img => `${baseUrl}/storage/v1/object/public/event-images/${img.path}`);
+
+    // Past event images — pull from all events with status = 'past'
+    const { data: pastEvts } = await supabase
+      .from("events")
+      .select("event_images(path, sort_order)")
+      .eq("status", "past")
+      .is("deleted_at", null);
+
+    const pastImgs = (pastEvts ?? []).flatMap(
+      (e: { event_images: Array<{ path: string; sort_order: number }> }) =>
+        [...(e.event_images ?? [])]
+          .sort((a, b) => a.sort_order - b.sort_order)
+          .map(img => `${baseUrl}/storage/v1/object/public/event-images/${img.path}`)
+    );
+
+    // Merge: current event first, then past event images
+    const allImgs = [...currentImgs, ...pastImgs];
+    if (allImgs.length > 0) {
+      setGalleryUrls(allImgs);
+    }
+
+    // Highlight video: use the current event's video, fall back to the most recent past event's
+    if (evTyped.highlight_video) {
+      setHighlightVideoUrl(evTyped.highlight_video);
+    } else {
+      const { data: pastWithVideo } = await supabase
+        .from("events")
+        .select("highlight_video")
+        .eq("status", "past")
+        .not("highlight_video", "is", null)
+        .is("deleted_at", null)
+        .order("event_date", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      setHighlightVideoUrl((pastWithVideo as { highlight_video: string } | null)?.highlight_video ?? null);
     }
 
     // Only load display_state on first call (no eventId means initial load)
@@ -386,7 +528,29 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
         .select("*")
         .eq("event_id", evTyped.id)
         .maybeSingle();
-      if (ds) setDisplay(ds as DisplayState);
+      if (ds) {
+        setDisplay(ds as DisplayState);
+      } else {
+        // No row yet — create the default so the display never hangs on the spinner.
+        // Matches what the control panel's "Initialise display" button does.
+        const { data: init } = await supabase
+          .from("display_state")
+          .upsert({
+            event_id:                 evTyped.id,
+            scene:                    "branding",
+            song_id:                  null,
+            verse_index:              0,
+            custom_text:              null,
+            theme:                    "dark",
+            show_qr:                  false,
+            featured_feedback:        null,
+            featured_feedback_author: null,
+            updated_at:               new Date().toISOString(),
+          }, { onConflict: "event_id" })
+          .select("*")
+          .single();
+        if (init) setDisplay(init as DisplayState);
+      }
     }
   }
 
@@ -551,8 +715,8 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
       <div className="absolute inset-0 pointer-events-none"
         style={{ background: `radial-gradient(ellipse 70% 55% at 50% 50%, ${t.glow}, transparent)` }} />
 
-      {/* Floating particles — hidden during gallery to not compete with images */}
-      {scene !== "gallery" && <Particles color={t.particle} />}
+      {/* Floating particles — hidden during gallery/highlight to not compete with imagery */}
+      {scene !== "gallery" && scene !== "highlight" && <Particles color={t.particle} />}
 
       {/* Gallery scene — full bleed, lives outside the padded wrapper */}
       <AnimatePresence>
@@ -566,6 +730,311 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
             transition={{ duration: 0.6 }}
           >
             <GalleryScene imageUrls={galleryUrls} t={t} />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Highlight video scene — cinematic fullscreen */}
+      <AnimatePresence>
+        {scene === "highlight" && highlightVideoUrl && (
+          <motion.div
+            key="highlight-scene"
+            className="absolute inset-0 z-10 bg-black overflow-hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.8 }}
+          >
+            {/* Video — full bleed */}
+            <video
+              key={highlightVideoUrl}
+              src={highlightVideoUrl}
+              autoPlay
+              loop
+              muted
+              playsInline
+              preload="metadata"
+              className="absolute inset-0 w-full h-full object-cover"
+            />
+
+            {/* Film grain */}
+            <div
+              className="absolute inset-0 pointer-events-none mix-blend-overlay"
+              style={{
+                opacity: 0.1,
+                backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")`,
+                backgroundSize: "160px 160px",
+              }}
+            />
+
+            {/* Deep cinematic vignette */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{ background: "radial-gradient(ellipse 90% 80% at 50% 40%, transparent 28%, rgba(0,0,0,0.55) 65%, rgba(0,0,0,0.88) 100%)" }}
+            />
+
+            {/* Scanlines */}
+            <div
+              className="absolute inset-0 pointer-events-none opacity-[0.03]"
+              style={{ backgroundImage: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,1) 2px, rgba(0,0,0,1) 4px)" }}
+            />
+
+            {/* Faint dot grid */}
+            <div
+              className="absolute inset-0 pointer-events-none opacity-[0.04]"
+              style={{ backgroundImage: "radial-gradient(circle, #f7f2e8 1px, transparent 1px)", backgroundSize: "32px 32px" }}
+            />
+
+            {/* Gold ambient glow — top left, breathing */}
+            <motion.div
+              className="absolute -top-40 -left-40 w-[700px] h-[700px] rounded-full pointer-events-none"
+              style={{ background: "radial-gradient(circle, rgba(201,162,74,0.22) 0%, transparent 62%)" }}
+              animate={{ scale: [1, 1.18, 1], opacity: [0.7, 1, 0.7] }}
+              transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
+            />
+
+            {/* Forest ambient glow — bottom right, breathing */}
+            <motion.div
+              className="absolute -bottom-32 -right-32 w-[600px] h-[600px] rounded-full pointer-events-none"
+              style={{ background: "radial-gradient(circle, rgba(46,90,62,0.7) 0%, transparent 68%)" }}
+              animate={{ scale: [1, 1.12, 1], opacity: [0.6, 0.9, 0.6] }}
+              transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 3 }}
+            />
+
+            {/* Cinematic letterbox — top bar */}
+            <motion.div
+              className="absolute top-0 inset-x-0 z-20 pointer-events-none overflow-hidden"
+              style={{ height: "9vh", background: "linear-gradient(180deg, rgba(0,0,0,0.97) 0%, rgba(0,0,0,0.88) 100%)" }}
+              initial={{ y: "-100%" }}
+              animate={{ y: 0 }}
+              transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1], delay: 0.2 }}
+            >
+              {/* Shimmer sweep across bar on entrance */}
+              <motion.div
+                className="absolute inset-y-0 pointer-events-none"
+                style={{ width: "40%", background: "linear-gradient(90deg, transparent, rgba(201,162,74,0.08), transparent)" }}
+                initial={{ x: "-100%" }}
+                animate={{ x: "350%" }}
+                transition={{ delay: 0.85, duration: 1.1, ease: "easeInOut", repeat: Infinity, repeatDelay: 3.5 }}
+              />
+
+              {/* Bar content */}
+              <div className="flex items-center justify-between h-full px-10">
+                {/* Left: pulsing logo mark + site name */}
+                <div className="flex items-center gap-3">
+                  {/* Circle mark — springs in, dot pulses forever */}
+                  <motion.div
+                    className="relative w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
+                    style={{ border: "1.5px solid rgba(201,162,74,0.65)" }}
+                    initial={{ scale: 0, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ delay: 0.55, duration: 0.4, type: "spring", stiffness: 380, damping: 20 }}
+                  >
+                    <motion.div
+                      className="w-2 h-2 rounded-full"
+                      style={{ background: "rgba(201,162,74,0.9)" }}
+                      animate={{ scale: [1, 1.5, 1], opacity: [0.9, 0.4, 0.9] }}
+                      transition={{ duration: 2.4, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                    {/* Ping ring */}
+                    <motion.div
+                      className="absolute inset-0 rounded-full"
+                      style={{ border: "1.5px solid rgba(201,162,74,0.45)" }}
+                      animate={{ scale: [1, 1.9], opacity: [0.55, 0] }}
+                      transition={{ duration: 2.4, repeat: Infinity, ease: "easeOut", delay: 0.3 }}
+                    />
+                  </motion.div>
+
+                  {/* Site name — slides from left */}
+                  <motion.span
+                    className="uppercase font-semibold"
+                    style={{ color: "rgba(247,242,232,0.55)", fontSize: "0.65rem", letterSpacing: "0.42em" }}
+                    initial={{ opacity: 0, x: -14 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.72, duration: 0.4, ease: "easeOut" }}
+                  >
+                    The Green House W.S
+                  </motion.span>
+                </div>
+
+                {/* Right: Session badge — springs from right */}
+                <motion.div
+                  className="flex items-center gap-2 px-3 py-1 rounded-full"
+                  style={{ background: "rgba(201,162,74,0.12)", border: "1px solid rgba(201,162,74,0.35)" }}
+                  initial={{ opacity: 0, x: 16, scale: 0.8 }}
+                  animate={{ opacity: 1, x: 0, scale: 1 }}
+                  transition={{ delay: 0.78, duration: 0.4, type: "spring", stiffness: 300, damping: 22 }}
+                >
+                  <motion.span
+                    className="w-1.5 h-1.5 rounded-full flex-shrink-0"
+                    style={{ background: "rgba(201,162,74,0.85)" }}
+                    animate={{ opacity: [0.85, 0.3, 0.85] }}
+                    transition={{ duration: 2, repeat: Infinity }}
+                  />
+                  <span
+                    className="uppercase font-bold"
+                    style={{ color: "rgba(201,162,74,0.9)", fontSize: "0.6rem", letterSpacing: "0.35em" }}
+                  >
+                    Session 01
+                  </span>
+                </motion.div>
+              </div>
+
+              {/* Gold ruled line at bottom of bar — draws left to right */}
+              <motion.div
+                className="absolute bottom-0 left-0 h-px"
+                style={{ background: "linear-gradient(90deg, transparent 0%, rgba(201,162,74,0.65) 20%, rgba(201,162,74,0.4) 80%, transparent 100%)" }}
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ delay: 0.62, duration: 0.65, ease: "easeOut" }}
+              />
+            </motion.div>
+
+            {/* Downward scan sweep — passes through the frame once after bar settles */}
+            <motion.div
+              className="absolute inset-x-0 z-[6] pointer-events-none"
+              style={{
+                height: "3px",
+                background: "linear-gradient(90deg, transparent 0%, rgba(201,162,74,0.22) 25%, rgba(247,242,232,0.12) 50%, rgba(201,162,74,0.22) 75%, transparent 100%)",
+              }}
+              initial={{ top: "9vh", opacity: 0 }}
+              animate={{ top: "100%", opacity: [0, 1, 1, 0] }}
+              transition={{ delay: 0.72, duration: 1.5, ease: "easeIn" }}
+            />
+
+            {/* Corner brackets — each arm draws itself (scaleX / scaleY) */}
+
+            {/* Top-left */}
+            <motion.div className="absolute z-10 pointer-events-none" style={{ top: "calc(9vh + 14px)", left: "2rem", height: "2px", width: "3rem", background: "rgba(201,162,74,0.72)", transformOrigin: "left center" }}
+              initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.62, duration: 0.25, ease: "easeOut" }} />
+            <motion.div className="absolute z-10 pointer-events-none" style={{ top: "calc(9vh + 14px)", left: "2rem", height: "3rem", width: "2px", background: "rgba(201,162,74,0.72)", transformOrigin: "top center" }}
+              initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.78, duration: 0.25, ease: "easeOut" }} />
+
+            {/* Top-right */}
+            <motion.div className="absolute z-10 pointer-events-none" style={{ top: "calc(9vh + 14px)", right: "2rem", height: "2px", width: "3rem", background: "rgba(201,162,74,0.72)", transformOrigin: "right center" }}
+              initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.66, duration: 0.25, ease: "easeOut" }} />
+            <motion.div className="absolute z-10 pointer-events-none" style={{ top: "calc(9vh + 14px)", right: "2rem", height: "3rem", width: "2px", background: "rgba(201,162,74,0.72)", transformOrigin: "top center" }}
+              initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.82, duration: 0.25, ease: "easeOut" }} />
+
+            {/* Bottom-left */}
+            <motion.div className="absolute z-10 pointer-events-none" style={{ bottom: "2rem", left: "2rem", height: "2px", width: "3rem", background: "rgba(201,162,74,0.72)", transformOrigin: "left center" }}
+              initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.7, duration: 0.25, ease: "easeOut" }} />
+            <motion.div className="absolute z-10 pointer-events-none" style={{ bottom: "2rem", left: "2rem", height: "3rem", width: "2px", background: "rgba(201,162,74,0.72)", transformOrigin: "bottom center" }}
+              initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.86, duration: 0.25, ease: "easeOut" }} />
+
+            {/* Bottom-right */}
+            <motion.div className="absolute z-10 pointer-events-none" style={{ bottom: "2rem", right: "2rem", height: "2px", width: "3rem", background: "rgba(201,162,74,0.72)", transformOrigin: "right center" }}
+              initial={{ scaleX: 0 }} animate={{ scaleX: 1 }} transition={{ delay: 0.74, duration: 0.25, ease: "easeOut" }} />
+            <motion.div className="absolute z-10 pointer-events-none" style={{ bottom: "2rem", right: "2rem", height: "3rem", width: "2px", background: "rgba(201,162,74,0.72)", transformOrigin: "bottom center" }}
+              initial={{ scaleY: 0 }} animate={{ scaleY: 1 }} transition={{ delay: 0.9, duration: 0.25, ease: "easeOut" }} />
+
+            {/* One-shot light leak sweep */}
+            <motion.div
+              className="absolute inset-y-0 pointer-events-none z-[5]"
+              style={{
+                width: "45%",
+                background: "linear-gradient(90deg, transparent 0%, rgba(247,242,232,0.055) 50%, transparent 100%)",
+              }}
+              initial={{ x: "-60%", opacity: 0 }}
+              animate={{ x: "280%", opacity: [0, 1, 1, 0] }}
+              transition={{ delay: 1.1, duration: 1.6, ease: "easeInOut" }}
+            />
+
+            {/* Cinematic bottom — deep gradient + dramatic text */}
+            <div
+              className="absolute inset-x-0 bottom-0 z-20 pointer-events-none flex flex-col items-center justify-end"
+              style={{
+                paddingBottom: "4.5vh",
+                paddingTop: "18vh",
+                background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.75) 25%, rgba(0,0,0,0.4) 55%, transparent 100%)",
+              }}
+            >
+              {/* "PREVIOUSLY IN" — white, readable */}
+              <motion.div
+                className="flex items-center gap-5 mb-5"
+                initial={{ opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.7, duration: 0.55, ease: "easeOut" }}
+              >
+                <motion.div
+                  style={{ height: "1px", background: "rgba(201,162,74,0.75)" }}
+                  initial={{ width: 0 }}
+                  animate={{ width: "3rem" }}
+                  transition={{ delay: 0.85, duration: 0.5, ease: "easeOut" }}
+                />
+                <span
+                  className="uppercase font-bold"
+                  style={{
+                    color: "rgba(247,242,232,0.92)",
+                    fontSize: "clamp(0.7rem,1.2vw,0.95rem)",
+                    letterSpacing: "0.6em",
+                    textShadow: "0 0 24px rgba(201,162,74,0.55), 0 2px 12px rgba(0,0,0,0.9)",
+                  }}
+                >
+                  Previously In
+                </span>
+                <motion.div
+                  style={{ height: "1px", background: "rgba(201,162,74,0.75)" }}
+                  initial={{ width: 0 }}
+                  animate={{ width: "3rem" }}
+                  transition={{ delay: 0.85, duration: 0.5, ease: "easeOut" }}
+                />
+              </motion.div>
+
+              {/* Main title — sweeps up */}
+              <div className="overflow-hidden">
+                <motion.p
+                  className="font-display font-semibold text-center relative"
+                  style={{
+                    color: "#f7f2e8",
+                    fontSize: "clamp(2.8rem,6.5vw,6rem)",
+                    letterSpacing: "0.05em",
+                    lineHeight: 1,
+                    textShadow: "0 6px 48px rgba(0,0,0,0.9), 0 0 100px rgba(201,162,74,0.18)",
+                  }}
+                  initial={{ y: 72, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  transition={{ delay: 0.85, duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
+                >
+                  {SITE_NAME}
+                  {/* Gold shimmer sweep — continuous */}
+                  <motion.span
+                    className="absolute inset-0 pointer-events-none overflow-hidden"
+                    initial={{ x: "-110%" }}
+                    animate={{ x: "210%" }}
+                    transition={{ delay: 1.7, duration: 1.4, ease: "easeInOut", repeat: Infinity, repeatDelay: 4 }}
+                    style={{
+                      background: "linear-gradient(105deg, transparent 25%, rgba(201,162,74,0.35) 50%, transparent 75%)",
+                    }}
+                  />
+                </motion.p>
+              </div>
+
+              {/* Sub-caption */}
+              <motion.p
+                className="mt-4 uppercase"
+                style={{
+                  color: "rgba(201,162,74,0.65)",
+                  fontSize: "clamp(0.55rem,0.9vw,0.75rem)",
+                  letterSpacing: "0.5em",
+                  textShadow: "0 2px 8px rgba(0,0,0,0.8)",
+                }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ delay: 1.15, duration: 0.6 }}
+              >
+                Session 01 &nbsp;·&nbsp; Nairobi, Kenya
+              </motion.p>
+            </div>
+          </motion.div>
+        )}
+        {scene === "highlight" && !highlightVideoUrl && (
+          <motion.div
+            key="highlight-missing"
+            className="absolute inset-0 z-10 flex items-center justify-center"
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+          >
+            <p className="font-display text-2xl" style={{ color: t.sub }}>No highlight video set for this event.</p>
           </motion.div>
         )}
       </AnimatePresence>
@@ -624,10 +1093,10 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
         )}
       </AnimatePresence>
 
-      {/* Scene content (all non-gallery scenes, with padding) */}
+      {/* Scene content (all non-gallery/highlight scenes, with padding) */}
       <div className="relative z-10 w-full h-full flex items-center justify-center p-12 md:p-20">
         <AnimatePresence mode="wait">
-          {scene !== "gallery" && (
+          {scene !== "gallery" && scene !== "highlight" && (
             <motion.div key={scene} variants={sceneV} initial="initial" animate="animate" exit="exit"
               className="w-full flex items-center justify-center">
 
@@ -649,7 +1118,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
               )}
 
               {scene === "countdown" && (
-                <CountdownScene eventDate={event.event_date} eventTime={event.event_time} t={t} />
+                <CountdownScene eventDate={event.event_date} eventTime={event.event_time} sessions={event.event_sessions} t={t} />
               )}
 
               {scene === "now_playing" && (activeSong ? (
@@ -961,52 +1430,186 @@ function SongRemovedMessage({ t }: { t: typeof THEMES[ThemeKey] }) {
   );
 }
 
-function CountdownScene({ eventDate, eventTime, t }: { eventDate: string; eventTime: string; t: typeof THEMES[ThemeKey] }) {
-  const [remaining, setRemaining] = useState("");
-  const [isLive, setIsLive] = useState(false);
+type SessionTimer = {
+  title:       string;
+  timeStr:     string;   // "MM:SS"
+  progressPct: number;   // 0–100, how much of the session has elapsed
+  isComplete:  boolean;
+};
+
+function CountdownScene({
+  eventDate, eventTime, sessions, t,
+}: {
+  eventDate: string;
+  eventTime: string;
+  sessions:  Session[];
+  t:         typeof THEMES[ThemeKey];
+}) {
+  const [remaining,     setRemaining]     = useState("");
+  const [isLive,        setIsLive]        = useState(false);
+  const [sessionTimer,  setSessionTimer]  = useState<SessionTimer | null>(null);
+
+  // Use a ref so the interval always sees the latest sessions without restarting
+  const sessionsRef = useRef(sessions);
+  sessionsRef.current = sessions;
 
   useEffect(() => {
     const target = new Date(`${eventDate}T${eventTime}`);
+
     function update() {
-      const diff = target.getTime() - Date.now();
-      if (diff <= 0) {
-        setIsLive(true);
-        setRemaining("");
+      const now  = Date.now();
+      const diff = target.getTime() - now;
+
+      if (diff > 0) {
+        // Pre-event countdown
+        setIsLive(false);
+        setSessionTimer(null);
+        const h = Math.floor(diff / 3600000);
+        const m = Math.floor((diff % 3600000) / 60000);
+        const s = Math.floor((diff % 60000) / 1000);
+        setRemaining(h > 0
+          ? `${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`
+          : `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`);
         return;
       }
-      setIsLive(false);
-      const h = Math.floor(diff / 3600000);
-      const m = Math.floor((diff % 3600000) / 60000);
-      const s = Math.floor((diff % 60000) / 1000);
-      setRemaining(h > 0
-        ? `${h}h ${String(m).padStart(2, "0")}m ${String(s).padStart(2, "0")}s`
-        : `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`);
+
+      // Event is live — compute current session timer
+      setIsLive(true);
+      setRemaining("");
+
+      const elapsedMs = now - target.getTime();
+
+      const timed = sessionsRef.current
+        .filter(s => !s.deleted_at && (s.duration_min ?? 0) > 0)
+        .sort((a, b) => a.sort_order - b.sort_order);
+
+      if (timed.length === 0) { setSessionTimer(null); return; }
+
+      let accMs = 0;
+      for (const sess of timed) {
+        const durMs = sess.duration_min! * 60 * 1000;
+        if (elapsedMs < accMs + durMs) {
+          const sessElapsedMs   = elapsedMs - accMs;
+          const sessRemainingMs = durMs - sessElapsedMs;
+          const rm = Math.floor(sessRemainingMs / 60000);
+          const rs = Math.floor((sessRemainingMs % 60000) / 1000);
+          setSessionTimer({
+            title:       sess.title,
+            timeStr:     `${String(rm).padStart(2, "0")}:${String(rs).padStart(2, "0")}`,
+            progressPct: Math.min(100, (sessElapsedMs / durMs) * 100),
+            isComplete:  false,
+          });
+          return;
+        }
+        accMs += durMs;
+      }
+
+      // All sessions done
+      setSessionTimer({ title: "Program complete", timeStr: "—", progressPct: 100, isComplete: true });
     }
+
     update();
     const id = setInterval(update, 1000);
     return () => clearInterval(id);
   }, [eventDate, eventTime]);
 
-  if (isLive) {
+  // ── Pre-event ──
+  if (!isLive) {
+    return (
+      <div className="text-center">
+        <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-8 font-semibold" style={{ color: t.goldSub }}>
+          Session begins in
+        </p>
+        <p className="font-display text-7xl md:text-9xl font-bold tabular-nums" style={{ color: t.text }}>
+          {remaining}
+        </p>
+      </div>
+    );
+  }
+
+  // ── Live, no session durations set ──
+  if (!sessionTimer) {
     return (
       <div className="text-center flex flex-col items-center gap-6">
         <div className="flex items-center gap-3">
           <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
-          <p className="text-xl md:text-2xl uppercase tracking-[0.45em] font-semibold" style={{ color: t.goldSub }}>Session is live</p>
+          <p className="text-xl md:text-2xl uppercase tracking-[0.45em] font-semibold" style={{ color: t.goldSub }}>
+            Session is live
+          </p>
           <span className="w-3 h-3 rounded-full bg-green-400 animate-pulse" />
         </div>
         <p className="font-display text-5xl md:text-7xl font-semibold" style={{ color: t.text }}>
           We&apos;re on.
         </p>
-        <p className="text-xl md:text-2xl" style={{ color: t.sub }}>The session has begun — welcome.</p>
+        <p className="text-xl md:text-2xl" style={{ color: t.sub }}>
+          The session has begun — welcome.
+        </p>
       </div>
     );
   }
 
+  // ── Live, session timer active ──
   return (
-    <div className="text-center">
-      <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-8 font-semibold" style={{ color: t.goldSub }}>Session begins in</p>
-      <p className="font-display text-7xl md:text-9xl font-bold tabular-nums" style={{ color: t.text }}>{remaining}</p>
+    <div className="text-center flex flex-col items-center gap-8 max-w-3xl w-full">
+
+      {/* Live badge */}
+      <div className="flex items-center gap-3">
+        <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+        <p className="text-base md:text-lg uppercase tracking-[0.45em] font-semibold" style={{ color: t.goldSub }}>
+          {sessionTimer.isComplete ? "Program complete" : "Now in session"}
+        </p>
+        <span className="w-2.5 h-2.5 rounded-full bg-green-400 animate-pulse" />
+      </div>
+
+      {/* Session name */}
+      {!sessionTimer.isComplete && (
+        <h1
+          className="font-display font-semibold leading-tight"
+          style={{ color: t.text, fontSize: "clamp(2.5rem,6vw,5rem)" }}
+        >
+          {sessionTimer.title}
+        </h1>
+      )}
+
+      {/* Timer */}
+      {!sessionTimer.isComplete && (
+        <div>
+          <p className="text-sm uppercase tracking-[0.45em] mb-4 font-semibold" style={{ color: t.goldSub }}>
+            Time remaining
+          </p>
+          <p
+            className="font-display font-bold tabular-nums"
+            style={{ color: t.text, fontSize: "clamp(4rem,10vw,9rem)", lineHeight: 1 }}
+          >
+            {sessionTimer.timeStr}
+          </p>
+        </div>
+      )}
+
+      {/* Progress bar */}
+      {!sessionTimer.isComplete && (
+        <div className="w-72 md:w-[28rem]">
+          <div className="h-1.5 rounded-full overflow-hidden" style={{ background: t.surface }}>
+            <motion.div
+              className="h-full rounded-full"
+              style={{ background: `linear-gradient(to right, ${t.gold}, ${t.goldSub})` }}
+              animate={{ width: `${sessionTimer.progressPct}%` }}
+              transition={{ duration: 0.8, ease: "linear" }}
+            />
+          </div>
+          <div className="flex justify-between mt-2">
+            <span className="text-[10px] uppercase tracking-widest" style={{ color: t.sub, opacity: 0.5 }}>Start</span>
+            <span className="text-[10px] uppercase tracking-widest" style={{ color: t.sub, opacity: 0.5 }}>End</span>
+          </div>
+        </div>
+      )}
+
+      {/* Complete state */}
+      {sessionTimer.isComplete && (
+        <p className="font-display text-5xl md:text-7xl font-semibold" style={{ color: t.text }}>
+          Thank you.
+        </p>
+      )}
     </div>
   );
 }
@@ -1180,7 +1783,10 @@ function TriviaScene({
             <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full"
               style={{ background: "rgba(201,162,74,0.15)", border: "1px solid rgba(201,162,74,0.3)" }}>
               <span className="text-xs font-bold" style={{ color: t.gold }}>
-                {results?.correct ?? 0} / {totalVotes} got it right
+                {round.type === "open_input"
+                  ? `${totalVotes} response${totalVotes !== 1 ? "s" : ""} received`
+                  : `${results?.correct ?? 0} / ${totalVotes} got it right`
+                }
               </span>
             </div>
           )}

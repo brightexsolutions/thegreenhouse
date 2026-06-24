@@ -13,7 +13,7 @@ const VIDEOS = [
     label:       "Session 01 · 2026",
     duration:    "5:07",
     src:         SESSION_01_HIGHLIGHT_VIDEO,
-    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.jpg",
+    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2,w_640,q_auto,f_jpg/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.jpg",
   },
   {
     id:          "umwema",
@@ -22,7 +22,7 @@ const VIDEOS = [
     label:       "Session 01 · 2026",
     duration:    "6:04",
     src:         SESSION_01_UMWEMA_VIDEO,
-    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2/v1781426590/greenhouse-session-1-umwema_znsmuo.jpg",
+    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2,w_640,q_auto,f_jpg/v1781426590/greenhouse-session-1-umwema_znsmuo.jpg",
   },
   {
     id:          "ebenezer",
@@ -31,7 +31,7 @@ const VIDEOS = [
     label:       "Session 01 · 2026",
     duration:    "2:30",
     src:         SESSION_01_EBENEZER_VIDEO,
-    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.jpg",
+    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2,w_640,q_auto,f_jpg/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.jpg",
   },
 ];
 
@@ -80,7 +80,7 @@ function VideoModal({ video, onClose }: { video: typeof VIDEOS[0]; onClose: () =
             src={video.src}
             controls
             playsInline
-            preload="auto"
+            preload="metadata"
             className="w-full h-full object-contain"
           />
         </div>

@@ -359,6 +359,160 @@ ${SITE_URL}
 `;
 }
 
+// ─── Pre-event reminder email (sent the day before the event) ────────────────
+
+export interface ReminderEmailData {
+  firstName:       string;
+  eventTitle:      string;
+  eventDate:       string;
+  eventTime:       string;
+  venueName:       string | null;
+  venueMapUrl?:    string | null;
+  dressCode?:      string | null;
+  themeTitle?:     string | null;
+  themeScripture?: string | null;
+  ticketToken:     string;
+  eventSlug:       string;
+}
+
+export function reminderEmailHtml(d: ReminderEmailData): string {
+  const ticketUrl = `${SITE_URL}/ticket/${d.ticketToken}`;
+  const liveUrl   = `${SITE_URL}/live/${d.eventSlug}`;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>See you tomorrow — ${d.eventTitle}</title>
+<style>
+  body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  .header { background: #1b3a2a; padding: 40px 40px 32px; border-radius: 16px 16px 0 0; }
+  .logo { color: #c9a24a; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; font-weight: 700; }
+  .header h1 { color: #f7f2e8; font-size: 30px; font-weight: 700; margin: 14px 0 0; line-height: 1.2; }
+  .header p { color: rgba(247,242,232,0.6); font-size: 14px; margin: 10px 0 0; }
+  .body { background: #ffffff; border-radius: 0 0 16px 16px; padding: 32px 40px 40px; }
+  .greeting { font-size: 16px; color: #1a1a18; line-height: 1.7; margin-bottom: 24px; }
+  .theme-block { background: linear-gradient(135deg,#1b3a2a,#0d2218); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+  .theme-label { color: rgba(201,162,74,0.7); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin: 0 0 6px; }
+  .theme-title { color: #c9a24a; font-size: 22px; font-weight: 700; font-style: italic; margin: 0 0 4px; }
+  .theme-verse { color: rgba(247,242,232,0.55); font-size: 13px; margin: 0; }
+  .detail-row { margin-bottom: 16px; }
+  .detail-row table { border-collapse: collapse; width: 100%; }
+  .detail-icon { width: 40px; height: 40px; background: #edf4f0; border-radius: 10px; text-align: center; vertical-align: top; font-size: 18px; line-height: 40px; padding: 0; }
+  .detail-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #6b7280; font-weight: 600; margin-bottom: 3px; }
+  .detail-value { font-size: 15px; color: #1a1a18; font-weight: 600; }
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
+  .cta { display: block; text-align: center; background: #1b3a2a; color: #f7f2e8 !important; text-decoration: none; padding: 16px 32px; border-radius: 100px; font-weight: 700; font-size: 15px; margin: 28px 0 12px; }
+  .cta-secondary { display: block; text-align: center; background: transparent; border: 2px solid #1b3a2a; color: #1b3a2a !important; text-decoration: none; padding: 14px 32px; border-radius: 100px; font-weight: 600; font-size: 14px; margin: 0 0 28px; }
+  .note-box { background: #f7f2e8; border-radius: 12px; padding: 18px 22px; margin-bottom: 8px; }
+  .note-box p { font-size: 14px; color: #5c4a35; line-height: 1.6; margin: 0; }
+  .footer { text-align: center; padding: 24px 40px; font-size: 13px; color: #6b7280; line-height: 1.8; }
+  .footer a { color: #c9a24a; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">${EMAIL_FROM_NAME}</div>
+    <h1>See you tomorrow,<br />${d.firstName}.</h1>
+    <p>${d.eventTitle} · ${d.eventDate}</p>
+  </div>
+  <div class="body">
+    <p class="greeting">
+      Just a heads-up — the session is tomorrow. We're looking forward to an evening of worship,
+      community, and something real. Here are your details.
+    </p>
+
+    ${d.themeTitle ? `
+    <div class="theme-block">
+      <p class="theme-label">Tonight's theme</p>
+      <p class="theme-title">${d.themeTitle}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+    </div>` : ""}
+
+    <div class="detail-row">
+      <table><tr>
+        <td class="detail-icon" width="40">📅</td>
+        <td style="padding-left:14px;vertical-align:top">
+          <div class="detail-label">Date</div>
+          <div class="detail-value">${d.eventDate}</div>
+        </td>
+      </tr></table>
+    </div>
+    <div class="detail-row">
+      <table><tr>
+        <td class="detail-icon" width="40">🕖</td>
+        <td style="padding-left:14px;vertical-align:top">
+          <div class="detail-label">Time</div>
+          <div class="detail-value">${d.eventTime}pm</div>
+        </td>
+      </tr></table>
+    </div>
+    ${d.venueName ? `
+    <div class="detail-row">
+      <table><tr>
+        <td class="detail-icon" width="40">📍</td>
+        <td style="padding-left:14px;vertical-align:top">
+          <div class="detail-label">Venue</div>
+          <div class="detail-value">${d.venueName}${d.venueMapUrl ? ` &nbsp;<a href="${d.venueMapUrl}" style="font-size:13px;color:#1b3a2a;font-weight:600;text-decoration:none;">View on map →</a>` : ""}</div>
+        </td>
+      </tr></table>
+    </div>` : ""}
+    ${d.dressCode ? `
+    <div class="detail-row">
+      <table><tr>
+        <td class="detail-icon" width="40">👔</td>
+        <td style="padding-left:14px;vertical-align:top">
+          <div class="detail-label">Dress Code</div>
+          <div class="detail-value">${d.dressCode}</div>
+        </td>
+      </tr></table>
+    </div>` : ""}
+
+    <hr class="divider" />
+
+    <a href="${ticketUrl}" class="cta">View your ticket</a>
+    <a href="${liveUrl}" class="cta-secondary">📱 Open live program on the night</a>
+
+    <div class="note-box">
+      <p>Doors open 30 minutes before the session begins. Your ticket (this email or the link above) is all you need at the door.</p>
+    </div>
+  </div>
+  <div class="footer">
+    <p>You received this because you registered for <strong>${d.eventTitle}</strong>.</p>
+    <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
+    <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${EMAIL_FROM_NAME}</p>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+export function reminderEmailText(d: ReminderEmailData): string {
+  const ticketUrl = `${SITE_URL}/ticket/${d.ticketToken}`;
+  const liveUrl   = `${SITE_URL}/live/${d.eventSlug}`;
+  return `${SITE_NAME} — See you tomorrow
+
+Hi ${d.firstName},
+
+Just a quick reminder — ${d.eventTitle} is tomorrow and we can't wait to see you there.
+${d.themeTitle ? `\nTheme: ${d.themeTitle}${d.themeScripture ? ` — ${d.themeScripture}` : ""}\n` : ""}
+Date:  ${d.eventDate}
+Time:  ${d.eventTime}pm${d.venueName ? `\nVenue: ${d.venueName}${d.venueMapUrl ? `\nMap:   ${d.venueMapUrl}` : ""}` : ""}${d.dressCode ? `\nDress code: ${d.dressCode}` : ""}
+
+View your ticket: ${ticketUrl}
+Live program (use on the night): ${liveUrl}
+
+Doors open 30 minutes before the session begins.
+
+Questions? ${CONTACT_EMAIL}
+
+— ${EMAIL_FROM_NAME}
+${SITE_URL}
+`;
+}
+
 export function ticketEmailText(d: TicketEmailData): string {
   const entryLine = d.isFree === false && d.priceKes
     ? `Ticket price: KES ${d.priceKes.toLocaleString()}. Please present this email or your ticket at the door.`
