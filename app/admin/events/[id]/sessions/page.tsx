@@ -15,7 +15,8 @@ async function getEventWithSessions(id: string) {
       .select("id, title, type, duration_min, notes, sort_order, trivia_question_id, trivia_questions(id, question, category), session_songs(id, sort_order, vocalist, item_type, item_text, songs(id, title, artist, lyrics))")
       .eq("event_id", id)
       .is("deleted_at", null)
-      .order("sort_order", { ascending: true }),
+      .order("sort_order", { ascending: true })
+      .order("sort_order", { ascending: true, foreignTable: "session_songs" }),
   ]);
   return { event, sessions: sessions ?? [] };
 }
