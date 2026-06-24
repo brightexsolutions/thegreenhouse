@@ -1,12 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Save, Loader2, Globe, Mail, Share2, Sliders } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type SettingsMap = Record<string, string>;
 
-const SECTIONS = [
+type Section = {
+  key: string;
+  icon: React.ElementType;
+  title: string;
+  description: string;
+  disabled?: boolean;
+  fields: readonly { key: string; label: string; placeholder: string; type: string }[];
+};
+
+const SECTIONS: Section[] = [
   {
     key: "identity",
     icon: Globe,
@@ -31,7 +40,8 @@ const SECTIONS = [
     key: "social",
     icon: Share2,
     title: "Social Links",
-    description: "Social media handles and links shown in the footer.",
+    description: "Managed in code (lib/constants.ts). Update and redeploy to change.",
+    disabled: true,
     fields: [
       { key: "instagram_handle", label: "Instagram handle", placeholder: "@thegreenhouseke", type: "text" },
       { key: "twitter_handle",   label: "X / Twitter handle", placeholder: "@thegreenhouseke", type: "text" },
@@ -115,7 +125,7 @@ export default function SettingsPage() {
       )}
 
       <form onSubmit={save} className="space-y-5">
-        {SECTIONS.map(({ key, icon: Icon, title, description, fields }) => (
+        {SECTIONS.map(({ key, icon: Icon, title, description, fields, disabled }) => (
           <div key={key} className="bg-white rounded-2xl border border-mist overflow-hidden">
             {/* Section header */}
             <div className="flex items-center gap-3 px-5 py-4 border-b border-mist bg-off-white/60">
@@ -136,9 +146,15 @@ export default function SettingsPage() {
                   <input
                     type={type}
                     value={values[fkey] ?? ""}
-                    onChange={e => setValues(prev => ({ ...prev, [fkey]: e.target.value }))}
+                    onChange={e => !disabled && setValues(prev => ({ ...prev, [fkey]: e.target.value }))}
                     placeholder={placeholder}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-mist text-sm focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all bg-white"
+                    disabled={disabled}
+                    className={cn(
+                      "w-full px-3.5 py-2.5 rounded-xl border border-mist text-sm transition-all",
+                      disabled
+                        ? "bg-off-white/60 text-charcoal/35 cursor-not-allowed"
+                        : "bg-white focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
+                    )}
                   />
                 </div>
               ))}
