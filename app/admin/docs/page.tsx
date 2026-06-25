@@ -26,7 +26,7 @@ export default function AdminDocsPage() {
           <p className="text-sm text-charcoal/50 ml-12">
             Full reference for running The Green House platform — from creating a gathering to deploying the site and getting it on Google.
           </p>
-          <div className="ml-12 mt-2">
+          <div className="ml-12 mt-2 flex items-center gap-4">
             <a
               href="/docs"
               target="_blank"
@@ -34,6 +34,14 @@ export default function AdminDocsPage() {
               className="inline-flex items-center gap-1.5 text-xs text-forest/70 hover:text-forest transition-colors"
             >
               <span>↗ View shareable public version</span>
+            </a>
+            <a
+              href="/design-system"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-xs text-charcoal/40 hover:text-charcoal transition-colors"
+            >
+              <span>↗ Brand System</span>
             </a>
           </div>
         </div>
