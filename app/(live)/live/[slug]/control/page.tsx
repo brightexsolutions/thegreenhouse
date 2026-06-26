@@ -128,7 +128,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const supabase = supabaseRef.current;
 
   const [authed,          setAuthed]         = useState<boolean | null>(null);
-  const [permissions,     setPermissions]    = useState<string[]>(["full"]);
+  const [permissions,     setPermissions]    = useState<string[]>([]);
   const [event,           setEvent]          = useState<EventData | null>(null);
   const [display,         setDisplay]        = useState<DisplayState | null>(null);
   const [saving,          setSaving]         = useState(false);
@@ -162,28 +162,48 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   const [scoringLoading,  setScoringLoading]  = useState(false);
   const [scoringSaved,    setScoringSaved]    = useState(false);
 
-  // Auth check — admin session OR valid control token
+  const hasPermission = useCallback((permission: string) => {
+    if (permissions.includes("full")) return true;
+    return permissions.includes(permission);
+  }, [permissions]);
+
+  // Auth check — control token first, then admin session fallback
   useEffect(() => {
     async function checkAuth() {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) { setAuthed(true); setPermissions(["full"]); return; }
       const t = new URLSearchParams(window.location.search).get("t");
-      if (!t) { setAuthed(false); return; }
-      try {
-        const res = await fetch(`/api/live/${slug}/control-access?t=${encodeURIComponent(t)}`);
-        if (res.ok) {
-          const data = await res.json() as { valid: boolean; permissions?: string[] };
-          setAuthed(data.valid);
-          if (data.valid) setPermissions(data.permissions ?? ["full"]);
-        } else {
+      if (t) {
+        try {
+          const res = await fetch(`/api/live/${slug}/control-access?t=${encodeURIComponent(t)}`);
+          if (res.ok) {
+            const data = await res.json() as { valid: boolean; permissions?: string[] };
+            setAuthed(data.valid);
+            if (data.valid) {
+              setPermissions(data.permissions ?? ["full"]);
+              return;
+            }
+          }
           setAuthed(false);
+          setPermissions([]);
+          return;
+        } catch {
+          setAuthed(false);
+          setPermissions([]);
+          return;
         }
-      } catch {
-        setAuthed(false);
       }
+
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setAuthed(true);
+        setPermissions(["full"]);
+        return;
+      }
+
+      setAuthed(false);
+      setPermissions([]);
     }
     checkAuth();
-  }, [slug]);
+  }, [slug, supabase.auth]);
 
   // Auto-set focusTab to first allowed tab when permissions are scoped
   useEffect(() => {
@@ -427,7 +447,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   }, [triviaRound?.id, triviaRound?.type, display?.trivia_round_id]);
 
   async function startTriviaRound() {
-    if (!event || !selectedQId) return;
+    if (!event || !selectedQId || !hasPermission("trivia")) return;
     setTriviaLoading(true);
     setTriviaCount(0);
     setTriviaCorrect(0);
@@ -447,6 +467,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   }
 
   async function patchTriviaRound(action: "reveal" | "close") {
+    if (!hasPermission("trivia")) return;
     const roundId = display?.trivia_round_id ?? triviaRound?.id;
     if (!roundId) return;
     setTriviaLoading(true);
@@ -483,6 +504,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   }
 
   async function dismissTrivia() {
+    if (!hasPermission("trivia")) return;
     const roundId = display?.trivia_round_id ?? triviaRound?.id;
     if (!roundId || !event) return;
     setTriviaLoading(true);
@@ -506,6 +528,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   }
 
   async function finalizeTrivia() {
+    if (!hasPermission("trivia")) return;
     const roundId = display?.trivia_round_id ?? triviaRound?.id;
     if (!roundId || !event) return;
     setTriviaLoading(true);
@@ -570,7 +593,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   }
 
   async function initDisplay() {
-    if (!event) return;
+    if (!event || !hasPermission("scenes")) return;
     setSaving(true);
     const { data } = await supabase
       .from("display_state")
@@ -586,8 +609,13 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     setSaving(false);
   }
 
-  async function setScene(scene: SceneKey)   { await upsertDisplay({ scene, verse_index: 0 }); }
+  async function setScene(scene: SceneKey) {
+    if (!hasPermission("scenes")) return;
+    await upsertDisplay({ scene, verse_index: 0 });
+  }
+
   async function setSong(songId: string, sessionSongId: string) {
+    if (!hasPermission("music")) return;
     if (display?.session_song_id === sessionSongId) {
       await upsertDisplay({ song_id: null, session_song_id: null, verse_index: 0 });
     } else {
@@ -596,31 +624,54 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   }
 
   async function setTextItem(sessionSongId: string, text: string) {
+    if (!hasPermission("music")) return;
     if (display?.session_song_id === sessionSongId) {
       await upsertDisplay({ session_song_id: null, custom_text: null });
     } else {
       await upsertDisplay({ session_song_id: sessionSongId, song_id: null, custom_text: text, scene: "custom", verse_index: 0 });
     }
   }
+
   async function nextVerse() {
+    if (!hasPermission("music")) return;
     const verses = getLyricsVerses(activeSong?.lyrics ?? null);
     await upsertDisplay({ verse_index: Math.min((display?.verse_index ?? 0) + 1, verses.length - 1) });
   }
+
   async function prevVerse() {
+    if (!hasPermission("music")) return;
     await upsertDisplay({ verse_index: Math.max((display?.verse_index ?? 0) - 1, 0) });
   }
-  async function pushCustom()            { await upsertDisplay({ custom_text: customText, scene: "custom" }); }
-  async function panic()                 { await upsertDisplay({ scene: "branding", featured_feedback: null }); }
-  async function setTheme(theme: string) { await upsertDisplay({ theme }); }
-  async function toggleQr()              { await upsertDisplay({ show_qr: !display?.show_qr }); }
+
+  async function pushCustom() {
+    if (!hasPermission("music")) return;
+    await upsertDisplay({ custom_text: customText, scene: "custom" });
+  }
+
+  async function panic() {
+    if (!hasPermission("scenes")) return;
+    await upsertDisplay({ scene: "branding", featured_feedback: null });
+  }
+
+  async function setTheme(theme: string) {
+    if (!hasPermission("scenes")) return;
+    await upsertDisplay({ theme });
+  }
+
+  async function toggleQr() {
+    if (!hasPermission("scenes")) return;
+    await upsertDisplay({ show_qr: !display?.show_qr });
+  }
 
   async function projectFeedback(message: string, authorName: string | null) {
+    if (!hasPermission("feedback")) return;
     setProjecting(message);
     await upsertDisplay({ featured_feedback: message, featured_feedback_author: authorName });
     setProjecting(null);
   }
 
   async function dismissFeedback() {
+    if (!hasPermission("feedback")) return;
     await upsertDisplay({ featured_feedback: null, featured_feedback_author: null });
   }
 
