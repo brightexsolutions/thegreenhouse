@@ -8,7 +8,7 @@ import { SongContributionPanel } from "@/components/admin/song-contribution-pane
 import { ContributionLinkPanel } from "@/components/admin/contribution-link-panel";
 import { PostEventEmailPanel } from "@/components/admin/post-event-email-panel";
 import Link from "next/link";
-import { ExternalLink, Download, Tv2 } from "lucide-react";
+import { ExternalLink, Download, Tv2, BarChart2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -128,6 +128,27 @@ export default async function EventToolsPage({ params }: Props) {
           {(registrantCount ?? 0) === 0 && (
             <span className="text-[10px] text-charcoal/35 bg-charcoal/5 px-2 py-0.5 rounded-full">No registrants yet</span>
           )}
+        </div>
+
+        {/* Summary report — always available */}
+        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-forest/5 border border-forest/15">
+          <div className="w-8 h-8 rounded-lg bg-forest/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <BarChart2 size={14} className="text-forest" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-charcoal mb-0.5">Event Summary Report</p>
+            <p className="text-xs text-charcoal/50 leading-relaxed mb-2.5">
+              A clear, shareable overview for your team — registrations, attendance, session feedback, and trivia participation.
+            </p>
+            <a
+              href={`/api/admin/events/${id}/report`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded bg-forest text-cream text-xs font-semibold hover:bg-moss transition-colors"
+            >
+              <ExternalLink size={12} /> Open Report
+            </a>
+          </div>
         </div>
 
         <div className="flex flex-wrap gap-3">
