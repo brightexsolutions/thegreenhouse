@@ -124,21 +124,43 @@ export async function GET(req: NextRequest, { params }: Props) {
   const attRate     = pct(checkedIn, totalReg + walkins > totalReg ? checkedIn : totalReg);
 
   // ── Trivia stats ────────────────────────────────────────────────────────────
-  const roundsPlayed = allRounds.length;
-  const allResponses = allRounds.flatMap(r => (r.trivia_responses ?? []) as { attendee_name: string | null; is_correct: boolean | null; answer_text: string }[]);
-  const uniqueNames  = new Set(allResponses.map(r => r.attendee_name?.trim().toLowerCase()).filter(Boolean));
-  const mcResponses  = allResponses.filter(r => r.is_correct !== null);
-  const correctCount = mcResponses.filter(r => r.is_correct).length;
-  const correctRate  = pct(correctCount, mcResponses.length);
+  type TriviaQuestion = { type: string; points: number };
+  type TriviaResponse = { attendee_name: string | null; is_correct: boolean | null };
+  type RoundData = { trivia_questions: TriviaQuestion | null; trivia_responses: TriviaResponse[] };
 
-  // Top scorer (most correct MC answers)
-  const scorerMap: Record<string, number> = {};
-  for (const r of allResponses) {
-    if (r.is_correct && r.attendee_name) {
-      scorerMap[r.attendee_name] = (scorerMap[r.attendee_name] ?? 0) + 1;
+  const roundsPlayed = allRounds.length;
+  let totalMcResponses = 0;
+  let totalCorrect = 0;
+
+  type Participant = { name: string; answered: number; correct: number; points: number };
+  const participantMap: Record<string, Participant> = {};
+
+  for (const round of allRounds as unknown as RoundData[]) {
+    const q = round.trivia_questions;
+    const pts = q?.points ?? 10;
+    const isMC = q?.type === "multiple_choice";
+    for (const resp of round.trivia_responses ?? []) {
+      const name = resp.attendee_name?.trim();
+      if (!name) continue;
+      if (!participantMap[name]) participantMap[name] = { name, answered: 0, correct: 0, points: 0 };
+      participantMap[name].answered += 1;
+      if (isMC) {
+        totalMcResponses += 1;
+        if (resp.is_correct) {
+          totalCorrect += 1;
+          participantMap[name].correct += 1;
+          participantMap[name].points += pts;
+        }
+      }
     }
   }
-  const topScorer = Object.entries(scorerMap).sort((a, b) => b[1] - a[1])[0];
+
+  const leaderboard = Object.values(participantMap)
+    .sort((a, b) => b.points - a.points || b.correct - a.correct || a.name.localeCompare(b.name));
+  const uniqueCount  = leaderboard.length;
+  const correctRate  = pct(totalCorrect, totalMcResponses);
+  const topScorer    = leaderboard[0];
+  const hasMcRounds  = (allRounds as unknown as RoundData[]).some(r => r.trivia_questions?.type === "multiple_choice");
 
   // Sample feedback messages (up to 6, non-empty)
   const sampleMessages = allFeedback
@@ -359,6 +381,48 @@ export async function GET(req: NextRequest, { params }: Props) {
   }
   .highlight-box strong { font-weight: 700; }
 
+  /* ── Leaderboard table ── */
+  .leaderboard-wrap {
+    margin-top: 16px;
+    border: 1px solid #e4e0d4;
+    border-radius: 8px;
+    overflow: hidden;
+  }
+  .lb-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .lb-table thead tr {
+    background: #f0f5ea;
+  }
+  .lb-table th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #4a5544;
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 1px solid #dfe8d8;
+  }
+  .lb-table th.right, .lb-table td.right { text-align: right; }
+  .lb-table td {
+    padding: 9px 12px;
+    color: #1c2419;
+    border-bottom: 1px solid #f0ede8;
+  }
+  .lb-table tr:last-child td { border-bottom: none; }
+  .lb-table tbody tr:nth-child(even) { background: #faf9f6; }
+  .lb-table tbody tr:hover { background: #f4f2ec; }
+  .lb-rank { font-weight: 700; font-size: 13px; width: 40px; }
+  .lb-name { font-weight: 600; }
+  .lb-pts  { font-weight: 700; color: #2D5016; }
+  .lb-dim  { color: #8a9080; }
+  @media print {
+    .lb-table tbody tr:hover { background: inherit; }
+  }
+
   /* ── Footer ── */
   .report-footer {
     margin-top: 48px;
@@ -463,13 +527,39 @@ export async function GET(req: NextRequest, { params }: Props) {
   ${roundsPlayed === 0 ? `<p class="no-data">No trivia rounds were run for this event.</p>` : `
   <div class="stat-grid">
     ${statBox("Rounds Played", roundsPlayed)}
-    ${statBox("Participants", uniqueNames.size, "unique names")}
-    ${mcResponses.length > 0 ? statBox("Got It Right", `${correctCount} / ${mcResponses.length}`, `${correctRate} correct rate`) : ""}
+    ${statBox("Participants", uniqueCount, "unique players")}
+    ${hasMcRounds && totalMcResponses > 0 ? statBox("Got It Right", `${totalCorrect} / ${totalMcResponses}`, `${correctRate} correct rate`) : ""}
   </div>
 
   ${topScorer ? `
   <div class="highlight-box">
-    🏆 <strong>${topScorer[0]}</strong> led the leaderboard with <strong>${topScorer[1]}</strong> correct answer${topScorer[1] !== 1 ? "s" : ""}.
+    🏆 <strong>${topScorer.name}</strong> led the leaderboard${hasMcRounds ? ` with <strong>${topScorer.correct}</strong> correct answer${topScorer.correct !== 1 ? "s" : ""} and <strong>${topScorer.points} pts</strong>` : ""}.
+  </div>` : ""}
+
+  ${leaderboard.length > 0 ? `
+  <div class="breakdown-label" style="margin-top:18px">How each participant did</div>
+  <div class="leaderboard-wrap">
+    <table class="lb-table">
+      <thead>
+        <tr>
+          <th style="width:40px">#</th>
+          <th>Name</th>
+          <th class="right">Rounds Joined</th>
+          ${hasMcRounds ? `<th class="right">Correct</th><th class="right">Score</th>` : ""}
+        </tr>
+      </thead>
+      <tbody>
+        ${leaderboard.map((p, i) => {
+          const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}`;
+          return `<tr>
+            <td class="lb-rank">${medal}</td>
+            <td class="lb-name">${p.name}</td>
+            <td class="right lb-dim">${p.answered} of ${roundsPlayed}</td>
+            ${hasMcRounds ? `<td class="right">${p.correct}</td><td class="right lb-pts">${p.points} pts</td>` : ""}
+          </tr>`;
+        }).join("")}
+      </tbody>
+    </table>
   </div>` : ""}
   `}
 </div>
