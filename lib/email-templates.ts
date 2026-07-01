@@ -139,7 +139,8 @@ export interface PostEventEmailData {
 }
 
 export function postEventEmailHtml(d: PostEventEmailData): string {
-  const feedbackUrl = `${SITE_URL}/events/${d.eventSlug}`;
+  const feedbackUrl = `${SITE_URL}/live/${d.eventSlug}`;
+  const eventDayName = new Date(d.eventDate).toLocaleDateString("en-KE", { weekday: "long" });
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -178,7 +179,7 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
   </div>
   <div class="body">
     <p class="greeting">
-      Something real happens when people gather with open hearts. Thank you for bringing yours last night.
+      Something real happens when people gather with open hearts. Thank you for bringing yours on ${eventDayName}.
       Whether you sang, prayed, listened, or simply showed up — you were part of what made it meaningful.
     </p>
 
@@ -217,7 +218,7 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
 }
 
 export function postEventEmailText(d: PostEventEmailData): string {
-  const feedbackUrl = `${SITE_URL}/events/${d.eventSlug}`;
+  const feedbackUrl = `${SITE_URL}/live/${d.eventSlug}`;
   return `${SITE_NAME} — Thank you for being there
 
 Hi ${d.firstName},

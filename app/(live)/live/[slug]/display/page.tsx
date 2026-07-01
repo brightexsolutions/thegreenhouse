@@ -2567,11 +2567,11 @@ function CommunityScene({ attendees, t }: {
 
       {/* Centred count */}
       <div className="relative text-center z-10">
-        <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-4 font-semibold" style={{ color: t.goldSub }}>In the room tonight</p>
+        <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-4 font-semibold" style={{ color: t.goldSub }}>In the room</p>
         {count > 0 ? (
           <>
             <p className="font-display text-8xl md:text-[10rem] font-bold leading-none" style={{ color: t.text }}>{count}</p>
-            <p className="mt-4 text-2xl md:text-3xl" style={{ color: t.sub }}>people gathered here tonight</p>
+            <p className="mt-4 text-2xl md:text-3xl" style={{ color: t.sub }}>people gathered here</p>
           </>
         ) : (
           <p className="font-display text-4xl" style={{ color: t.sub }}>—</p>

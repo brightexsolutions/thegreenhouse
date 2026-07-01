@@ -100,7 +100,7 @@ export function AttendeePhotoShare({ slug }: Props) {
         </div>
         <div className="text-left flex-1">
           <p className={cn("text-sm font-semibold", atLimit ? "text-charcoal/40" : "text-forest")}>
-            Share a photo from tonight
+            Share a photo from the session
           </p>
           <p className="text-xs text-charcoal/50 mt-0.5">
             {atLimit
