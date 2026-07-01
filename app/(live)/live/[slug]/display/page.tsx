@@ -3,7 +3,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import { createBrowserClient } from "@supabase/ssr";
-import { Maximize2, Minimize2, Music2, Sparkles } from "lucide-react";
+import { Loader2, Maximize2, Minimize2, Music2, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { SITE_NAME } from "@/lib/constants";
@@ -601,7 +601,9 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
     return () => { cancelled = true; clearInterval(id); };
   }, [slug]);
 
-  // Poll trivia round + results every 5s when scene = trivia
+  // Poll trivia round + results every 5s when scene = trivia.
+  // display?.updated_at is included so that any display_state change (reveal, close)
+  // triggers an immediate re-poll rather than waiting up to 5s.
   useEffect(() => {
     let cancelled = false;
     async function pollTrivia() {
@@ -620,7 +622,8 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
     pollTrivia();
     const id = setInterval(pollTrivia, 5000);
     return () => { cancelled = true; clearInterval(id); };
-  }, [display?.trivia_round_id, display?.scene]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [display?.trivia_round_id, display?.scene, display?.updated_at]);
 
   // Polling fallback every 3s — ensures display stays in sync even if Realtime drops
   useEffect(() => {
@@ -2223,8 +2226,13 @@ function TriviaFinalLeaderboard({
       </motion.div>
 
       {/* Rankings */}
-      {rankings.length === 0 ? (
-        <p className="text-xl font-display" style={{ color: t.sub }}>No correct answers yet</p>
+      {data === null ? (
+        <div className="flex items-center gap-4" style={{ color: t.sub }}>
+          <Loader2 size={28} className="animate-spin" style={{ color: t.gold }} />
+          <p className="font-display text-2xl md:text-3xl">Loading results…</p>
+        </div>
+      ) : rankings.length === 0 ? (
+        <p className="text-xl font-display" style={{ color: t.sub }}>No correct answers recorded</p>
       ) : (
         <div className="w-full max-w-2xl space-y-3">
           {rankings.map((r, i) => (

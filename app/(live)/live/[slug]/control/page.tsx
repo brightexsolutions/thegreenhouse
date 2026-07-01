@@ -551,6 +551,8 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     setTriviaLoading(false);
   }
 
+  // All display_state writes go through the server API so team members with only
+  // a control-link token (no Supabase session) can write past RLS.
   async function upsertDisplay(patch: Partial<DisplayState>) {
     if (!event || !display) return;
     setSaving(true);
@@ -568,44 +570,49 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       show_qr:                  updated.show_qr ?? false,
       featured_feedback:        updated.featured_feedback ?? null,
       featured_feedback_author: updated.featured_feedback_author ?? null,
-      updated_at:               new Date().toISOString(),
     };
-    let { data, error } = await supabase
-      .from("display_state")
-      .upsert(payload, { onConflict: "event_id" })
-      .select("*")
-      .single();
-    // Retry once on transient error
-    if (error) {
+    const tokenParam = controlToken ? `?t=${encodeURIComponent(controlToken)}` : "";
+    let res = await fetch(`/api/live/${slug}/display${tokenParam}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify(payload),
+    });
+    // Retry once on transient failure
+    if (!res.ok) {
       await new Promise(r => setTimeout(r, 800));
-      ({ data, error } = await supabase
-        .from("display_state")
-        .upsert(payload, { onConflict: "event_id" })
-        .select("*")
-        .single());
+      res = await fetch(`/api/live/${slug}/display${tokenParam}`, {
+        method:  "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body:    JSON.stringify(payload),
+      });
     }
-    if (error) {
+    if (res.ok) {
+      const json = await res.json() as { display: DisplayState };
+      setDisplay(json.display);
+    } else {
       setSaveError(true);
       setTimeout(() => setSaveError(false), 3000);
     }
-    if (data) setDisplay(data as DisplayState);
     setSaving(false);
   }
 
   async function initDisplay() {
     if (!event || !hasPermission("scenes")) return;
     setSaving(true);
-    const { data } = await supabase
-      .from("display_state")
-      .upsert({
+    const tokenParam = controlToken ? `?t=${encodeURIComponent(controlToken)}` : "";
+    const res = await fetch(`/api/live/${slug}/display${tokenParam}`, {
+      method:  "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body:    JSON.stringify({
         event_id: event.id, scene: "branding", song_id: null,
         verse_index: 0, custom_text: null, theme: "dark", show_qr: false,
         featured_feedback: null, featured_feedback_author: null,
-        updated_at: new Date().toISOString(),
-      }, { onConflict: "event_id" })
-      .select("*")
-      .single();
-    if (data) setDisplay(data as DisplayState);
+      }),
+    });
+    if (res.ok) {
+      const json = await res.json() as { display: DisplayState };
+      setDisplay(json.display);
+    }
     setSaving(false);
   }
 
