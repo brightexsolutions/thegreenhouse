@@ -121,7 +121,7 @@ export function PreEventView({
           >
             <div className="w-2.5 h-2.5 rounded-full bg-green-400 mx-auto mb-3 animate-pulse" />
             <p className="text-cream font-semibold text-lg">Starting now</p>
-            <p className="text-cream/50 text-sm mt-1">Refresh the page to access tonight&apos;s program.</p>
+            <p className="text-cream/50 text-sm mt-1">Refresh the page to access the live program.</p>
           </motion.div>
         ) : (
           <motion.div

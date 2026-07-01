@@ -39,6 +39,9 @@ export default async function EditEventPage({ params }: Props) {
           theme_scripture:   event.theme_scripture ?? undefined,
           theme_description: event.theme_description ?? undefined,
           dress_code:        event.dress_code ?? undefined,
+          early_bird_deadline: (event as { early_bird_deadline?: string | null }).early_bird_deadline
+            ? (event as { early_bird_deadline: string }).early_bird_deadline.slice(0, 10)
+            : undefined,
           playlist_url:      event.playlist_url ?? undefined,
           feedback_url:      event.feedback_url ?? undefined,
           cover_image:       event.cover_image     ?? undefined,

@@ -1,6 +1,6 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, CalendarDays, MessageSquare } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { TicketBadgeSection } from "@/components/ticket/ticket-badge-section";
@@ -14,7 +14,7 @@ async function getTicket(token: string) {
   const supabase = createAdminClient();
   const { data } = await supabase
     .from("registrations")
-    .select("*, events(id, title, subtitle, event_date, event_time, venue_name, slug, dress_code, theme_title, theme_scripture)")
+    .select("*, events(id, title, subtitle, event_date, event_time, venue_name, slug, dress_code, theme_title, theme_scripture, status)")
     .eq("ticket_token", token)
     .is("deleted_at", null)
     .single();
@@ -48,15 +48,34 @@ export default async function TicketPage({ params }: Props) {
       venue_name: string | null;
       slug: string;
       dress_code: string | null;
-      theme_title:      string | null;
-      theme_scripture:  string | null;
+      theme_title:     string | null;
+      theme_scripture: string | null;
+      status:          string;
     };
   } | null;
 
   if (!ticket) notFound();
 
-  const event = ticket.events;
-  const ref   = ticket.ticket_token.slice(0, 8).toUpperCase();
+  const event  = ticket.events;
+  const isPast = event.status === "past";
+  const ref    = ticket.ticket_token.slice(0, 8).toUpperCase();
+
+  // Fetch next event when this one is past
+  type NextEventRow = { title: string; event_date: string; slug: string };
+  const nextEvent: NextEventRow | null = await (async () => {
+    if (!isPast) return null;
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("events")
+      .select("title, event_date, slug")
+      .is("deleted_at", null)
+      .in("status", ["published", "live"])
+      .gt("event_date", event.event_date)
+      .order("event_date", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+    return (data as NextEventRow | null);
+  })();
 
   const shortDate = new Date(event.event_date).toLocaleDateString("en-KE", {
     day: "numeric", month: "long", year: "numeric",
@@ -80,6 +99,39 @@ export default async function TicketPage({ params }: Props) {
           Back to event
         </Link>
       </div>
+
+      {/* ── Post-event banner ── */}
+      {isPast && (
+        <div className="w-full max-w-sm mb-6 rounded-2xl overflow-hidden border border-gold/20"
+          style={{ background: "rgba(201,162,74,0.08)" }}>
+          <div className="px-5 py-4">
+            <p className="text-sm font-semibold text-gold leading-snug">This session has concluded.</p>
+            <p className="text-xs text-cream/55 mt-1 leading-relaxed">
+              Thank you for being part of it. We&apos;d love to hear your thoughts — share your feedback below.
+            </p>
+          </div>
+          <div className="px-5 pb-4 flex flex-wrap gap-2">
+            <Link
+              href={`/live/${event.slug}`}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded bg-gold/20 border border-gold/30 text-xs font-semibold text-gold hover:bg-gold/30 transition-colors"
+            >
+              <MessageSquare size={11} /> Leave feedback
+            </Link>
+            {nextEvent && (
+              <Link
+                href={`/events/${nextEvent.slug}`}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded bg-cream/8 border border-cream/15 text-xs font-semibold text-cream/70 hover:text-cream transition-colors"
+              >
+                <CalendarDays size={11} />
+                {nextEvent.title.replace(/^The Green House\s*[—–-]\s*/i, "")}
+                <span className="text-cream/40">
+                  {new Date(nextEvent.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
+                </span>
+              </Link>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* ── TICKET CARD ── */}
       <div className="w-full max-w-sm relative" style={{ filter: "drop-shadow(0 32px 80px rgba(0,0,0,0.7))" }}>

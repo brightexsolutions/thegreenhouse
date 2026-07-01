@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
   // Fetch event
   const { data: event, error: eventErr } = await supabase
     .from("events")
-    .select("id, slug, title, event_date, event_time, venue_name, dress_code, theme_title, theme_scripture, status, capacity, type, price_kes")
+    .select("id, slug, title, event_date, event_time, venue_name, dress_code, theme_title, theme_scripture, status, capacity, type, price_kes, early_bird_deadline")
     .eq("id", data.event_id)
     .is("deleted_at", null)
     .single();
@@ -101,6 +101,12 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // Determine early bird eligibility
+  const earlyBirdDeadline = (event as { early_bird_deadline?: string | null }).early_bird_deadline;
+  const isEarlyBird = event.type === "paid"
+    && !!earlyBirdDeadline
+    && new Date() < new Date(earlyBirdDeadline);
+
   // Insert registration
   const { data: reg, error: regErr } = await supabase
     .from("registrations")
@@ -115,6 +121,7 @@ export async function POST(req: NextRequest) {
       notes:           data.notes ?? null,
       whatsapp_opt_in:  data.whatsapp_opt_in,
       photo_consent:    data.photo_consent ?? false,
+      is_early_bird:    isEarlyBird,
     })
     .select("id, ticket_token")
     .single();

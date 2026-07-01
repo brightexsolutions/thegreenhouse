@@ -187,7 +187,7 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                   </div>
                   <div>
                     <p className="text-[10px] label-caps text-gold/70 mb-0.5">Support the mission</p>
-                    <h3 className="font-display text-xl font-semibold text-cream leading-tight">Give tonight</h3>
+                    <h3 className="font-display text-xl font-semibold text-cream leading-tight">Give now</h3>
                     <p className="text-cream/55 text-xs mt-1 leading-relaxed">
                       Venue, production, outreach — your contribution keeps this going.
                     </p>
@@ -276,7 +276,7 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                       <textarea
                         value={message}
                         onChange={e => setMessage(e.target.value.slice(0, 280))}
-                        placeholder="What's moved you tonight?"
+                        placeholder="What's moved you today?"
                         rows={3}
                         className="w-full px-4 py-3 rounded-xl border border-mist text-sm resize-none focus:outline-none focus:ring-2 focus:ring-forest/20 placeholder:text-charcoal/30"
                       />

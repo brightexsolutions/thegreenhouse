@@ -17,9 +17,10 @@ const schema = z.object({
   venue_name:        z.string().optional(),
   venue_address:     z.string().optional(),
   venue_map_url:     z.string().url().optional().or(z.literal("")),
-  type:              z.enum(["free", "paid"]),
-  price_kes:         z.number().int().min(0).optional(),
-  capacity:          z.number().int().min(1).optional(),
+  type:                z.enum(["free", "paid"]),
+  price_kes:           z.number().int().min(0).optional(),
+  early_bird_deadline: z.string().optional(),
+  capacity:            z.number().int().min(1).optional(),
   status:            z.enum(["draft", "published", "live", "past", "cancelled"]),
   description:       z.string().optional(),
   theme_title:       z.string().optional(),
@@ -136,6 +137,10 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
       banner_image:     bannerPath,
       highlight_video:  videoPath,
       price_kes:   data.type === "paid" ? (data.price_kes ?? 0) : 0,
+      // store early_bird_deadline as midnight EAT (21:00 UTC) of chosen date; null when cleared or type=free
+      early_bird_deadline: data.type === "paid" && data.early_bird_deadline
+        ? `${data.early_bird_deadline}T21:00:00Z`
+        : null,
       // empty strings → null
       venue_map_url:     data.venue_map_url || null,
       playlist_url:      data.playlist_url || null,
@@ -436,9 +441,15 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         </div>
 
         {type === "paid" && (
-          <Field label="Price (KES)" error={errors.price_kes?.message}>
-            <input {...register("price_kes", { valueAsNumber: true })} type="number" min="0" placeholder="500" className={inp(!!errors.price_kes)} />
-          </Field>
+          <>
+            <Field label="Price (KES)" error={errors.price_kes?.message}>
+              <input {...register("price_kes", { valueAsNumber: true })} type="number" min="0" placeholder="500" className={inp(!!errors.price_kes)} />
+            </Field>
+            <Field label="Early bird deadline (optional)" error={errors.early_bird_deadline?.message}>
+              <input {...register("early_bird_deadline")} type="date" className={inp(false)} />
+              <p className="text-[11px] text-charcoal/40 mt-1 leading-relaxed">Past attendees who register before this date get free entry. Leave blank for no early bird offer.</p>
+            </Field>
+          </>
         )}
 
         <Field label="Capacity (optional)" error={errors.capacity?.message}>

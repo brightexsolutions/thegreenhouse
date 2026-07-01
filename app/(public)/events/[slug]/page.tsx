@@ -469,6 +469,19 @@ export default async function EventDetailPage({ params }: Props) {
                       )}
                     </div>
 
+                    {(() => {
+                      const earlyBirdDeadline = (event as { early_bird_deadline?: string | null }).early_bird_deadline;
+                      const isEarlyBirdActive = event.type === "paid" && earlyBirdDeadline && new Date(earlyBirdDeadline) > new Date();
+                      if (!isEarlyBirdActive || !earlyBirdDeadline) return null;
+                      const deadlineLabel = new Date(earlyBirdDeadline).toLocaleDateString("en-KE", { day: "numeric", month: "long" });
+                      return (
+                        <div className="mb-4 px-4 py-3 rounded-xl bg-gold/10 border border-gold/30 text-center">
+                          <p className="text-xs font-semibold text-gold/90 uppercase tracking-wide mb-0.5">Early bird</p>
+                          <p className="text-sm text-charcoal/80 leading-snug">Free entry if you register before <strong>{deadlineLabel}</strong></p>
+                        </div>
+                      );
+                    })()}
+
                     {isOpen && isFull ? (
                       <div className="w-full py-3.5 rounded-full bg-red-50 border border-red-100 text-red-500 text-sm text-center font-medium">
                         This session is full

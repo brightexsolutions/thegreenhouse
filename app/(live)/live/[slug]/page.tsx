@@ -4,6 +4,7 @@ import type { Metadata } from "next";
 import { LiveAttendeeView } from "@/components/live/live-attendee-view";
 import { DonationPrompt } from "@/components/live/donation-prompt";
 import { PreEventView } from "@/components/live/pre-event-view";
+import { PostEventView } from "@/components/live/post-event-view";
 import { Wifi } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 
@@ -78,6 +79,28 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
     .filter(s => !(s as { deleted_at?: string | null }).deleted_at)
     .sort((a, b) => a.sort_order - b.sort_order);
 
+  if (typedEvent.status === "past") {
+    const { data: nextEventRow } = await supabase
+      .from("events")
+      .select("title, event_date, slug")
+      .is("deleted_at", null)
+      .in("status", ["published", "live"])
+      .gt("event_date", typedEvent.event_date)
+      .order("event_date", { ascending: true })
+      .limit(1)
+      .maybeSingle();
+
+    return (
+      <PostEventView
+        eventId={typedEvent.id}
+        eventTitle={typedEvent.title}
+        themeTitle={typedEvent.theme_title}
+        themeScripture={typedEvent.theme_scripture}
+        nextEvent={nextEventRow as { title: string; event_date: string; slug: string } | null}
+      />
+    );
+  }
+
   if (typedEvent.status !== "live") {
     return (
       <PreEventView
@@ -87,7 +110,7 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
         venueName={typedEvent.venue_name}
         themeTitle={typedEvent.theme_title}
         themeScripture={typedEvent.theme_scripture}
-        isPast={typedEvent.status === "past"}
+        isPast={false}
       />
     );
   }

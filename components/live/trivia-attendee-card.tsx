@@ -112,7 +112,9 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
     // Poll every 4s as fallback in case Realtime misses an event
     const pollId = setInterval(fetchAll, 4000);
 
-    // Realtime subscription on trivia_rounds for near-instant status changes
+    // Realtime subscription on trivia_rounds for near-instant status changes.
+    // Re-fetch the full round (not just merging raw fields) so that correct_index
+    // is populated — the API only returns it once status = revealing/closed.
     const supabase = createBrowserClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -122,16 +124,8 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
       .on("postgres_changes", {
         event: "UPDATE", schema: "public", table: "trivia_rounds",
         filter: `id=eq.${roundId}`,
-      }, (payload: { new: Record<string, unknown> }) => {
-        // payload.new is a raw DB row — no joined question data.
-        // Only merge the status fields; keep question/options from the initial fetch.
-        if (!cancelled && payload.new) {
-          setRound(prev => prev ? {
-            ...prev,
-            status:      (payload.new.status as TriviaRound["status"]) ?? prev.status,
-            revealed_at: (payload.new.revealed_at as string | null) ?? null,
-          } : prev);
-        }
+      }, () => {
+        if (!cancelled) fetchAll();
       })
       .subscribe();
 

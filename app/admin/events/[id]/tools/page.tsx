@@ -7,8 +7,9 @@ import { CommsSendDialog } from "@/components/admin/comms-send-dialog";
 import { SongContributionPanel } from "@/components/admin/song-contribution-panel";
 import { ContributionLinkPanel } from "@/components/admin/contribution-link-panel";
 import { PostEventEmailPanel } from "@/components/admin/post-event-email-panel";
+import { AnnounceAttendeesPanel } from "@/components/admin/announce-attendees-panel";
 import Link from "next/link";
-import { ExternalLink, Download, Tv2 } from "lucide-react";
+import { ExternalLink, Download, Tv2, BarChart2 } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -21,7 +22,7 @@ export default async function EventToolsPage({ params }: Props) {
   const [{ data: event }, { count: registrantCount }, { count: emailCount }, { data: controlLinks }] = await Promise.all([
     supabase
       .from("events")
-      .select("id, title, slug, status, checkin_token, post_event_email_sent")
+      .select("id, title, slug, status, checkin_token, post_event_email_sent, type, price_kes, early_bird_deadline, event_date")
       .eq("id", id)
       .is("deleted_at", null)
       .single(),
@@ -130,6 +131,27 @@ export default async function EventToolsPage({ params }: Props) {
           )}
         </div>
 
+        {/* Summary report — always available */}
+        <div className="flex items-start gap-3 p-3.5 rounded-xl bg-forest/5 border border-forest/15">
+          <div className="w-8 h-8 rounded-lg bg-forest/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <BarChart2 size={14} className="text-forest" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-charcoal mb-0.5">Event Summary Report</p>
+            <p className="text-xs text-charcoal/50 leading-relaxed mb-2.5">
+              A clear, shareable overview for your team — registrations, attendance, session feedback, and trivia participation.
+            </p>
+            <a
+              href={`/api/admin/events/${id}/report`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 px-3.5 py-2 rounded bg-forest text-cream text-xs font-semibold hover:bg-moss transition-colors"
+            >
+              <ExternalLink size={12} /> Open Report
+            </a>
+          </div>
+        </div>
+
         <div className="flex flex-wrap gap-3">
           {(registrantCount ?? 0) > 0 ? (
             <>
@@ -162,6 +184,25 @@ export default async function EventToolsPage({ params }: Props) {
           <CommsSendDialog events={[{ id, title: event.title }]} />
         </div>
       </div>
+
+      {/* Announce to past attendees — shown for upcoming (non-past, non-cancelled) events */}
+      {event.status !== "past" && event.status !== "cancelled" && (() => {
+        const isPaid = (event as { type: string }).type === "paid";
+        const rawDeadline = (event as { early_bird_deadline?: string | null }).early_bird_deadline;
+        const isEarlyBirdActive = isPaid && rawDeadline && new Date(rawDeadline) > new Date();
+        const earlyBirdDate = isEarlyBirdActive && rawDeadline
+          ? new Date(rawDeadline).toLocaleDateString("en-KE", { day: "numeric", month: "long", year: "numeric" })
+          : null;
+        return (
+          <AnnounceAttendeesPanel
+            eventId={id}
+            eventTitle={event.title}
+            isPaid={isPaid}
+            hasEarlyBird={!!isEarlyBirdActive}
+            earlyBirdDate={earlyBirdDate}
+          />
+        );
+      })()}
 
       {/* Post-event email — only shown for past events */}
       {event.status === "past" && (
