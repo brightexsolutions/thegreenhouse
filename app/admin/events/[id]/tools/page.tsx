@@ -7,6 +7,7 @@ import { CommsSendDialog } from "@/components/admin/comms-send-dialog";
 import { SongContributionPanel } from "@/components/admin/song-contribution-panel";
 import { ContributionLinkPanel } from "@/components/admin/contribution-link-panel";
 import { PostEventEmailPanel } from "@/components/admin/post-event-email-panel";
+import { AnnounceAttendeesPanel } from "@/components/admin/announce-attendees-panel";
 import Link from "next/link";
 import { ExternalLink, Download, Tv2, BarChart2 } from "lucide-react";
 
@@ -21,7 +22,7 @@ export default async function EventToolsPage({ params }: Props) {
   const [{ data: event }, { count: registrantCount }, { count: emailCount }, { data: controlLinks }] = await Promise.all([
     supabase
       .from("events")
-      .select("id, title, slug, status, checkin_token, post_event_email_sent")
+      .select("id, title, slug, status, checkin_token, post_event_email_sent, type, price_kes, early_bird_deadline, event_date")
       .eq("id", id)
       .is("deleted_at", null)
       .single(),
@@ -183,6 +184,25 @@ export default async function EventToolsPage({ params }: Props) {
           <CommsSendDialog events={[{ id, title: event.title }]} />
         </div>
       </div>
+
+      {/* Announce to past attendees — shown for upcoming (non-past, non-cancelled) events */}
+      {event.status !== "past" && event.status !== "cancelled" && (() => {
+        const isPaid = (event as { type: string }).type === "paid";
+        const rawDeadline = (event as { early_bird_deadline?: string | null }).early_bird_deadline;
+        const isEarlyBirdActive = isPaid && rawDeadline && new Date(rawDeadline) > new Date();
+        const earlyBirdDate = isEarlyBirdActive && rawDeadline
+          ? new Date(rawDeadline).toLocaleDateString("en-KE", { day: "numeric", month: "long", year: "numeric" })
+          : null;
+        return (
+          <AnnounceAttendeesPanel
+            eventId={id}
+            eventTitle={event.title}
+            isPaid={isPaid}
+            hasEarlyBird={!!isEarlyBirdActive}
+            earlyBirdDate={earlyBirdDate}
+          />
+        );
+      })()}
 
       {/* Post-event email — only shown for past events */}
       {event.status === "past" && (

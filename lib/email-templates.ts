@@ -541,3 +541,160 @@ Questions? ${CONTACT_EMAIL}
 ${SITE_URL}
 `;
 }
+
+// ─── Past-attendee announcement + early bird email ────────────────────────────
+
+export interface AnnounceAttendeeEmailData {
+  firstName:          string;
+  newEventTitle:      string;
+  newEventDate:       string;
+  newEventTime:       string;
+  newEventSlug:       string;
+  venueName:          string | null;
+  themeTitle?:        string | null;
+  themeScripture?:    string | null;
+  isPaid:             boolean;
+  priceKes?:          number | null;
+  earlyBirdDeadline?: string | null;  // formatted human-readable date
+}
+
+export function announceAttendeeEmailHtml(d: AnnounceAttendeeEmailData): string {
+  const registerUrl = `${SITE_URL}/events/${d.newEventSlug}`;
+  const hasEarlyBird = d.isPaid && d.earlyBirdDeadline;
+  return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>You're invited — ${d.newEventTitle}</title>
+<style>
+  body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
+  .wrap { max-width: 560px; margin: 0 auto; }
+  .header { background: #1b3a2a; padding: 40px 40px 32px; border-radius: 16px 16px 0 0; }
+  .logo { color: #c9a24a; font-size: 11px; letter-spacing: 4px; text-transform: uppercase; font-weight: 700; }
+  .header h1 { color: #f7f2e8; font-size: 30px; font-weight: 700; margin: 14px 0 0; line-height: 1.2; }
+  .header p { color: rgba(247,242,232,0.6); font-size: 14px; margin: 10px 0 0; }
+  .body { background: #ffffff; border-radius: 0 0 16px 16px; padding: 32px 40px 40px; }
+  .greeting { font-size: 16px; color: #1a1a18; line-height: 1.7; margin-bottom: 24px; }
+  .detail-grid { background: #f7f2e8; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+  .detail-row { margin-bottom: 12px; }
+  .detail-row:last-child { margin-bottom: 0; }
+  .detail-row table { border-collapse: collapse; }
+  .detail-icon { width: 28px; font-size: 16px; vertical-align: top; padding-top: 2px; }
+  .detail-label { font-size: 10px; text-transform: uppercase; letter-spacing: 1.5px; color: #6b7280; font-weight: 600; margin-bottom: 2px; }
+  .detail-value { font-size: 15px; color: #1a1a18; font-weight: 600; }
+  .theme-block { background: linear-gradient(135deg,#1b3a2a,#0d2218); border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; }
+  .theme-label { color: rgba(201,162,74,0.7); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; margin: 0 0 6px; }
+  .theme-title { color: #c9a24a; font-size: 20px; font-weight: 700; font-style: italic; margin: 0 0 4px; }
+  .theme-verse { color: rgba(247,242,232,0.55); font-size: 13px; margin: 0; }
+  .early-bird-box { border: 1.5px solid #c9a24a; border-radius: 12px; padding: 20px 24px; margin-bottom: 24px; background: #fffbf0; }
+  .early-bird-label { font-size: 10px; letter-spacing: 2px; text-transform: uppercase; font-weight: 700; color: #9a7832; margin: 0 0 6px; }
+  .early-bird-title { font-size: 18px; font-weight: 700; color: #1b3a2a; margin: 0 0 8px; }
+  .early-bird-body { font-size: 14px; color: #5c4a35; line-height: 1.6; margin: 0; }
+  .divider { border: none; border-top: 1px solid #e5e7eb; margin: 28px 0; }
+  .cta { display: block; text-align: center; background: #1b3a2a; color: #f7f2e8 !important; text-decoration: none; padding: 16px 32px; border-radius: 100px; font-weight: 700; font-size: 15px; margin: 0 0 12px; }
+  .footer { text-align: center; padding: 24px 40px; font-size: 13px; color: #6b7280; line-height: 1.8; }
+  .footer a { color: #c9a24a; text-decoration: none; font-weight: 600; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">${EMAIL_FROM_NAME}</div>
+    <h1>You're invited back,<br />${d.firstName}.</h1>
+    <p>The next session is here.</p>
+  </div>
+  <div class="body">
+    <p class="greeting">
+      We loved having you with us — and we're delighted to let you know that the next session of ${SITE_NAME} is now open.
+      We'd love to see you again.
+    </p>
+
+    <div class="detail-grid">
+      <div class="detail-row">
+        <table><tr>
+          <td class="detail-icon">📋</td>
+          <td><div class="detail-label">Session</div><div class="detail-value">${d.newEventTitle}</div></td>
+        </tr></table>
+      </div>
+      <div class="detail-row">
+        <table><tr>
+          <td class="detail-icon">📅</td>
+          <td><div class="detail-label">Date</div><div class="detail-value">${d.newEventDate}</div></td>
+        </tr></table>
+      </div>
+      <div class="detail-row">
+        <table><tr>
+          <td class="detail-icon">🕐</td>
+          <td><div class="detail-label">Time</div><div class="detail-value">${d.newEventTime}</div></td>
+        </tr></table>
+      </div>
+      ${d.venueName ? `
+      <div class="detail-row">
+        <table><tr>
+          <td class="detail-icon">📍</td>
+          <td><div class="detail-label">Venue</div><div class="detail-value">${d.venueName}</div></td>
+        </tr></table>
+      </div>` : ""}
+    </div>
+
+    ${d.themeTitle ? `
+    <div class="theme-block">
+      <p class="theme-label">Theme</p>
+      <p class="theme-title">${d.themeTitle}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+    </div>` : ""}
+
+    ${hasEarlyBird ? `
+    <div class="early-bird-box">
+      <p class="early-bird-label">Early bird — past attendees only</p>
+      <p class="early-bird-title">Free entry until ${d.earlyBirdDeadline}</p>
+      <p class="early-bird-body">
+        As a returning member of our community, you get early bird access — register before ${d.earlyBirdDeadline}
+        and your entry fee is waived. After that, entry is KES ${(d.priceKes ?? 0).toLocaleString()}.
+        Be first.
+      </p>
+    </div>` : ""}
+
+    <a href="${registerUrl}" class="cta">${hasEarlyBird ? "Claim my free early bird spot →" : "Reserve my spot →"}</a>
+
+    <hr class="divider" />
+
+    <p style="font-size:14px;color:#6b7280;line-height:1.7;text-align:center;">
+      Follow us on
+      <a href="${SOCIAL_INSTAGRAM}" style="color:#1b3a2a;font-weight:600;">Instagram</a>
+      for behind-the-scenes moments and session updates.
+    </p>
+  </div>
+  <div class="footer">
+    <p>You received this because you attended a previous ${SITE_NAME} session.</p>
+    <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
+    <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${EMAIL_FROM_NAME}</p>
+  </div>
+</div>
+</body>
+</html>`;
+}
+
+export function announceAttendeeEmailText(d: AnnounceAttendeeEmailData): string {
+  const registerUrl = `${SITE_URL}/events/${d.newEventSlug}`;
+  const hasEarlyBird = d.isPaid && d.earlyBirdDeadline;
+  return `${SITE_NAME} — You're invited back
+
+Hi ${d.firstName},
+
+The next session of ${SITE_NAME} is open, and we'd love to see you again.
+
+${d.newEventTitle}
+Date:  ${d.newEventDate}
+Time:  ${d.newEventTime}${d.venueName ? `\nVenue: ${d.venueName}` : ""}
+${d.themeTitle ? `\nTheme: ${d.themeTitle}${d.themeScripture ? ` — ${d.themeScripture}` : ""}` : ""}
+${hasEarlyBird ? `\nEARLY BIRD — past attendees only\nRegister before ${d.earlyBirdDeadline} for a waived entry fee.\nAfter that, entry is KES ${(d.priceKes ?? 0).toLocaleString()}.` : ""}
+
+Register here: ${registerUrl}
+
+See you there,
+— ${EMAIL_FROM_NAME}
+${SITE_URL}
+`;
+}

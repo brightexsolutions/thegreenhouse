@@ -31,6 +31,7 @@ export interface Event {
   theme_description:string | null;
   dress_code:       string | null;
   playlist_url:     string | null;
+  early_bird_deadline:   string | null;
   checkin_token:         string | null;
   post_event_email_sent: boolean;
   deleted_at:            string | null;
@@ -96,6 +97,7 @@ export interface Registration {
   whatsapp_opt_in: boolean;
   ticket_sent:     boolean;
   checked_in:      boolean;
+  is_early_bird:   boolean;
   deleted_at:      string | null;
   created_at:      string;
   updated_at:      string;
