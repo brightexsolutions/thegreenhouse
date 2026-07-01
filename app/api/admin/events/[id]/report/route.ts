@@ -62,6 +62,26 @@ function row(label: string, count: number, total: number) {
     </div>`;
 }
 
+function delta(current: number, prev: number): string {
+  if (!prev) return current > 0 ? `<span class="delta-up">New</span>` : "";
+  const pctChange = ((current - prev) / prev) * 100;
+  const abs = Math.abs(Math.round(pctChange));
+  if (abs < 2) return `<span class="delta-flat">— no change</span>`;
+  return pctChange > 0
+    ? `<span class="delta-up">↑ ${abs}%</span>`
+    : `<span class="delta-dn">↓ ${abs}%</span>`;
+}
+
+function cmpRow(label: string, curr: string | number, prev: string | number | null, d: string) {
+  return `
+    <tr>
+      <td class="cmp-label">${label}</td>
+      <td class="cmp-curr">${curr}</td>
+      <td class="cmp-prev">${prev ?? "—"}</td>
+      <td class="cmp-delta">${d}</td>
+    </tr>`;
+}
+
 export async function GET(req: NextRequest, { params }: Props) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -99,6 +119,44 @@ export async function GET(req: NextRequest, { params }: Props) {
   ]);
 
   if (!event) return new NextResponse("Event not found", { status: 404 });
+
+  // ── Find previous event ─────────────────────────────────────────────────────
+  const { data: prevEvent } = await admin
+    .from("events")
+    .select("id, title, event_date")
+    .is("deleted_at", null)
+    .lt("event_date", event.event_date)
+    .order("event_date", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  type PrevStats = { regs: number; checkedIn: number; walkins: number; feedback: number; triviaPlayers: number };
+  let prev: PrevStats | null = null;
+
+  if (prevEvent) {
+    const [
+      { data: pRegs },
+      { data: pFeedback },
+      { data: pRounds },
+    ] = await Promise.all([
+      admin.from("registrations").select("checked_in, is_walkin").eq("event_id", prevEvent.id).is("deleted_at", null),
+      admin.from("feedback_submissions").select("id").eq("event_id", prevEvent.id),
+      admin.from("trivia_rounds").select("id, trivia_responses(attendee_name)").eq("event_id", prevEvent.id),
+    ]);
+    const pAllRegs = pRegs ?? [];
+    const pRoundsList = pRounds ?? [];
+    const pAllResponses = pRoundsList.flatMap(r =>
+      (r.trivia_responses ?? []) as { attendee_name: string | null }[]
+    );
+    const pUniqueNames = new Set(pAllResponses.map(r => r.attendee_name?.trim().toLowerCase()).filter(Boolean));
+    prev = {
+      regs:          pAllRegs.length,
+      checkedIn:     pAllRegs.filter(r => r.checked_in).length,
+      walkins:       pAllRegs.filter(r => r.is_walkin && r.checked_in).length,
+      feedback:      (pFeedback ?? []).length,
+      triviaPlayers: pUniqueNames.size,
+    };
+  }
 
   const allRegs = regs ?? [];
   const allFeedback = feedback ?? [];
@@ -381,6 +439,41 @@ export async function GET(req: NextRequest, { params }: Props) {
   }
   .highlight-box strong { font-weight: 700; }
 
+  /* ── Comparison table ── */
+  .cmp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .cmp-table thead tr { background: #f0f5ea; }
+  .cmp-table th {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: .05em;
+    text-transform: uppercase;
+    color: #4a5544;
+    padding: 9px 12px;
+    text-align: left;
+    border-bottom: 1px solid #dfe8d8;
+  }
+  .cmp-table th:not(:first-child) { text-align: right; }
+  .cmp-table td { padding: 9px 12px; border-bottom: 1px solid #f0ede8; }
+  .cmp-table tr:last-child td { border-bottom: none; }
+  .cmp-table tbody tr:nth-child(even) { background: #faf9f6; }
+  .cmp-label { font-weight: 500; color: #1c2419; }
+  .cmp-curr  { text-align: right; font-weight: 700; color: #1c2419; }
+  .cmp-prev  { text-align: right; color: #9a9a8a; }
+  .cmp-delta { text-align: right; }
+  .delta-up  { color: #2D5016; font-weight: 700; }
+  .delta-dn  { color: #b94444; font-weight: 700; }
+  .delta-flat { color: #9a9a8a; }
+  .prev-event-note {
+    font-size: 11px;
+    color: #9a9a8a;
+    margin-bottom: 10px;
+    font-style: italic;
+  }
+
   /* ── Leaderboard table ── */
   .leaderboard-wrap {
     margin-top: 16px;
@@ -561,6 +654,51 @@ export async function GET(req: NextRequest, { params }: Props) {
       </tbody>
     </table>
   </div>` : ""}
+  `}
+</div>
+
+<!-- ── 5. Compared to last time ───────────────────────────────────────── -->
+<div class="section">
+  <div class="section-heading">Compared to Last Time</div>
+
+  ${!prevEvent ? `<p class="no-data">This is the first event on record — comparison data will appear from the next session onwards.</p>` : `
+  <p class="prev-event-note">Previous event: ${prevEvent.title} · ${fmtDate(prevEvent.event_date)}</p>
+  <div style="border:1px solid #e4e0d4; border-radius:8px; overflow:hidden;">
+    <table class="cmp-table">
+      <thead>
+        <tr>
+          <th>Metric</th>
+          <th>This event</th>
+          <th>Last time</th>
+          <th>Change</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${prev ? cmpRow("Registrations", totalReg, prev.regs, delta(totalReg, prev.regs)) : ""}
+        ${prev ? cmpRow("Showed up", checkedIn, prev.checkedIn, delta(checkedIn, prev.checkedIn)) : ""}
+        ${prev ? cmpRow("Walk-ins", walkins, prev.walkins, delta(walkins, prev.walkins)) : ""}
+        ${prev ? cmpRow(
+          "Attendance rate",
+          `${totalReg ? Math.round((checkedIn / totalReg) * 100) : 0}%`,
+          prev.regs ? `${Math.round((prev.checkedIn / prev.regs) * 100)}%` : "—",
+          (() => {
+            const c = totalReg ? Math.round((checkedIn / totalReg) * 100) : 0;
+            const p = prev!.regs ? Math.round((prev!.checkedIn / prev!.regs) * 100) : null;
+            if (!p) return "";
+            const diff = c - p;
+            if (Math.abs(diff) < 2) return `<span class="delta-flat">— no change</span>`;
+            return diff > 0
+              ? `<span class="delta-up">↑ ${diff}pp</span>`
+              : `<span class="delta-dn">↓ ${Math.abs(diff)}pp</span>`;
+          })()
+        ) : ""}
+        ${prev ? cmpRow("Feedback responses", allFeedback.length, prev.feedback, delta(allFeedback.length, prev.feedback)) : ""}
+        ${prev && (uniqueCount > 0 || prev.triviaPlayers > 0)
+          ? cmpRow("Trivia players", uniqueCount, prev.triviaPlayers, delta(uniqueCount, prev.triviaPlayers))
+          : ""}
+      </tbody>
+    </table>
+  </div>
   `}
 </div>
 
