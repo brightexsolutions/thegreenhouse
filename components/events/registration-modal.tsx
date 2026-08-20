@@ -133,7 +133,7 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
       <div onClick={() => setOpen(true)}>
         {trigger ?? (
           <button className="w-full flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-all duration-200">
-            Register — it&apos;s free
+            Register, it&apos;s free
           </button>
         )}
       </div>

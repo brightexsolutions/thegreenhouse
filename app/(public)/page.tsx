@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import { HeroCollage }      from "@/components/home/hero-collage";
 
 export const metadata: Metadata = {
-  title: "The Green House — Worship Community · Nairobi, Kenya",
+  // absolute, so the root layout's "%s | The Green House" template is not
+  // applied. A plain string here produced "The Green House: Worship Community
+  // Nairobi, Kenya | The Green House": 69 characters with the brand name twice,
+  // which is why Google was truncating it with an ellipsis.
+  title: { absolute: "The Green House: Worship Community in Nairobi, Kenya" },
   description: "A cross-church worship community in Nairobi, Kenya. Quarterly gatherings for worship, prayer, and real connection across churches. Low pressure. Everyone welcome.",
   alternates: { canonical: "/" },
   openGraph: {
-    title:       "The Green House — Worship Community · Nairobi, Kenya",
+    title:       "The Green House: Worship Community in Nairobi, Kenya",
     description: "Cross-church quarterly worship gatherings in Nairobi, Kenya. Real connection. Low pressure.",
     url:         "https://www.greenhousews.co.ke",
     type:        "website",
@@ -22,6 +26,7 @@ import { CommunityCircles }   from "@/components/home/community-circles";
 import { SessionHighlight }   from "@/components/home/session-highlight";
 import { PartnersStrip }      from "@/components/home/partners-strip";
 import { createAdminClient } from "@/lib/supabase/server";
+import { getSitePhotos } from "@/lib/site-photos";
 import type { Event } from "@/types/database";
 
 export const revalidate = 300;
@@ -44,12 +49,13 @@ async function getNextEvent(): Promise<Event | null> {
 }
 
 export default async function HomePage() {
-  const nextEvent = await getNextEvent();
+  const [nextEvent, gallery] = await Promise.all([getNextEvent(), getSitePhotos(8)]);
+  const photos = gallery.map(g => g.path);
 
   return (
     <>
       {/* 1 — Hero with 4-card floating collage */}
-      <HeroCollage />
+      <HeroCollage photos={photos} />
 
       {/* Thin identity strip */}
       <MarqueeStrip />
@@ -62,13 +68,13 @@ export default async function HomePage() {
       } />
 
       {/* 2 — What a session feels like (image + text) */}
-      <WhatHappens />
+      <WhatHappens photos={photos.slice(4)} />
 
       {/* 3 — What makes it different (4 pillars) */}
       <VisionCards />
 
       {/* 4 — Session highlight video */}
-      <SessionHighlight />
+      <SessionHighlight photo={photos[0] ?? null} />
 
       {/* 5 — Next session countdown */}
       {nextEvent && <EventTeaser event={nextEvent} />}

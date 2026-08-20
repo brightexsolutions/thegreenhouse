@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { CheckCircle2, XCircle, Eye, EyeOff, Trash2, Loader2, Camera, RefreshCw } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, sessionName } from "@/lib/utils";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 
 interface Event {
@@ -103,7 +103,7 @@ export function AttendeePhotoApproval({ events }: Props) {
           >
             {events.map(e => (
               <option key={e.id} value={e.id}>
-                {e.title.replace("The Green House — ", "")} —{" "}
+                {sessionName(e.title)}{" · "}
                 {new Date(e.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
               </option>
             ))}
@@ -134,7 +134,7 @@ export function AttendeePhotoApproval({ events }: Props) {
                   <div className="px-5 py-3 border-b border-amber-100 bg-amber-50/50 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-amber-400" />
                     <p className="text-sm font-semibold text-amber-700">
-                      Pending review — {pending_photos.length} photo{pending_photos.length > 1 ? "s" : ""}
+                      Pending review, {pending_photos.length} photo{pending_photos.length > 1 ? "s" : ""}
                     </p>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-4">
@@ -159,7 +159,7 @@ export function AttendeePhotoApproval({ events }: Props) {
                   <div className="px-5 py-3 border-b border-mist flex items-center gap-2">
                     <CheckCircle2 size={13} className="text-green-500" />
                     <p className="text-sm font-semibold text-charcoal/60">
-                      Approved — {approved_photos.length} photo{approved_photos.length > 1 ? "s" : ""}
+                      Approved, {approved_photos.length} photo{approved_photos.length > 1 ? "s" : ""}
                     </p>
                   </div>
                   <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 p-4">

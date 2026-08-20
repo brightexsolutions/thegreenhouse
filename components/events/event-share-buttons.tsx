@@ -18,8 +18,8 @@ export function EventShareButtons({ url, title, date, variant, message }: Props)
   useEffect(() => { setHasNativeShare(!!navigator.share); }, []);
 
   const shareText = message
-    ? `${message}: ${title} — ${date}`
-    : `${title} — ${date}. Reserve your spot:`;
+    ? `${message}: ${title}, ${date}`
+    : `${title}, ${date}. Reserve your spot:`;
 
   const waUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${url}`)}`;
   const twUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(`${shareText}`)}&url=${encodeURIComponent(url)}`;

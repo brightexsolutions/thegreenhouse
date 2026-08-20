@@ -20,7 +20,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .select("title")
     .eq("slug", slug)
     .single();
-  const title = event ? `${(event as { title: string }).title} — Live` : "Live Program";
+  const title = event ? `${(event as { title: string }).title}, Live` : "Live Program";
   return { title, robots: { index: false } };
 }
 
@@ -119,7 +119,7 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
     <div className="min-h-screen bg-cream">
       <div className="bg-green-600 text-white text-center py-2.5 text-xs font-medium flex items-center justify-center gap-2">
         <Wifi size={12} className="animate-pulse" />
-        This session is live right now — you&apos;re in the right place
+        This session is live right now, you&apos;re in the right place
       </div>
 
       <div className="bg-forest pt-10 pb-8 px-4">

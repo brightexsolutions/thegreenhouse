@@ -71,7 +71,7 @@ export default function TrashPage() {
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-forest">Trash</h1>
-          <p className="text-sm text-charcoal/50 mt-1">Soft-deleted items — restore or leave to expire</p>
+          <p className="text-sm text-charcoal/50 mt-1">Soft-deleted items, restore or leave to expire</p>
         </div>
         <div className="flex items-center gap-1.5 text-xs text-charcoal/40 bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2">
           <Trash2 size={12} className="text-yellow-600" />
@@ -165,9 +165,9 @@ export default function TrashPage() {
                 {registrations.map(r => (
                   <tr key={r.id} className="hover:bg-off-white/50 transition-colors">
                     <td className="px-4 py-3 font-medium text-charcoal/80">{r.first_name} {r.last_name}</td>
-                    <td className="px-4 py-3 text-charcoal/50 text-xs">{r.email ?? r.phone ?? "—"}</td>
+                    <td className="px-4 py-3 text-charcoal/50 text-xs">{r.email ?? r.phone ?? "–"}</td>
                     <td className="px-4 py-3 text-charcoal/50 text-xs">
-                      {(r.events as { title: string } | null)?.title ?? "—"}
+                      {(r.events as { title: string } | null)?.title ?? "–"}
                     </td>
                     <td className="px-4 py-3 text-charcoal/40 text-xs">
                       {new Date(r.deleted_at).toLocaleDateString("en-KE", { dateStyle: "medium" })}

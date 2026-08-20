@@ -27,7 +27,7 @@ function NotificationBell() {
     return (
       <button
         disabled
-        title="Notifications blocked — allow them in your browser settings"
+        title="Notifications blocked, allow them in your browser settings"
         className="w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/25 cursor-not-allowed"
       >
         <BellOff size={13} />

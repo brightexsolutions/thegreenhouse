@@ -172,13 +172,13 @@ export function CommsLogTable({ logs }: Props) {
                   </td>
                   <td className="px-4 py-3.5 max-w-[220px]">
                     <p className="text-sm text-charcoal font-medium truncate" title={log.subject ?? undefined}>
-                      {log.subject ?? "—"}
+                      {log.subject ?? "–"}
                     </p>
                     <p className="text-[10px] text-charcoal/40 truncate mt-0.5">{log.recipient}</p>
                   </td>
                   <td className="px-4 py-3.5 hidden md:table-cell">
                     <p className="text-xs text-charcoal/55 truncate max-w-[160px]">
-                      {log.events?.title ?? "—"}
+                      {log.events?.title ?? "–"}
                     </p>
                   </td>
                   <td className="px-4 py-3.5">
@@ -191,7 +191,7 @@ export function CommsLogTable({ logs }: Props) {
                     <p className="text-[10px] text-charcoal/40 whitespace-nowrap">
                       {log.sent_at
                         ? new Date(log.sent_at).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "2-digit" })
-                        : "—"}
+                        : "–"}
                     </p>
                     <p className="text-[9px] text-charcoal/25 mt-0.5">
                       {log.sent_at

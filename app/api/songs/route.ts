@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/rate-limit";
+
+export const dynamic = "force-dynamic";
 
 // GET /api/songs?token=xxx  — return event info + all songs
 export async function GET(req: NextRequest) {
@@ -28,6 +31,9 @@ export async function GET(req: NextRequest) {
 
 // POST /api/songs?token=xxx — submit a new song
 export async function POST(req: NextRequest) {
+  const limited = await rateLimit(req, "public");
+  if (limited) return limited;
+
   const token = req.nextUrl.searchParams.get("token");
   if (!token) return NextResponse.json({ error: "Missing token" }, { status: 400 });
 

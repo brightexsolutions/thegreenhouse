@@ -5,8 +5,16 @@ import { logger } from "@/lib/logger";
 export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
+  // Fail closed. These run on cron-job.org, so the URLs are reachable from the
+  // open internet: a missing secret must block the request, never skip the check.
+  // post-event-email in particular broadcasts to every registrant.
+  const expected = process.env.CRON_SECRET;
+  if (!expected) {
+    logger.error("cron_secret_missing", { route: req.nextUrl.pathname });
+    return NextResponse.json({ error: "Cron is not configured" }, { status: 500 });
+  }
   const cronSecret = req.headers.get("x-vercel-cron-secret") ?? req.headers.get("x-cron-secret");
-  if (process.env.CRON_SECRET && cronSecret !== process.env.CRON_SECRET) {
+  if (cronSecret !== expected) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 

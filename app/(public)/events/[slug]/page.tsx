@@ -67,11 +67,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   return {
     title: event.title,
-    description: event.description ?? `${event.title} — a cross-church worship evening in Nairobi on ${formattedDate}.`,
+    description: event.description ?? `${event.title}, a cross-church worship evening in Nairobi on ${formattedDate}.`,
     alternates: { canonical: `/events/${slug}` },
     openGraph: {
       title: event.title,
-      description: event.description ?? `${event.title} — ${formattedDate}`,
+      description: event.description ?? `${event.title}: ${formattedDate}`,
       url: `${SITE_URL}/events/${slug}`,
       type: "website",
       ...(ogImage ? { images: [{ url: ogImage, width: 1200, alt: event.title }] } : {}),
@@ -219,7 +219,7 @@ export default async function EventDetailPage({ params }: Props) {
         {event.status === "live" && (
           <div className="absolute top-0 left-0 right-0 z-10 bg-green-600/95 backdrop-blur-sm text-white text-center py-2.5 px-4 text-xs font-semibold flex items-center justify-center gap-2">
             <Radio size={12} className="animate-pulse" />
-            This session is happening right now — join us
+            This session is happening right now, join us
           </div>
         )}
         {event.status === "cancelled" && (
@@ -462,7 +462,7 @@ export default async function EventDetailPage({ params }: Props) {
                         <InfoRow
                           icon={<Users size={12} />}
                           label={isFull
-                            ? `${event.capacity} — session full`
+                            ? `${event.capacity}, session full`
                             : `${registrantCount} / ${event.capacity} registered`
                           }
                         />
@@ -496,7 +496,7 @@ export default async function EventDetailPage({ params }: Props) {
 
                     {isOpen && !isFull && (
                       <p className="text-center text-xs text-charcoal/50 mt-3 leading-relaxed">
-                        Ticket sent to your email — link can also be copied &amp; shared
+                        Ticket sent to your email, link can also be copied &amp; shared
                       </p>
                     )}
 

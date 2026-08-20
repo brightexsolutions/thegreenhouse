@@ -3,6 +3,10 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { COMMS_FROM_EMAIL } from "@/lib/constants";
 
+export const dynamic = "force-dynamic";
+// Sending mail plus writing the log needs more than the default budget.
+export const maxDuration = 60;
+
 type Props = { params: Promise<{ id: string }> };
 
 export async function POST(req: NextRequest, { params }: Props) {
@@ -56,7 +60,7 @@ export async function POST(req: NextRequest, { params }: Props) {
   await resend.emails.send({
     from:    COMMS_FROM_EMAIL(),
     to:      [email],
-    subject: `Registrant list — ${eventTitle}`,
+    subject: `Registrant list: ${eventTitle}`,
     text:    `Attached is the registrant list for ${eventTitle} (${eventDate}). ${registrants.length} registrant(s).`,
     attachments: [{ filename: "registrants.csv", content: csv }],
   });

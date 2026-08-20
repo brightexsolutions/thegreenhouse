@@ -46,7 +46,7 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
         <h3 className="text-sm font-semibold text-charcoal">Check-in Link</h3>
       </div>
       <p className="text-xs text-charcoal/50 mb-4 leading-relaxed">
-        Share with your door team. No admin login required — access is protected by the token in the link.
+        Share with your door team. No admin login required, access is protected by the token in the link.
       </p>
 
       {!token ? (

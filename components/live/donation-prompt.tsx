@@ -189,7 +189,7 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                     <p className="text-[10px] label-caps text-gold/70 mb-0.5">Support the mission</p>
                     <h3 className="font-display text-xl font-semibold text-cream leading-tight">Give now</h3>
                     <p className="text-cream/55 text-xs mt-1 leading-relaxed">
-                      Venue, production, outreach — your contribution keeps this going.
+                      Venue, production, outreach, your contribution keeps this going.
                     </p>
                   </div>
                 </div>
@@ -317,7 +317,7 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                       {photoSuccess
                         ? "Thanks for capturing this moment with us."
                         : atPhotoLimit
-                          ? `You've shared ${MAX_PHOTOS} photos — limit reached.`
+                          ? `You've shared ${MAX_PHOTOS} photos, limit reached.`
                           : `Got a great shot? Drop it here · ${MAX_PHOTOS - uploadCount} remaining`}
                     </p>
                   </div>

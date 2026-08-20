@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Palette, Plus, X, BookOpen, ChevronDown, Loader2, CheckCircle2, AlertCircle, Edit2, Trash2 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, sessionName } from "@/lib/utils";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 
 type Theme = {
@@ -179,7 +179,7 @@ function ThemeCard({
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {assigned.map(ev => (
                     <span key={ev.id} className="inline-flex items-center gap-1 text-[10px] bg-forest/8 text-forest px-2 py-0.5 rounded-full font-medium">
-                      {ev.title.replace("The Green House — ", "")}
+                      {sessionName(ev.title)}
                       <button
                         onClick={() => doUnassign(ev.id)}
                         disabled={busy === ev.id}
@@ -247,7 +247,7 @@ function ThemeCard({
                     disabled={!!busy}
                     className="w-full flex items-center justify-between px-3 py-2 rounded-xl hover:bg-forest/5 text-sm text-charcoal transition-colors disabled:opacity-50"
                   >
-                    <span className="font-medium">{ev.title.replace("The Green House — ", "")}</span>
+                    <span className="font-medium">{sessionName(ev.title)}</span>
                     <span className="flex items-center gap-1 text-[10px] text-forest">
                       {busy === ev.id ? <Loader2 size={10} className="animate-spin" /> : <Plus size={10} />}
                       Assign

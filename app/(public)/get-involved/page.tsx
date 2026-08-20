@@ -6,7 +6,7 @@ import { InvolvementForm } from "@/components/get-involved/involvement-form";
 
 export const metadata: Metadata = {
   title: "Get Involved",
-  description: "Serve at The Green House — lead worship, host a venue, or join our volunteer team. Every role matters.",
+  description: "Serve at The Green House: lead worship, host a venue, or join our volunteer team. Every role matters.",
   alternates: { canonical: "/get-involved" },
 };
 
@@ -15,7 +15,7 @@ const ROLES = [
     image:   "https://images.unsplash.com/photo-1511379938547-c1f69419868d?auto=format&fit=crop&w=800&q=75",
     title:   "Worship Team",
     tagline: "Lead the room",
-    body:    "Are you a vocalist or instrumentalist? We rotate worship teams each session. Your church background doesn't matter — your heart does.",
+    body:    "Are you a vocalist or instrumentalist? We rotate worship teams each session. Your church background doesn't matter, your heart does.",
   },
   {
     image:   "https://images.unsplash.com/photo-1487958449943-2429e8be8625?auto=format&fit=crop&w=800&q=75",
@@ -27,13 +27,13 @@ const ROLES = [
     image:   "https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=800&q=75",
     title:   "Vision Carrier",
     tagline: "Shape what it becomes",
-    body:    "A small group of people who believe in what The Green House is doing and want to help it grow — through prayer, ideas, and showing up.",
+    body:    "A small group of people who believe in what The Green House is doing and want to help it grow: through prayer, ideas, and showing up.",
   },
   {
     image:   "https://images.unsplash.com/photo-1452802447250-470a88ac82bc?auto=format&fit=crop&w=800&q=75",
     title:   "Creative Team",
     tagline: "Capture and create",
-    body:    "Photography, video, design, or social — if you have a creative skill and want to use it for something meaningful, this is for you.",
+    body:    "Photography, video, design, or social: if you have a creative skill and want to use it for something meaningful, this is for you.",
   },
 ];
 
@@ -81,7 +81,7 @@ export default async function GetInvolvedPage({
             </FadeIn>
             <FadeIn delay={0.1}>
               <p className="text-cream/70 text-base sm:text-lg max-w-md leading-relaxed">
-                The Green House runs because people choose to show up — before, during, and after sessions. Every role is voluntary. Every contribution matters.
+                The Green House runs because people choose to show up: before, during, and after sessions. Every role is voluntary. Every contribution matters.
               </p>
             </FadeIn>
           </div>
@@ -117,7 +117,7 @@ export default async function GetInvolvedPage({
                 Volunteer<br />your gift
               </h2>
               <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-sm">
-                Worship, hosting, creative, vision — every gifted person has a role here.
+                Worship, hosting, creative, vision, every gifted person has a role here.
               </p>
               <div className="flex items-center gap-3 mt-7">
                 <div className="w-10 h-px bg-gold group-hover:w-16 transition-all duration-300" />
@@ -239,12 +239,12 @@ export default async function GetInvolvedPage({
                 Why your generosity<br />matters
               </h2>
               <p className="text-charcoal/60 text-base leading-relaxed mb-4">
-                Every session has real costs — a warm venue, quality sound, invited guests, and the
+                Every session has real costs: a warm venue, quality sound, invited guests, and the
                 small touches that make the room feel like a haven, not just a hall.
               </p>
               <p className="text-charcoal/60 text-base leading-relaxed">
                 By giving, you&apos;re not just covering expenses. You&apos;re directly investing in a space
-                where many people come tired and leave restored — and in the larger vision of community
+                where many people come tired and leave restored, and in the larger vision of community
                 outreach, mental health support, and discipleship that lies ahead.
               </p>
               <Link
@@ -271,7 +271,7 @@ export default async function GetInvolvedPage({
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0d2218] via-[#0d2218]/85 to-[#0d2218]/25" />
                   <div className="absolute inset-x-0 bottom-0 p-7 space-y-3.5">
                     {[
-                      { icon: "🏛", label: "Venue & Space",     body: "A warm, comfortable physical setting — the foundation of everything." },
+                      { icon: "🏛", label: "Venue & Space",     body: "A warm, comfortable physical setting, the foundation of everything." },
                       { icon: "🎵", label: "Sound & Equipment", body: "Quality acoustics so worship doesn't feel like an afterthought." },
                       { icon: "👤", label: "Invited Guests",    body: "Voices and gifts that enrich every session for everyone in the room." },
                       { icon: "☕", label: "Hospitality",       body: "The small touches that turn a gathering into a community." },
@@ -334,7 +334,7 @@ export default async function GetInvolvedPage({
               </h2>
               <p className="text-charcoal/60 text-base leading-relaxed mb-8">
                 Fill in the form and someone from the team will reach out.
-                No pressure, no commitment — just a conversation.
+                No pressure, no commitment, just a conversation.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">

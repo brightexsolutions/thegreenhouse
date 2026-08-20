@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { SITE_NAME, SITE_URL, COMMS_FROM_EMAIL } from "@/lib/constants";
+import { logger } from "@/lib/logger";
+
+export const dynamic = "force-dynamic";
 
 async function guardSuperAdmin() {
   const supabase = await createClient();
@@ -124,8 +127,34 @@ export async function DELETE(req: NextRequest) {
   const supabase = await guardSuperAdmin();
   if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  const cookieSupa = await createClient();
+  const { data: { user } } = await cookieSupa.auth.getUser();
+
   const { id } = await req.json() as { id: string };
+
+  // Locking yourself out is not a recoverable mistake from inside the panel.
+  if (user && user.id === id) {
+    return NextResponse.json(
+      { error: "You cannot remove your own admin account." },
+      { status: 400 }
+    );
+  }
+
   const { error } = await supabase.from("admin_profiles").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Deleting the profile alone leaves a valid Supabase session behind, and the
+  // API guards used to accept any signed-in user. requireAdmin() now checks for
+  // a profile, but the auth account still has to go or the person keeps a
+  // working login and can request password resets.
+  const { error: authError } = await supabase.auth.admin.deleteUser(id);
+  if (authError) {
+    logger.error("admin_auth_delete_failed", { adminId: id, error: authError.message });
+    return NextResponse.json({
+      error: "The admin was removed from the list, but their login could not be deleted. Remove it in the Supabase dashboard.",
+    }, { status: 500 });
+  }
+
+  logger.info("admin_removed", { adminId: id });
   return NextResponse.json({ deleted: true });
 }

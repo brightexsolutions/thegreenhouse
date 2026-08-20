@@ -406,7 +406,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         <h3 className="text-sm font-semibold text-charcoal">Event details</h3>
 
         <Field label="Title" error={errors.title?.message}>
-          <input {...register("title")} placeholder="The Green House — Session 03" className={inp(!!errors.title)} />
+          <input {...register("title")} placeholder="The Green House, Session 03" className={inp(!!errors.title)} />
         </Field>
 
         <Field label="Subtitle" error={errors.subtitle?.message}>
@@ -495,7 +495,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
       <div className="bg-white rounded-2xl border border-mist p-6 space-y-4">
         <h3 className="text-sm font-semibold text-charcoal">Dress code</h3>
         <Field label="Dress code guidance">
-          <input {...register("dress_code")} placeholder="Smart casual — come comfortable, come yourself." className={inp(false)} />
+          <input {...register("dress_code")} placeholder="Smart casual: come comfortable, come yourself." className={inp(false)} />
         </Field>
       </div>
 

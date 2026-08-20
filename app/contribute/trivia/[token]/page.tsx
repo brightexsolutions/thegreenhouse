@@ -163,7 +163,7 @@ export default function TriviaContributePage() {
               {qType === "multiple_choice" && (
                 <div className="space-y-2">
                   <label className="block text-[10px] font-semibold uppercase tracking-wider text-[#1a1a18]/40">
-                    Options — select the correct one
+                    Options, select the correct one
                   </label>
                   {form.options.map((opt, i) => (
                     <div key={i} className="flex items-center gap-2">
@@ -282,7 +282,7 @@ export default function TriviaContributePage() {
         {questions.length === 0 && !expandAdd && (
           <div className="text-center py-8 text-[#1a1a18]/30">
             <Sparkles size={28} className="mx-auto mb-3 opacity-30" />
-            <p className="text-sm">No questions yet — tap &ldquo;Add a question&rdquo; above to get started.</p>
+            <p className="text-sm">No questions yet, tap &ldquo;Add a question&rdquo; above to get started.</p>
           </div>
         )}
 

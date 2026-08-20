@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
 } from "@react-pdf/renderer";
+import { sessionName } from "@/lib/utils";
 
 const F = "#1b3a2a";   // forest
 const G = "#c9a24a";   // gold
@@ -203,12 +204,12 @@ interface TicketPdfProps {
 
 export function TicketPdf(p: TicketPdfProps) {
   const ref          = p.ticketToken.slice(0, 8).toUpperCase();
-  const sessionLabel = p.eventTitle.replace(/^The Green House\s*[—–-]\s*/i, "");
+  const sessionLabel = sessionName(p.eventTitle);
   const domain       = (p.siteUrl ?? "greenhousews.co.ke").replace(/^https?:\/\//, "");
 
   return (
     <Document
-      title={`Ticket — ${p.eventTitle}`}
+      title={`Ticket, ${p.eventTitle}`}
       author={p.siteName ?? "The Green House"}
       creator={p.siteName ?? "The Green House"}
     >

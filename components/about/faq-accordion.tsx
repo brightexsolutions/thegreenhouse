@@ -5,15 +5,15 @@ import { SESSION_FREQUENCY } from "@/lib/constants";
 const faqs = [
   {
     q: "Who is The Green House for?",
-    a: "Anyone who needs a space to breathe. Particularly those who are spiritually drained, emotionally burnt out, or feeling isolated from genuine community. It doesn't matter which church you attend, your denomination, or whether you're a regular churchgoer — if you're curious and open, you're welcome.",
+    a: "Anyone who needs a space to breathe. Particularly those who are spiritually drained, emotionally burnt out, or feeling isolated from genuine community. It doesn't matter which church you attend, your denomination, or whether you're a regular churchgoer: if you're curious and open, you're welcome.",
   },
   {
     q: "How often do sessions happen?",
-    a: `Sessions are ${SESSION_FREQUENCY} — four times a year. We keep it rare so each gathering feels meaningful, not routine.`,
+    a: `Sessions are ${SESSION_FREQUENCY}, four times a year. We keep it rare so each gathering feels meaningful, not routine.`,
   },
   {
     q: "What is the mental and emotional health aspect about?",
-    a: "We believe many Christians are quietly dealing with burnout, isolation, and emotional exhaustion that traditional church settings don't always address. The Green House creates intentional space to slow down, be honest, and find rest — for the whole person, not just the spiritual surface.",
+    a: "We believe many Christians are quietly dealing with burnout, isolation, and emotional exhaustion that traditional church settings don't always address. The Green House creates intentional space to slow down, be honest, and find rest: for the whole person, not just the spiritual surface.",
   },
   {
     q: "Is it free to attend?",
@@ -25,11 +25,11 @@ const faqs = [
   },
   {
     q: "Can I bring someone who doesn't go to church?",
-    a: "Absolutely — that's the point. The Green House is designed to be accessible for people at any point in their faith journey.",
+    a: "Absolutely, that's the point. The Green House is designed to be accessible for people at any point in their faith journey.",
   },
   {
     q: "Who runs The Green House?",
-    a: "A collective of gifted people from active ministries and churches across Nairobi, all sharing the same vision — worship teams, creatives, hosts, and vision-carriers who give their time and gifts voluntarily.",
+    a: "A collective of gifted people from active ministries and churches across Nairobi, all sharing the same vision: worship teams, creatives, hosts, and vision-carriers who give their time and gifts voluntarily.",
   },
   {
     q: "How do I stay informed about upcoming sessions?",

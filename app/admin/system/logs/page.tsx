@@ -42,7 +42,7 @@ export default async function LogsPage() {
     <div className="space-y-6">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-forest">System Logs</h1>
-        <p className="text-sm text-charcoal/50 mt-1">Communications history — last 200 entries</p>
+        <p className="text-sm text-charcoal/50 mt-1">Communications history, last 200 entries</p>
       </div>
 
       {/* Summary chips */}
@@ -101,12 +101,12 @@ export default async function LogsPage() {
                         {log.recipient}
                       </td>
                       <td className="px-4 py-3 text-charcoal/60 text-xs max-w-[140px] truncate">
-                        {(log.events as { title: string } | null)?.title ?? "—"}
+                        {(log.events as { title: string } | null)?.title ?? "–"}
                       </td>
                       <td className="px-4 py-3 text-charcoal/60 text-xs max-w-[200px] truncate">
                         {log.error_message
                           ? <span className="text-red-500">{log.error_message}</span>
-                          : (log.subject ?? "—")
+                          : (log.subject ?? "–")
                         }
                       </td>
                       <td className="px-4 py-3 text-charcoal/40 text-xs whitespace-nowrap">

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Music2, ChevronDown, ChevronUp, Plus, Loader2, CheckCircle2, AlertCircle, Search, Mic2, User, X } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, sessionName } from "@/lib/utils";
 
 interface Song {
   id:           string;
@@ -214,7 +214,7 @@ export default function ContributePage({ params }: { params: { token: string } }
             </div>
 
             <p className="text-sm text-charcoal/60 mb-4 leading-relaxed">
-              Are you a vocalist for <span className="font-semibold text-charcoal">{event?.title.replace("The Green House — ", "")}</span>?
+              Are you a vocalist for <span className="font-semibold text-charcoal">{sessionName(event?.title)}</span>?
               Add your name so your songs are credited to you on the program.
             </p>
 
@@ -320,7 +320,7 @@ export default function ContributePage({ params }: { params: { token: string } }
             </div>
             <div>
               <label className="text-xs font-semibold text-charcoal/70 mb-1.5 block">
-                Lyrics <span className="text-charcoal/40 font-normal">(optional — separate verses with a blank line)</span>
+                Lyrics <span className="text-charcoal/40 font-normal">(optional, separate verses with a blank line)</span>
               </label>
               <textarea
                 value={lyrics}

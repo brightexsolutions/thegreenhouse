@@ -104,7 +104,7 @@ export function AttendeePhotoShare({ slug }: Props) {
           </p>
           <p className="text-xs text-charcoal/50 mt-0.5">
             {atLimit
-              ? `You've shared ${MAX_PHOTOS} photos — limit reached`
+              ? `You've shared ${MAX_PHOTOS} photos, limit reached`
               : `Got a great shot? Drop it here · ${MAX_PHOTOS - uploadCount} remaining`}
           </p>
         </div>

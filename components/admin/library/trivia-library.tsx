@@ -283,7 +283,7 @@ export function TriviaLibrary() {
                       </div>
                     )}
                     {q.type === "open_input" && (
-                      <p className="text-xs text-charcoal/50 italic">Open text response — no correct answer marked</p>
+                      <p className="text-xs text-charcoal/50 italic">Open text response, no correct answer marked</p>
                     )}
                     {q.hint && (
                       <p className="text-xs text-charcoal/50">
@@ -348,7 +348,7 @@ export function TriviaLibrary() {
               {form.type === "multiple_choice" && (
                 <div>
                   <p className="text-xs font-semibold text-charcoal/50 uppercase tracking-wider mb-2">
-                    Options — tap the letter to mark correct answer
+                    Options, tap the letter to mark correct answer
                   </p>
                   <div className="space-y-2">
                     {form.options.map((opt, i) => {

@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { normalisePhone } from "@/lib/phone";
+import { rateLimit } from "@/lib/rate-limit";
 
 type Props = { params: Promise<{ slug: string }> };
 
 export async function POST(req: NextRequest, { params }: Props) {
+  const limited = await rateLimit(req, "checkin");
+  if (limited) return limited;
+
   const { slug } = await params;
 
   const body = await req.json().catch(() => ({})) as {

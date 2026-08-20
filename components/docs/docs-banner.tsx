@@ -38,7 +38,7 @@ export function DocsBanner() {
             Platform Documentation
           </h1>
           <p className="text-sm sm:text-base text-cream/60 leading-relaxed max-w-xl">
-            Full reference for the The Green House platform — covering events, registration, projection display, communications, check-in, library, and deployment. For team members running sessions.
+            Full reference for the The Green House platform: covering events, registration, projection display, communications, check-in, library, and deployment. For team members running sessions.
           </p>
 
           <div className="flex flex-wrap items-center gap-2 mt-6">

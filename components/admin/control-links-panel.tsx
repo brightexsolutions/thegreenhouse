@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 type Permission = "full" | "music" | "scenes" | "trivia" | "feedback";
 
 const PERMISSION_META: Record<Permission, { label: string; desc: string; color: string }> = {
-  full:     { label: "Full access",  desc: "All tabs — scenes, music, trivia, feedback", color: "bg-forest/15 text-forest border-forest/25" },
+  full:     { label: "Full access",  desc: "All tabs: scenes, music, trivia, feedback", color: "bg-forest/15 text-forest border-forest/25" },
   music:    { label: "Music",        desc: "Song selection and verse navigation",         color: "bg-gold/15 text-gold/80 border-gold/25" },
   scenes:   { label: "Scenes",       desc: "Scene switcher and display themes",           color: "bg-blue-50 text-blue-700 border-blue-200" },
   trivia:   { label: "Trivia",       desc: "Launch and manage trivia rounds",             color: "bg-purple-50 text-purple-700 border-purple-200" },
@@ -109,7 +109,7 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
         </button>
       </div>
       <p className="text-xs text-charcoal/50 mb-4 leading-relaxed">
-        Generate access links for worship leaders and team members. Each link can be scoped to specific sections — no admin login needed.
+        Generate access links for worship leaders and team members. Each link can be scoped to specific sections, no admin login needed.
       </p>
 
       {/* ── Create form ── */}
@@ -263,7 +263,7 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
       {links.length > 0 && (
         <p className="text-[10px] text-charcoal/30 mt-3 flex items-center gap-1">
           <AlertTriangle size={9} />
-          Revoking a link immediately invalidates it — the holder will lose access.
+          Revoking a link immediately invalidates it, the holder will lose access.
         </p>
       )}
     </div>

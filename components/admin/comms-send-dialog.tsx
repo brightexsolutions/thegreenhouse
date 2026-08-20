@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, X, Loader2, Mail, Phone, Users, Heart } from "lucide-react";
+import { Send, X, Loader2, Users, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface CommsDialogProps {
@@ -11,7 +11,8 @@ interface CommsDialogProps {
 export function CommsSendDialog({ events }: CommsDialogProps) {
   const [open,    setOpen]    = useState(false);
   const [eventId, setEventId] = useState(events[0]?.id ?? "");
-  const [channel, setChannel] = useState<"email" | "whatsapp">("email");
+  // Email is the only channel. WhatsApp sending was dropped as a paid service.
+  const channel = "email" as const;
   const [scope,   setScope]   = useState<"all" | "opt_in">("all");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
@@ -88,31 +89,6 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
                 </div>
               </div>
 
-              {/* Channel toggle */}
-              <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-charcoal/50 uppercase tracking-wider">Channel</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {([
-                    { value: "email",    Icon: Mail,  label: "Email"    },
-                    { value: "whatsapp", Icon: Phone, label: "WhatsApp" },
-                  ] as const).map(({ value, Icon, label }) => (
-                    <button
-                      key={value}
-                      onClick={() => setChannel(value)}
-                      className={cn(
-                        "flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-medium transition-all",
-                        channel === value
-                          ? "border-forest bg-forest text-cream shadow-sm"
-                          : "border-mist bg-white text-charcoal/55 hover:border-forest/30 hover:text-charcoal"
-                      )}
-                    >
-                      <Icon size={13} />
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               {/* Send to toggle */}
               <div className="space-y-1.5">
                 <label className="text-[11px] font-semibold text-charcoal/50 uppercase tracking-wider">Send to</label>
@@ -136,15 +112,10 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
                     </button>
                   ))}
                 </div>
-                {scope === "opt_in" && (
-                  <p className="text-[10px] text-charcoal/35 leading-relaxed">
-                    Only sends to registrants who ticked &ldquo;Keep me updated&rdquo; at registration.
-                  </p>
-                )}
               </div>
 
-              {/* Subject (email only) */}
-              {channel === "email" && (
+              {/* Subject */}
+              {(
                 <div className="space-y-1.5">
                   <label className="text-[11px] font-semibold text-charcoal/50 uppercase tracking-wider">Subject</label>
                   <input

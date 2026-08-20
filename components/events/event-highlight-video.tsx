@@ -13,12 +13,13 @@ interface Props {
 }
 
 function derivePoster(src: string): string | null {
-  if (src.includes("res.cloudinary.com")) {
-    return src
-      .replace("/video/upload/", "/video/upload/so_2,w_960,q_auto,f_jpg/")
-      .replace(/\.mp4$/, ".jpg")
-      .replace(/\.mov$/, ".jpg");
-  }
+  // This used to build a still frame out of a Cloudinary transform URL. That
+  // account is deleted, so any poster derived from one is a second dead
+  // request on top of a dead video. Returning null puts the designed gradient
+  // behind the play button instead.
+  //
+  // A stored poster_url column would be the right way to bring these back.
+  if (src.includes("res.cloudinary.com")) return null;
   return null;
 }
 

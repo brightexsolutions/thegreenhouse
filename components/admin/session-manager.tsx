@@ -59,7 +59,7 @@ const SESSION_HINTS: Record<string, { items: string[]; tip: string }> = {
   prayer:   { items: ["Add a 'Quote' item for each prayer prompt", "Add a 'Verse' item for any scripture anchor", "Leave notes for the prayer leader"], tip: "Use the Custom scene on the control panel to push live prompts to the display screen." },
   sharing:  { items: ["Add a 'Topic' item as the discussion prompt", "Add 'Text' items for sub-questions or talking points", "Set a duration so the session stays on time"], tip: "Switch to the Community scene to show attendance count while sharing." },
   teaching: { items: ["Add 'Verse' items for each scripture reference", "Add 'Text' items for outline points", "Paste full passage text so it appears on the display screen"], tip: "Use the Theme scene on the control panel to anchor the teaching title on screen." },
-  open_mic: { items: ["Add songs that participants may request", "Assign vocalist names as people sign up", "Use Trivia between sets to keep energy up"], tip: "Plan a trivia question for this section — it fills wait time well." },
+  open_mic: { items: ["Add songs that participants may request", "Assign vocalist names as people sign up", "Use Trivia between sets to keep energy up"], tip: "Plan a trivia question for this section, it fills wait time well." },
   other:    { items: ["Add songs, quotes, verses, or topics as needed", "Drag to reorder if the plan changes mid-session"], tip: "Any item type can be pushed live from the control panel." },
 };
 
@@ -557,7 +557,7 @@ function SortableSessionCard({
             value={session.duration_min ?? ""}
             onChange={e => onUpdate({ duration_min: e.target.value ? Number(e.target.value) : null })}
             className="w-10 bg-transparent text-cream/50 text-xs border-none outline-none text-right"
-            placeholder="—"
+            placeholder="–"
             min="1"
           />
           <span className="text-cream/30 text-[10px]">min</span>
@@ -842,7 +842,7 @@ function SortableSessionCard({
                               />
                             ) : (
                               <pre className="text-cream/55 text-sm leading-loose whitespace-pre-wrap font-sans min-h-[60px]">
-                                {ss.songs?.lyrics || <span className="text-cream/20 italic text-xs">No lyrics yet — click Edit to add</span>}
+                                {ss.songs?.lyrics || <span className="text-cream/20 italic text-xs">No lyrics yet, click Edit to add</span>}
                               </pre>
                             )}
                             <p className="text-[10px] text-cream/20 mt-3">
@@ -883,9 +883,9 @@ function SortableSessionCard({
                   onChange={e => setTextContent(e.target.value)}
                   rows={3}
                   placeholder={
-                    textType === "quote"  ? `e.g. "Where there is love, there is life." — Gandhi` :
+                    textType === "quote"  ? `e.g. "Where there is love, there is life.", Gandhi` :
                     textType === "topic"  ? "e.g. What does forgiveness look like in daily life?" :
-                    textType === "verse"  ? "e.g. John 3:16 — For God so loved the world…" :
+                    textType === "verse"  ? "e.g. John 3:16, For God so loved the world…" :
                     "Enter the text to display…"
                   }
                   className="w-full px-3 py-2 rounded-xl border border-blue-200 text-sm text-charcoal focus:outline-none focus:border-blue-400 resize-none placeholder:text-charcoal/30"

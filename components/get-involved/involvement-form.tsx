@@ -33,12 +33,12 @@ type FormData = z.infer<typeof schema>;
 
 const INTEREST_OPTIONS = [
   { value: "attend",         label: "I just want to attend sessions" },
-  { value: "worship_team",   label: "Worship team — vocalist or instrumentalist" },
+  { value: "worship_team",   label: "Worship team: vocalist or instrumentalist" },
   { value: "host_venue",     label: "Host a venue for a session" },
-  { value: "vision_carrier", label: "Vision Carrier — help shape the community" },
-  { value: "creative_team",  label: "Creative team — photography, design, video" },
-  { value: "partner",        label: "Partnership — work together on something" },
-  { value: "give",           label: "Support financially — contribute to the work" },
+  { value: "vision_carrier", label: "Vision Carrier: help shape the community" },
+  { value: "creative_team",  label: "Creative team: photography, design, video" },
+  { value: "partner",        label: "Partnership: work together on something" },
+  { value: "give",           label: "Support financially: contribute to the work" },
   { value: "other",          label: "Something else" },
 ];
 
@@ -130,7 +130,7 @@ export function InvolvementForm({ defaultInterest }: InvolvementFormProps) {
         </div>
         <h3 className="font-display text-2xl font-semibold text-forest mb-2">We&apos;ve got your message</h3>
         <p className="text-charcoal/60 text-sm leading-relaxed max-w-xs mx-auto">
-          Someone from the team will be in touch soon. Check your inbox — we&apos;ve sent you a copy of your message.
+          Someone from the team will be in touch soon. Check your inbox, we&apos;ve sent you a copy of your message.
         </p>
       </div>
     );
@@ -203,7 +203,7 @@ export function InvolvementForm({ defaultInterest }: InvolvementFormProps) {
               <p>Send to: <span className="font-bold text-forest">{givingSettings.giving_phone}</span></p>
             )}
             {!givingSettings.giving_paybill && !givingSettings.giving_till && !givingSettings.giving_phone && (
-              <p className="text-charcoal/50 italic text-xs">Payment details coming soon — fill in the form and we&apos;ll be in touch.</p>
+              <p className="text-charcoal/50 italic text-xs">Payment details coming soon, fill in the form and we&apos;ll be in touch.</p>
             )}
           </div>
           <p className="text-xs text-charcoal/45 mt-2">Fill in the form below so we can acknowledge your support.</p>

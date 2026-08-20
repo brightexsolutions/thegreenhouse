@@ -1,11 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
+import { IMMUTABLE_CACHE } from "@/lib/storage";
 import { randomUUID } from "crypto";
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 60;
+
 export async function POST(req: NextRequest) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
@@ -17,8 +21,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Invalid file type. Upload MP4, WebM, or MOV." }, { status: 400 });
   }
 
-  if (file.size > 100 * 1024 * 1024) {
-    return NextResponse.json({ error: "File too large (max 100MB)" }, { status: 400 });
+  // 100MB filled a quarter of the 1GB bucket per upload. Long-form worship
+  // recordings belong on YouTube; this path is for short clips only.
+  if (file.size > 25 * 1024 * 1024) {
+    return NextResponse.json({
+      error: "Videos over 25MB should go on YouTube. Paste the YouTube link on the event instead.",
+    }, { status: 400 });
   }
 
   const ext  = file.type === "video/webm" ? "webm" : file.type === "video/quicktime" ? "mov" : "mp4";
@@ -31,7 +39,7 @@ export async function POST(req: NextRequest) {
     .from("event-images")
     .upload(path, buffer, {
       contentType: file.type,
-      cacheControl: "3600",
+      cacheControl: IMMUTABLE_CACHE,
     });
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

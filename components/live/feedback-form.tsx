@@ -60,7 +60,7 @@ export function FeedbackForm({ eventId }: FeedbackFormProps) {
       {done ? (
         <div className="px-5 py-10 text-center">
           <CheckCircle2 size={30} className="text-forest mx-auto mb-3" />
-          <p className="text-sm font-semibold text-charcoal">Received — thank you!</p>
+          <p className="text-sm font-semibold text-charcoal">Received, thank you!</p>
           <p className="text-xs text-charcoal/50 mt-1.5 leading-relaxed">
             Your message has been sent to the team.
           </p>

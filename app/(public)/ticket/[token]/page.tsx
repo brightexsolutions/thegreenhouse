@@ -5,6 +5,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { TicketBadgeSection } from "@/components/ticket/ticket-badge-section";
 import type { Metadata } from "next";
+import { sessionName } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -26,7 +27,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const ticket = await getTicket(token);
   if (!ticket) return { title: "Ticket not found" };
   return {
-    title: `Your Ticket — ${(ticket as { events: { title: string } }).events?.title ?? SITE_NAME}`,
+    title: `Your Ticket, ${(ticket as { events: { title: string } }).events?.title ?? SITE_NAME}`,
     robots: { index: false },
   };
 }
@@ -82,7 +83,7 @@ export default async function TicketPage({ params }: Props) {
   });
   const formattedTime = `${event.event_time.slice(0, 5).replace(":", ".")} pm`;
   // Strip "The Green House — " prefix for cleaner display
-  const sessionLabel = event.title.replace(/^The Green House\s*[—–-]\s*/i, "");
+  const sessionLabel = sessionName(event.title);
 
   return (
     <main
@@ -107,7 +108,7 @@ export default async function TicketPage({ params }: Props) {
           <div className="px-5 py-4">
             <p className="text-sm font-semibold text-gold leading-snug">This session has concluded.</p>
             <p className="text-xs text-cream/55 mt-1 leading-relaxed">
-              Thank you for being part of it. We&apos;d love to hear your thoughts — share your feedback below.
+              Thank you for being part of it. We&apos;d love to hear your thoughts, share your feedback below.
             </p>
           </div>
           <div className="px-5 pb-4 flex flex-wrap gap-2">
@@ -123,7 +124,7 @@ export default async function TicketPage({ params }: Props) {
                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded bg-cream/8 border border-cream/15 text-xs font-semibold text-cream/70 hover:text-cream transition-colors"
               >
                 <CalendarDays size={11} />
-                {nextEvent.title.replace(/^The Green House\s*[—–-]\s*/i, "")}
+                {sessionName(nextEvent.title)}
                 <span className="text-cream/40">
                   {new Date(nextEvent.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
                 </span>

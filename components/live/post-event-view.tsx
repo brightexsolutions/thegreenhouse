@@ -109,7 +109,7 @@ export function PostEventView({
           </div>
           <p className="text-base font-semibold text-charcoal">This session has concluded.</p>
           <p className="text-sm text-charcoal/45 mt-1.5 leading-relaxed">
-            Thank you to everyone who joined us — it was a beautiful evening. We&apos;d love to hear from you.
+            Thank you to everyone who joined us, it was a beautiful evening. We&apos;d love to hear from you.
           </p>
         </motion.div>
 

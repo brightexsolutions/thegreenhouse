@@ -56,7 +56,7 @@ export function NotificationListener() {
           const label = e.interest === "partner" ? "partnership interest" : e.interest;
           fire(
             "New enquiry",
-            `${e.full_name} — ${label}`,
+            `${e.full_name}: ${label}`,
             "/admin/enquiries"
           );
         }

@@ -66,7 +66,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /what\s*(is|'?s)?\s*(the\s*)?green\s*house|about\s*(you|green\s*house|this)|tell\s*me\s*more|who\s*are\s*you/i,
     reply: () => ({
-      text:   "The Green House is a cross-church worship and sharing community in Nairobi, Kenya. We gather **quarterly** for an evening of low-pressure worship, prayer, and genuine connection — no performance, no pressure, just real community across different churches.",
+      text:   "The Green House is a cross-church worship and sharing community in Nairobi, Kenya. We gather **quarterly** for an evening of low-pressure worship, prayer, and genuine connection: no performance, no pressure, just real community across different churches.",
       chips:  ["Who can attend?", "When is the next session?", "Is it free?"],
       action: { label: "Learn more about us", href: "/about" },
     }),
@@ -74,7 +74,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /how\s*(do\s*i|to|can\s*i)?\s*(register|sign\s*up|book|get\s*a?\s*ticket)/i,
     reply: () => ({
-      text:   "Head to our **Events** page, click on Session 02, and fill in your details. You'll receive a **PDF ticket via email** — you can also copy your ticket link to save it anywhere.",
+      text:   "Head to our **Events** page, click on Session 02, and fill in your details. You'll receive a **PDF ticket via email**, you can also copy your ticket link to save it anywhere.",
       chips:  ["Is it free?", "What do I receive after registering?"],
       action: { label: "Register for Session 02", href: "/events/session-02" },
     }),
@@ -82,7 +82,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /free|cost|price|pay|charge|fee/i,
     reply: () => ({
-      text:   "Yes — entry is completely free. Some future sessions may include a small venue contribution, but this will always be communicated clearly in advance.",
+      text:   "Yes, entry is completely free. Some future sessions may include a small venue contribution, but this will always be communicated clearly in advance.",
       chips:  ["How do I register?", "Who can attend?"],
       action: { label: "Register for free", href: "/events/session-02" },
     }),
@@ -90,7 +90,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /ticket|receive|get\s*(after|my)|confirmation/i,
     reply: () => ({
-      text:   "After registering, you'll get a **PDF ticket via email**. You can also copy your ticket link to save it somewhere handy — bring it on your phone screen to the door.",
+      text:   "After registering, you'll get a **PDF ticket via email**. You can also copy your ticket link to save it somewhere handy, bring it on your phone screen to the door.",
       chips:  ["Where will it be held?", "When is the next session?"],
       action: { label: "Register now", href: "/events/session-02" },
     }),
@@ -98,21 +98,21 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /who\s*(can|is\s*it\s*for|attends?)|everyone|anyone|welcome|inclusive|denomination|friend|church/i,
     reply: () => ({
-      text:  "Everyone is welcome — regardless of church, denomination, or where you are in your faith journey. Come curious, come sceptical, come as you are. You can even bring someone who doesn't attend church.",
+      text:  "Everyone is welcome: regardless of church, denomination, or where you are in your faith journey. Come curious, come sceptical, come as you are. You can even bring someone who doesn't attend church.",
       chips: ["What happens at a session?", "Is it free?"],
     }),
   },
   {
     re: /what\s*happen|what\s*to\s*expect|program|agenda|evening\s*like|session\s*like|structure/i,
     reply: () => ({
-      text:  "A Green House evening includes live worship, prayer, open sharing, and genuine connection time. It's relaxed and intimate — more like a gathering of friends than a formal service.",
+      text:  "A Green House evening includes live worship, prayer, open sharing, and genuine connection time. It's relaxed and intimate, more like a gathering of friends than a formal service.",
       chips: ["What's the theme for Session 02?", "Who can attend?"],
     }),
   },
   {
     re: /how\s*often|frequency|quarterly|monthly|times\s*a\s*(year|month)|per\s*(year|month)/i,
     reply: () => ({
-      text:  `Sessions happen **${SESSION_FREQUENCY}** — four times a year. We keep it rare so each gathering feels meaningful, not routine.`,
+      text:  `Sessions happen **${SESSION_FREQUENCY}**, four times a year. We keep it rare so each gathering feels meaningful, not routine.`,
       chips: ["When is the next session?", "What happens at a session?"],
     }),
   },
@@ -126,14 +126,14 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /mental\s*health|emotional|burnout|drained|exhaust|lonely|isolat|depress|anxiety/i,
     reply: () => ({
-      text:  "We believe many people quietly deal with burnout, isolation, and emotional exhaustion that traditional church settings don't always address. The Green House creates intentional space to slow down, be honest, and find rest — for the whole person.",
+      text:  "We believe many people quietly deal with burnout, isolation, and emotional exhaustion that traditional church settings don't always address. The Green House creates intentional space to slow down, be honest, and find rest, for the whole person.",
       chips: ["Who can attend?", "What happens at a session?"],
     }),
   },
   {
     re: /who\s*runs|organise|organiz|team|behind|leadership|founder|host/i,
     reply: () => ({
-      text:  "The Green House is run by a collective of gifted people from active ministries and churches across Nairobi — worship teams, creatives, hosts, and vision-carriers who volunteer their time and gifts.",
+      text:  "The Green House is run by a collective of gifted people from active ministries and churches across Nairobi: worship teams, creatives, hosts, and vision-carriers who volunteer their time and gifts.",
       chips: ["What happens at a session?", "How do I stay informed?"],
     }),
   },
@@ -148,7 +148,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /instagram|tiktok|youtube|social|follow|@thegreen/i,
     reply: () => ({
-      text:  "Find us on Instagram and TikTok — both **@thegreenhouseke**. We post session announcements, highlights, and community moments there.",
+      text:  "Find us on Instagram and TikTok, both **@thegreenhouseke**. We post session announcements, highlights, and community moments there.",
       chips: ["How do I register?", "Contact the team"],
     }),
   },
@@ -163,7 +163,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /partner|support|sponsor|volunteer|get\s*involv|contribute|serve/i,
     reply: () => ({
-      text:   "We'd love to have you involved! Whether you'd like to serve, partner, or support the vision — fill in the 'Get Involved' form on the website and the team will be in touch.",
+      text:   "We'd love to have you involved! Whether you'd like to serve, partner, or support the vision, fill in the 'Get Involved' form on the website and the team will be in touch.",
       chips:  ["Contact the team", "What is The Green House?"],
       action: { label: "Get involved", href: "/get-involved" },
     }),
@@ -212,7 +212,7 @@ function getBotReply(input: string, hasGreeted: boolean, event?: UpcomingEvent |
       const time = fmtTime(event.event_time);
       const venueLine = hasVenue(event)
         ? ` It will be held at **${event.venue_name}**.`
-        : " Venue details will be shared soon — register and we'll notify you via email.";
+        : " Venue details will be shared soon, register and we'll notify you via email.";
       return {
         text:   `The next gathering is **${event.title}** on **${date}** at **${time}**.${venueLine}`,
         chips:  ["How do I register?", "Where will it be held?", "What's the theme?"],
@@ -220,7 +220,7 @@ function getBotReply(input: string, hasGreeted: boolean, event?: UpcomingEvent |
       };
     }
     return {
-      text:   "The next gathering is **Session 02** on **June 26, 2026** at **7:00 PM**. Venue details will be shared soon — register and we'll notify you via email.",
+      text:   "The next gathering is **Session 02** on **June 26, 2026** at **7:00 PM**. Venue details will be shared soon, register and we'll notify you via email.",
       chips:  ["How do I register?", "Where will it be held?", "What's the theme?"],
       action: { label: "View Session 02", href: "/events/session-02" },
     };
@@ -254,7 +254,7 @@ function getBotReply(input: string, hasGreeted: boolean, event?: UpcomingEvent |
       };
     }
     return {
-      text:  "The theme for Session 02 is **'Delusion'**, drawn from **2 Timothy 4:3–6** — a conversation about truth, comfort, and what we choose to hear.",
+      text:  "The theme for Session 02 is **'Delusion'**, drawn from **2 Timothy 4:3–6**: a conversation about truth, comfort, and what we choose to hear.",
       chips: ["When is the next session?", "How do I register?"],
     };
   }
@@ -264,7 +264,7 @@ function getBotReply(input: string, hasGreeted: boolean, event?: UpcomingEvent |
   }
 
   return {
-    text:  "I'm here to answer questions about The Green House — sessions, registration, what to expect, our community, and more. What would you like to know?",
+    text:  "I'm here to answer questions about The Green House: sessions, registration, what to expect, our community, and more. What would you like to know?",
     chips: ["What is The Green House?", "When is the next session?", "How do I register?", "Is it free?"],
   };
 }
@@ -291,7 +291,7 @@ const TYPING_MS   = 520;
 const WELCOME: Msg = {
   id:    0,
   role:  "bot",
-  text:  "Hi! I can help answer questions about The Green House — upcoming sessions, registration, what to expect, and more.",
+  text:  "Hi! I can help answer questions about The Green House: upcoming sessions, registration, what to expect, and more.",
   chips: ["What is The Green House?", "When is the next session?", "How do I register?", "Is it free?"],
 };
 

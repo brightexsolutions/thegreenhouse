@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { requireTriviaRoundAccess } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +9,10 @@ type Params = { params: { roundId: string } };
 // Body: { scores: { id: string; is_correct: boolean }[] }
 // Bulk-updates is_correct + admin_override on trivia_responses for open_input scoring
 export async function PATCH(req: NextRequest, { params }: Params) {
-  const supabase = createAdminClient();
   const { roundId } = params;
+  const guard = await requireTriviaRoundAccess(roundId, req.nextUrl.searchParams.get("t"));
+  if (!guard.ok) return guard.response;
+  const supabase = guard.supabase;
   const body = await req.json() as { scores: { id: string; is_correct: boolean }[] };
   const { scores } = body;
 

@@ -72,7 +72,7 @@ export default async function EventToolsPage({ params }: Props) {
         </div>
         <p className="text-xs text-charcoal/50 mb-4">
           {isPreviewOnly
-            ? "Event is not yet published. These links are available for testing — the display and control panel will work as normal."
+            ? "Event is not yet published. These links are available for testing, the display and control panel will work as normal."
             : "Open the display screen on a projector and use the control panel on your phone to manage scenes, lyrics, and messages in real time."}
         </p>
         <div className="flex flex-wrap gap-3">
@@ -139,7 +139,7 @@ export default async function EventToolsPage({ params }: Props) {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-charcoal mb-0.5">Event Summary Report</p>
             <p className="text-xs text-charcoal/50 leading-relaxed mb-2.5">
-              A clear, shareable overview for your team — registrations, attendance, session feedback, and trivia participation.
+              A clear, shareable overview for your team: registrations, attendance, session feedback, and trivia participation.
             </p>
             <a
               href={`/api/admin/events/${id}/report`}

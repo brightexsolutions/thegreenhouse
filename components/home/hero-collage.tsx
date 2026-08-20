@@ -1,18 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { motion, useReducedMotion } from "framer-motion";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { Photo } from "@/components/ui/photo";
 
 const EASE = [0.16, 1, 0.3, 1] as [number, number, number, number];
-
-const PHOTOS = {
-  pause:   "https://images.unsplash.com/photo-1518241353330-0f7941c2d9b5?auto=format&fit=crop&w=600&q=80",
-  worship: "https://res.cloudinary.com/dpjget2he/image/upload/w_900,q_auto,f_auto/v1781375011/IMG_4476_mkgrmd.jpg",
-  connect: "https://res.cloudinary.com/dpjget2he/image/upload/w_900,q_auto,f_auto/v1781373355/IMG_4402_gwdrn1.jpg",
-  reflect: "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?auto=format&fit=crop&w=700&q=80",
-};
 
 const PARTICLES = [
   { left: "12%",  top: "22%", size: 4,   dur: 7,   delay: 0,   color: "rgba(201,162,74,0.80)" },
@@ -161,11 +154,17 @@ function FloatCard({
 function CardInner({
   src, alt, label, borderRadius,
 }: {
-  src: string; alt: string; label: string; borderRadius?: string;
+  src: string | null; alt: string; label: string; borderRadius?: string;
 }) {
   return (
-    <div className="relative w-full h-full overflow-hidden shadow-2xl" style={{ borderRadius: borderRadius ?? "2rem" }}>
-      <Image src={src} alt={alt} fill className="object-cover" sizes="(max-width:1024px) 40vw, 22vw" priority={alt === "Worship" || alt === "Pause"} unoptimized />
+    <div className="relative w-full h-full overflow-hidden shadow-2xl bg-forest-dark" style={{ borderRadius: borderRadius ?? "2rem" }}>
+      <Photo
+        src={src}
+        alt={alt}
+        width={900}
+        sizes="(max-width:1024px) 40vw, 22vw"
+        priority={alt === "Worship" || alt === "Pause"}
+      />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-4">
         <span className="label-caps text-cream text-xs font-bold tracking-widest">{label}</span>
@@ -174,7 +173,13 @@ function CardInner({
   );
 }
 
-export function HeroCollage() {
+export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) {
+  // Four tiles, filled from the gallery newest session first. Any slot without
+  // a photograph renders as a designed panel rather than a gap.
+  // Connect takes slot 1 and Worship slot 2: the second gallery photo is the
+  // one of people talking, the third is the band.
+  const [pause, connect, worship, reflect] = [0, 1, 2, 3].map(i => photos[i] ?? null);
+
   const container = {
     hidden: {},
     show: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } },
@@ -208,7 +213,7 @@ export function HeroCollage() {
               floatAmount={10}
               className="absolute left-4 top-0 w-[54%] h-full"
             >
-              <CardInner src={PHOTOS.worship} alt="Worship" label="Worship" borderRadius="1.75rem" />
+              <CardInner src={worship} alt="Worship" label="Worship" borderRadius="1.75rem" />
             </FloatCard>
 
             {/* Connect card — smaller, right-offset, lower */}
@@ -220,7 +225,7 @@ export function HeroCollage() {
               floatAmount={8}
               className="absolute right-4 top-[14%] w-[46%] h-[80%]"
             >
-              <CardInner src={PHOTOS.connect} alt="Connect" label="Connect" borderRadius="1.5rem" />
+              <CardInner src={connect} alt="Connect" label="Connect" borderRadius="1.5rem" />
             </FloatCard>
 
             {/* Session badge chip — floats between the two cards */}
@@ -261,7 +266,7 @@ export function HeroCollage() {
             </motion.h1>
 
             <motion.p variants={item(0.1)} className="text-cream/70 text-base sm:text-lg max-w-sm leading-relaxed">
-              A quarterly cross-church gathering in Nairobi — low pressure, real connection, all welcome.
+              A quarterly cross-church gathering in Nairobi: low pressure, real connection, all welcome.
             </motion.p>
 
             <motion.div variants={item(0.15)} className="flex flex-wrap gap-3 pt-2">
@@ -296,7 +301,7 @@ export function HeroCollage() {
               floatAmount={8}
               className="absolute left-0 top-0 w-[33%] h-[32%]"
             >
-              <CardInner src={PHOTOS.pause} alt="Pause" label="Pause" borderRadius="1.75rem" />
+              <CardInner src={pause} alt="Pause" label="Pause" borderRadius="1.75rem" />
             </FloatCard>
 
             {/* Card: WORSHIP — large pill, left-center */}
@@ -308,7 +313,7 @@ export function HeroCollage() {
               floatAmount={12}
               className="absolute left-0 top-[30%] w-[47%] h-[66%]"
             >
-              <CardInner src={PHOTOS.worship} alt="Worship" label="Worship" borderRadius="2.5rem" />
+              <CardInner src={worship} alt="Worship" label="Worship" borderRadius="2.5rem" />
             </FloatCard>
 
             {/* Card: CONNECT — medium, top-right */}
@@ -320,7 +325,7 @@ export function HeroCollage() {
               floatAmount={10}
               className="absolute right-0 top-0 w-[44%] h-[46%]"
             >
-              <CardInner src={PHOTOS.connect} alt="Connect" label="Connect" borderRadius="2rem" />
+              <CardInner src={connect} alt="Connect" label="Connect" borderRadius="2rem" />
             </FloatCard>
 
             {/* Card: REFLECT — arch, bottom-right */}
@@ -334,10 +339,10 @@ export function HeroCollage() {
               style={{ borderRadius: "50% 50% 2rem 2rem / 50% 50% 2rem 2rem" }}
             >
               <div
-                className="relative w-full h-full overflow-hidden shadow-2xl"
+                className="relative w-full h-full overflow-hidden shadow-2xl bg-forest-dark"
                 style={{ borderRadius: "inherit" }}
               >
-                <Image src={PHOTOS.reflect} alt="Reflect" fill className="object-cover" sizes="(max-width:1024px) 34vw, 18vw" unoptimized />
+                <Photo src={reflect} alt="Reflect" width={700} sizes="(max-width:1024px) 34vw, 18vw" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <span className="label-caps text-cream text-xs font-bold tracking-widest">Reflect</span>

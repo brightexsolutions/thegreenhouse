@@ -4,6 +4,10 @@ import { sendBroadcastEmail } from "@/lib/communications/email";
 import { postEventEmailHtml, postEventEmailText } from "@/lib/email-templates";
 import { logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
+// Sending mail plus writing the log needs more than the default budget.
+export const maxDuration = 60;
+
 type Props = { params: Promise<{ id: string }> };
 
 export async function POST(req: NextRequest, { params }: Props) {
@@ -66,7 +70,7 @@ export async function POST(req: NextRequest, { params }: Props) {
 
     const results = await sendBroadcastEmail({
       to:      [r.email],
-      subject: `Thank you for being there — ${event.title}`,
+      subject: `Thank you for being there, ${event.title}`,
       html,
       text,
     });
@@ -79,7 +83,7 @@ export async function POST(req: NextRequest, { params }: Props) {
         registration_id: r.id,
         channel:         "email",
         recipient:       r.email,
-        subject:         `Thank you for being there — ${event.title}`,
+        subject:         `Thank you for being there, ${event.title}`,
         message_body:    text,
         status:          "sent",
         provider_id:     result.providerId,
@@ -92,7 +96,7 @@ export async function POST(req: NextRequest, { params }: Props) {
         registration_id: r.id,
         channel:         "email",
         recipient:       r.email,
-        subject:         `Thank you for being there — ${event.title}`,
+        subject:         `Thank you for being there, ${event.title}`,
         status:          "failed",
         error_message:   result?.error ?? "Unknown error",
       });

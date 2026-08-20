@@ -5,6 +5,7 @@ import Link from "next/link";
 import { motion, useInView } from "framer-motion";
 import { Volume2, VolumeX, ArrowUpRight, Play, Pause } from "lucide-react";
 import { SESSION_01_HIGHLIGHT_VIDEO } from "@/lib/constants";
+import { Photo } from "@/components/ui/photo";
 
 const CORNERS = [
   { key: "tl", cls: "-top-3 -left-3 border-t-2 border-l-2 rounded-tl-2xl" },
@@ -25,7 +26,11 @@ const PARTICLES = [
 
 const WAVE = [2, 5, 8, 4, 9, 5, 7, 3, 8, 6, 4, 9, 3, 7, 5, 8, 4, 6, 3, 7, 5, 4, 8, 3, 6];
 
-export function SessionHighlight() {
+export function SessionHighlight({ photo }: { photo?: string | null }) {
+  // Session 01's recording was lost with the Cloudinary account. Until there is
+  // footage again, the frame holds a photograph instead of a dead player.
+  const hasVideo = Boolean(SESSION_01_HIGHLIGHT_VIDEO);
+
   const sectionRef  = useRef<HTMLDivElement>(null);
   const videoRef    = useRef<HTMLVideoElement>(null);
   const isInView    = useInView(sectionRef, { once: true, margin: "-80px" });
@@ -316,15 +321,24 @@ export function SessionHighlight() {
 
             {/* Video */}
             <div className="relative rounded-2xl overflow-hidden bg-black shadow-2xl">
-              <video
-                ref={videoRef}
-                src={SESSION_01_HIGHLIGHT_VIDEO}
-                muted
-                loop
-                playsInline
-                preload="auto"
-                className="w-full aspect-video object-cover"
-              />
+              {hasVideo ? (
+                <video
+                  ref={videoRef}
+                  src={SESSION_01_HIGHLIGHT_VIDEO}
+                  muted
+                  loop
+                  playsInline
+                  // Never "auto". It downloads the whole file before anyone
+                  // presses play, on every homepage visit, which is what
+                  // drained the Cloudinary bandwidth in the first place.
+                  preload="metadata"
+                  className="w-full aspect-video object-cover"
+                />
+              ) : (
+                <div className="relative w-full aspect-video">
+                  <Photo src={photo} alt="A moment from a Green House session" width={1200} sizes="(max-width:1024px) 92vw, 60vw" />
+                </div>
+              )}
 
               {/* Cinematic vignette */}
               <div
@@ -341,6 +355,7 @@ export function SessionHighlight() {
               {/* Bottom gradient for controls */}
               <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
 
+              {hasVideo && (<>
               {/* Progress bar */}
               <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/8">
                 <div
@@ -375,12 +390,13 @@ export function SessionHighlight() {
                 </button>
               </div>
 
-              {/* Loading spinner */}
+              {/* Loading spinner. With no video this would spin forever. */}
               {!ready && (
                 <div className="absolute inset-0 bg-[#070c09]/80 flex items-center justify-center">
                   <div className="w-10 h-10 rounded-full border-2 border-gold/20 border-t-gold/65 animate-spin" />
                 </div>
               )}
+              </>)}
             </div>
           </div>
         </motion.div>
@@ -393,7 +409,9 @@ export function SessionHighlight() {
           className="flex items-center justify-between mt-7"
         >
           <p className="text-cream/20 text-xs">
-            {muted ? "Unmute to hear the session" : "Now playing with sound"}
+            {!hasVideo
+              ? "A moment from the last gathering"
+              : muted ? "Unmute to hear the session" : "Now playing with sound"}
           </p>
           <Link
             href="/events/session-01"

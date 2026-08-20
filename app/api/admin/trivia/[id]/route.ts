@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
 // PUT /api/admin/trivia/[id] — update a question
 export async function PUT(req: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createAdminClient();
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+  const supabase = guard.supabase;
   const body = await req.json();
   const { question, type, options, correct_index, hint, category, points } = body;
 
@@ -31,7 +33,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
 // DELETE /api/admin/trivia/[id] — soft delete
 export async function DELETE(_: NextRequest, { params }: { params: { id: string } }) {
-  const supabase = createAdminClient();
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+  const supabase = guard.supabase;
   const { error } = await supabase
     .from("trivia_questions")
     .update({ deleted_at: new Date().toISOString() })

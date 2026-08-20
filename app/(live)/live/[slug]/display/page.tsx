@@ -7,6 +7,7 @@ import { Loader2, Maximize2, Minimize2, Music2, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { SITE_NAME } from "@/lib/constants";
+import { sessionName } from "@/lib/utils";
 
 type DisplayState = {
   scene:                    string;
@@ -1110,7 +1111,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
                     Pause. Breathe.<br />Reflect. Worship.
                   </div>
                   <div className="text-2xl md:text-4xl font-display font-medium mb-10" style={{ color: t.gold }}>
-                    {event.title.replace("The Green House — ", "").replace("The Green House – ", "")}
+                    {sessionName(event.title)}
                   </div>
                   <div className="flex flex-col items-center gap-2">
                     <p className="text-xl md:text-2xl" style={{ color: t.sub }}>{formattedDate}</p>
@@ -1220,7 +1221,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
               {scene === "theme" && (
                 <div className="text-center max-w-3xl">
                   <p className="text-xl md:text-2xl uppercase tracking-[0.45em] mb-10 font-semibold" style={{ color: t.goldSub }}>Tonight&apos;s Theme</p>
-                  <h1 className="font-display text-7xl md:text-9xl font-bold mb-8" style={{ color: t.text }}>{event.theme_title ?? "—"}</h1>
+                  <h1 className="font-display text-7xl md:text-9xl font-bold mb-8" style={{ color: t.text }}>{event.theme_title ?? "–"}</h1>
                   {event.theme_scripture && <p className="text-2xl md:text-4xl font-display italic" style={{ color: t.gold }}>{event.theme_scripture}</p>}
                   {event.theme_description && (
                     <p className="mt-6 text-xl md:text-2xl max-w-xl mx-auto leading-relaxed" style={{ color: t.sub }}>{event.theme_description}</p>
@@ -1508,7 +1509,7 @@ function CountdownScene({
       }
 
       // All sessions done
-      setSessionTimer({ title: "Program complete", timeStr: "—", progressPct: 100, isComplete: true });
+      setSessionTimer({ title: "Program complete", timeStr: "–", progressPct: 100, isComplete: true });
     }
 
     update();
@@ -1545,7 +1546,7 @@ function CountdownScene({
           We&apos;re on.
         </p>
         <p className="text-xl md:text-2xl" style={{ color: t.sub }}>
-          The session has begun — welcome.
+          The session has begun, welcome.
         </p>
       </div>
     );
@@ -2582,7 +2583,7 @@ function CommunityScene({ attendees, t }: {
             <p className="mt-4 text-2xl md:text-3xl" style={{ color: t.sub }}>people gathered here</p>
           </>
         ) : (
-          <p className="font-display text-4xl" style={{ color: t.sub }}>—</p>
+          <p className="font-display text-4xl" style={{ color: t.sub }}>–</p>
         )}
       </div>
     </div>
