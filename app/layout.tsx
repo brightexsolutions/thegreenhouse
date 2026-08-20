@@ -51,10 +51,12 @@ export const metadata: Metadata = {
     "nairobi christian gathering",
     "greenhousews",
   ],
-  icons: {
-    icon:     "/icon.svg",
-    shortcut: "/icon.svg",
-  },
+  // Icons are intentionally not declared here. Setting this key makes Next
+  // use only what is listed and skip its file conventions, which is how the
+  // site ended up serving an SVG and nothing else: /favicon.ico returned 404,
+  // and Google's favicon crawler wants a raster icon at the root. The files in
+  // app/ (favicon.ico, icon.svg, icon.png, apple-icon.png) are detected
+  // automatically and emitted with correct types and sizes.
   openGraph: {
     type:     "website",
     locale:   "en_KE",
