@@ -416,7 +416,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                     className="inline-flex items-center gap-1 text-[10px] text-[#8a6a1a] hover:underline disabled:opacity-40"
                   >
                     {aiBusy === "keywords" ? <Loader2 size={9} className="animate-spin" /> : <Sparkles size={9} />}
-                    Suggest
+                    Suggest phrases
                   </button>
                 </div>
                 {keywords.length > 0 ? (
@@ -460,9 +460,9 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 </div>
 
                 {aiMode === "brief" ? (
-                  <AiButton task="draft" busy={aiBusy} onRun={runAi} icon={Wand2}>Write a draft</AiButton>
+                  <AiButton task="draft" busy={aiBusy} onRun={runAi} icon={Wand2} primary>Write the post</AiButton>
                 ) : (
-                  <AiButton task="expand" busy={aiBusy} onRun={runAi} icon={Wand2}>Shape my notes into a post</AiButton>
+                  <AiButton task="expand" busy={aiBusy} onRun={runAi} icon={Wand2} primary>Write the post from my notes</AiButton>
                 )}
                 <AiButton task="rewrite" busy={aiBusy} onRun={runAi}>Improve the draft</AiButton>
                 <AiButton task="titles"  busy={aiBusy} onRun={runAi}>Suggest titles</AiButton>
@@ -487,8 +487,10 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
               )}
 
               <p className="text-[11px] text-charcoal/45 mt-4">
-                Everything AI writes lands in the editor as a draft. Read it before publishing:
-                it does not know your venue, dates, or who was in the room.
+                <strong className="text-charcoal/70">Write the post</strong> fills the body below using your
+                brief and the phrases above. The other buttons refine a draft once it is there.
+                Everything lands in the editor as a draft: read it before publishing, because it does
+                not know your venue, dates, or who was in the room.
               </p>
             </>
           )}
@@ -817,12 +819,14 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
 /* ── small building blocks ── */
 
 function AiButton({
-  task, busy, onRun, icon: Icon, children,
+  task, busy, onRun, icon: Icon, primary, children,
 }: {
   task:     AiTask;
   busy:     AiTask | null;
   onRun:    (t: AiTask) => void;
   icon?:    LucideIcon;
+  /** The action that writes the post. Everything else refines what is there. */
+  primary?: boolean;
   children: React.ReactNode;
 }) {
   const isBusy = busy === task;
@@ -831,7 +835,12 @@ function AiButton({
       type="button"
       disabled={busy !== null}
       onClick={() => onRun(task)}
-      className="inline-flex items-center gap-1.5 text-[11px] font-medium bg-white/80 hover:bg-white text-charcoal/70 px-3 py-1.5 rounded border border-gold/20 transition-colors disabled:opacity-40"
+      className={cn(
+        "inline-flex items-center gap-1.5 text-[11px] font-medium px-3 py-1.5 rounded border transition-colors disabled:opacity-40",
+        primary
+          ? "bg-forest text-cream border-forest hover:bg-moss"
+          : "bg-white/80 hover:bg-white text-charcoal/70 border-gold/20"
+      )}
     >
       {isBusy ? <Loader2 size={11} className="animate-spin" /> : Icon ? <Icon size={11} /> : null}
       {children}

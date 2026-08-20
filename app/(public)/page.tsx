@@ -2,11 +2,15 @@ import type { Metadata } from "next";
 import { HeroCollage }      from "@/components/home/hero-collage";
 
 export const metadata: Metadata = {
-  title: "The Green House: Worship Community · Nairobi, Kenya",
+  // absolute, so the root layout's "%s | The Green House" template is not
+  // applied. A plain string here produced "The Green House: Worship Community
+  // Nairobi, Kenya | The Green House": 69 characters with the brand name twice,
+  // which is why Google was truncating it with an ellipsis.
+  title: { absolute: "The Green House: Worship Community in Nairobi, Kenya" },
   description: "A cross-church worship community in Nairobi, Kenya. Quarterly gatherings for worship, prayer, and real connection across churches. Low pressure. Everyone welcome.",
   alternates: { canonical: "/" },
   openGraph: {
-    title:       "The Green House: Worship Community · Nairobi, Kenya",
+    title:       "The Green House: Worship Community in Nairobi, Kenya",
     description: "Cross-church quarterly worship gatherings in Nairobi, Kenya. Real connection. Low pressure.",
     url:         "https://www.greenhousews.co.ke",
     type:        "website",
