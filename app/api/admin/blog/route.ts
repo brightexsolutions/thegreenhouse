@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth-guard";
@@ -6,6 +7,16 @@ import { slugify, readingMinutes, deriveExcerpt } from "@/lib/blog";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
+
+/** Push a published change straight into the cached pages that show it.
+ *  Without this, /blog and the sitemap serve their last snapshot until the
+ *  revalidate window lapses, so a new post looks like it did not save. */
+function revalidateBlog(slug?: string) {
+  revalidatePath("/blog");
+  revalidatePath("/sitemap.xml");
+  if (slug) revalidatePath(`/blog/${slug}`);
+}
+
 
 const postSchema = z.object({
   title:            z.string().trim().min(3).max(160),
@@ -99,6 +110,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  revalidateBlog(slug);
   logger.info("blog_created", { adminId: guard.userId, slug });
   return NextResponse.json({ post: data }, { status: 201 });
 }
