@@ -22,6 +22,7 @@ import { CommunityCircles }   from "@/components/home/community-circles";
 import { SessionHighlight }   from "@/components/home/session-highlight";
 import { PartnersStrip }      from "@/components/home/partners-strip";
 import { createAdminClient } from "@/lib/supabase/server";
+import { getSitePhotos } from "@/lib/site-photos";
 import type { Event } from "@/types/database";
 
 export const revalidate = 300;
@@ -44,12 +45,13 @@ async function getNextEvent(): Promise<Event | null> {
 }
 
 export default async function HomePage() {
-  const nextEvent = await getNextEvent();
+  const [nextEvent, gallery] = await Promise.all([getNextEvent(), getSitePhotos(8)]);
+  const photos = gallery.map(g => g.path);
 
   return (
     <>
       {/* 1 — Hero with 4-card floating collage */}
-      <HeroCollage />
+      <HeroCollage photos={photos} />
 
       {/* Thin identity strip */}
       <MarqueeStrip />
@@ -62,13 +64,13 @@ export default async function HomePage() {
       } />
 
       {/* 2 — What a session feels like (image + text) */}
-      <WhatHappens />
+      <WhatHappens photos={photos.slice(4)} />
 
       {/* 3 — What makes it different (4 pillars) */}
       <VisionCards />
 
       {/* 4 — Session highlight video */}
-      <SessionHighlight />
+      <SessionHighlight photo={photos[0] ?? null} />
 
       {/* 5 — Next session countdown */}
       {nextEvent && <EventTeaser event={nextEvent} />}

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
+import { Photo } from "@/components/ui/photo";
+import { getSitePhotos } from "@/lib/site-photos";
 import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
 import { VisionCards } from "@/components/about/vision-cards";
 import { FaqAccordion } from "@/components/about/faq-accordion";
@@ -13,22 +14,27 @@ export const metadata: Metadata = {
   alternates: { canonical: "/about" },
 };
 
-export default function AboutPage() {
+export const revalidate = 300;
+
+export default async function AboutPage() {
+  // Real photographs from the gallery, newest session first.
+  const gallery = await getSitePhotos(6);
+  const [heroPhoto, stackMain, stackAccent, ctaPhoto] =
+    [0, 1, 2, 3].map(i => gallery[i]?.path ?? null);
+
   return (
     <>
       {/* Hero — full-bleed photo with dark overlay */}
       <section className="relative min-h-[70vh] flex items-end overflow-hidden pt-20">
         {/* Background photo */}
         <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1600&q=75"
+          <Photo
+            src={heroPhoto}
             alt=""
-            fill
-            className="object-cover object-top"
+            width={1600}
             priority
             sizes="100vw"
-            aria-hidden
-            unoptimized
+            className="object-top"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/85 to-forest/50" />
         </div>
@@ -110,25 +116,21 @@ export default function AboutPage() {
               <div className="relative h-[420px] sm:h-[480px]">
                 {/* Main photo */}
                 <div className="absolute inset-0 rounded-[2rem] overflow-hidden shadow-2xl">
-                  <Image
-                    src="https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=800&q=80"
+                  <Photo
+                    src={stackMain}
                     alt="Community gathering"
-                    fill
-                    className="object-cover"
+                    width={900}
                     sizes="(max-width:1024px) 90vw, 44vw"
-                    unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-forest/40 to-transparent" />
                 </div>
                 {/* Accent card bottom-left */}
                 <div className="absolute -bottom-5 -left-5 w-[45%] h-[38%] rounded-[1.5rem] overflow-hidden shadow-xl border-4 border-cream">
-                  <Image
-                    src="https://res.cloudinary.com/dpjget2he/image/upload/w_600,q_auto,f_auto/v1781373355/IMG_4402_gwdrn1.jpg"
+                  <Photo
+                    src={stackAccent}
                     alt="People connecting"
-                    fill
-                    className="object-cover"
+                    width={600}
                     sizes="(max-width:1024px) 40vw, 20vw"
-                    unoptimized
                   />
                 </div>
                 {/* Gold ring */}
@@ -190,7 +192,7 @@ export default function AboutPage() {
       <VisionCards />
 
       {/* Umwema — live worship moment from Session 01 */}
-      <UmwemaMoment />
+      <UmwemaMoment photo={gallery[4]?.path ?? null} />
 
       {/* FAQ */}
       <FaqAccordion />
@@ -258,14 +260,13 @@ export default function AboutPage() {
       {/* CTA — photo background */}
       <section className="relative py-24 text-center overflow-hidden">
         <div className="absolute inset-0">
-          <Image
-            src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1400&q=70"
+          <Photo
+            src={ctaPhoto}
             alt=""
-            fill
-            className="object-cover opacity-25"
+            width={1400}
+            quality={70}
             sizes="100vw"
-            aria-hidden
-            unoptimized
+            className="opacity-25"
           />
           <div className="absolute inset-0 bg-gradient-to-b from-forest via-forest/95 to-forest" />
         </div>

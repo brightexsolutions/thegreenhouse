@@ -1,5 +1,5 @@
-import Image from "next/image";
 import { FadeIn } from "@/components/motion/fade-in";
+import { Photo } from "@/components/ui/photo";
 
 const MOMENTS = [
   { icon: "🌬", label: "Pause",   body: "The room stops. You exhale. There's nowhere you need to be right now." },
@@ -8,7 +8,9 @@ const MOMENTS = [
   { icon: "💬", label: "Connect", body: "Genuine conversation with people you wouldn't normally meet." },
 ];
 
-export function WhatHappens() {
+export function WhatHappens({ photos = [] }: { photos?: Array<string | null> }) {
+  const [main, inset] = [0, 1].map(i => photos[i] ?? null);
+
   return (
     <section className="py-20 md:py-32 bg-cream overflow-hidden">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -19,26 +21,22 @@ export function WhatHappens() {
             <div className="relative h-[480px] sm:h-[560px]">
               {/* Main large photo */}
               <div className="absolute inset-0 rounded-[2.5rem] overflow-hidden shadow-2xl">
-                <Image
-                  src="https://res.cloudinary.com/dpjget2he/image/upload/w_1200,q_auto,f_auto/v1781370714/IMG_4446_dozayr.jpg"
+                <Photo
+                  src={main}
                   alt="An evening at The Green House"
-                  fill
-                  className="object-cover"
+                  width={1200}
                   sizes="(max-width: 1024px) 90vw, 44vw"
-                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-forest/60 via-transparent to-transparent" />
               </div>
 
               {/* Smaller overlay photo — bottom right */}
-              <div className="absolute -bottom-6 -right-4 sm:-right-8 w-[46%] h-[42%] rounded-[1.5rem] overflow-hidden shadow-xl border-4 border-cream">
-                <Image
-                  src="https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=500&q=80"
+              <div className="absolute -bottom-6 -right-4 sm:-right-8 w-[46%] h-[42%] rounded-[1.5rem] overflow-hidden shadow-xl border-4 border-cream bg-forest-dark">
+                <Photo
+                  src={inset}
                   alt="Community connection"
-                  fill
-                  className="object-cover"
+                  width={600}
                   sizes="(max-width: 1024px) 42vw, 22vw"
-                  unoptimized
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
               </div>

@@ -14,12 +14,20 @@ export const REGISTRATION_SUPPORT_WA   = "254741980127";
 export const TICKET_FROM_EMAIL = () => process.env.RESEND_TICKET_FROM  ?? `${EMAIL_FROM_NAME} <tickets@greenhousews.co.ke>`;
 export const COMMS_FROM_EMAIL  = () => process.env.RESEND_COMMS_FROM   ?? `${EMAIL_FROM_NAME} <hello@greenhousews.co.ke>`;
 
-// Session highlight videos — update per session after event
-// vc_h264,f_mp4: forces H.264/AAC re-encode on Cloudinary so Safari can play
-// (ewe-yesu and ebenezer were uploaded in a codec Safari doesn't support)
-export const SESSION_01_HIGHLIGHT_VIDEO = "https://res.cloudinary.com/dpjget2he/video/upload/vc_h264,f_mp4/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.mp4";
-export const SESSION_01_UMWEMA_VIDEO    = "https://res.cloudinary.com/dpjget2he/video/upload/v1781426590/greenhouse-session-1-umwema_znsmuo.mp4";
-export const SESSION_01_EBENEZER_VIDEO  = "https://res.cloudinary.com/dpjget2he/video/upload/vc_h264,f_mp4/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.mp4";
+// Session highlight videos.
+//
+// Session 01's three recordings lived on Cloudinary. That account exceeded its
+// free monthly credits under real traffic, was suspended, and was then deleted
+// for inactivity. The originals were never migrated, so the files are gone and
+// no URL will bring them back.
+//
+// Leave these empty until there is footage to point at. Every consumer treats
+// an empty string as "no video" and shows a photograph instead, so nothing
+// renders a dead player. When a recording goes up on YouTube, put the embed
+// URL here and the section will switch back to video on its own.
+export const SESSION_01_HIGHLIGHT_VIDEO = "";
+export const SESSION_01_UMWEMA_VIDEO    = "";
+export const SESSION_01_EBENEZER_VIDEO  = "";
 
 export const SOCIAL_INSTAGRAM = "https://www.instagram.com/the.greenhouse.ws?igsh=djVoc245d3pqMjJp";
 export const SOCIAL_TIKTOK    = "https://www.tiktok.com/@the.greenhouse.w?_r=1&_t=ZS-9450HyXrwGO";

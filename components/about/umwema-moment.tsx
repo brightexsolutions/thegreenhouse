@@ -4,6 +4,7 @@ import { useRef, useState, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import { Volume2, VolumeX, Music } from "lucide-react";
 import { SESSION_01_UMWEMA_VIDEO } from "@/lib/constants";
+import { Photo } from "@/components/ui/photo";
 
 const EASE: [number, number, number, number] = [0.16, 1, 0.3, 1];
 const EQ_DELAYS = [0, 0.18, 0.09, 0.27, 0.14];
@@ -19,7 +20,9 @@ function EqBar({ delay }: { delay: number }) {
   );
 }
 
-export function UmwemaMoment() {
+export function UmwemaMoment({ photo }: { photo?: string | null }) {
+  const hasVideo = Boolean(SESSION_01_UMWEMA_VIDEO);
+
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRef   = useRef<HTMLVideoElement>(null);
   const inView     = useInView(sectionRef, { once: true, margin: "-80px" });
@@ -74,22 +77,29 @@ export function UmwemaMoment() {
             {/* Polaroid card */}
             <div className="bg-white p-3 pb-10 shadow-2xl shadow-forest/15 rounded-[2px]">
               <div className="relative aspect-video overflow-hidden bg-forest-dark rounded-[1px]">
-                <video
-                  ref={videoRef}
-                  src={SESSION_01_UMWEMA_VIDEO}
-                  className="w-full h-full object-cover"
-                  muted={muted}
-                  loop
-                  playsInline
-                />
-                {/* Mute toggle */}
-                <button
-                  onClick={toggleMute}
-                  aria-label={muted ? "Unmute" : "Mute"}
-                  className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
-                >
-                  {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
-                </button>
+                {hasVideo ? (
+                  <>
+                    <video
+                      ref={videoRef}
+                      src={SESSION_01_UMWEMA_VIDEO}
+                      className="w-full h-full object-cover"
+                      muted={muted}
+                      loop
+                      playsInline
+                      preload="metadata"
+                    />
+                    {/* Mute toggle. Pointless without a video behind it. */}
+                    <button
+                      onClick={toggleMute}
+                      aria-label={muted ? "Unmute" : "Mute"}
+                      className="absolute bottom-3 right-3 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center text-white hover:bg-black/70 transition-colors"
+                    >
+                      {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
+                    </button>
+                  </>
+                ) : (
+                  <Photo src={photo} alt="A moment from a Green House session" width={900} sizes="(max-width:1024px) 90vw, 44vw" />
+                )}
               </div>
 
               {/* Caption strip */}

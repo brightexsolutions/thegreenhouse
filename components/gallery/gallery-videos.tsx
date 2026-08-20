@@ -5,7 +5,10 @@ import { Play, X, Volume2, VolumeX } from "lucide-react";
 import { motion, AnimatePresence, useInView } from "framer-motion";
 import { SESSION_01_HIGHLIGHT_VIDEO, SESSION_01_UMWEMA_VIDEO, SESSION_01_EBENEZER_VIDEO } from "@/lib/constants";
 
-const VIDEOS = [
+// Session 01's recordings and their poster frames were hosted on Cloudinary
+// and are gone. The list is kept because it records what was sung, by whom and
+// for how long: put a YouTube embed URL in `src` and the card comes back.
+const ALL_VIDEOS = [
   {
     id:          "ewe-yesu",
     title:       "Ewe Yesu Wangu",
@@ -13,7 +16,7 @@ const VIDEOS = [
     label:       "Session 01 · 2026",
     duration:    "5:07",
     src:         SESSION_01_HIGHLIGHT_VIDEO,
-    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2,w_640,q_auto,f_jpg/v1781371203/greenhouse-session-1-ewe-yesu_g3yorq.jpg",
+    thumb:       "",
   },
   {
     id:          "umwema",
@@ -22,7 +25,7 @@ const VIDEOS = [
     label:       "Session 01 · 2026",
     duration:    "6:04",
     src:         SESSION_01_UMWEMA_VIDEO,
-    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2,w_640,q_auto,f_jpg/v1781426590/greenhouse-session-1-umwema_znsmuo.jpg",
+    thumb:       "",
   },
   {
     id:          "ebenezer",
@@ -31,11 +34,15 @@ const VIDEOS = [
     label:       "Session 01 · 2026",
     duration:    "2:30",
     src:         SESSION_01_EBENEZER_VIDEO,
-    thumb:       "https://res.cloudinary.com/dpjget2he/video/upload/so_2,w_640,q_auto,f_jpg/v1781434031/greenhouse-session1-Wewe_ni_Ebenezer_yzbimx.jpg",
+    thumb:       "",
   },
 ];
 
-function VideoModal({ video, onClose }: { video: typeof VIDEOS[0]; onClose: () => void }) {
+// Session 01's recordings went with the Cloudinary account. Anything without a
+// source is filtered out rather than rendered as a card that plays nothing.
+const VIDEOS = ALL_VIDEOS.filter(v => Boolean(v.src));
+
+function VideoModal({ video, onClose }: { video: typeof ALL_VIDEOS[0]; onClose: () => void }) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [muted, setMuted] = useState(false);
 
@@ -115,9 +122,13 @@ function VideoModal({ video, onClose }: { video: typeof VIDEOS[0]; onClose: () =
 }
 
 export function GalleryVideos() {
-  const [active, setActive] = useState<typeof VIDEOS[0] | null>(null);
+  const [active, setActive] = useState<typeof ALL_VIDEOS[0] | null>(null);
   const sectionRef = useRef<HTMLDivElement>(null);
   const isInView = useInView(sectionRef, { once: true, margin: "-60px" });
+
+  // With no recordings to show, the whole cinema panel comes off the page
+  // rather than sitting there empty above the photo grid.
+  if (VIDEOS.length === 0) return null;
 
   return (
     <>
