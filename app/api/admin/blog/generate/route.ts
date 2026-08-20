@@ -9,7 +9,7 @@ export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
 const schema = z.object({
-  task:     z.enum(["draft", "expand", "rewrite", "seo", "excerpt", "alt", "titles", "keywords"]),
+  task:     z.enum(["compose", "draft", "expand", "rewrite", "seo", "excerpt", "alt", "titles", "keywords"]),
   mode:     z.enum(["brief", "notes"]).optional(),
   brief:    z.string().trim().max(4000).optional(),
   notes:    z.string().trim().max(12_000).optional(),
@@ -64,6 +64,91 @@ function keywordLine(keywords?: string[]): string {
   return `\nPrioritise these search phrases, used naturally: ${keywords.join(", ")}.`;
 }
 
+
+/**
+ * Write a complete post in one request.
+ *
+ * The panel used to need five separate clicks (draft, then titles, then
+ * excerpt, then search copy, then tags) to fill a post in. This runs the same
+ * work server-side in two calls and returns everything at once, so the author
+ * presses one button and gets something they can read and edit.
+ */
+async function compose(opts: {
+  idea:     string;
+  keepFacts: boolean;
+  tone?:    string;
+  category?: string;
+  keywords?: string[];
+}) {
+  const bodyPrompt = opts.keepFacts
+    ? `Turn the notes below into a finished blog post in Markdown.
+
+These are the author's own notes. Shape them, do not replace them:
+- Keep every fact, name, number, song title and scripture reference exactly as written. Do not add any that are not there.
+- Keep the author's order of ideas and their point of view.
+- Expand fragments into full sentences that say what the note says and nothing more.
+- Add "##" headings that name the ideas already present.
+- If something is unclear, write a marked gap like [check this] rather than filling it in.
+${opts.category ? `Category: ${opts.category}` : ""}
+${opts.tone ? `Tone: ${opts.tone}` : ""}${keywordLine(opts.keywords)}
+
+NOTES:
+${opts.idea}
+
+Return only the Markdown body, no code fence, no title heading.`
+    : `Write a blog post in Markdown.
+
+Brief: ${opts.idea}
+${opts.category ? `Category: ${opts.category}` : ""}
+${opts.tone ? `Tone: ${opts.tone}` : ""}${keywordLine(opts.keywords)}
+
+Structure it with three or four "##" headings.
+Open with a concrete observation, not a definition.
+Close with something the reader can act on or sit with.
+Return only the Markdown body, no code fence, no title heading.`;
+
+  const content = unfence(await generateText({
+    system: HOUSE_STYLE, prompt: bodyPrompt, maxTokens: 4096,
+    temperature: opts.keepFacts ? 0.45 : 0.7,
+  }));
+
+  // Everything else is derived from the body that was just written, so the
+  // title and the search copy actually describe the post rather than the brief.
+  const metaRaw = unfence(await generateText({
+    system: HOUSE_STYLE,
+    maxTokens: 900,
+    temperature: 0.35,
+    prompt: `Write the title and search metadata for this blog post.
+
+${content.slice(0, 6000)}
+
+Return JSON only, exactly these keys:
+{"title": "...", "excerpt": "...", "meta_title": "...", "meta_description": "...", "tags": ["...","..."]}
+
+Rules:
+- title: under 60 characters, concrete, the way a person would search for this. No colon-plus-subtitle formula, no clickbait.
+- excerpt: 25 to 45 words, a real summary for the blog index.
+- meta_title: at most 60 characters, leading with the phrase a Nairobi reader would type into Google.
+- meta_description: 140 to 155 characters, main search phrase in the first half.
+- tags: 4 to 6 lowercase tags mixing subject with location terms. No hashes.
+- No code fence.`,
+  }));
+
+  let meta: Record<string, unknown> = {};
+  try { meta = JSON.parse(metaRaw); } catch { /* fall through to derived values */ }
+
+  return {
+    content,
+    title:            String(meta.title ?? "").slice(0, 160),
+    excerpt:          String(meta.excerpt ?? deriveExcerpt(content, 200)).slice(0, 320),
+    meta_title:       String(meta.meta_title ?? "").slice(0, 70),
+    meta_description: String(meta.meta_description ?? deriveExcerpt(content, 155)).slice(0, 170),
+    tags: Array.isArray(meta.tags)
+      ? (meta.tags as unknown[]).slice(0, 6).map(t => String(t).toLowerCase().replace(/^#/, "").trim()).filter(Boolean)
+      : [],
+  };
+}
+
 export async function POST(req: NextRequest) {
   const guard = await requireAdmin();
   if (!guard.ok) return guard.response;
@@ -82,6 +167,30 @@ export async function POST(req: NextRequest) {
   }
 
   const { task, brief, notes, title, content, category, tone, keywords } = parsed.data;
+
+  // One click, whole post. Handled before the switch because it is the only
+  // task that makes more than one model call.
+  if (task === "compose") {
+    const idea = (notes || brief || "").trim();
+    if (!idea) {
+      return NextResponse.json({ error: "Describe the post, or paste your notes, first." }, { status: 400 });
+    }
+    try {
+      const result = await compose({
+        idea,
+        keepFacts: Boolean(notes),
+        tone,
+        category,
+        keywords,
+      });
+      return NextResponse.json(result);
+    } catch (err) {
+      if (err instanceof AiUnavailableError) {
+        return NextResponse.json({ error: err.message }, { status: 503 });
+      }
+      return NextResponse.json({ error: "Generation failed. Please try again." }, { status: 500 });
+    }
+  }
 
   let prompt: string;
   let maxTokens = 3072;

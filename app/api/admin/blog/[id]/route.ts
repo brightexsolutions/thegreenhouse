@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { requireAdmin } from "@/lib/auth-guard";
@@ -6,6 +7,16 @@ import { slugify, readingMinutes, deriveExcerpt } from "@/lib/blog";
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
+
+/** Push a published change straight into the cached pages that show it.
+ *  Without this, /blog and the sitemap serve their last snapshot until the
+ *  revalidate window lapses, so a new post looks like it did not save. */
+function revalidateBlog(slug?: string) {
+  revalidatePath("/blog");
+  revalidatePath("/sitemap.xml");
+  if (slug) revalidatePath(`/blog/${slug}`);
+}
+
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -134,6 +145,9 @@ export async function PATCH(req: NextRequest, { params }: Props) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 
+  // Both slugs: the new one, and the old one if the URL changed.
+  revalidateBlog((data as { slug: string }).slug);
+  if (existing.slug !== (data as { slug: string }).slug) revalidateBlog(existing.slug);
   logger.info("blog_updated", { adminId: guard.userId, slug: (data as { slug: string }).slug });
   return NextResponse.json({ post: data });
 }
@@ -151,6 +165,7 @@ export async function DELETE(_req: NextRequest, { params }: Props) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  revalidateBlog();
   logger.info("blog_deleted", { adminId: guard.userId, postId: id });
   return NextResponse.json({ deleted: true });
 }

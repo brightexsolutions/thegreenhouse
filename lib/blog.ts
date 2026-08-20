@@ -1,5 +1,4 @@
 import { marked } from "marked";
-import DOMPurify from "isomorphic-dompurify";
 
 export const BLOG_CATEGORIES = [
   { value: "reflection",    label: "Reflection" },
@@ -71,14 +70,62 @@ export function deriveExcerpt(markdown: string, limit = 200): string {
 
 marked.setOptions({ gfm: true, breaks: false });
 
-// Headings carry the same ids that extractHeadings() derives, so the contents
-// list on the article page can link straight into the body.
+/** Escape the five characters that can start a tag or break an attribute. */
+function escapeHtml(input: string): string {
+  return input
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+/** Only allow schemes that cannot execute script. */
+function safeHref(href: string): string | null {
+  const trimmed = href.trim();
+  if (/^(https?:|mailto:|tel:)/i.test(trimmed)) return trimmed;
+  // Site-relative links, which is how posts link to /events and /about.
+  if (/^\/(?!\/)/.test(trimmed) || /^#/.test(trimmed)) return trimmed;
+  return null;
+}
+
 marked.use({
   renderer: {
+    // Headings carry the same ids that extractHeadings() derives, so the
+    // contents list on the article page can link into the body.
     heading(token: { tokens: unknown[]; depth: number }) {
       const text = this.parser.parseInline(token.tokens as never);
       const id   = slugify(text.replace(/<[^>]+>/g, ""));
       return `<h${token.depth} id="${id}">${text}</h${token.depth}>\n`;
+    },
+
+    // Raw HTML in the source is shown as text rather than executed. This is
+    // the entire sanitisation strategy: if no HTML gets through the parser,
+    // there is nothing downstream to clean up.
+    //
+    // This replaced isomorphic-dompurify, which works but drags jsdom in with
+    // it. jsdom does not survive Vercel's serverless bundling, so every post
+    // rendered at runtime returned a 500 while posts prerendered at build time
+    // were fine. Parsing markdown should not require a DOM implementation.
+    html(token: { text: string }) {
+      return escapeHtml(token.text);
+    },
+
+    link(token: { href: string; title?: string | null; tokens: unknown[] }) {
+      const href = safeHref(token.href);
+      const text = this.parser.parseInline(token.tokens as never);
+      if (!href) return text;
+      const title = token.title ? ` title="${escapeHtml(token.title)}"` : "";
+      const external = /^https?:/i.test(href);
+      const rel = external ? ' target="_blank" rel="noopener noreferrer"' : "";
+      return `<a href="${escapeHtml(href)}"${title}${rel}>${text}</a>`;
+    },
+
+    image(token: { href: string; title?: string | null; text: string }) {
+      const href = safeHref(token.href);
+      if (!href) return escapeHtml(token.text);
+      const title = token.title ? ` title="${escapeHtml(token.title)}"` : "";
+      return `<img src="${escapeHtml(href)}" alt="${escapeHtml(token.text)}"${title} loading="lazy" />`;
     },
   },
 });
@@ -86,25 +133,12 @@ marked.use({
 /**
  * Markdown to HTML for a post body.
  *
- * Posts are authored by admins, so this is not the primary defence, but the
- * output is served to every visitor and indexed by crawlers. Sanitising costs
- * nothing here and means a compromised admin account cannot plant a script
- * tag on the public site.
+ * Safe by construction: the renderer above never emits a tag it did not build
+ * itself, and raw HTML from the source is escaped into visible text. No DOM,
+ * so this runs anywhere.
  */
 export function renderMarkdown(markdown: string): string {
-  const raw = marked.parse(markdown, { async: false }) as string;
-  return DOMPurify.sanitize(raw, {
-    ALLOWED_TAGS: [
-      "h1", "h2", "h3", "h4", "h5", "h6",
-      "p", "br", "hr", "blockquote",
-      "ul", "ol", "li",
-      "strong", "em", "del", "code", "pre",
-      "a", "img", "figure", "figcaption",
-      "table", "thead", "tbody", "tr", "th", "td",
-    ],
-    ALLOWED_ATTR: ["href", "title", "src", "alt", "width", "height", "target", "rel", "id"],
-    ALLOWED_URI_REGEXP: /^(?:https?:|mailto:|tel:|\/)/i,
-  });
+  return marked.parse(markdown, { async: false }) as string;
 }
 
 /** Headings in the body, used to build the on-page contents list. */

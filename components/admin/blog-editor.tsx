@@ -35,7 +35,7 @@ const EMPTY: BlogEditorValues = {
 };
 
 type Mode = "edit" | "preview";
-type AiTask = "draft" | "expand" | "rewrite" | "seo" | "excerpt" | "alt" | "titles" | "keywords";
+type AiTask = "compose" | "draft" | "expand" | "rewrite" | "seo" | "excerpt" | "alt" | "titles" | "keywords";
 type AiMode = "brief" | "notes";
 
 export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEditorValues>; aiEnabled: boolean }) {
@@ -170,6 +170,21 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
     }
 
     switch (task) {
+      case "compose":
+        setV(prev => ({
+          ...prev,
+          content:          body.content ?? prev.content,
+          // Never overwrite something the author already typed.
+          title:            prev.title.trim()   ? prev.title   : (body.title ?? ""),
+          excerpt:          prev.excerpt.trim() ? prev.excerpt : (body.excerpt ?? ""),
+          meta_title:       body.meta_title       || prev.meta_title,
+          meta_description: body.meta_description || prev.meta_description,
+          tags:             prev.tags.length ? prev.tags : (body.tags ?? []),
+        }));
+        setMode("edit");
+        setAiOpen(false);
+        toast.success("Post drafted. Read it through before publishing.");
+        break;
       case "draft":
       case "expand":
         set("content", body.text);
@@ -358,8 +373,8 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                   your own notes and let the model shape them. */}
               <div className="flex items-center bg-white/60 rounded p-0.5 mb-3 max-w-md" role="tablist" aria-label="Generation mode">
                 {([
-                  { key: "brief" as AiMode, label: "From a brief",  hint: "Describe the idea" },
-                  { key: "notes" as AiMode, label: "From my notes", hint: "Paste your own words" },
+                  { key: "brief" as AiMode, label: "Expand my idea",   hint: "A sentence is enough" },
+                  { key: "notes" as AiMode, label: "Keep to my notes", hint: "Nothing invented" },
                 ]).map(m => (
                   <button
                     key={m.key}
@@ -384,8 +399,8 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 <textarea
                   value={aiBrief}
                   onChange={e => setAiBrief(e.target.value)}
-                  rows={3}
-                  placeholder="What should this post cover? For example: a recap of Session 02, what the theme of delusion meant, and what surprised us about the turnout."
+                  rows={4}
+                  placeholder="What is the post about? A sentence or two is enough. For example: who we are as a worship community, and why we gather quarterly rather than every week."
                   className="w-full text-sm bg-white border border-gold/25 rounded p-3 outline-none focus:border-gold/60 transition-colors resize-y placeholder:text-charcoal/30"
                 />
               ) : (
@@ -459,16 +474,38 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                   ))}
                 </div>
 
-                {aiMode === "brief" ? (
-                  <AiButton task="draft" busy={aiBusy} onRun={runAi} icon={Wand2} primary>Write the post</AiButton>
-                ) : (
-                  <AiButton task="expand" busy={aiBusy} onRun={runAi} icon={Wand2} primary>Write the post from my notes</AiButton>
+                <button
+                  type="button"
+                  disabled={aiBusy !== null}
+                  onClick={() => runAi("compose")}
+                  className="inline-flex items-center gap-2 bg-forest text-cream text-sm font-medium px-5 py-2.5 rounded hover:bg-moss transition-colors disabled:opacity-50"
+                >
+                  {aiBusy === "compose"
+                    ? <><Loader2 size={14} className="animate-spin" /> Writing the post</>
+                    : <><Wand2 size={14} /> Write the post</>}
+                </button>
+
+                {v.content.trim() && (
+                  <span className="text-[11px] text-charcoal/40">
+                    This replaces the body below.
+                  </span>
                 )}
-                <AiButton task="rewrite" busy={aiBusy} onRun={runAi}>Improve the draft</AiButton>
-                <AiButton task="titles"  busy={aiBusy} onRun={runAi}>Suggest titles</AiButton>
-                <AiButton task="excerpt" busy={aiBusy} onRun={runAi}>Write the excerpt</AiButton>
-                <AiButton task="seo"     busy={aiBusy} onRun={runAi}>Write search copy</AiButton>
               </div>
+
+              {/* Refinements, useful once there is a draft to work on. */}
+              {v.content.trim() && (
+                <details className="mt-3 group">
+                  <summary className="text-[11px] text-charcoal/50 cursor-pointer select-none hover:text-charcoal/80">
+                    Refine what is there
+                  </summary>
+                  <div className="flex flex-wrap items-center gap-2 mt-2.5">
+                    <AiButton task="rewrite" busy={aiBusy} onRun={runAi}>Improve the writing</AiButton>
+                    <AiButton task="titles"  busy={aiBusy} onRun={runAi}>Other titles</AiButton>
+                    <AiButton task="excerpt" busy={aiBusy} onRun={runAi}>Rewrite the excerpt</AiButton>
+                    <AiButton task="seo"     busy={aiBusy} onRun={runAi}>Redo the search copy</AiButton>
+                  </div>
+                </details>
+              )}
 
               {titleIdeas.length > 0 && (
                 <div className="mt-4 flex flex-col gap-1.5">
@@ -487,10 +524,9 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
               )}
 
               <p className="text-[11px] text-charcoal/45 mt-4">
-                <strong className="text-charcoal/70">Write the post</strong> fills the body below using your
-                brief and the phrases above. The other buttons refine a draft once it is there.
-                Everything lands in the editor as a draft: read it before publishing, because it does
-                not know your venue, dates, or who was in the room.
+                One press fills the title, body, excerpt, tags and search copy. Everything lands in the
+                editor as a draft: read it before publishing, because it does not know your venue,
+                your dates, or who was in the room.
               </p>
             </>
           )}
