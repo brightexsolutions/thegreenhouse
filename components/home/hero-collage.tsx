@@ -176,7 +176,9 @@ function CardInner({
 export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) {
   // Four tiles, filled from the gallery newest session first. Any slot without
   // a photograph renders as a designed panel rather than a gap.
-  const [pause, worship, connect, reflect] = [0, 1, 2, 3].map(i => photos[i] ?? null);
+  // Connect takes slot 1 and Worship slot 2: the second gallery photo is the
+  // one of people talking, the third is the band.
+  const [pause, connect, worship, reflect] = [0, 1, 2, 3].map(i => photos[i] ?? null);
 
   const container = {
     hidden: {},
