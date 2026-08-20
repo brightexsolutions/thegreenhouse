@@ -3,21 +3,21 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Brand System — The Green House",
-  description: "The complete visual language for The Green House — color, typography, components, motion, and voice.",
+  title: "Brand System: The Green House",
+  description: "The complete visual language for The Green House: color, typography, components, motion, and voice.",
   robots: { index: false, follow: false },
 };
 
 const COLORS = {
   greens: [
-    { name: "Forest",      hex: "#1b3a2a", label: "Primary — nav, hero, footer" },
-    { name: "Forest Dark", hex: "#0d1a12", label: "Deep bg — hero underlay" },
+    { name: "Forest",      hex: "#1b3a2a", label: "Primary: nav, hero, footer" },
+    { name: "Forest Dark", hex: "#0d1a12", label: "Deep bg: hero underlay" },
     { name: "Moss",        hex: "#2d5240", label: "Hover states, mid tones" },
     { name: "Sage",        hex: "#4e7a5e", label: "Secondary accents" },
     { name: "Sage Light",  hex: "#7fa98a", label: "Muted green elements" },
   ],
   gold: [
-    { name: "Gold",        hex: "#c9a24a", label: "Primary accent — CTAs, highlights" },
+    { name: "Gold",        hex: "#c9a24a", label: "Primary accent: CTAs, highlights" },
     { name: "Gold Light",  hex: "#e4c97e", label: "Hover gold" },
     { name: "Gold Pale",   hex: "#f5edce", label: "Gold tint bg" },
   ],
@@ -80,7 +80,7 @@ export default function DesignSystemPage() {
             Brand <em className="not-italic text-gold">System</em>
           </h1>
           <p className="text-cream/55 text-base sm:text-lg max-w-xl leading-relaxed mb-10">
-            The complete visual language for The Green House — color, typography, spacing, components, motion, and voice.
+            The complete visual language for The Green House: color, typography, spacing, components, motion, and voice.
           </p>
 
           {/* TOC pill row */}
@@ -109,7 +109,7 @@ export default function DesignSystemPage() {
             <div className="space-y-8">
               {/* Greens */}
               <DSBlock>
-                <TypeTag>Greens — carry the brand identity</TypeTag>
+                <TypeTag>Greens, carry the brand identity</TypeTag>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   {COLORS.greens.map(({ name, hex, label }) => (
                     <div key={hex}>
@@ -124,7 +124,7 @@ export default function DesignSystemPage() {
 
               {/* Gold */}
               <DSBlock>
-                <TypeTag>Gold — accent, never overuse</TypeTag>
+                <TypeTag>Gold: accent, never overuse</TypeTag>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {COLORS.gold.map(({ name, hex, label }) => (
                     <div key={hex}>
@@ -139,7 +139,7 @@ export default function DesignSystemPage() {
 
               {/* Neutrals */}
               <DSBlock>
-                <TypeTag>Neutrals — carry most page weight</TypeTag>
+                <TypeTag>Neutrals, carry most page weight</TypeTag>
                 <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
                   {COLORS.neutrals.map(({ name, hex, label }) => (
                     <div key={hex}>
@@ -160,26 +160,26 @@ export default function DesignSystemPage() {
 
             <div className="space-y-4">
               <DSBlock>
-                <TypeTag>Cormorant Garamond — Display · Hero headlines · Section titles</TypeTag>
+                <TypeTag>Cormorant Garamond, Display · Hero headlines · Section titles</TypeTag>
                 <div className="font-display text-[clamp(48px,7vw,80px)] font-light text-charcoal leading-[0.92] tracking-tight mb-4">
                   A place to <em className="not-italic text-gold">breathe</em>
                 </div>
                 <div className="font-display text-4xl font-normal text-charcoal tracking-tight mb-3">
-                  Section Heading — 36px / Weight 400
+                  Section Heading, 36px / Weight 400
                 </div>
                 <div className="font-display text-2xl italic text-gold mb-4">
-                  Italic em phrase — sub-heading / 24px
+                  Italic em phrase, sub-heading / 24px
                 </div>
                 <code className="text-[10px] font-mono text-charcoal/40 bg-off-white px-2 py-1 rounded">
-                  font-family: &apos;Cormorant Garamond&apos;, Georgia, serif — var(--font-display)
+                  font-family: &apos;Cormorant Garamond&apos;, Georgia, serif, var(--font-display)
                 </code>
               </DSBlock>
 
               <DSBlock>
-                <TypeTag>DM Sans — Interface · Body copy · Navigation · Buttons</TypeTag>
-                <p className="text-lg font-medium text-charcoal mb-3">UI Heading — DM Sans 500 / 18px</p>
+                <TypeTag>DM Sans, Interface · Body copy · Navigation · Buttons</TypeTag>
+                <p className="text-lg font-medium text-charcoal mb-3">UI Heading, DM Sans 500 / 18px</p>
                 <p className="text-sm text-charcoal/65 leading-relaxed max-w-xl mb-4">
-                  Body regular — A quarterly cross-church gathering in Nairobi. Low pressure, real connection, everyone welcome. Each session is a curated evening of worship, sharing, and stillness.
+                  Body regular, A quarterly cross-church gathering in Nairobi. Low pressure, real connection, everyone welcome. Each session is a curated evening of worship, sharing, and stillness.
                 </p>
                 <div className="flex flex-wrap gap-5 items-center mb-4">
                   <span className="label-caps text-gold/80 tracking-widest text-[10px]">Nairobi · Quarterly</span>
@@ -187,7 +187,7 @@ export default function DesignSystemPage() {
                   <span className="text-xs text-charcoal/40">Caption · Muted</span>
                 </div>
                 <code className="text-[10px] font-mono text-charcoal/40 bg-off-white px-2 py-1 rounded">
-                  font-family: &apos;DM Sans&apos;, system-ui, sans-serif — var(--font-sans)
+                  font-family: &apos;DM Sans&apos;, system-ui, sans-serif, var(--font-sans)
                 </code>
               </DSBlock>
             </div>
@@ -243,7 +243,7 @@ export default function DesignSystemPage() {
 
             <div className="space-y-4">
               {/* Eyebrow pattern */}
-              <div className="text-[11px] font-semibold uppercase tracking-widest text-charcoal/40 mb-3">Eyebrow + Heading Pattern — used above every major section</div>
+              <div className="text-[11px] font-semibold uppercase tracking-widest text-charcoal/40 mb-3">Eyebrow + Heading Pattern, used above every major section</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <DSBlock>
                   <div className="flex items-center gap-2 mb-3">
@@ -288,7 +288,7 @@ export default function DesignSystemPage() {
 
               {/* Section icon tiles */}
               <DSBlock>
-                <TypeTag>Icon Tiles — used in docs and feature lists</TypeTag>
+                <TypeTag>Icon Tiles, used in docs and feature lists</TypeTag>
                 <div className="flex flex-wrap gap-3">
                   {[
                     { label: "Events",    color: "bg-forest/10 text-forest" },
@@ -309,7 +309,7 @@ export default function DesignSystemPage() {
 
               {/* Card pattern */}
               <DSBlock dark>
-                <TypeTag light>Event Card — dark with radial gold glow</TypeTag>
+                <TypeTag light>Event Card, dark with radial gold glow</TypeTag>
                 <div className="relative rounded-2xl overflow-hidden border border-cream/8 bg-forest max-w-xs">
                   <div className="absolute inset-0" style={{
                     background: "radial-gradient(ellipse 80% 60% at 20% 80%, rgba(201,162,74,0.15) 0%, transparent 65%)",
@@ -336,7 +336,7 @@ export default function DesignSystemPage() {
             <SectionLabel n="05" title="Spacing System" />
 
             <DSBlock>
-              <TypeTag>4px base unit — all spacing is a multiple of 4</TypeTag>
+              <TypeTag>4px base unit, all spacing is a multiple of 4</TypeTag>
               <div className="flex items-end gap-4 flex-wrap mb-8">
                 {[
                   { size: 4,  label: "4" },
@@ -381,7 +381,7 @@ export default function DesignSystemPage() {
 
             <div className="space-y-4">
               <DSBlock>
-                <TypeTag>Entrance animations — FadeIn / FadeInStagger</TypeTag>
+                <TypeTag>Entrance animations, FadeIn / FadeInStagger</TypeTag>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-charcoal/70">
                   <div className="bg-off-white rounded-xl border border-mist p-4">
                     <p className="font-semibold text-charcoal mb-2">FadeIn</p>
@@ -402,7 +402,7 @@ export default function DesignSystemPage() {
               </DSBlock>
 
               <DSBlock>
-                <TypeTag>Reduced motion — always respected</TypeTag>
+                <TypeTag>Reduced motion, always respected</TypeTag>
                 <p className="text-sm text-charcoal/60 leading-relaxed max-w-xl">
                   All animated elements check <code className="font-mono text-xs bg-off-white px-1.5 py-0.5 rounded text-charcoal/70">useReducedMotion()</code> from Framer Motion.
                   When enabled, float loops and ripple pulses are suppressed. Entrance animations (opacity/y) still run as they are non-looping and brief.
@@ -421,7 +421,7 @@ export default function DesignSystemPage() {
                 <ul className="space-y-3 text-sm text-charcoal/70">
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✓</span>
-                    Short headlines — 6 words or fewer
+                    Short headlines, 6 words or fewer
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✓</span>
@@ -429,15 +429,15 @@ export default function DesignSystemPage() {
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✓</span>
-                    Body text under 2 lines per block — let imagery carry weight
+                    Body text under 2 lines per block, let imagery carry weight
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✓</span>
-                    Warm and direct — &ldquo;All welcome.&rdquo; not &ldquo;We warmly invite you to join us.&rdquo;
+                    Warm and direct, &ldquo;All welcome.&rdquo; not &ldquo;We warmly invite you to join us.&rdquo;
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-green-100 text-green-600 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✓</span>
-                    Label caps for categories — UPPERCASE 10px with wide tracking
+                    Label caps for categories, UPPERCASE 10px with wide tracking
                   </li>
                 </ul>
               </DSBlock>
@@ -447,23 +447,23 @@ export default function DesignSystemPage() {
                 <ul className="space-y-3 text-sm text-charcoal/70">
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✗</span>
-                    Walls of text — no paragraph blocks longer than 2 sentences per section
+                    Walls of text, no paragraph blocks longer than 2 sentences per section
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✗</span>
-                    Generic church copy — avoid &ldquo;Come as you are and experience God&rsquo;s presence&rdquo;
+                    Generic church copy, avoid &ldquo;Come as you are and experience God&rsquo;s presence&rdquo;
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✗</span>
-                    Exclamation marks — restraint conveys confidence
+                    Exclamation marks, restraint conveys confidence
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✗</span>
-                    Color as decoration — gold appears intentionally, not casually
+                    Color as decoration: gold appears intentionally, not casually
                   </li>
                   <li className="flex items-start gap-2.5">
                     <span className="w-4 h-4 rounded-full bg-red-100 text-red-500 flex items-center justify-center text-[10px] font-bold flex-shrink-0 mt-0.5">✗</span>
-                    &ldquo;Monthly&rdquo; — the gathering is quarterly
+                    &ldquo;Monthly&rdquo;, the gathering is quarterly
                   </li>
                 </ul>
               </DSBlock>

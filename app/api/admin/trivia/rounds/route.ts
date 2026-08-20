@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdminOrControlToken } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -8,7 +8,11 @@ export async function GET(req: NextRequest) {
   const event_id = req.nextUrl.searchParams.get("event_id");
   if (!event_id) return NextResponse.json({ error: "event_id required" }, { status: 400 });
 
-  const supabase = createAdminClient();
+  const guard = await requireAdminOrControlToken(
+    { eventId: event_id }, "trivia", req.nextUrl.searchParams.get("t")
+  );
+  if (!guard.ok) return guard.response;
+  const supabase = guard.supabase;
   const { data, error } = await supabase
     .from("trivia_rounds")
     .select("id, question_id, status, started_at, closed_at")
@@ -22,12 +26,19 @@ export async function GET(req: NextRequest) {
 // POST /api/admin/trivia/rounds — start a new trivia round
 // Closes any existing active/revealing round for this event first
 export async function POST(req: NextRequest) {
-  const supabase = createAdminClient();
   const { event_id, question_id, timer_seconds } = await req.json() as {
     event_id:      string;
     question_id:   string;
     timer_seconds?: number;
   };
+
+  if (!event_id) return NextResponse.json({ error: "event_id required" }, { status: 400 });
+
+  const guard = await requireAdminOrControlToken(
+    { eventId: event_id }, "trivia", req.nextUrl.searchParams.get("t")
+  );
+  if (!guard.ok) return guard.response;
+  const supabase = guard.supabase;
 
   if (!event_id || !question_id)
     return NextResponse.json({ error: "event_id and question_id required" }, { status: 400 });

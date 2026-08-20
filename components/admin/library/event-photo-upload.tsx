@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { Upload, Trash2, ImageIcon, Loader2, ExternalLink, X, Check, Images } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, sessionName } from "@/lib/utils";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 
 interface Event {
@@ -53,9 +53,7 @@ function formatKb(kb: number): string {
 }
 
 function shortTitle(title: string) {
-  return title
-    .replace(/^The Green House\s*[—–-]\s*/i, "")
-    .replace(/^Greenhouse\s*[—–-]\s*/i, "");
+  return sessionName(title);
 }
 
 export function EventPhotoUpload({ events }: Props) {
@@ -118,7 +116,7 @@ export function EventPhotoUpload({ events }: Props) {
       ["image/jpeg", "image/png", "image/webp"].includes(f.type) && f.size <= 15 * 1024 * 1024
     );
     const skipped = files.length - accepted.length;
-    if (skipped > 0) alert(`${skipped} file(s) skipped — only JPEG/PNG/WebP under 15MB accepted.`);
+    if (skipped > 0) alert(`${skipped} file(s) skipped, only JPEG/PNG/WebP under 15MB accepted.`);
     if (!accepted.length) return;
     pendingRef.current = [...pendingRef.current, ...accepted];
     if (!processingRef.current) processQueue();

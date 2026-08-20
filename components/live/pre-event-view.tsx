@@ -40,7 +40,7 @@ const FEATURES = [
   {
     icon:  Music2,
     title: "Tonight's Program",
-    desc:  "Follow along with the program as it unfolds — session by session.",
+    desc:  "Follow along with the program as it unfolds, session by session.",
   },
   {
     icon:  BookOpen,
@@ -50,7 +50,7 @@ const FEATURES = [
   {
     icon:  MessageSquare,
     title: "Drop a Thought",
-    desc:  "Share what's on your heart — questions, reflections, or a word. We're listening.",
+    desc:  "Share what's on your heart: questions, reflections, or a word. We're listening.",
   },
 ];
 
@@ -110,7 +110,7 @@ export function PreEventView({
           >
             <p className="text-sm font-medium text-charcoal/60">This session has ended.</p>
             <p className="text-xs text-charcoal/35 mt-1">
-              Thank you to everyone who joined us — see you at the next one.
+              Thank you to everyone who joined us, see you at the next one.
             </p>
           </motion.div>
         ) : diff <= 0 ? (
@@ -195,7 +195,7 @@ export function PreEventView({
             transition={{ delay: 0.6 }}
             className="text-center text-[11px] text-charcoal/30 pb-4"
           >
-            Keep this page open or bookmark it — it goes live when the session starts.
+            Keep this page open or bookmark it, it goes live when the session starts.
           </motion.p>
         )}
       </div>

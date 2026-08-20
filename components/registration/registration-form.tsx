@@ -139,7 +139,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         {!hasEmail && (
           <>
             <p className="text-charcoal/60 text-sm max-w-xs mx-auto leading-relaxed mb-6">
-              Your spot is confirmed. Download your ticket below or copy the link to save it somewhere handy — you&apos;ll need it at the door.
+              Your spot is confirmed. Download your ticket below or copy the link to save it somewhere handy, you&apos;ll need it at the door.
             </p>
 
             <div className="space-y-3 max-w-xs mx-auto">
@@ -181,7 +181,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
               </div>
 
               <p className="text-xs text-charcoal/45 leading-relaxed">
-                Keep the PDF or link handy — you&apos;ll need it to check in at the door.
+                Keep the PDF or link handy, you&apos;ll need it to check in at the door.
               </p>
             </div>
           </>
@@ -289,7 +289,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         {emailValue && (
           <p className="flex items-center gap-1 text-[11px] text-forest/70 mt-1">
             <Mail size={11} className="shrink-0" />
-            We&apos;ll email your ticket here — nothing else.
+            We&apos;ll email your ticket here, nothing else.
           </p>
         )}
       </Field>
@@ -368,7 +368,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
             <div className="pl-[22px] space-y-1.5">
               <p className="text-xs text-amber-700 leading-relaxed">
                 If you registered earlier, check your email for your ticket.
-                If someone else used your details, or you need help, reach out below —
+                If someone else used your details, or you need help, reach out below.
                 we&apos;ll sort it out before the session.
               </p>
               <a
@@ -396,7 +396,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         {isSubmitting ? (
           <><Loader2 size={15} className="animate-spin" />Registering…</>
         ) : (
-          "Reserve my spot — it's free"
+          "Reserve my spot, it's free"
         )}
       </button>
 

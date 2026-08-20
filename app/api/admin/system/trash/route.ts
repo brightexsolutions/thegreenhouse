@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 
+export const dynamic = "force-dynamic";
+
 async function guardSuperAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -18,7 +20,7 @@ export async function GET() {
   const supabase = await guardSuperAdmin();
   if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [{ data: events }, { data: registrations }] = await Promise.all([
+  const [{ data: events }, { data: registrations }, { data: posts }] = await Promise.all([
     supabase
       .from("events")
       .select("id, title, event_date, status, deleted_at")
@@ -29,9 +31,18 @@ export async function GET() {
       .select("id, first_name, last_name, email, phone, deleted_at, events(title)")
       .not("deleted_at", "is", null)
       .order("deleted_at", { ascending: false }),
+    supabase
+      .from("blog_posts")
+      .select("id, title, slug, deleted_at")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false }),
   ]);
 
-  return NextResponse.json({ events: events ?? [], registrations: registrations ?? [] });
+  return NextResponse.json({
+    events:        events ?? [],
+    registrations: registrations ?? [],
+    posts:         posts ?? [],
+  });
 }
 
 export async function PATCH(req: NextRequest) {
@@ -40,7 +51,7 @@ export async function PATCH(req: NextRequest) {
 
   const { table, id } = await req.json() as { table: string; id: string };
 
-  const allowedTables = ["events", "registrations", "event_sessions", "songs"];
+  const allowedTables = ["events", "registrations", "event_sessions", "songs", "blog_posts"];
   if (!allowedTables.includes(table)) {
     return NextResponse.json({ error: "Invalid table" }, { status: 400 });
   }

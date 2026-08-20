@@ -7,6 +7,7 @@ import {
   Circle,
   Svg,
 } from "@react-pdf/renderer";
+import { sessionName } from "@/lib/utils";
 
 // Square social badge — 1080×1080 pt (rendered at screen resolution)
 const SIZE = 560;
@@ -95,12 +96,12 @@ interface BadgePdfProps {
 
 export function BadgePdf(p: BadgePdfProps) {
   // Strip "The Green House — " prefix
-  const sessionLabel = p.eventTitle.replace(/^The Green House\s*[—–-]\s*/i, "");
+  const sessionLabel = sessionName(p.eventTitle);
   const cleanUrl = p.siteUrl.replace(/^https?:\/\//, "");
 
   return (
     <Document
-      title={`Badge — ${p.eventTitle}`}
+      title={`Badge, ${p.eventTitle}`}
       author={p.siteName}
       creator={p.siteName}
     >

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { StatCard } from "@/components/admin/ui/stat-card";
 import { StatusBadge } from "@/components/admin/ui/status-badge";
 import type { EventStatus } from "@/types/database";
+import { sessionName } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -86,7 +87,7 @@ export default async function AdminDashboardPage() {
           <div className="flex items-center gap-3">
             <Radio size={15} className="animate-pulse" />
             <p className="text-sm font-semibold">Session is LIVE</p>
-            <span className="text-white/70 text-sm">— {d.liveEvent.title}</span>
+            <span className="text-white/70 text-sm">– {d.liveEvent.title}</span>
           </div>
           <Link
             href={`/live/${d.liveEvent.slug}/control`}
@@ -209,7 +210,7 @@ export default async function AdminDashboardPage() {
                     </div>
                     {r.events?.title && (
                       <span className="hidden md:block text-[10px] text-charcoal/30 bg-charcoal/5 px-2 py-0.5 rounded-lg truncate max-w-[120px]">
-                        {r.events.title.replace("The Green House — ", "")}
+                        {sessionName(r.events.title)}
                       </span>
                     )}
                     <p className="text-[10px] text-charcoal/30 flex-shrink-0 text-right">

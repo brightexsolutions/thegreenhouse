@@ -10,7 +10,7 @@ export const revalidate = 300;
 export const metadata: Metadata = {
   title: "Sessions",
   description:
-    "All Green House sessions — past and upcoming. A cross-church worship and sharing evening in Nairobi.",
+    "All Green House sessions, past and upcoming. A cross-church worship and sharing evening in Nairobi.",
   alternates: { canonical: "/events" },
   openGraph: {
     title: "Sessions | The Green House",
@@ -70,7 +70,7 @@ export default async function EventsPage() {
           </FadeIn>
           <FadeIn delay={0.1}>
             <p className="mt-5 text-cream/70 text-base sm:text-lg max-w-md leading-relaxed">
-              Quarterly evenings of worship, prayer, and real conversation. No performance — just people.
+              Quarterly evenings of worship, prayer, and real conversation. No performance, just people.
             </p>
           </FadeIn>
         </div>

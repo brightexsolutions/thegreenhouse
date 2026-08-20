@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin, requireAdminOrControlToken } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
@@ -15,8 +16,21 @@ type TriviaQuestion = {
   created_at: string;
 };
 
-// GET /api/admin/trivia — list all questions
-export async function GET() {
+// GET /api/admin/trivia?slug=&t= — list all questions
+// The live control panel reads this to pick a question, so a control-link
+// token scoped to trivia is accepted alongside an admin session.
+export async function GET(req: NextRequest) {
+  const slug  = req.nextUrl.searchParams.get("slug");
+  const token = req.nextUrl.searchParams.get("t");
+
+  if (token && slug) {
+    const guard = await requireAdminOrControlToken({ slug }, "trivia", token);
+    if (!guard.ok) return guard.response;
+  } else {
+    const guard = await requireAdmin();
+    if (!guard.ok) return guard.response;
+  }
+
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from("trivia_questions")
@@ -30,7 +44,11 @@ export async function GET() {
 
 // POST /api/admin/trivia — create a question
 export async function POST(req: NextRequest) {
-  const supabase = createAdminClient();
+  // Creating library questions is admin only, tokens do not get this.
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
+  const supabase = guard.supabase;
   const body = await req.json() as Partial<TriviaQuestion>;
 
   const { question, type, options, correct_index, hint, category, points } = body;

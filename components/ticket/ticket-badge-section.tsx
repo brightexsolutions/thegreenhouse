@@ -73,7 +73,7 @@ export function TicketBadgeSection({ pdfUrl, ...badgeProps }: Props) {
               Customize &amp; share your badge
             </h3>
             <p className="text-xs text-[#f7f2e8]/50 leading-relaxed mb-5">
-              Add your photo, choose a style and post it — invite your community to come along!
+              Add your photo, choose a style and post it, invite your community to come along!
             </p>
 
             <button

@@ -50,7 +50,7 @@ export default function AboutPage() {
             <FadeIn delay={0.1}>
               <p className="text-cream/70 text-base sm:text-lg leading-relaxed max-w-md">
                 A safe, relaxed, life-giving space designed for mental, emotional, and spiritual
-                renewal — where tired souls from different churches come to slow down, breathe deeply,
+                renewal: where tired souls from different churches come to slow down, breathe deeply,
                 and find God and each other again.
               </p>
             </FadeIn>
@@ -72,7 +72,7 @@ export default function AboutPage() {
                       "Cross-church and non-denominational",
                       "Led by rotating worship teams",
                       "2–3 hours of worship, prayer and sharing",
-                      "Open to everyone — believer or curious",
+                      "Open to everyone: believer or curious",
                     ].map((item) => (
                       <li key={item} className="flex items-start gap-3 text-sm text-charcoal/70">
                         <span className="mt-1 w-4 h-4 rounded-full bg-gold/20 flex items-center justify-center shrink-0">
@@ -156,12 +156,12 @@ export default function AboutPage() {
               <p className="text-cream/70 text-base leading-relaxed">
                 Modern life is relentless. Many Christians are spiritually drained, emotionally
                 isolated, and too pressed to find the stillness that actually restores. Traditional
-                settings don&apos;t always create room for raw, honest conversations — or the extended
+                settings don&apos;t always create room for raw, honest conversations, or the extended
                 quiet needed to truly decompress.
               </p>
               <p className="text-cream/70 text-base leading-relaxed mt-4">
                 The Green House bridges that gap. We offer a consistent, unhurried space to address
-                the silent epidemic of burnout in the Christian community — not with more programming,
+                the silent epidemic of burnout in the Christian community: not with more programming,
                 but with presence, deep worship, and the kind of authentic fellowship that replaces
                 isolation with real healing.
               </p>
@@ -169,9 +169,9 @@ export default function AboutPage() {
             <FadeIn delay={0.1}>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { icon: "😮‍💨", label: "Burnout",     body: "We exist specifically for those running on empty — spiritually and emotionally depleted." },
+                  { icon: "😮‍💨", label: "Burnout",     body: "We exist specifically for those running on empty, spiritually and emotionally depleted." },
                   { icon: "🏘",  label: "Isolation",   body: "We replace disconnection with genuine fellowship across church walls." },
-                  { icon: "🛐",  label: "Deep Worship", body: "Extended time in worship and prayer — unhurried, unperformed, and real." },
+                  { icon: "🛐",  label: "Deep Worship", body: "Extended time in worship and prayer: unhurried, unperformed, and real." },
                   { icon: "🤝",  label: "Connection",  body: "Cross-church fellowship built on vulnerability, not networking." },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl bg-white/5 border border-white/10 p-6">
@@ -224,7 +224,7 @@ export default function AboutPage() {
                 num: "02",
                 icon: "🤲",
                 title: "Holistic Community Care",
-                body: "Food and clothing drives alongside donations of essential personal effects — meeting real, practical needs.",
+                body: "Food and clothing drives alongside donations of essential personal effects: meeting real, practical needs.",
               },
               {
                 num: "03",

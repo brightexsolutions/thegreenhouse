@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { requireTriviaRoundAccess } from "@/lib/auth-guard";
 
 export const dynamic = "force-dynamic";
 
 type Params = { params: { roundId: string } };
 
 // GET /api/admin/trivia/rounds/[roundId] — get results + breakdown
-export async function GET(_: NextRequest, { params }: Params) {
-  const supabase = createAdminClient();
+export async function GET(req: NextRequest, { params }: Params) {
   const { roundId } = params;
+  const guard = await requireTriviaRoundAccess(roundId, req.nextUrl.searchParams.get("t"));
+  if (!guard.ok) return guard.response;
+  const supabase = guard.supabase;
 
   const [{ data: round }, { data: responses }] = await Promise.all([
     supabase
@@ -45,8 +47,10 @@ export async function GET(_: NextRequest, { params }: Params) {
 
 // PATCH /api/admin/trivia/rounds/[roundId] — reveal, close, dismiss, or finalize
 export async function PATCH(req: NextRequest, { params }: Params) {
-  const supabase = createAdminClient();
   const { roundId } = params;
+  const guard = await requireTriviaRoundAccess(roundId, req.nextUrl.searchParams.get("t"));
+  if (!guard.ok) return guard.response;
+  const supabase = guard.supabase;
   const body = await req.json() as { action: "reveal" | "close" | "dismiss" | "finalize"; event_id?: string };
   const { action } = body;
 

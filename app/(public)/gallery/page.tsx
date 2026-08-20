@@ -11,7 +11,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Gallery",
-  description: "Moments from The Green House — a visual record of our gatherings across Nairobi.",
+  description: "Moments from The Green House, a visual record of our gatherings across Nairobi.",
   alternates: { canonical: "/gallery" },
 };
 

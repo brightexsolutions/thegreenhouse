@@ -38,7 +38,7 @@ export function GetInvolvedCta() {
               <div>
                 <h3 className="font-display text-xl font-semibold text-charcoal">Partner with us</h3>
                 <p className="text-charcoal/50 text-sm mt-2 leading-relaxed">
-                  Serve on the team — vocals, instruments, photography, creative, logistics.
+                  Serve on the team: vocals, instruments, photography, creative, logistics.
                 </p>
               </div>
               <div className="flex items-center gap-1.5 text-forest text-sm font-medium mt-auto">
@@ -60,7 +60,7 @@ export function GetInvolvedCta() {
               <div>
                 <h3 className="font-display text-xl font-semibold text-charcoal">Support financially</h3>
                 <p className="text-charcoal/50 text-sm mt-2 leading-relaxed">
-                  Venue, production, outreach — your contribution covers what makes it all possible.
+                  Venue, production, outreach, your contribution covers what makes it all possible.
                 </p>
               </div>
               <div className="flex items-center gap-1.5 text-bark text-sm font-medium mt-auto">

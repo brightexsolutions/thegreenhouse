@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
 import { sendTicketEmail } from "@/lib/communications/email";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
@@ -8,9 +8,15 @@ import { logger } from "@/lib/logger";
 
 type Props = { params: Promise<{ id: string }> };
 
+export const dynamic = "force-dynamic";
+export const maxDuration = 30;
+
 export async function POST(_req: NextRequest, { params }: Props) {
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
+
   const { id } = await params;
-  const supabase = createAdminClient();
+  const supabase = guard.supabase;
 
   const { data: reg } = await supabase
     .from("registrations")
@@ -95,7 +101,7 @@ export async function POST(_req: NextRequest, { params }: Props) {
     registration_id: r.id,
     channel:         "email",
     recipient:       r.email,
-    subject:         `Your ticket — ${ev.title} (resent)`,
+    subject:         `Your ticket, ${ev.title} (resent)`,
     status:          emailResult.success ? "sent" : "failed",
     provider_id:     emailResult.providerId,
     error_message:   emailResult.error ?? null,

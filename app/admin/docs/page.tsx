@@ -24,7 +24,7 @@ export default function AdminDocsPage() {
             <h1 className="text-xl font-semibold text-charcoal">Platform Documentation</h1>
           </div>
           <p className="text-sm text-charcoal/50 ml-12">
-            Full reference for running The Green House platform — from creating a gathering to deploying the site and getting it on Google.
+            Full reference for running The Green House platform, from creating a gathering to deploying the site and getting it on Google.
           </p>
           <div className="ml-12 mt-2 flex items-center gap-4">
             <a

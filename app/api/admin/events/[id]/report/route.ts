@@ -66,7 +66,7 @@ function delta(current: number, prev: number): string {
   if (!prev) return current > 0 ? `<span class="delta-up">New</span>` : "";
   const pctChange = ((current - prev) / prev) * 100;
   const abs = Math.abs(Math.round(pctChange));
-  if (abs < 2) return `<span class="delta-flat">— no change</span>`;
+  if (abs < 2) return `<span class="delta-flat">No change</span>`;
   return pctChange > 0
     ? `<span class="delta-up">↑ ${abs}%</span>`
     : `<span class="delta-dn">↓ ${abs}%</span>`;
@@ -77,7 +77,7 @@ function cmpRow(label: string, curr: string | number, prev: string | number | nu
     <tr>
       <td class="cmp-label">${label}</td>
       <td class="cmp-curr">${curr}</td>
-      <td class="cmp-prev">${prev ?? "—"}</td>
+      <td class="cmp-prev">${prev ?? "–"}</td>
       <td class="cmp-delta">${d}</td>
     </tr>`;
 }
@@ -245,7 +245,7 @@ export async function GET(req: NextRequest, { params }: Props) {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${event.title} — Event Summary</title>
+<title>${event.title}, Event Summary</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   @page { size: A4; margin: 1.8cm 1.5cm; }
@@ -536,20 +536,20 @@ export async function GET(req: NextRequest, { params }: Props) {
 
 <!-- Print bar -->
 <div class="print-bar">
-  <span class="print-bar-note">To save as PDF — click Print and choose <em>Save as PDF</em> from your printer options.</span>
+  <span class="print-bar-note">To save as PDF, click Print and choose <em>Save as PDF</em> from your printer options.</span>
   <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
 </div>
 
 <!-- Header -->
 <div class="report-header">
-  <div class="org-label">The Green House W.S — Event Summary</div>
+  <div class="org-label">The Green House W.S, Event Summary</div>
   <h1 class="event-title">${event.title}</h1>
   <div class="event-meta">
     <span>${fmtDate(event.event_date)}</span>
     <span>${fmtTime(event.event_time)}</span>
     ${event.venue_name ? `<span>${event.venue_name}</span>` : ""}
   </div>
-  ${event.theme_title ? `<div class="theme-note">Theme: <strong>${event.theme_title}</strong>${event.theme_scripture ? ` — ${event.theme_scripture}` : ""}</div>` : ""}
+  ${event.theme_title ? `<div class="theme-note">Theme: <strong>${event.theme_title}</strong>${event.theme_scripture ? `, ${event.theme_scripture}` : ""}</div>` : ""}
   <div class="generated-on">Report generated on ${generatedOn}</div>
 </div>
 
@@ -607,7 +607,7 @@ export async function GET(req: NextRequest, { params }: Props) {
     ${sampleMessages.map(f => `
       <div class="message-card">
         "${f.message.length > 160 ? f.message.slice(0, 157) + "…" : f.message}"
-        ${f.name ? `<span class="message-author">— ${f.name}</span>` : ""}
+        ${f.name ? `<span class="message-author">– ${f.name}</span>` : ""}
       </div>`).join("")}
   </div>` : ""}
   `}
@@ -661,7 +661,7 @@ export async function GET(req: NextRequest, { params }: Props) {
 <div class="section">
   <div class="section-heading">Compared to Last Time</div>
 
-  ${!prevEvent ? `<p class="no-data">This is the first event on record — comparison data will appear from the next session onwards.</p>` : `
+  ${!prevEvent ? `<p class="no-data">This is the first event on record, comparison data will appear from the next session onwards.</p>` : `
   <p class="prev-event-note">Previous event: ${prevEvent.title} · ${fmtDate(prevEvent.event_date)}</p>
   <div style="border:1px solid #e4e0d4; border-radius:8px; overflow:hidden;">
     <table class="cmp-table">
@@ -680,13 +680,13 @@ export async function GET(req: NextRequest, { params }: Props) {
         ${prev ? cmpRow(
           "Attendance rate",
           `${totalReg ? Math.round((checkedIn / totalReg) * 100) : 0}%`,
-          prev.regs ? `${Math.round((prev.checkedIn / prev.regs) * 100)}%` : "—",
+          prev.regs ? `${Math.round((prev.checkedIn / prev.regs) * 100)}%` : "–",
           (() => {
             const c = totalReg ? Math.round((checkedIn / totalReg) * 100) : 0;
             const p = prev!.regs ? Math.round((prev!.checkedIn / prev!.regs) * 100) : null;
             if (!p) return "";
             const diff = c - p;
-            if (Math.abs(diff) < 2) return `<span class="delta-flat">— no change</span>`;
+            if (Math.abs(diff) < 2) return `<span class="delta-flat">No change</span>`;
             return diff > 0
               ? `<span class="delta-up">↑ ${diff}pp</span>`
               : `<span class="delta-dn">↓ ${Math.abs(diff)}pp</span>`;
@@ -705,7 +705,7 @@ export async function GET(req: NextRequest, { params }: Props) {
 <!-- Footer -->
 <div class="report-footer">
   <span>The Green House W.S · greenhousews.co.ke</span>
-  <span>Confidential — for internal team use</span>
+  <span>Confidential, for internal team use</span>
 </div>
 
 </body>

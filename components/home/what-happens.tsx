@@ -4,7 +4,7 @@ import { FadeIn } from "@/components/motion/fade-in";
 const MOMENTS = [
   { icon: "🌬", label: "Pause",   body: "The room stops. You exhale. There's nowhere you need to be right now." },
   { icon: "🎶", label: "Worship", body: "Live music from rotating teams. Different churches, one sound." },
-  { icon: "🪞", label: "Reflect", body: "Space to sit with what God is saying — without rushing past it." },
+  { icon: "🪞", label: "Reflect", body: "Space to sit with what God is saying, without rushing past it." },
   { icon: "💬", label: "Connect", body: "Genuine conversation with people you wouldn't normally meet." },
 ];
 
@@ -62,7 +62,7 @@ export function WhatHappens() {
               <em className="not-italic text-gold">stays with you</em>
             </h2>
             <p className="text-charcoal/60 text-base leading-relaxed mb-10">
-              Not a concert. Not a conference. A space built for tired souls — people from
+              Not a concert. Not a conference. A space built for tired souls, people from
               different churches across Nairobi who need somewhere to slow down, exhale, and
               find God and each other without the noise.
             </p>

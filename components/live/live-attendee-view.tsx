@@ -331,7 +331,7 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-charcoal">{currentPrompt.text}</p>
-              <p className="text-[11px] text-charcoal/40 mt-0.5">Tap to share — anonymous or with your name</p>
+              <p className="text-[11px] text-charcoal/40 mt-0.5">Tap to share, anonymous or with your name</p>
             </div>
             <MessageSquare size={14} className="text-charcoal/20 flex-shrink-0" />
           </motion.button>

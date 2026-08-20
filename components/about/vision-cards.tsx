@@ -9,12 +9,12 @@ const pillars = [
   {
     icon: "✝️",
     title: "Cross-Church",
-    description: "Run by gifted people from active ministries across Nairobi — meeting as the wider body, not as competing congregations.",
+    description: "Run by gifted people from active ministries across Nairobi: meeting as the wider body, not as competing congregations.",
   },
   {
     icon: "🧠",
     title: "Whole-Person Focus",
-    description: "We take seriously the mental and emotional weight many Christians quietly carry — this space is built for real renewal, not just religious attendance.",
+    description: "We take seriously the mental and emotional weight many Christians quietly carry: this space is built for real renewal, not just religious attendance.",
   },
   {
     icon: "⏳",

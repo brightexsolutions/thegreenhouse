@@ -261,7 +261,7 @@ export function HeroCollage() {
             </motion.h1>
 
             <motion.p variants={item(0.1)} className="text-cream/70 text-base sm:text-lg max-w-sm leading-relaxed">
-              A quarterly cross-church gathering in Nairobi — low pressure, real connection, all welcome.
+              A quarterly cross-church gathering in Nairobi: low pressure, real connection, all welcome.
             </motion.p>
 
             <motion.div variants={item(0.15)} className="flex flex-wrap gap-3 pt-2">

@@ -185,7 +185,7 @@ export default function AdminsPage() {
                         </div>
                         <div>
                           <div className="flex items-center gap-1.5">
-                            <p className="font-medium text-charcoal/80">{admin.full_name ?? "—"}</p>
+                            <p className="font-medium text-charcoal/80">{admin.full_name ?? "–"}</p>
                             {isSelf && (
                               <span className="text-[10px] text-charcoal/30 bg-mist px-1.5 py-0.5 rounded-full">you</span>
                             )}

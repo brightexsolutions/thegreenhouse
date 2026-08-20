@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { ImageResponse } from "next/og";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_NAME } from "@/lib/constants";
+import { sessionName } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,7 @@ export async function GET(req: NextRequest, { params }: Props) {
     events: { title: string; event_date: string; theme_title: string | null };
   };
 
-  const sessionLabel = t.events.title.replace(/^The Green House\s*[—–-]\s*/i, "");
+  const sessionLabel = sessionName(t.events.title);
   const shortDate    = new Date(t.events.event_date).toLocaleDateString("en-KE", {
     day: "numeric", month: "long", year: "numeric",
   });

@@ -7,6 +7,7 @@ import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 import { storageUrl } from "@/lib/constants";
 import type { Event } from "@/types/database";
+import { sessionName } from "@/lib/utils";
 
 function Countdown({ targetDate }: { targetDate: string }) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -144,7 +145,7 @@ export function EventTeaser({ event }: { event: Event | null }) {
 
               {/* Countdown card */}
               <div className="rounded-3xl border border-cream/15 bg-cream/8 backdrop-blur-sm p-8 lg:p-10">
-                <p className="label-caps text-cream/40 text-xs mb-5">Counting down to {event.title.split("—").pop()?.trim() ?? "the session"}</p>
+                <p className="label-caps text-cream/40 text-xs mb-5">Counting down to {sessionName(event.title)}</p>
                 <Countdown targetDate={eventDateTime} />
                 <div className="mt-8 pt-6 border-t border-cream/15">
                   <p className="text-sm text-cream/40">

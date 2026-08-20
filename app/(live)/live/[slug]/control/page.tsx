@@ -121,6 +121,11 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     ? new URLSearchParams(window.location.search).get("t")
     : null;
 
+  // The trivia endpoints accept an admin session or a control-link token
+  // scoped to trivia. A logged in organiser has no token, so this is empty
+  // for them and the session carries the request instead.
+  const triviaTokenParam = controlToken ? `?t=${encodeURIComponent(controlToken)}` : "";
+
   const supabaseRef = useRef(createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -317,7 +322,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
 
   const loadUsedQIds = useCallback(async (eventId: string) => {
     try {
-      const res = await fetch(`/api/admin/trivia/rounds?event_id=${eventId}`);
+      const res = await fetch(`/api/admin/trivia/rounds?event_id=${eventId}${controlToken ? `&t=${encodeURIComponent(controlToken)}` : ""}`);
       if (!res.ok) return;
       const d = await res.json() as { rounds: Array<{ question_id: string }> };
       setUsedQIds(new Set(d.rounds.map(r => r.question_id)));
@@ -335,7 +340,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     }
     let cancelled = false;
     async function load() {
-      const res = await fetch(`/api/admin/trivia/rounds/${roundId}`);
+      const res = await fetch(`/api/admin/trivia/rounds/${roundId}${triviaTokenParam}`);
       if (!res.ok || cancelled) return;
       const d = await res.json() as { round: { trivia_questions: unknown }; responses: OpenResponse[]; correctCount: number };
       if (cancelled) return;
@@ -376,13 +381,13 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       .filter(([, v]) => v !== null)
       .map(([id, is_correct]) => ({ id, is_correct: is_correct as boolean }));
     if (scores.length > 0) {
-      await fetch(`/api/admin/trivia/rounds/${roundId}/score`, {
+      await fetch(`/api/admin/trivia/rounds/${roundId}/score${triviaTokenParam}`, {
         method:  "PATCH",
         headers: { "Content-Type": "application/json" },
         body:    JSON.stringify({ scores }),
       });
     }
-    const res = await fetch(`/api/admin/trivia/rounds/${roundId}`);
+    const res = await fetch(`/api/admin/trivia/rounds/${roundId}${triviaTokenParam}`);
     if (res.ok) {
       const d = await res.json() as { correctCount: number; responses: OpenResponse[] };
       setOpenResponses(d.responses ?? []);
@@ -399,7 +404,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   // Load trivia question library + used question history once authed
   useEffect(() => {
     if (authed !== true || !event) return;
-    fetch("/api/admin/trivia")
+    fetch(`/api/admin/trivia?slug=${encodeURIComponent(slug)}${controlToken ? `&t=${encodeURIComponent(controlToken)}` : ""}`)
       .then(r => r.json())
       .then((d: { questions: TriviaQuestion[] }) => {
         setTriviaQuestions(d.questions ?? []);
@@ -451,7 +456,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     setTriviaLoading(true);
     setTriviaCount(0);
     setTriviaCorrect(0);
-    const res = await fetch("/api/admin/trivia/rounds", {
+    const res = await fetch(`/api/admin/trivia/rounds${triviaTokenParam}`, {
       method:  "POST",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ event_id: event.id, question_id: selectedQId, timer_seconds: triviaTimer }),
@@ -471,7 +476,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     const roundId = display?.trivia_round_id ?? triviaRound?.id;
     if (!roundId) return;
     setTriviaLoading(true);
-    const res = await fetch(`/api/admin/trivia/rounds/${roundId}`, {
+    const res = await fetch(`/api/admin/trivia/rounds/${roundId}${triviaTokenParam}`, {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ action }),
@@ -516,7 +521,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     setLocalScores({});
     setOpenKeywords(null);
     setDisplay(prev => prev ? { ...prev, trivia_round_id: null } : prev);
-    await fetch(`/api/admin/trivia/rounds/${roundId}`, {
+    await fetch(`/api/admin/trivia/rounds/${roundId}${triviaTokenParam}`, {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ action: "dismiss" }),
@@ -540,7 +545,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     setLocalScores({});
     setOpenKeywords(null);
     setDisplay(prev => prev ? { ...prev, trivia_round_id: null } : prev);
-    await fetch(`/api/admin/trivia/rounds/${roundId}`, {
+    await fetch(`/api/admin/trivia/rounds/${roundId}${triviaTokenParam}`, {
       method:  "PATCH",
       headers: { "Content-Type": "application/json" },
       body:    JSON.stringify({ action: "finalize", event_id: event.id }),
@@ -785,7 +790,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       {/* Current scene chip */}
       <div className="bg-cream/10 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between">
         <span className="text-xs text-cream/50">Current scene</span>
-        <span className="text-sm font-semibold text-gold uppercase tracking-wider">{display?.scene ?? "—"}</span>
+        <span className="text-sm font-semibold text-gold uppercase tracking-wider">{display?.scene ?? "–"}</span>
       </div>
 
       {/* Focus tabs — filtered by permissions */}
@@ -998,7 +1003,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                   </span>
                 </div>
                 <div className="bg-cream/5 rounded-xl p-2.5 mb-3 text-xs text-cream/50 min-h-[48px] whitespace-pre-line leading-relaxed">
-                  {verses[display.verse_index] ?? "—"}
+                  {verses[display.verse_index] ?? "–"}
                 </div>
                 <div className="flex items-center gap-2">
                   <button onClick={prevVerse} disabled={saving || display.verse_index === 0}
@@ -1056,7 +1061,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-cream/80 leading-relaxed">&ldquo;{fb.message}&rdquo;</p>
                         {fb.author_name && (
-                          <p className="text-[10px] text-cream/35 mt-1">— {fb.author_name}</p>
+                          <p className="text-[10px] text-cream/35 mt-1">– {fb.author_name}</p>
                         )}
                       </div>
                       <div className="flex flex-col gap-1.5 flex-shrink-0">
@@ -1292,7 +1297,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                     )}
                     {triviaQuestions.length === 0 ? (
                       <p className="text-[11px] text-cream/30 text-center py-3">
-                        No trivia questions yet — add some in Library → Trivia
+                        No trivia questions yet, add some in Library → Trivia
                       </p>
                     ) : (
                       <>

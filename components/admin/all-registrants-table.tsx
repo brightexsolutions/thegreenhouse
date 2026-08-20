@@ -4,7 +4,7 @@ import { useState, useMemo, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { Search, Mail, Phone, CheckCircle2, Circle, Users, Send, Copy, ExternalLink, RefreshCw } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, sessionName } from "@/lib/utils";
 
 interface Registrant {
   id:              string;
@@ -108,7 +108,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
   function buildWaLink(r: Registrant) {
     if (!r.ticket_token) return null;
     const url        = `${SITE_URL}/ticket/${r.ticket_token}`;
-    const eventTitle = r.events?.title?.replace("The Green House — ", "") ?? "the session";
+    const eventTitle = r.events?.title ? sessionName(r.events.title) : "the session";
     const text = `Hi ${r.first_name}, here is your ticket for ${eventTitle}:\n${url}\nPresent this at the door. See you there!`;
     return `https://wa.me/?text=${encodeURIComponent(text)}`;
   }
@@ -155,7 +155,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
             <option value="all">All sessions</option>
             {events.map(e => (
               <option key={e.id} value={e.id}>
-                {e.title.replace("The Green House — ", "")}
+                {sessionName(e.title)}
               </option>
             ))}
           </select>
@@ -244,10 +244,10 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                       <td className="px-4 py-3 hidden md:table-cell">
                         {r.events ? (
                           <p className="text-xs text-charcoal/60 truncate max-w-[140px]">
-                            {r.events.title.replace("The Green House — ", "")}
+                            {sessionName(r.events.title)}
                           </p>
                         ) : (
-                          <span className="text-[10px] text-charcoal/30">—</span>
+                          <span className="text-[10px] text-charcoal/30">–</span>
                         )}
                       </td>
                       <td className="px-4 py-3 hidden sm:table-cell">

@@ -5,10 +5,20 @@ import { postEventEmailHtml, postEventEmailText, missedYouEmailHtml, missedYouEm
 import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
+// Sending mail plus writing the log needs more than the default budget.
+export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
+  // Fail closed. These run on cron-job.org, so the URLs are reachable from the
+  // open internet: a missing secret must block the request, never skip the check.
+  // post-event-email in particular broadcasts to every registrant.
+  const expected = process.env.CRON_SECRET;
+  if (!expected) {
+    logger.error("cron_secret_missing", { route: req.nextUrl.pathname });
+    return NextResponse.json({ error: "Cron is not configured" }, { status: 500 });
+  }
   const cronSecret = req.headers.get("x-vercel-cron-secret") ?? req.headers.get("x-cron-secret");
-  if (process.env.CRON_SECRET && cronSecret !== process.env.CRON_SECRET) {
+  if (cronSecret !== expected) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
@@ -81,7 +91,7 @@ export async function GET(req: NextRequest) {
         themeScripture: event.theme_scripture,
         eventSlug:      event.slug,
       });
-      const subject = `Thank you for being there — ${event.title}`;
+      const subject = `Thank you for being there, ${event.title}`;
       const results = await sendBroadcastEmail({ to: [r.email], subject, html, text });
       const result = results[0];
       if (result?.success) {

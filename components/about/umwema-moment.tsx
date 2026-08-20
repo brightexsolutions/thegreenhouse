@@ -152,7 +152,7 @@ export function UmwemaMoment() {
               transition={{ duration: 0.6, delay: 0.48 }}
               className="text-charcoal/60 text-base leading-relaxed max-w-sm"
             >
-              Sung live at Session 01 — this is the sound of what happens when
+              Sung live at Session 01, this is the sound of what happens when
               tired souls find a room with no pressure and a lot of grace.
               Unscripted. Unperformed. Real.
             </motion.p>

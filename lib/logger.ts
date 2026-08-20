@@ -28,7 +28,7 @@ function emit(level: Level, msg: string, ctx?: LogContext): void {
     const colour = DEV_COLOURS[level];
     const tag    = `${colour}[${level.toUpperCase().padEnd(5)}]${RESET}`;
     const route  = ctx?.route ? ` ${ctx.route}` : "";
-    const extra  = ctx?.error ? ` — ${ctx.error}` : "";
+    const extra  = ctx?.error ? `, ${ctx.error}` : "";
     const fn     = level === "error" ? console.error : level === "warn" ? console.warn : console.log;
     fn(`${tag}${route} ${msg}${extra}`);
   }

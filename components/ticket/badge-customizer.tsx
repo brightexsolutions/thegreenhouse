@@ -725,7 +725,7 @@ export function BadgePromptDialog({ open, onClose, onCustomize }: PromptProps) {
             You have a digital badge
           </h3>
           <p className="text-sm text-[#f7f2e8]/60 leading-relaxed mb-6">
-            Add your photo, pick a style, and share it on Instagram, WhatsApp or Facebook — invite your people to come along!
+            Add your photo, pick a style, and share it on Instagram, WhatsApp or Facebook, invite your people to come along!
           </p>
           <button
             onClick={() => { onClose(); onCustomize(); }}

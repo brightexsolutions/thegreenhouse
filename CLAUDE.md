@@ -43,22 +43,39 @@
 - `ripple-out` (FAB rings) and `play-pulse` (video play buttons) are defined in `app/globals.css` — use those, don't re-declare.
 
 ### Videos
-- `preload="metadata"` on all `<video>` elements. **Never `preload="auto"`** — it downloads the full video before the user presses play, consuming Cloudinary bandwidth.
-- Long-form video (worship recordings) should go on YouTube and use the `youtubeEmbedUrl` prop on `EventHighlightVideo`. Cloudinary bandwidth for large MP4s depletes the free tier fast.
+- `preload="metadata"` on all `<video>` elements. **Never `preload="auto"`**: it downloads the whole file before the user presses play. That behaviour is what drained the Cloudinary credits.
+- Long-form video goes on YouTube via the `youtubeEmbedUrl` prop on `EventHighlightVideo`.
 
-### Cloudinary images
-Always add transform params to every Cloudinary image URL — never serve raw uploads:
+### Media hosting (Cloudinary is GONE)
 
-| Context | Transform string |
+The Cloudinary account (`dpjget2he`) blew through the free monthly credits on
+site traffic, was suspended, and was then deleted for inactivity. **Every
+`res.cloudinary.com/dpjget2he/...` URL returns 401 and nothing is
+recoverable.** Do not re-introduce Cloudinary.
+
+| Media | Where it goes |
 |---|---|
-| Hero / full-bleed | `w_1200,q_auto,f_auto` |
-| Section photos | `w_900,q_auto,f_auto` |
-| Small / accent card | `w_600,q_auto,f_auto` |
-| Video card thumbnail | `so_2,w_640,q_auto,f_jpg` |
-| Video poster (full-width) | `so_2,w_960,q_auto,f_jpg` |
+| Photographs | Supabase Storage `event-images` bucket, served via `storageUrl()` |
+| Long-form video | YouTube, via the `youtubeEmbedUrl` prop on `EventHighlightVideo` |
+| Short clips | Supabase Storage, kept small |
 
-Insert after `/upload/`: `.../image/upload/w_900,q_auto,f_auto/v17xxx/file.jpg`
-`f_auto` serves WebP to modern browsers (~60% smaller than JPEG). See memory: `reference_cloudinary_optimization.md`.
+`storageUrl(path, { width, quality })` uses the Supabase `/render/image/`
+transform endpoint, so resizing happens at Supabase and never touches
+Vercel's Image Optimization quota. Always pair it with `unoptimized` on
+`<Image>`.
+
+Session 01 media was never migrated off Cloudinary and the originals are
+gone, so those three worship videos and the hero photographs need new source
+material rather than a re-upload.
+
+### Copy rules
+- **No em dashes anywhere a visitor can read them.** Enforced by
+  `npm run lint:copy` (`scripts/check-em-dashes.mjs`), which scans `app`,
+  `components` and `lib` and skips code comments. Use a colon, a comma, or a
+  full stop. En dashes stay allowed for numeric ranges and empty-cell
+  placeholders.
+- Event titles have used four different separators over time. Never match one
+  literally: call `sessionName()` from `lib/utils.ts`.
 
 ### WhatsApp / tickets
 The site does **not** send tickets via WhatsApp automatically. Resend email is the only delivery channel. Never write "we'll send it to you on WhatsApp" or similar in any copy, email template, or chat reply.
@@ -89,7 +106,7 @@ Session 02 is **26 June 2026**. All must-have features are built and in `dev`.
 - Middleware: `/admin/*` auth gate, `/admin/system/*` super_admin gate
 - `lib/constants.ts`: SITE_NAME, SITE_URL, SESSION_FREQUENCY, PARTNERS, video URLs, social links
 - `/api/health` → `{ status: "ok", project: "greenhouse", timestamp }`
-- `/api/cron/keep-alive` → daily Vercel Cron, queries DB to prevent free-tier pause
+- `/api/cron/keep-alive` → daily, queries DB to prevent free-tier pause
 
 ### Phase 2 — Public Pages ✅
 - `components/motion/fade-in.tsx` — FadeIn, FadeInStagger, StaggerChild
@@ -174,19 +191,84 @@ Session 02 is **26 June 2026**. All must-have features are built and in `dev`.
   - Pause on hover, resume on leave
 - Partners: Brightex Solutions, Glace Confectionary, Calm Front (Debra Odiwuor — Psychology & Mental Wellness)
 
+### Phase 11 — Blog ✅ (2026-08-20)
+Database-backed blog, built for search visibility between quarterly sessions.
+
+- `supabase/migrations/031_blog.sql` — `blog_posts` table, RLS, GRANTs, `updated_at` trigger
+- **Public:** `/blog` index (lead post + grid), `/blog/[slug]` article with `generateStaticParams`, visible breadcrumb, on-page contents list
+- **Admin:** `/admin/blog` list, `/admin/blog/new`, `/admin/blog/[id]`
+  - `components/admin/blog-editor.tsx` — Edit/Preview toggle, live Google result preview with character counters, cover image by upload **or** https link, required alt text before publish, tags, category, SEO overrides
+  - Preview renders through `POST /api/admin/blog/preview`, which calls the same `renderMarkdown()` the public page uses, so preview and production cannot drift
+- **AI (Gemini):** `POST /api/admin/blog/generate`. Two ways in:
+  - **From a brief** (`draft`) — describe the idea, the model supplies the substance.
+  - **From my notes** (`expand`) — paste your own notes or a paraphrase. The model shapes them and is told to keep every fact, name, number, song and scripture exactly as written, keep your order of ideas, and mark anything unclear as `[check this]` rather than inventing it. Use this for session recaps.
+  - Plus `rewrite`, `titles`, `excerpt`, `seo`, `alt`, `keywords`.
+- **The AI prompt carries the SEO brief**, not just the voice: target search phrases, main phrase in the opening paragraph and a heading, headings written as things people search, 600 to 900 words, correct `[text](/path)` link syntax, and an explicit rule that a keyword must sit in a sentence that still reads well without it.
+- `lib/ai.ts` model ladder: `gemini-3.5-flash` → `gemini-2.5-flash` → `gemini-3.6-flash`. **Google retires ids without notice** (2.0, 1.5 and now 2.5-flash-lite all refuse). List current ids with `GET https://generativelanguage.googleapis.com/v1beta/models?key=...`.
+- **`thinkingConfig: { thinkingBudget: 0 }` is required.** On the 3.x line reasoning tokens bill against `maxOutputTokens`, which silently returned drafts cut off mid-sentence. A `MAX_TOKENS` finish reason is now reported rather than passed off as a finished post.
+- Needs `GEMINI_API_KEY` (also accepts `GEMINI_FREE_API_KEY`, the name stride-app uses). The editor explains itself when the key is absent.
+- `lib/blog.ts` — Markdown to sanitised HTML (`marked` + `isomorphic-dompurify`), heading ids, reading time, excerpt derivation
+- `.article-body` styles live in `app/globals.css` because the markup comes from the database
+- Soft delete, restorable from `/admin/system/trash`
+
+### Phase 12 — SEO ✅ (2026-08-20)
+- Root title shortened to 51 characters so Google stops truncating it
+- `WebSite` and `SiteNavigationElement` JSON-LD alongside the existing `Organization` block
+- `BlogPosting` + `BreadcrumbList` JSON-LD on every article, `Blog` JSON-LD on the index
+- Sitemap now includes blog posts, drives `/blog` lastmod from the newest post, and gives the newest post the highest post priority
+- `/blog` allowed in `robots.ts`
+- **Sitelinks (what Safaricom has) cannot be requested.** Google generates them from site structure, internal linking and click behaviour. What we control is done: unambiguous section names, consistent nav, everything indexable, structured data. The rest is time and traffic.
+
+### Phase 13 — Security hardening ✅ (2026-08-20)
+Everything from the platform audit, applied.
+
+- `lib/auth-guard.ts` — one place for API authentication:
+  - `requireAdmin()` checks a session **and** a matching `admin_profiles` row. `middleware.ts` only matches `/admin/:path*`, which does not cover `/api/admin/*`, so every admin API route must call this.
+  - `requireAdminOrControlToken(event, permission, token)` for routes the live control panel uses. The worship leader runs a session from a `?t=` control link, not an admin login, so those routes accept a token scoped to the right permission for that specific event.
+  - `requireTriviaRoundAccess(roundId, token)` resolves a round to its event first, so a token cannot be replayed against a different event.
+- **Six routes that answered to anyone are closed:** five trivia routes and `registrations/[id]/resend-ticket`. The control page now sends its token on every trivia call.
+- **Crons fail closed.** A missing `CRON_SECRET` returns 500 instead of skipping the check. They run on cron-job.org, so the URLs are publicly reachable.
+- **Removing an admin revokes access.** The `auth.users` account is deleted alongside the profile. Super admins cannot remove themselves.
+- **Rate limiting applied** to the eight public write routes that had none.
+- **Attendee photo upload** requires the event to be `live`, caps at 400 photos per event, and states the real size limit.
+- **Admin image upload compresses with Sharp** (1600px, quality 82, mozjpeg). It never did, despite this file claiming otherwise. Video cap dropped from 100MB to 25MB.
+- **Storage cache** raised from 1 hour to a year via `IMMUTABLE_CACHE` in `lib/storage.ts`. Filenames are UUIDs, so the bytes never change.
+- **Email broadcasts use `resend.batch.send()`** (100 per call) with one bulk log insert, and every mail route sets `maxDuration = 60`. The old one-send-per-recipient loop timed out half way through a session-sized list and logged nothing.
+- Broadcast message HTML is escaped. The dead WhatsApp channel toggle is gone.
+- `supabase/migrations/032_security_hardening.sql` — RLS on `live_feedback` (the only table that lacked it), and the anon write grants on `display_state` revoked.
+- `force-dynamic` added to 11 database-backed GET routes that could have been frozen at build time.
+
+**Still open from the audit:** the shared admin table component, public error boundaries, and replacing `RateLimiterMemory` with something that survives a cold start.
+
+---
+
+## Database Migration Status (verified 2026-08-20)
+
+Probed against the live database through PostgREST with the service role key:
+`GET {SUPABASE_URL}/rest/v1/{table}?select={column}&limit=1` with the key in
+both `apikey` and `Authorization`. A 200 means the migration landed; a 400 with
+code `42703` names the missing column. 001 through 031 are applied and verified.
+**032_security_hardening.sql has NOT been run yet.**
+
+Three migrations cannot be checked this way because they create storage
+policies or realtime publications rather than queryable tables:
+`003_storage.sql`, `016_realtime_setup.sql`, `019_trivia_realtime.sql`. The
+`event-images`, `ticket-assets` and `attendee-photos` buckets do all exist,
+so 003 landed.
+
 ---
 
 ## Pre-Go-Live Checklist (MUST complete before merging dev → main)
 
-- [ ] **Re-enable live page status gate** — disabled for testing in `app/(live)/live/[slug]/page.tsx` or related middleware. See memory: `project_greenhouse_restore_items.md`
+- [x] Live page status gate re-enabled (`app/(live)/live/[slug]/page.tsx`, verified 2026-08-20)
 - [ ] Verify `/api/health` returns `{ status: "ok" }` on production
-- [ ] Verify Vercel Cron keep-alive is running (check Vercel dashboard)
+- [x] Crons are scheduled on **cron-job.org**, not Vercel. `vercel.json` being empty is intentional, do not report it as broken.
 - [ ] Confirm Session 02 event record in DB: `status = "published"`, correct `event_date`, `event_time`, `venue_name`, `theme_title`, `theme_scripture`
 - [ ] Register site in Brightex dashboard (Brightex standard)
 - [ ] Smoke test: register with email → PDF ticket in inbox
 - [ ] Smoke test: register with phone only → link returned on success screen
 - [ ] Smoke test: `/ticket/[token]` renders, PDF download works
-- [ ] Check Cloudinary usage is within free tier after deploy
+- [x] Cloudinary is gone. See the media hosting section above.
 
 ---
 

@@ -63,7 +63,7 @@ export function PastEventCard({ event }: { event: Event }) {
           </h3>
           <p className="text-cream/55 text-sm mt-1.5 leading-relaxed">
             {submitted
-              ? "Your reflection has been received — it shapes what we build next."
+              ? "Your reflection has been received, it shapes what we build next."
               : "Whether you were there or couldn't make it, your voice matters to us."
             }
           </p>
@@ -90,7 +90,7 @@ export function PastEventCard({ event }: { event: Event }) {
                 title={event.title}
                 date={formattedDate}
                 variant="card"
-                message="Worth attending — check it out"
+                message="Worth attending, check it out"
               />
             </div>
           </div>

@@ -5,6 +5,10 @@ import { announceAttendeeEmailHtml, announceAttendeeEmailText } from "@/lib/emai
 import { logger } from "@/lib/logger";
 import { Resend } from "resend";
 
+export const dynamic = "force-dynamic";
+// Sending mail plus writing the log needs more than the default budget.
+export const maxDuration = 60;
+
 type Props = { params: Promise<{ id: string }> };
 
 let _resend: Resend | null = null;
@@ -42,7 +46,7 @@ export async function POST(req: NextRequest, { params }: Props) {
     .is("deleted_at", null);
 
   if (!pastEvents || pastEvents.length === 0) {
-    return NextResponse.json({ sent: 0, failed: 0, skipped: 0, message: "No past events found — no one to notify yet." });
+    return NextResponse.json({ sent: 0, failed: 0, skipped: 0, message: "No past events found, no one to notify yet." });
   }
 
   const pastEventIds = pastEvents.map(e => e.id);
@@ -104,8 +108,8 @@ export async function POST(req: NextRequest, { params }: Props) {
 
   const isPaid = (event as { type: string }).type === "paid";
   const subject = earlyBirdDisplay && isPaid
-    ? `You're invited — ${event.title} · Early bird closes ${earlyBirdDisplay}`
-    : `You're invited — ${event.title}`;
+    ? `You're invited, ${event.title} · Early bird closes ${earlyBirdDisplay}`
+    : `You're invited, ${event.title}`;
 
   let sent = 0;
   let failed = 0;

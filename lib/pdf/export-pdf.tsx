@@ -33,7 +33,7 @@ interface ExportPdfProps {
 
 export function ExportPdf({ eventTitle, eventDate, registrants }: ExportPdfProps) {
   return (
-    <Document title={`Registrants — ${eventTitle}`} author="The Green House">
+    <Document title={`Registrants, ${eventTitle}`} author="The Green House">
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
           <Text style={styles.logo}>The Green House</Text>
@@ -53,7 +53,7 @@ export function ExportPdf({ eventTitle, eventDate, registrants }: ExportPdfProps
         {registrants.map((r, i) => (
           <View key={i} style={[styles.row, i % 2 !== 0 ? styles.rowAlt : {}]}>
             <Text style={[styles.cell, { flex: 2 }]}>{r.first_name} {r.last_name}</Text>
-            <Text style={[styles.cell, { flex: 2, color: "#1a1a1870" }]}>{r.email ?? r.phone ?? "—"}</Text>
+            <Text style={[styles.cell, { flex: 2, color: "#1a1a1870" }]}>{r.email ?? r.phone ?? "–"}</Text>
             <Text style={[styles.cell, { flex: 1 }]}><Text style={styles.badge}>{r.role}</Text></Text>
             <Text style={[styles.cell, { flex: 1 }]}>
               <Text style={r.checked_in ? styles.present : styles.absent}>

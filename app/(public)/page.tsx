@@ -2,11 +2,11 @@ import type { Metadata } from "next";
 import { HeroCollage }      from "@/components/home/hero-collage";
 
 export const metadata: Metadata = {
-  title: "The Green House — Worship Community · Nairobi, Kenya",
+  title: "The Green House: Worship Community · Nairobi, Kenya",
   description: "A cross-church worship community in Nairobi, Kenya. Quarterly gatherings for worship, prayer, and real connection across churches. Low pressure. Everyone welcome.",
   alternates: { canonical: "/" },
   openGraph: {
-    title:       "The Green House — Worship Community · Nairobi, Kenya",
+    title:       "The Green House: Worship Community · Nairobi, Kenya",
     description: "Cross-church quarterly worship gatherings in Nairobi, Kenya. Real connection. Low pressure.",
     url:         "https://www.greenhousews.co.ke",
     type:        "website",

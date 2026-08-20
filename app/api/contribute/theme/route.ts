@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +25,9 @@ export async function GET(req: NextRequest) {
 
 // POST /api/contribute/theme?token=xxx — update theme data
 export async function POST(req: NextRequest) {
+  const limited = await rateLimit(req, "public");
+  if (limited) return limited;
+
   const token = req.nextUrl.searchParams.get("token");
   if (!token) return NextResponse.json({ error: "Missing token" }, { status: 400 });
 

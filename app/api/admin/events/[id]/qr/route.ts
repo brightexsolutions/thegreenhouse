@@ -3,6 +3,8 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import QRCode from "qrcode";
 import { SITE_URL } from "@/lib/constants";
 
+export const dynamic = "force-dynamic";
+
 type Props = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: Props) {

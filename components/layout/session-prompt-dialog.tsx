@@ -131,7 +131,7 @@ export function SessionPromptDialog({ event }: SessionPromptProps) {
           )}
 
           <p className="text-charcoal/55 text-sm leading-relaxed pt-1">
-            We&apos;d love to have you. Grab your spot — it only takes a moment.
+            We&apos;d love to have you. Grab your spot, it only takes a moment.
           </p>
 
           <div className="flex items-center gap-3 pt-3">

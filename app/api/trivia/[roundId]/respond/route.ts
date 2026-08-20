@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
 // POST /api/trivia/[roundId]/respond — attendee submits their answer
 export async function POST(req: NextRequest, { params }: { params: { roundId: string } }) {
+  const limited = await rateLimit(req, "public");
+  if (limited) return limited;
+
   const supabase = createAdminClient();
   const { roundId } = params;
 

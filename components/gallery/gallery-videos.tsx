@@ -89,7 +89,7 @@ function VideoModal({ video, onClose }: { video: typeof VIDEOS[0]; onClose: () =
             <p className="text-cream font-display font-medium text-xl leading-tight">
               {video.title}
               {video.translation && (
-                <span className="text-gold/60 italic text-base ml-2">— &ldquo;{video.translation}&rdquo;</span>
+                <span className="text-gold/60 italic text-base ml-2">&ldquo;{video.translation}&rdquo;</span>
               )}
             </p>
             <p className="text-cream/35 text-xs mt-1">{video.label}</p>

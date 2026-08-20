@@ -11,6 +11,10 @@ import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { TicketPdf } from "@/lib/pdf/ticket-pdf";
 import { logger } from "@/lib/logger";
 
+export const dynamic = "force-dynamic";
+// Sending mail plus writing the log needs more than the default budget.
+export const maxDuration = 60;
+
 function ip(req: NextRequest) {
   return (
     req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
@@ -187,7 +191,7 @@ export async function POST(req: NextRequest) {
       registration_id: reg.id,
       channel:         "email",
       recipient:       data.email,
-      subject:         `Your ticket — ${event.title}`,
+      subject:         `Your ticket, ${event.title}`,
       status:          emailResult.success ? "sent" : "failed",
       provider_id:     emailResult.providerId,
       error_message:   emailResult.error ?? null,

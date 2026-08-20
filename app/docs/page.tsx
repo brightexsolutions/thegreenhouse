@@ -7,7 +7,7 @@ import { DocsBanner } from "@/components/docs/docs-banner";
 const PUBLIC_EXCLUDE = ["deployment"] as const;
 
 export const metadata: Metadata = {
-  title: "Platform Documentation — The Green House",
+  title: "Platform Documentation: The Green House",
   robots: { index: false, follow: false },
 };
 

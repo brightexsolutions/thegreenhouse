@@ -110,7 +110,7 @@ export function GalleryCarousel({ images, eventTitle }: Props) {
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.55, delay: Math.min(i * 0.08, 0.4), ease: [0.16, 1, 0.3, 1] }}
               onClick={() => setLightboxIdx(i)}
-              aria-label={`${eventTitle} — photo ${i + 1}`}
+              aria-label={`${eventTitle}, photo ${i + 1}`}
               className="snap-start flex-shrink-0 w-[calc(50%-6px)] sm:w-[calc(33.333%-8px)] relative aspect-[4/5] rounded-2xl overflow-hidden group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold"
             >
               <Image

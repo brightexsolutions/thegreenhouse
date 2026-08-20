@@ -148,7 +148,7 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
                         )}
                       </p>
                       <p className="text-[10px] text-charcoal/35 truncate max-w-[160px] mt-0.5">
-                        {e.email ?? e.phone ?? "—"}
+                        {e.email ?? e.phone ?? "–"}
                       </p>
                     </div>
                   </div>
@@ -176,7 +176,7 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
                       {e.message}
                     </p>
                   ) : (
-                    <span className="text-[10px] text-charcoal/20">—</span>
+                    <span className="text-[10px] text-charcoal/20">–</span>
                   )}
                 </td>
 

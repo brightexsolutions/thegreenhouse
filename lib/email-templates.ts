@@ -26,7 +26,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Your Ticket — ${d.eventTitle}</title>
+<title>Your Ticket, ${d.eventTitle}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -63,7 +63,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
     <h1>See you there,<br />${d.firstName}.</h1>
   </div>
   <div class="body">
-    <p class="greeting">Your registration is confirmed. Here are the details for the evening — your PDF ticket is attached.</p>
+    <p class="greeting">Your registration is confirmed. Here are the details for the evening, your PDF ticket is attached.</p>
 
     ${d.themeTitle ? `
     <div class="theme-block">
@@ -111,7 +111,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
 
     ${d.liveUrl ? `
     <a href="${d.liveUrl}" class="cta-secondary">📱 Open live program on the night</a>
-    <p class="live-note">This link gives you the program, song lyrics, and a way to share your thoughts — bookmark it for the session.</p>
+    <p class="live-note">This link gives you the program, song lyrics, and a way to share your thoughts, bookmark it for the session.</p>
     ` : ""}
 
     <div class="entry-note">${entryLine}</div>
@@ -146,7 +146,7 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Thank you for being there — ${d.eventTitle}</title>
+<title>Thank you for being there, ${d.eventTitle}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -180,7 +180,7 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
   <div class="body">
     <p class="greeting">
       Something real happens when people gather with open hearts. Thank you for bringing yours on ${eventDayName}.
-      Whether you sang, prayed, listened, or simply showed up — you were part of what made it meaningful.
+      Whether you sang, prayed, listened, or simply showed up, you were part of what made it meaningful.
     </p>
 
     ${d.themeTitle ? `
@@ -195,7 +195,7 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
     <div class="feedback-box">
       <p class="feedback-title">How did it land for you?</p>
       <p class="feedback-body">
-        We'd love to hear your reflection — what stayed with you, what moved you, or even what you'd want to see next time.
+        We'd love to hear your reflection: what stayed with you, what moved you, or even what you'd want to see next time.
         It takes less than a minute and shapes what we build next.
       </p>
       <a href="${feedbackUrl}" class="cta">Share your reflection</a>
@@ -219,11 +219,11 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
 
 export function postEventEmailText(d: PostEventEmailData): string {
   const feedbackUrl = `${SITE_URL}/live/${d.eventSlug}`;
-  return `${SITE_NAME} — Thank you for being there
+  return `${SITE_NAME}, Thank you for being there
 
 Hi ${d.firstName},
 
-We're glad you were part of ${d.eventTitle}${d.themeTitle ? ` — "${d.themeTitle}"` : ""}.
+We're glad you were part of ${d.eventTitle}${d.themeTitle ? `, "${d.themeTitle}"` : ""}.
 ${d.themeScripture ? `Scripture: ${d.themeScripture}\n` : ""}
 Something real happens when people gather with open hearts. Thank you for showing up.
 
@@ -236,7 +236,7 @@ Stay connected: ${SOCIAL_INSTAGRAM}
 
 Questions? ${CONTACT_EMAIL}
 
-— ${EMAIL_FROM_NAME}
+${EMAIL_FROM_NAME}
 ${SITE_URL}
 `;
 }
@@ -260,7 +260,7 @@ export function missedYouEmailHtml(d: MissedYouEmailData): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>We missed you — ${d.eventTitle}</title>
+<title>We missed you, ${d.eventTitle}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -293,7 +293,7 @@ export function missedYouEmailHtml(d: MissedYouEmailData): string {
   </div>
   <div class="body">
     <p class="greeting">
-      We had hoped to see you at ${d.eventTitle} — and we completely understand that life sometimes has other plans.
+      We had hoped to see you at ${d.eventTitle}, and we completely understand that life sometimes has other plans.
       The evening was a beautiful one, and we genuinely look forward to having you with us at the next one.
     </p>
 
@@ -310,7 +310,7 @@ export function missedYouEmailHtml(d: MissedYouEmailData): string {
       <p class="preview-title">Get a glimpse of what happened</p>
       <p class="preview-body">
         Photos, highlights, and a feel for the evening are up on the event page.
-        Take a look — it might make you even more excited for the next one.
+        Take a look, it might make you even more excited for the next one.
       </p>
       <a href="${eventUrl}" class="cta-primary">See the event recap →</a>
     </div>
@@ -338,12 +338,12 @@ export function missedYouEmailHtml(d: MissedYouEmailData): string {
 export function missedYouEmailText(d: MissedYouEmailData): string {
   const eventUrl  = `${SITE_URL}/events/${d.eventSlug}`;
   const eventsUrl = `${SITE_URL}/events`;
-  return `${SITE_NAME} — We missed you
+  return `${SITE_NAME}, We missed you
 
 Hi ${d.firstName},
 
-We had hoped to see you at ${d.eventTitle} on ${d.eventDate} — and we completely understand that life sometimes has other plans.
-${d.themeTitle ? `\nThe evening explored the theme "${d.themeTitle}"${d.themeScripture ? ` — ${d.themeScripture}` : ""}.` : ""}
+We had hoped to see you at ${d.eventTitle} on ${d.eventDate}, and we completely understand that life sometimes has other plans.
+${d.themeTitle ? `\nThe evening explored the theme "${d.themeTitle}"${d.themeScripture ? `, ${d.themeScripture}` : ""}.` : ""}
 
 Get a glimpse of what happened:
 ${eventUrl}
@@ -355,7 +355,7 @@ Follow us on Instagram for updates: ${SOCIAL_INSTAGRAM}
 
 Questions? ${CONTACT_EMAIL}
 
-— ${EMAIL_FROM_NAME}
+${EMAIL_FROM_NAME}
 ${SITE_URL}
 `;
 }
@@ -384,7 +384,7 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>See you tomorrow — ${d.eventTitle}</title>
+<title>See you tomorrow, ${d.eventTitle}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -421,7 +421,7 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
   </div>
   <div class="body">
     <p class="greeting">
-      Just a heads-up — the session is tomorrow. We're looking forward to an evening of worship,
+      Just a heads-up, the session is tomorrow. We're looking forward to an evening of worship,
       community, and something real. Here are your details.
     </p>
 
@@ -493,12 +493,12 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
 export function reminderEmailText(d: ReminderEmailData): string {
   const ticketUrl = `${SITE_URL}/ticket/${d.ticketToken}`;
   const liveUrl   = `${SITE_URL}/live/${d.eventSlug}`;
-  return `${SITE_NAME} — See you tomorrow
+  return `${SITE_NAME}, See you tomorrow
 
 Hi ${d.firstName},
 
-Just a quick reminder — ${d.eventTitle} is tomorrow and we can't wait to see you there.
-${d.themeTitle ? `\nTheme: ${d.themeTitle}${d.themeScripture ? ` — ${d.themeScripture}` : ""}\n` : ""}
+Just a quick reminder, ${d.eventTitle} is tomorrow and we can't wait to see you there.
+${d.themeTitle ? `\nTheme: ${d.themeTitle}${d.themeScripture ? `, ${d.themeScripture}` : ""}\n` : ""}
 Date:  ${d.eventDate}
 Time:  ${d.eventTime}pm${d.venueName ? `\nVenue: ${d.venueName}${d.venueMapUrl ? `\nMap:   ${d.venueMapUrl}` : ""}` : ""}${d.dressCode ? `\nDress code: ${d.dressCode}` : ""}
 
@@ -509,7 +509,7 @@ Doors open 30 minutes before the session begins.
 
 Questions? ${CONTACT_EMAIL}
 
-— ${EMAIL_FROM_NAME}
+${EMAIL_FROM_NAME}
 ${SITE_URL}
 `;
 }
@@ -519,12 +519,12 @@ export function ticketEmailText(d: TicketEmailData): string {
     ? `Ticket price: KES ${d.priceKes.toLocaleString()}. Please present this email or your ticket at the door.`
     : "Entry is free. Please present this email or your ticket at the door.";
 
-  return `${SITE_NAME} — You're registered!
+  return `${SITE_NAME}, You're registered!
 
 Hi ${d.firstName},
 
 Your spot at ${d.eventTitle} is confirmed.
-${d.themeTitle ? `\nSession theme: ${d.themeTitle}${d.themeScripture ? ` — ${d.themeScripture}` : ""}\n` : ""}
+${d.themeTitle ? `\nSession theme: ${d.themeTitle}${d.themeScripture ? `, ${d.themeScripture}` : ""}\n` : ""}
 Date:  ${d.eventDate}
 Time:  ${d.eventTime}pm${d.venueName ? `\nVenue: ${d.venueName}` : ""}
 
@@ -537,7 +537,7 @@ Doors open 30 minutes before the session begins.
 
 Questions? ${CONTACT_EMAIL}
 
-— ${EMAIL_FROM_NAME}
+${EMAIL_FROM_NAME}
 ${SITE_URL}
 `;
 }
@@ -566,7 +566,7 @@ export function announceAttendeeEmailHtml(d: AnnounceAttendeeEmailData): string 
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>You're invited — ${d.newEventTitle}</title>
+<title>You're invited, ${d.newEventTitle}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -606,7 +606,7 @@ export function announceAttendeeEmailHtml(d: AnnounceAttendeeEmailData): string 
   </div>
   <div class="body">
     <p class="greeting">
-      We loved having you with us — and we're delighted to let you know that the next session of ${SITE_NAME} is now open.
+      We loved having you with us, and we're delighted to let you know that the next session of ${SITE_NAME} is now open.
       We'd love to see you again.
     </p>
 
@@ -647,10 +647,10 @@ export function announceAttendeeEmailHtml(d: AnnounceAttendeeEmailData): string 
 
     ${hasEarlyBird ? `
     <div class="early-bird-box">
-      <p class="early-bird-label">Early bird — past attendees only</p>
+      <p class="early-bird-label">Early bird, past attendees only</p>
       <p class="early-bird-title">Free entry until ${d.earlyBirdDeadline}</p>
       <p class="early-bird-body">
-        As a returning member of our community, you get early bird access — register before ${d.earlyBirdDeadline}
+        As a returning member of our community, you get early bird access, register before ${d.earlyBirdDeadline}
         and your entry fee is waived. After that, entry is KES ${(d.priceKes ?? 0).toLocaleString()}.
         Be first.
       </p>
@@ -679,7 +679,7 @@ export function announceAttendeeEmailHtml(d: AnnounceAttendeeEmailData): string 
 export function announceAttendeeEmailText(d: AnnounceAttendeeEmailData): string {
   const registerUrl = `${SITE_URL}/events/${d.newEventSlug}`;
   const hasEarlyBird = d.isPaid && d.earlyBirdDeadline;
-  return `${SITE_NAME} — You're invited back
+  return `${SITE_NAME}, You're invited back
 
 Hi ${d.firstName},
 
@@ -688,13 +688,13 @@ The next session of ${SITE_NAME} is open, and we'd love to see you again.
 ${d.newEventTitle}
 Date:  ${d.newEventDate}
 Time:  ${d.newEventTime}${d.venueName ? `\nVenue: ${d.venueName}` : ""}
-${d.themeTitle ? `\nTheme: ${d.themeTitle}${d.themeScripture ? ` — ${d.themeScripture}` : ""}` : ""}
-${hasEarlyBird ? `\nEARLY BIRD — past attendees only\nRegister before ${d.earlyBirdDeadline} for a waived entry fee.\nAfter that, entry is KES ${(d.priceKes ?? 0).toLocaleString()}.` : ""}
+${d.themeTitle ? `\nTheme: ${d.themeTitle}${d.themeScripture ? `, ${d.themeScripture}` : ""}` : ""}
+${hasEarlyBird ? `\nEARLY BIRD, past attendees only\nRegister before ${d.earlyBirdDeadline} for a waived entry fee.\nAfter that, entry is KES ${(d.priceKes ?? 0).toLocaleString()}.` : ""}
 
 Register here: ${registerUrl}
 
 See you there,
-— ${EMAIL_FROM_NAME}
+${EMAIL_FROM_NAME}
 ${SITE_URL}
 `;
 }

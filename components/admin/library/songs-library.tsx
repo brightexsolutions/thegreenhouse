@@ -158,7 +158,7 @@ export function SongsLibrary({ initialSongs }: Props) {
                 className="flex-1 px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest bg-white"
               >
                 {KEY_OPTIONS.map(k => (
-                  <option key={k} value={k}>{k || "— no key —"}</option>
+                  <option key={k} value={k}>{k || "No key"}</option>
                 ))}
               </select>
             </div>
@@ -286,7 +286,7 @@ export function SongsLibrary({ initialSongs }: Props) {
                         className="flex-1 px-3 py-1.5 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest bg-white"
                       >
                         {KEY_OPTIONS.map(k => (
-                          <option key={k} value={k}>{k || "— no key —"}</option>
+                          <option key={k} value={k}>{k || "No key"}</option>
                         ))}
                       </select>
                     </div>

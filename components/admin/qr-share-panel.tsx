@@ -25,7 +25,7 @@ export function QrSharePanel({ eventId, eventSlug }: QrSharePanelProps) {
         <h3 className="text-sm font-semibold text-charcoal">Registration QR</h3>
       </div>
       <p className="text-[11px] text-charcoal/50 mb-4 leading-relaxed">
-        Print or display this code — it links to the event registration page.
+        Print or display this code, it links to the event registration page.
       </p>
 
       {qrUrl && (

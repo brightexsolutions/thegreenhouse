@@ -56,7 +56,7 @@ export function AnnounceAttendeesPanel({ eventId, eventTitle, isPaid, hasEarlyBi
           <p className="text-xs text-charcoal/50 mt-0.5 leading-relaxed">
             Emails every past session attendee (with an email address) who hasn&apos;t yet registered for this event.
             {hasEarlyBird && earlyBirdDate && (
-              <> Includes an <span className="text-gold/80 font-medium">early bird offer</span> — free entry until {earlyBirdDate}.</>
+              <> Includes an <span className="text-gold/80 font-medium">early bird offer</span>, free entry until {earlyBirdDate}.</>
             )}
           </p>
         </div>
@@ -66,7 +66,7 @@ export function AnnounceAttendeesPanel({ eventId, eventTitle, isPaid, hasEarlyBi
         <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gold/8 border border-gold/20 mb-4">
           <Gift size={13} className="text-gold/80 mt-0.5 flex-shrink-0" />
           <p className="text-xs text-charcoal/70 leading-relaxed">
-            Early bird active — past attendees who register before <strong>{earlyBirdDate}</strong> will receive a waived entry fee.
+            Early bird active, past attendees who register before <strong>{earlyBirdDate}</strong> will receive a waived entry fee.
           </p>
         </div>
       )}
@@ -82,7 +82,7 @@ export function AnnounceAttendeesPanel({ eventId, eventTitle, isPaid, hasEarlyBi
                 {result.sent} announcement{result.sent !== 1 ? "s" : ""} sent
               </p>
               {result.failed > 0 && <p className="text-xs text-red-500">{result.failed} failed</p>}
-              {result.skipped > 0 && <p className="text-xs text-charcoal/40">{result.skipped} already registered — skipped</p>}
+              {result.skipped > 0 && <p className="text-xs text-charcoal/40">{result.skipped} already registered, skipped</p>}
             </>
           )}
         </div>

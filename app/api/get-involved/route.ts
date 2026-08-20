@@ -82,10 +82,10 @@ export async function POST(req: NextRequest) {
       to:      [CONTACT_EMAIL],
       replyTo: d.email ?? undefined,
       subject: isPartner
-        ? `⚡ Partnership enquiry — ${d.full_name}`
+        ? `⚡ Partnership enquiry, ${d.full_name}`
         : isGive
-        ? `💛 Financial support enquiry — ${d.full_name}`
-        : `New involvement enquiry — ${d.full_name} (${interestLabel})`,
+        ? `💛 Financial support enquiry, ${d.full_name}`
+        : `New involvement enquiry, ${d.full_name} (${interestLabel})`,
       html: `
         <div style="font-family:sans-serif;max-width:560px;margin:0 auto;color:#1a1a18">
           ${flagBadge}
@@ -113,44 +113,44 @@ export async function POST(req: NextRequest) {
       extra?: string;
     }> = {
       worship_team: {
-        subject: `Welcome to the worship family — ${SITE_NAME}`,
+        subject: `Welcome to the worship family: ${SITE_NAME}`,
         heading: `You're in, ${firstName}.`,
-        body: "You're taking a bold step. We're always looking for hearts that love worship — not just talent. Someone from the team will reach out to talk next steps and what being part of the worship team looks like practically.",
+        body: "You're taking a bold step. We're always looking for hearts that love worship, not just talent. Someone from the team will reach out to talk next steps and what being part of the worship team looks like practically.",
         cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
       },
       host_venue: {
-        subject: `Thanks for offering to host — ${SITE_NAME}`,
+        subject: `Thanks for offering to host: ${SITE_NAME}`,
         heading: `This is generous, ${firstName}.`,
-        body: "Venue is everything for a gathering like ours. We'll be in touch to walk through what hosting looks like — space requirements, logistics, and how we can make it work for everyone.",
+        body: "Venue is everything for a gathering like ours. We'll be in touch to walk through what hosting looks like: space requirements, logistics, and how we can make it work for everyone.",
         cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
       },
       vision_carrier: {
-        subject: `You caught the vision — ${SITE_NAME}`,
+        subject: `You caught the vision: ${SITE_NAME}`,
         heading: `Glad you're here, ${firstName}.`,
-        body: "Vision Carriers are the backbone of what we're building — people who believe in the idea and want to see it grow. Someone from the core team will reach out to talk through what this looks like practically.",
+        body: "Vision Carriers are the backbone of what we're building, people who believe in the idea and want to see it grow. Someone from the core team will reach out to talk through what this looks like practically.",
         cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
       },
       creative_team: {
-        subject: `The creative table just got bigger — ${SITE_NAME}`,
+        subject: `The creative table just got bigger: ${SITE_NAME}`,
         heading: `Welcome, ${firstName}.`,
-        body: "Design, photography, video, social — there's a place for your gift here. We'll be in touch about what we're working on and how you can plug in ahead of the next session.",
+        body: "Design, photography, video, social, there's a place for your gift here. We'll be in touch about what we're working on and how you can plug in ahead of the next session.",
         cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
       },
       partner: {
-        subject: `Partnership enquiry received — ${SITE_NAME}`,
+        subject: `Partnership enquiry received: ${SITE_NAME}`,
         heading: `Let's build together, ${firstName}.`,
-        body: "We love working with purpose-driven people and organisations. We'll review your enquiry and reach out to discuss what a partnership could look like — what you bring, what we offer, and how we align.",
+        body: "We love working with purpose-driven people and organisations. We'll review your enquiry and reach out to discuss what a partnership could look like: what you bring, what we offer, and how we align.",
         cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
       },
       give: {
-        subject: `Your generosity matters — ${SITE_NAME}`,
+        subject: `Your generosity matters: ${SITE_NAME}`,
         heading: `Thank you, ${firstName}.`,
-        body: "We don't take this lightly. Every contribution — whether financial, material, or in kind — goes directly into making these sessions possible for everyone who walks through the door.",
+        body: "We don't take this lightly. Every contribution: whether financial, material, or in kind, goes directly into making these sessions possible for everyone who walks through the door.",
         extra: `
           <div style="background:#f7f2e8;border-left:3px solid #c9a24a;padding:16px 20px;border-radius:0 8px 8px 0;margin:20px 0">
             <p style="margin:0 0 8px;font-size:14px;font-weight:600;color:#1a1a18">Ready to give or share a payment record?</p>
             <p style="margin:0;font-size:13px;color:#555;line-height:1.7">
-              Reply directly to this email or reach us on WhatsApp and we'll share the relevant account details and walk you through the process. If you'd like to support in a bigger way — equipment, sponsorship, covering costs for a session — we'd love to have that conversation too.
+              Reply directly to this email or reach us on WhatsApp and we'll share the relevant account details and walk you through the process. If you'd like to support in a bigger way: equipment, sponsorship, covering costs for a session, we'd love to have that conversation too.
             </p>
           </div>
           <div style="margin-top:16px">
@@ -159,13 +159,13 @@ export async function POST(req: NextRequest) {
           </div>`,
       },
       attend: {
-        subject: `Can't wait to see you — ${SITE_NAME}`,
+        subject: `Can't wait to see you: ${SITE_NAME}`,
         heading: `See you there, ${firstName}.`,
-        body: "The best way to experience The Green House is to just show up. Sessions are free, low-pressure, and open to everyone — no church background required. Register for the next one below.",
+        body: "The best way to experience The Green House is to just show up. Sessions are free, low-pressure, and open to everyone, no church background required. Register for the next one below.",
         cta: { label: "Register for next session →", href: `${SITE_URL}/events` },
       },
       other: {
-        subject: `We've received your message — ${SITE_NAME}`,
+        subject: `We've received your message: ${SITE_NAME}`,
         heading: `Thanks, ${firstName}.`,
         body: "We've received your message and someone from the team will be in touch soon.",
         cta: { label: "See upcoming sessions →", href: `${SITE_URL}/events` },
