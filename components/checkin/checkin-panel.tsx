@@ -40,6 +40,13 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
   // Track IDs we know about so we can detect new arrivals from other devices
   const knownIds = useRef(new Set(initial.map(r => r.id)));
 
+  // A poll that was already in flight when the user toggled can land *after*
+  // our own PATCH resolves, carrying the pre-toggle checked_in value — which
+  // would otherwise stomp the just-saved state right back to what it was.
+  // Guard each id for one full poll cycle (plus margin) after we touch it so
+  // the merge below trusts our own write instead of that stale response.
+  const pendingUntil = useRef(new Map<string, number>());
+
   // Unified poll — syncs both list and stats every 5s
   useEffect(() => {
     let cancelled = false;
@@ -51,10 +58,15 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
         const data = await res.json() as { registrants: Registrant[] };
         setItems(prev => {
           const serverMap = new Map(data.registrants.map(r => [r.id, r]));
+          const now = Date.now();
           // Update existing + add new
           const merged = prev.map(r => {
             const s = serverMap.get(r.id);
-            return s ? { ...r, checked_in: s.checked_in } : r;
+            if (!s) return r;
+            const until = pendingUntil.current.get(r.id);
+            if (until && now < until) return r;
+            if (until) pendingUntil.current.delete(r.id);
+            return { ...r, checked_in: s.checked_in };
           });
           for (const r of data.registrants) {
             if (!knownIds.current.has(r.id)) {
@@ -73,6 +85,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
 
   const toggle = useCallback(async (id: string, current: boolean) => {
     setUpdating(s => new Set(s).add(id));
+    pendingUntil.current.set(id, Date.now() + 7000);
     // Optimistic update
     setItems(prev => prev.map(r => r.id === id ? { ...r, checked_in: !current } : r));
     try {
@@ -83,6 +96,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
       });
       if (!res.ok) {
         // Revert on failure
+        pendingUntil.current.delete(id);
         setItems(prev => prev.map(r => r.id === id ? { ...r, checked_in: current } : r));
       }
     } finally {
