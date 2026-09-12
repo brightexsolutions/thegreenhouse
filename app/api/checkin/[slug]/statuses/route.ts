@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: Props) {
   const token = req.nextUrl.searchParams.get("t");
   if (!token) return NextResponse.json({ error: "Missing token" }, { status: 400 });
 
-  const supabase = createAdminClient();
+  const supabase = createAdminClient({ noStore: true });
 
   const { data: event } = await supabase
     .from("events")
