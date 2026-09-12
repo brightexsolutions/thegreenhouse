@@ -22,7 +22,7 @@ export async function PATCH(req: NextRequest, { params }: Props) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }
 
-  const supabase = createAdminClient();
+  const supabase = createAdminClient({ noStore: true });
 
   // Validate token
   const { data: event } = await supabase
