@@ -19,7 +19,7 @@ export default async function CheckinPage({ params, searchParams }: Props) {
 
   if (!token) redirect("/");
 
-  const supabase = createAdminClient();
+  const supabase = createAdminClient({ noStore: true });
 
   const { data: event } = await supabase
     .from("events")
