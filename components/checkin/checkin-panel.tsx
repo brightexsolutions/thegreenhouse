@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { Search, CheckCircle2, Circle, Mail, Phone, UserPlus, X, Loader2, Users, Camera, CameraOff } from "lucide-react";
+import { Search, CheckCircle2, Circle, Mail, Phone, UserPlus, X, Loader2, Users, Camera, CameraOff, AlertTriangle, WifiOff } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface Registrant {
@@ -24,6 +24,21 @@ interface Props {
   checkinToken: string;
 }
 
+const POLL_MS      = 5000;
+const REQUEST_MS   = 12000;
+
+/** fetch that gives up, so a hung request on venue Wi-Fi cannot leave a row
+ *  stuck on its spinner for the rest of the night. */
+async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REQUEST_MS);
+  try {
+    return await fetch(url, { ...init, cache: "no-store", signal: controller.signal });
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: Props) {
   const [items,        setItems]        = useState(initial);
   const [query,        setQuery]        = useState("");
@@ -36,103 +51,192 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
   const [walkInConsent, setWalkInConsent] = useState(true);
   const [walkInSaving,  setWalkInSaving]  = useState(false);
   const [walkInError,   setWalkInError]   = useState<string | null>(null);
+  const [notice,        setNotice]        = useState<{ kind: "error" | "info"; text: string } | null>(null);
+  const [linkInvalid,   setLinkInvalid]   = useState(false);
+  const [offline,       setOffline]       = useState(false);
 
-  // Track IDs we know about so we can detect new arrivals from other devices
-  const knownIds = useRef(new Set(initial.map(r => r.id)));
+  // When this device last wrote each registrant. Infinity while the request is
+  // still in flight, then the time it finished.
+  //
+  // A poll only gets to overwrite a row if the poll STARTED after that row's
+  // last write finished. Anything that started earlier may be carrying the
+  // value from before the tap, and applying it is what made a row flip back to
+  // "Mark present" a few seconds after being marked. The previous fix guarded
+  // each row for a fixed 7 seconds, which still lost the race whenever the
+  // save itself took longer than that on a slow connection.
+  const lastWrite = useRef(new Map<string, number>());
+  const pollFailures = useRef(0);
+  const noticeTimer  = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // A poll that was already in flight when the user toggled can land *after*
-  // our own PATCH resolves, carrying the pre-toggle checked_in value — which
-  // would otherwise stomp the just-saved state right back to what it was.
-  // Guard each id for one full poll cycle (plus margin) after we touch it so
-  // the merge below trusts our own write instead of that stale response.
-  const pendingUntil = useRef(new Map<string, number>());
+  const flash = useCallback((kind: "error" | "info", text: string) => {
+    setNotice({ kind, text });
+    if (noticeTimer.current) clearTimeout(noticeTimer.current);
+    noticeTimer.current = setTimeout(() => setNotice(null), 6000);
+  }, []);
 
-  // Unified poll — syncs both list and stats every 5s
+  useEffect(() => () => { if (noticeTimer.current) clearTimeout(noticeTimer.current); }, []);
+
+  // Keep every check-in device in step with the others.
   useEffect(() => {
     let cancelled = false;
+    let inFlight  = false;
 
     async function sync() {
+      if (inFlight || cancelled || document.hidden) return;
+      inFlight = true;
+      const startedAt = Date.now();
       try {
-        const res = await fetch(`/api/checkin/${eventSlug}/statuses?t=${encodeURIComponent(checkinToken)}`);
-        if (!res.ok || cancelled) return;
-        const data = await res.json() as { registrants: Registrant[] };
+        const res = await fetchWithTimeout(
+          `/api/checkin/${eventSlug}/statuses?t=${encodeURIComponent(checkinToken)}`
+        );
+        if (cancelled) return;
+        if (res.status === 403) { setLinkInvalid(true); return; }
+        if (!res.ok) throw new Error(String(res.status));
+
+        const data = await res.json() as { registrants?: Registrant[] };
+        if (cancelled || !Array.isArray(data.registrants)) return;
+        const server = data.registrants;
+
+        pollFailures.current = 0;
+        setOffline(false);
+        setLinkInvalid(false);
+
         setItems(prev => {
-          const serverMap = new Map(data.registrants.map(r => [r.id, r]));
-          const now = Date.now();
-          // Update existing + add new
-          const merged = prev.map(r => {
-            const s = serverMap.get(r.id);
-            if (!s) return r;
-            const until = pendingUntil.current.get(r.id);
-            if (until && now < until) return r;
-            if (until) pendingUntil.current.delete(r.id);
-            return { ...r, checked_in: s.checked_in };
+          const local = new Map(prev.map(r => [r.id, r]));
+          // Is this poll too old to be trusted for this row?
+          const stale = (id: string) => {
+            const wrote = lastWrite.current.get(id);
+            return wrote !== undefined && startedAt <= wrote;
+          };
+
+          const merged = server.map(s => {
+            const mine = local.get(s.id);
+            return mine && stale(s.id) ? { ...s, checked_in: mine.checked_in } : s;
           });
-          for (const r of data.registrants) {
-            if (!knownIds.current.has(r.id)) {
-              knownIds.current.add(r.id);
-              merged.push(r);
-            }
+
+          // A walk-in added here a moment ago may not be in a poll that started
+          // before the insert finished. Keep it until a fresh poll confirms it.
+          const seen = new Set(server.map(s => s.id));
+          for (const r of prev) {
+            if (!seen.has(r.id) && stale(r.id)) merged.push(r);
           }
           return merged;
         });
-      } catch { /* ignore network blip */ }
+      } catch {
+        if (cancelled) return;
+        pollFailures.current += 1;
+        if (pollFailures.current >= 2) setOffline(true);
+      } finally {
+        inFlight = false;
+      }
     }
 
-    const id = setInterval(sync, 5000);
-    return () => { cancelled = true; clearInterval(id); };
+    const id = setInterval(sync, POLL_MS);
+    const wake = () => { if (!document.hidden) sync(); };
+    document.addEventListener("visibilitychange", wake);
+    window.addEventListener("online", wake);
+    window.addEventListener("focus", wake);
+    sync();
+
+    return () => {
+      cancelled = true;
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", wake);
+      window.removeEventListener("online", wake);
+      window.removeEventListener("focus", wake);
+    };
   }, [eventSlug, checkinToken]);
 
-  const toggle = useCallback(async (id: string, current: boolean) => {
+  const toggle = useCallback(async (r: Registrant) => {
+    const { id } = r;
+    const next = !r.checked_in;
+    const name = `${r.first_name} ${r.last_name}`.trim();
+
     setUpdating(s => new Set(s).add(id));
-    pendingUntil.current.set(id, Date.now() + 7000);
-    // Optimistic update
-    setItems(prev => prev.map(r => r.id === id ? { ...r, checked_in: !current } : r));
+    lastWrite.current.set(id, Infinity);
+    setItems(prev => prev.map(x => x.id === id ? { ...x, checked_in: next } : x));
+
+    const revert = (message: string) => {
+      lastWrite.current.delete(id);
+      setItems(prev => prev.map(x => x.id === id ? { ...x, checked_in: !next } : x));
+      flash("error", message);
+    };
+
     try {
-      const res = await fetch(`/api/checkin/${eventSlug}`, {
+      const res = await fetchWithTimeout(`/api/checkin/${eventSlug}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ registration_id: id, checked_in: !current, token: checkinToken }),
+        body: JSON.stringify({ registration_id: id, checked_in: next, token: checkinToken }),
       });
-      if (!res.ok) {
-        // Revert on failure
-        pendingUntil.current.delete(id);
-        setItems(prev => prev.map(r => r.id === id ? { ...r, checked_in: current } : r));
+
+      if (res.ok) {
+        const saved = await res.json().catch(() => null) as { checked_in?: boolean } | null;
+        lastWrite.current.set(id, Date.now());
+        // Trust what the database says it stored over what we assumed.
+        if (saved && typeof saved.checked_in === "boolean" && saved.checked_in !== next) {
+          setItems(prev => prev.map(x => x.id === id ? { ...x, checked_in: saved.checked_in! } : x));
+        }
+      } else if (res.status === 403) {
+        setLinkInvalid(true);
+        revert("This check-in link is no longer valid.");
+      } else if (res.status === 404) {
+        lastWrite.current.delete(id);
+        setItems(prev => prev.filter(x => x.id !== id));
+        flash("error", `${name} is no longer on the list.`);
+      } else if (res.status === 429) {
+        revert(`Too many requests. Wait a few seconds, then mark ${name} again.`);
+      } else {
+        revert(`${name} was not saved. Tap again.`);
       }
+    } catch {
+      revert(`${name} was not saved. Check your connection and tap again.`);
     } finally {
-      setUpdating(s => { const next = new Set(s); next.delete(id); return next; });
+      setUpdating(s => { const n = new Set(s); n.delete(id); return n; });
     }
-  }, [eventSlug, checkinToken]);
+  }, [eventSlug, checkinToken, flash]);
 
   async function addWalkIn(e: React.FormEvent) {
     e.preventDefault();
-    if (!walkInFirst.trim() || !walkInLast.trim()) return;
+    if (walkInSaving || !walkInFirst.trim() || !walkInLast.trim()) return;
     setWalkInSaving(true);
     setWalkInError(null);
 
-    const res = await fetch(`/api/checkin/${eventSlug}/walkin`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        first_name:    walkInFirst.trim(),
-        last_name:     walkInLast.trim(),
-        phone:         walkInPhone.trim() || undefined,
-        photo_consent: walkInConsent,
-        token:         checkinToken,
-      }),
-    });
+    try {
+      const res = await fetchWithTimeout(`/api/checkin/${eventSlug}/walkin`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          first_name:    walkInFirst.trim(),
+          last_name:     walkInLast.trim(),
+          phone:         walkInPhone.trim() || undefined,
+          photo_consent: walkInConsent,
+          token:         checkinToken,
+        }),
+      });
 
-    if (res.ok) {
-      const newR = await res.json() as Registrant;
-      knownIds.current.add(newR.id);
-      setItems(prev => [...prev, newR]);
-      setWalkInFirst(""); setWalkInLast(""); setWalkInPhone(""); setWalkInConsent(false);
-      setShowWalkIn(false);
-    } else {
-      const data = await res.json().catch(() => ({})) as { error?: string };
-      setWalkInError(data.error ?? "Failed to add walk-in");
+      if (res.ok) {
+        const saved = await res.json() as Registrant & { already_registered?: boolean };
+        lastWrite.current.set(saved.id, Date.now());
+        setItems(prev => prev.some(x => x.id === saved.id)
+          ? prev.map(x => x.id === saved.id ? { ...x, ...saved } : x)
+          : [...prev, saved]);
+        if (saved.already_registered) {
+          flash("info", `${saved.first_name} ${saved.last_name} was already registered with that number and is now marked present.`);
+        }
+        setWalkInFirst(""); setWalkInLast(""); setWalkInPhone(""); setWalkInConsent(true);
+        setShowWalkIn(false);
+      } else if (res.status === 403) {
+        setLinkInvalid(true);
+        setWalkInError("This check-in link is no longer valid.");
+      } else {
+        const data = await res.json().catch(() => ({})) as { error?: string };
+        setWalkInError(data.error ?? "Could not add this person. Try again.");
+      }
+    } catch {
+      setWalkInError("Could not add this person. Check your connection and try again.");
+    } finally {
+      setWalkInSaving(false);
     }
-    setWalkInSaving(false);
   }
 
   // Derived stats (always in sync with items)
@@ -145,11 +249,15 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
     .filter(r => {
       const matchName = `${r.first_name} ${r.last_name}`.toLowerCase().includes(q);
       const matchRef  = r.ticket_token ? r.ticket_token.slice(0, 8).toUpperCase().includes(q.toUpperCase()) : false;
+      const matchContact = q.length >= 3 && (
+        (r.email ?? "").toLowerCase().includes(q) ||
+        (r.phone ?? "").replace(/\s/g, "").includes(q.replace(/\s/g, ""))
+      );
       const matchFilter =
         filter === "all" ||
         (filter === "present" && r.checked_in) ||
         (filter === "absent"  && !r.checked_in);
-      return (matchName || matchRef) && matchFilter;
+      return (matchName || matchRef || matchContact) && matchFilter;
     })
     .sort((a, b) => {
       // Walk-ins always float to top, newest first among themselves
@@ -161,6 +269,38 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
 
   return (
     <div className="space-y-4">
+      {linkInvalid && (
+        <div role="alert" className="flex items-start gap-2.5 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-800">
+          <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
+          <p><span className="font-semibold">This check-in link has been replaced.</span> Nothing you tap will save. Ask the event admin for the new link.</p>
+        </div>
+      )}
+      {offline && !linkInvalid && (
+        <div role="status" className="flex items-center gap-2.5 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+          <WifiOff size={16} className="flex-shrink-0" />
+          <p>Connection lost. The list will catch up when you are back online.</p>
+        </div>
+      )}
+      {notice && (
+        <div
+          role={notice.kind === "error" ? "alert" : "status"}
+          className={cn(
+            "sticky top-2 z-20 flex items-start gap-2.5 rounded-xl border px-4 py-3 text-sm shadow-card",
+            notice.kind === "error"
+              ? "border-red-200 bg-red-50 text-red-800"
+              : "border-forest/20 bg-white text-forest"
+          )}
+        >
+          {notice.kind === "error"
+            ? <AlertTriangle size={16} className="mt-0.5 flex-shrink-0" />
+            : <CheckCircle2 size={16} className="mt-0.5 flex-shrink-0" />}
+          <p className="flex-1">{notice.text}</p>
+          <button type="button" onClick={() => setNotice(null)} aria-label="Dismiss" className="p-0.5 -m-0.5">
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* ── Stats bar ── */}
       <div className="bg-white rounded-2xl border border-mist p-4">
         <div className="flex items-center justify-between mb-3">
@@ -169,8 +309,8 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
             <span className="text-sm font-semibold text-charcoal">{present} present</span>
           </div>
           <div className="flex items-center gap-2">
-            <Users size={13} className="text-charcoal/30" />
-            <span className="text-xs text-charcoal/40">{total} registered</span>
+            <Users size={13} className="text-charcoal/50" />
+            <span className="text-xs text-charcoal/65">{total} registered</span>
           </div>
         </div>
         <div className="h-1.5 rounded-full bg-mist overflow-hidden">
@@ -179,7 +319,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
             style={{ width: `${pct}%` }}
           />
         </div>
-        <p className="text-[10px] text-charcoal/30 mt-1.5 text-right">{pct}% attendance</p>
+        <p className="text-[10px] text-charcoal/60 mt-1.5 text-right">{pct}% attendance</p>
       </div>
 
       {/* ── Search + filter ── */}
@@ -189,8 +329,9 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
-            placeholder="Search name or ticket ref…"
-            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-mist bg-white text-sm placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
+            placeholder="Search name, phone or ticket ref"
+            aria-label="Search attendees"
+            className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-mist bg-white text-sm placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
           />
         </div>
         <div className="flex items-center gap-0.5 bg-white rounded-xl border border-mist p-1 flex-shrink-0">
@@ -199,8 +340,8 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
               key={f}
               onClick={() => setFilter(f)}
               className={cn(
-                "px-2.5 py-1.5 rounded-lg text-[10px] font-medium transition-all capitalize",
-                filter === f ? "bg-forest text-cream" : "text-charcoal/50 hover:text-charcoal"
+                "px-2.5 py-1.5 rounded-lg text-[11px] font-medium transition-all capitalize",
+                filter === f ? "bg-forest text-cream" : "text-charcoal/70 hover:text-charcoal"
               )}
             >
               {f}
@@ -215,7 +356,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
           <div className="flex items-center justify-between mb-1">
             <p className="text-xs font-semibold text-charcoal">Add attendee (no ticket)</p>
             <button type="button" onClick={() => { setShowWalkIn(false); setWalkInError(null); }}
-              className="p-1 rounded-lg hover:bg-charcoal/6 transition-colors">
+              className="p-1 rounded-lg hover:bg-charcoal/5 transition-colors">
               <X size={13} className="text-charcoal/40" />
             </button>
           </div>
@@ -266,7 +407,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
         </form>
       ) : (
         <button onClick={() => setShowWalkIn(true)}
-          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-forest/30 text-xs font-medium text-forest/60 hover:border-forest/50 hover:text-forest hover:bg-forest/4 transition-all">
+          className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-dashed border-forest/30 text-xs font-medium text-forest hover:border-forest/50 hover:text-forest hover:bg-forest/5 transition-all">
           <UserPlus size={13} />
           Someone arrived without a ticket? Add them here
         </button>
@@ -275,17 +416,17 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
       {/* ── Registrant list ── */}
       <div className="bg-white rounded-2xl border border-mist overflow-hidden">
         {filtered.length === 0 ? (
-          <p className="py-10 text-center text-sm text-charcoal/30">No results</p>
+          <p className="py-10 text-center text-sm text-charcoal/60">{items.length === 0 ? "No one has registered yet." : "No one matches that search."}</p>
         ) : (
           <div className="divide-y divide-mist">
             {filtered.map(r => (
               <div key={r.id} className="flex items-center gap-3 px-4 py-3.5">
                 <div className={cn(
                   "w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0",
-                  r.is_walkin ? "bg-gold/10" : "bg-forest/8"
+                  r.is_walkin ? "bg-gold/10" : "bg-forest/10"
                 )}>
                   <span className={cn("text-[10px] font-bold", r.is_walkin ? "text-gold" : "text-forest")}>
-                    {r.first_name[0]}{r.last_name[0]}
+                    {(r.first_name[0] ?? "").toUpperCase()}{(r.last_name[0] ?? "").toUpperCase()}
                   </span>
                 </div>
 
@@ -294,7 +435,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
                   <div className="flex items-center gap-1.5 flex-wrap">
                     <p className="text-sm font-medium text-charcoal">{r.first_name} {r.last_name}</p>
                     {r.is_walkin && (
-                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/12 text-gold/80 font-medium flex-shrink-0">Walk-in</span>
+                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-gold/15 text-bark font-medium flex-shrink-0">Walk-in</span>
                     )}
                     {/* Photo consent indicator */}
                     {r.photo_consent ? (
@@ -303,13 +444,13 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
                       </span>
                     ) : (
                       <span title="No photo consent" className="flex-shrink-0">
-                        <CameraOff size={11} className="text-charcoal/25" />
+                        <CameraOff size={11} className="text-charcoal/45" />
                       </span>
                     )}
                   </div>
                   {/* Row 2: contact (truncated) + ticket ref */}
                   <div className="flex items-center gap-1.5 mt-0.5 overflow-hidden">
-                    <div className="flex items-center gap-1 text-[11px] text-charcoal/40 min-w-0 flex-1">
+                    <div className="flex items-center gap-1 text-[11px] text-charcoal/65 min-w-0 flex-1">
                       {r.email ? (
                         <><Mail size={9} className="flex-shrink-0" /><span className="truncate">{r.email}</span></>
                       ) : r.phone ? (
@@ -317,7 +458,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
                       ) : null}
                     </div>
                     {r.ticket_token && (
-                      <span className="text-[11px] font-mono text-charcoal/30 flex-shrink-0">
+                      <span className="text-[11px] font-mono text-charcoal/55 flex-shrink-0">
                         #{r.ticket_token.slice(0, 8).toUpperCase()}
                       </span>
                     )}
@@ -325,17 +466,23 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
                 </div>
 
                 <button
-                  onClick={() => toggle(r.id, r.checked_in)}
-                  disabled={updating.has(r.id)}
+                  onClick={() => toggle(r)}
+                  disabled={updating.has(r.id) || linkInvalid}
+                  aria-pressed={r.checked_in}
+                  aria-label={r.checked_in ? `${r.first_name} ${r.last_name} is present. Tap to undo.` : `Mark ${r.first_name} ${r.last_name} present`}
                   className={cn(
                     "flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-200 flex-shrink-0",
+                    "min-h-[40px] border",
                     r.checked_in
-                      ? "bg-green-100 text-green-700 hover:bg-green-200"
-                      : "bg-charcoal/6 text-charcoal/50 hover:bg-forest/10 hover:text-forest",
-                    updating.has(r.id) && "opacity-50 cursor-not-allowed"
+                      ? "bg-green-600 border-green-600 text-white hover:bg-green-700"
+                      : "bg-white border-forest/40 text-forest hover:bg-forest hover:text-cream",
+                    updating.has(r.id) && "opacity-60 cursor-wait"
                   )}
                 >
-                  {r.checked_in ? <><CheckCircle2 size={13} /> Present</> : <><Circle size={13} /> Mark present</>}
+                  {updating.has(r.id)
+                    ? <Loader2 size={13} className="animate-spin" />
+                    : r.checked_in ? <CheckCircle2 size={13} /> : <Circle size={13} />}
+                  {r.checked_in ? "Present" : "Mark present"}
                 </button>
               </div>
             ))}
@@ -343,7 +490,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
         )}
       </div>
 
-      <p className="text-center text-[10px] text-charcoal/30">
+      <p className="text-center text-[11px] text-charcoal/60">
         {filtered.length} of {total} shown · {present} present
       </p>
     </div>

@@ -37,3 +37,6 @@ next-env.d.ts
 
 # Build output when building alongside a running dev server
 /.next-build/
+.next-test/
+.next-build/
+.claude/worktrees/
