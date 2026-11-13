@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/react";
 import { MobileScrollFix } from "@/components/mobile-scroll-fix";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import { safeJsonLd } from "@/lib/html";
 import { GOOGLE_SITE_VERIFICATION, SOCIAL_INSTAGRAM, SOCIAL_TIKTOK, SOCIAL_YOUTUBE, SOCIAL_FACEBOOK, SOCIAL_TWITTER } from "@/lib/constants";
 
 const displayFont = Cormorant_Garamond({
@@ -15,10 +16,12 @@ const displayFont = Cormorant_Garamond({
   display: "swap",
 });
 
+// DM Sans is a variable font, so no weight list: one file covers every weight.
+// Cormorant Garamond is static in this Next.js font manifest and has to list
+// its weights; next/font refuses to build it without them.
 const bodyFont = DM_Sans({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -141,15 +144,15 @@ export default function RootLayout({
       <body className="antialiased force-light grain" suppressHydrationWarning>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(orgJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(orgJsonLd) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(websiteJsonLd) }}
         />
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(navJsonLd) }}
+          dangerouslySetInnerHTML={{ __html: safeJsonLd(navJsonLd) }}
         />
         <MobileScrollFix />
         {children}

@@ -42,7 +42,9 @@ function AnimatedBackground() {
         }}
       />
 
-      {/* Animated glowing orbs */}
+      {/* Animated glowing orbs. No filter: blur() here: a blurred layer that
+          moves forever is repainted every frame. The gradients fade to
+          transparent inside their own box, so they are soft without it. */}
       {!reduce && (
         <>
           {/* Gold orb — drifts top-right */}
@@ -51,8 +53,7 @@ function AnimatedBackground() {
             transition={{ duration: 20, repeat: Infinity, ease: "easeInOut" }}
             className="absolute top-[-12%] right-[8%] w-[60%] h-[65%]"
             style={{
-              background: "radial-gradient(circle at 50% 50%, rgba(201,162,74,0.20) 0%, transparent 65%)",
-              filter: "blur(72px)",
+              background: "radial-gradient(ellipse closest-side at 50% 50%, rgba(201,162,74,0.20) 0%, transparent 100%)",
             }}
           />
 
@@ -62,8 +63,7 @@ function AnimatedBackground() {
             transition={{ duration: 24, repeat: Infinity, ease: "easeInOut", delay: 5 }}
             className="absolute bottom-[-8%] left-[-8%] w-[55%] h-[65%]"
             style={{
-              background: "radial-gradient(circle at 50% 50%, rgba(45,82,64,0.55) 0%, transparent 65%)",
-              filter: "blur(80px)",
+              background: "radial-gradient(ellipse closest-side at 50% 50%, rgba(45,82,64,0.55) 0%, transparent 100%)",
             }}
           />
 
@@ -73,8 +73,7 @@ function AnimatedBackground() {
             transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 2 }}
             className="absolute top-0 left-[35%] w-[50%] h-[38%]"
             style={{
-              background: "radial-gradient(circle at 50% 20%, rgba(247,242,232,1) 0%, transparent 65%)",
-              filter: "blur(90px)",
+              background: "radial-gradient(ellipse closest-side at 50% 50%, rgba(247,242,232,1) 0%, transparent 100%)",
             }}
           />
         </>
@@ -87,10 +86,11 @@ function AnimatedBackground() {
 
       {/* Ripple ring — expands and fades on loop */}
       {!reduce && (
-        <motion.div
-          animate={{ scale: [1, 1.7], opacity: [0.5, 0] }}
-          transition={{ duration: 5, repeat: Infinity, ease: "easeOut", delay: 1.5 }}
+        // CSS keyframe, not Framer Motion: the ring ends at a different value
+        // from where it starts, and FM flashes at the loop boundary when it does.
+        <div
           className="absolute top-[22%] right-[40%] w-24 h-24 rounded-full border-2 border-gold/70 hidden lg:block"
+          style={{ animation: "ripple-out 5s ease-out 1.5s infinite backwards" }}
         />
       )}
 
@@ -118,10 +118,13 @@ function FloatCard({
   floatDuration,
   floatDelay,
   floatAmount = 10,
+  instant = false,
   className,
   style,
   children,
 }: {
+  /** Skip the entrance so the card is visible in the server HTML (LCP). */
+  instant?: boolean;
   entranceDelay: number;
   rotate: number;
   floatDuration: number;
@@ -134,7 +137,7 @@ function FloatCard({
   const reduce = useReducedMotion();
   return (
     <motion.div
-      initial={{ opacity: 0, y: 36, rotate }}
+      initial={instant ? false : { opacity: 0, y: 36, rotate }}
       animate={{ opacity: 1, y: 0, rotate }}
       transition={{ duration: 0.8, delay: entranceDelay, ease: EASE }}
       className={className}
@@ -152,18 +155,21 @@ function FloatCard({
 }
 
 function CardInner({
-  src, alt, label, borderRadius,
+  src, alt, label, borderRadius, priority = false,
 }: {
-  src: string | null; alt: string; label: string; borderRadius?: string;
+  src: string | null; alt: string; label: string; borderRadius?: string; priority?: boolean;
 }) {
   return (
     <div className="relative w-full h-full overflow-hidden shadow-2xl bg-forest-dark" style={{ borderRadius: borderRadius ?? "2rem" }}>
       <Photo
         src={src}
         alt={alt}
-        width={900}
+        // The largest tile is drawn about 290px wide; 600 covers a 2x screen.
+        // Every tile asks for the same width so the mobile and desktop copies
+        // of a photo share one URL and one download.
+        width={600}
         sizes="(max-width:1024px) 40vw, 22vw"
-        priority={alt === "Worship" || alt === "Pause"}
+        priority={priority}
       />
       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
       <div className="absolute bottom-0 left-0 right-0 p-4">
@@ -180,15 +186,6 @@ export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) 
   // one of people talking, the third is the band.
   const [pause, connect, worship, reflect] = [0, 1, 2, 3].map(i => photos[i] ?? null);
 
-  const container = {
-    hidden: {},
-    show: { transition: { staggerChildren: 0.12, delayChildren: 0.2 } },
-  };
-  const item = (delay = 0) => ({
-    hidden: { opacity: 0, y: 32 },
-    show:   { opacity: 1, y: 0, transition: { duration: 0.65, ease: EASE, delay } },
-  });
-
   return (
     <section className="relative min-h-[100svh] bg-forest-dark flex items-center overflow-hidden pt-20">
       <AnimatedBackground />
@@ -197,13 +194,9 @@ export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) 
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-8 items-center">
 
           {/* Mobile image strip — visible only below sm, sits above the copy */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.9, delay: 0.25 }}
-            className="block sm:hidden relative h-52 -mx-4"
-            aria-hidden
-          >
+          {/* Plain element, and both cards are `instant`: on a phone these two
+              photos are above the fold, so they must not wait for hydration. */}
+          <div className="block sm:hidden relative h-52 -mx-4" aria-hidden>
             {/* Worship card — large, left-leaning */}
             <FloatCard
               entranceDelay={0.3}
@@ -211,9 +204,10 @@ export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) 
               floatDuration={4.4}
               floatDelay={0}
               floatAmount={10}
+              instant
               className="absolute left-4 top-0 w-[54%] h-full"
             >
-              <CardInner src={worship} alt="Worship" label="Worship" borderRadius="1.75rem" />
+              <CardInner src={worship} alt="Worship" label="Worship" borderRadius="1.75rem" priority />
             </FloatCard>
 
             {/* Connect card — smaller, right-offset, lower */}
@@ -223,6 +217,7 @@ export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) 
               floatDuration={3.8}
               floatDelay={1.4}
               floatAmount={8}
+              instant
               className="absolute right-4 top-[14%] w-[46%] h-[80%]"
             >
               <CardInner src={connect} alt="Connect" label="Connect" borderRadius="1.5rem" />
@@ -246,30 +241,30 @@ export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) 
               transition={{ duration: 0.5, delay: 0.8 }}
               className="absolute right-[38%] bottom-4 w-7 h-7 rounded-full border-2 border-gold/50 pointer-events-none"
             />
-          </motion.div>
+          </div>
 
-          {/* Left — copy */}
-          <motion.div variants={container} initial="hidden" animate="show" className="flex flex-col gap-6">
-            <motion.div variants={item(0)} className="flex items-center gap-2">
+          {/* Left: copy. Plain elements on purpose. This block holds the h1,
+              which is the largest paint on the page; as Framer Motion elements
+              it was server-rendered at opacity 0 and stayed invisible until
+              the JavaScript had loaded. */}
+          <div className="flex flex-col gap-6">
+            <div className="flex items-center gap-2">
               <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse-dot" />
               <span className="label-caps text-gold/80 tracking-widest">Nairobi · Quarterly</span>
-            </motion.div>
+            </div>
 
-            <motion.h1
-              variants={item(0.05)}
-              className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream leading-[0.95] tracking-tight"
-            >
+            <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream leading-[0.95] tracking-tight">
               A place to{" "}
               <em className="not-italic text-gold">breathe</em>
               {" "}and{" "}
               <em className="not-italic text-gold">connect</em>
-            </motion.h1>
+            </h1>
 
-            <motion.p variants={item(0.1)} className="text-cream/70 text-base sm:text-lg max-w-sm leading-relaxed">
+            <p className="text-cream/70 text-base sm:text-lg max-w-sm leading-relaxed">
               A quarterly cross-church gathering in Nairobi: low pressure, real connection, all welcome.
-            </motion.p>
+            </p>
 
-            <motion.div variants={item(0.15)} className="flex flex-wrap gap-3 pt-2">
+            <div className="flex flex-wrap gap-3 pt-2">
               <Link
                 href="/events"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-gold text-forest font-semibold text-sm hover:bg-gold-light transition-all duration-200 hover:-translate-y-0.5"
@@ -282,16 +277,13 @@ export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) 
               >
                 Learn more
               </Link>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
 
-          {/* Right — 4-card floating collage */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.3 }}
-            className="relative h-[480px] sm:h-[540px] lg:h-[600px] hidden sm:block"
-          >
+          {/* Right: 4-card floating collage. The wrapper is a plain element so
+              the large Worship tile inside it can paint from the server HTML;
+              the other three tiles keep their staggered entrance. */}
+          <div className="relative h-[480px] sm:h-[540px] lg:h-[600px] hidden sm:block">
             {/* Card: PAUSE — small square, top-left */}
             <FloatCard
               entranceDelay={0.38}
@@ -311,9 +303,10 @@ export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) 
               floatDuration={4.4}
               floatDelay={0}
               floatAmount={12}
+              instant
               className="absolute left-0 top-[30%] w-[47%] h-[66%]"
             >
-              <CardInner src={worship} alt="Worship" label="Worship" borderRadius="2.5rem" />
+              <CardInner src={worship} alt="Worship" label="Worship" borderRadius="2.5rem" priority />
             </FloatCard>
 
             {/* Card: CONNECT — medium, top-right */}
@@ -342,7 +335,7 @@ export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) 
                 className="relative w-full h-full overflow-hidden shadow-2xl bg-forest-dark"
                 style={{ borderRadius: "inherit" }}
               >
-                <Photo src={reflect} alt="Reflect" width={700} sizes="(max-width:1024px) 34vw, 18vw" />
+                <Photo src={reflect} alt="Reflect" width={600} sizes="(max-width:1024px) 34vw, 18vw" />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/10 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                   <span className="label-caps text-cream text-xs font-bold tracking-widest">Reflect</span>
@@ -368,7 +361,7 @@ export function HeroCollage({ photos = [] }: { photos?: Array<string | null> }) 
               <span className="font-display text-xl font-semibold text-cream">02</span>
               <p className="text-xs text-cream/70 mt-0.5 uppercase tracking-wider">Session</p>
             </motion.div>
-          </motion.div>
+          </div>
         </div>
       </div>
 

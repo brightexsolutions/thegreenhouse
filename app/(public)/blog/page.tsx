@@ -5,6 +5,7 @@ import { ArrowRight, Clock, PenLine } from "lucide-react";
 import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_URL, storageUrl } from "@/lib/constants";
+import { safeJsonLd } from "@/lib/html";
 import { categoryLabel, formatPostDate, type BlogPost } from "@/lib/blog";
 
 // Short window so a freshly published post reaches the index and the sitemap
@@ -79,7 +80,7 @@ export default async function BlogIndexPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(blogJsonLd) }}
       />
 
       {/* Hero */}

@@ -6,7 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Eye, ExternalLink, Pencil, Trash2, Clock } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
-import { categoryLabel, formatPostDate } from "@/lib/blog";
+import { categoryLabel, formatPostDate } from "@/lib/blog-shared";
 import { cn } from "@/lib/utils";
 
 type PostRow = {

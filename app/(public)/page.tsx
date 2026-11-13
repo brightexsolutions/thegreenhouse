@@ -27,22 +27,24 @@ import { SessionHighlight }   from "@/components/home/session-highlight";
 import { PartnersStrip }      from "@/components/home/partners-strip";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getSitePhotos } from "@/lib/site-photos";
-import type { Event } from "@/types/database";
+import { PUBLIC_EVENT_COLUMNS, type PublicEvent } from "@/lib/public-event";
+import { todayInNairobi } from "@/lib/utils";
 
 export const revalidate = 300;
 
-async function getNextEvent(): Promise<Event | null> {
+async function getNextEvent(): Promise<PublicEvent | null> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("events")
-      .select("*")
+      .select(PUBLIC_EVENT_COLUMNS)
       .in("status", ["published", "live"])
       .is("deleted_at", null)
+      .gte("event_date", todayInNairobi())
       .order("event_date", { ascending: true })
       .limit(1)
-      .single();
-    return data ?? null;
+      .maybeSingle();
+    return (data as PublicEvent | null) ?? null;
   } catch {
     return null;
   }

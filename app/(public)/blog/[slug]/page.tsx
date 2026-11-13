@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -6,6 +7,7 @@ import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_URL, SITE_NAME, storageUrl } from "@/lib/constants";
+import { safeJsonLd } from "@/lib/html";
 import {
   categoryLabel, deriveExcerpt, extractHeadings, formatPostDate, renderMarkdown,
   type BlogPost,
@@ -15,7 +17,8 @@ export const revalidate = 120;
 
 type Props = { params: Promise<{ slug: string }> };
 
-async function getPost(slug: string): Promise<BlogPost | null> {
+// cache() so generateMetadata and the page share one fetch per request.
+const getPost = cache(async function getPost(slug: string): Promise<BlogPost | null> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
@@ -29,7 +32,7 @@ async function getPost(slug: string): Promise<BlogPost | null> {
   } catch {
     return null;
   }
-}
+});
 
 async function getMorePosts(excludeId: string) {
   try {
@@ -142,8 +145,8 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
 
       {/* Header */}
       <section className="relative bg-forest overflow-hidden pt-28 pb-14">

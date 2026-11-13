@@ -4,10 +4,10 @@ import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { X, Calendar, MapPin, Leaf } from "lucide-react";
 import { RegistrationForm } from "@/components/registration/registration-form";
-import type { Event } from "@/types/database";
+import type { PublicEvent } from "@/lib/public-event";
 
 interface RegistrationModalProps {
-  event: Event;
+  event: PublicEvent;
   trigger?: React.ReactNode;
 }
 
@@ -40,7 +40,7 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
   }, [open]);
 
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
 
   const modal = (

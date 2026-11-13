@@ -4,11 +4,11 @@ import { useState } from "react";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { EventShareButtons } from "@/components/events/event-share-buttons";
 import { SITE_URL } from "@/lib/constants";
-import type { Event } from "@/types/database";
+import type { PublicEvent } from "@/lib/public-event";
 
 const MAX_CHARS = 280;
 
-export function PastEventCard({ event }: { event: Event }) {
+export function PastEventCard({ event }: { event: PublicEvent }) {
   const [attended,   setAttended]   = useState(true);
   const [name,       setName]       = useState("");
   const [anonymous,  setAnonymous]  = useState(false);
@@ -46,7 +46,7 @@ export function PastEventCard({ event }: { event: Event }) {
 
   const shareUrl = `${SITE_URL}/events/${event.slug}`;
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
-    day: "numeric", month: "long", year: "numeric",
+    day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
 
   return (

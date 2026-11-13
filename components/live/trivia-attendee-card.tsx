@@ -78,6 +78,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
   const [submitted,      setSubmitted]     = useState(false);
   const [isCorrect,      setIsCorrect]     = useState<boolean | null>(null);
   const [submitting,     setSubmitting]    = useState(false);
+  const [submitError,    setSubmitError]   = useState<string | null>(null);
   const [timeLeft,       setTimeLeft]      = useState<number | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -96,11 +97,17 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchAll() {
+    // Both endpoints are cached at the edge for a couple of seconds so the
+    // fallback poll from a full room does not hit the database once per phone.
+    // `fresh` adds a unique query string, which skips that cache: used for the
+    // first load, a Realtime status change and coming back to the tab, where a
+    // stale "active" would delay the reveal.
+    async function fetchAll(fresh = false) {
+      const bust = fresh ? `?fresh=${Date.now()}` : "";
       try {
         const [rRes, resRes] = await Promise.all([
-          fetch(`/api/trivia/${roundId}`, { cache: "no-store" }),
-          fetch(`/api/trivia/${roundId}/results`, { cache: "no-store" }),
+          fetch(`/api/trivia/${roundId}${bust}`, { cache: "no-store" }),
+          fetch(`/api/trivia/${roundId}/results${bust}`, { cache: "no-store" }),
         ]);
         if (cancelled) return;
         if (rRes.ok)   setRound(await rRes.json() as TriviaRound);
@@ -108,9 +115,13 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
       } catch { /* ignore */ }
     }
 
-    fetchAll();
-    // Poll every 4s as fallback in case Realtime misses an event
-    const pollId = setInterval(fetchAll, 4000);
+    fetchAll(true);
+    // Poll every 10s as fallback in case Realtime misses an event. Skipped
+    // while the tab is hidden (phone locked or in a pocket); it catches up the
+    // moment the tab is visible again.
+    const pollId = setInterval(() => { if (!document.hidden) fetchAll(); }, 10000);
+    const onVisible = () => { if (!document.hidden && !cancelled) fetchAll(true); };
+    document.addEventListener("visibilitychange", onVisible);
 
     // Realtime subscription on trivia_rounds for near-instant status changes.
     // Re-fetch the full round (not just merging raw fields) so that correct_index
@@ -125,13 +136,14 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
         event: "UPDATE", schema: "public", table: "trivia_rounds",
         filter: `id=eq.${roundId}`,
       }, () => {
-        if (!cancelled) fetchAll();
+        if (!cancelled) fetchAll(true);
       })
       .subscribe();
 
     return () => {
       cancelled = true;
       clearInterval(pollId);
+      document.removeEventListener("visibilitychange", onVisible);
       supabase.removeChannel(channel);
     };
   }, [roundId]);
@@ -173,6 +185,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
     if (round?.type === "open_input" && !openAnswer.trim()) return;
 
     setSubmitting(true);
+    setSubmitError(null);
     const payload: Record<string, unknown> = {
       answer_text:   round?.type === "multiple_choice"
         ? (round.options?.[selectedIndex!] ?? "")
@@ -195,6 +208,9 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
         // Round closed before answer recorded — show as submitted with no score
         setSubmitted(true);
         setIsCorrect(null);
+      } else if (res.status === 429) {
+        // Everyone in the room can share one IP address on the venue wifi.
+        setSubmitError("Too many answers from this network, try again in a moment");
       }
       // Ignore 500s silently — no feedback to attendee needed
     } catch { /* ignore network errors */ }
@@ -401,6 +417,10 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
               ? <><Loader2 size={13} className="animate-spin" />Locking in…</>
               : <><Send size={13} />Lock in my answer</>}
           </button>
+        )}
+
+        {submitError && !submitted && round.status === "active" && (
+          <p role="alert" className="text-xs text-rose-300 text-center">{submitError}</p>
         )}
 
         {/* Submission confirmation */}

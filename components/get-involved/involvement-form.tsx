@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { Suspense, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -79,7 +80,29 @@ interface InvolvementFormProps {
 
 const VALID_INTERESTS = ["worship_team", "host_venue", "vision_carrier", "creative_team", "partner", "give", "attend", "other"] as const;
 
-export function InvolvementForm({ defaultInterest }: InvolvementFormProps) {
+type Interest = (typeof VALID_INTERESTS)[number];
+
+/**
+ * Reads ?interest= in the browser and hands it to the form.
+ *
+ * The page used to await searchParams on the server, which made the whole
+ * page dynamic. Reading it here keeps the page static. It sits in its own
+ * Suspense boundary and renders nothing, so the form itself is still in the
+ * prerendered HTML.
+ */
+function InterestFromUrl({ onInterest }: { onInterest: (interest: Interest) => void }) {
+  const param = useSearchParams().get("interest");
+  useEffect(() => {
+    if (param && (VALID_INTERESTS as readonly string[]).includes(param)) {
+      onInterest(param as Interest);
+    }
+    // onInterest is recreated each render; only the URL value matters here.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [param]);
+  return null;
+}
+
+export function InvolvementForm({ defaultInterest }: InvolvementFormProps = {}) {
   const [submitted,      setSubmitted]      = useState(false);
   const [serverError,    setServerError]    = useState<string | null>(null);
   const [givingSettings, setGivingSettings] = useState<GivingSettings>({});
@@ -138,6 +161,9 @@ export function InvolvementForm({ defaultInterest }: InvolvementFormProps) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+      <Suspense fallback={null}>
+        <InterestFromUrl onInterest={(value) => setValue("interest", value)} />
+      </Suspense>
       <Field label="Full name" error={errors.full_name?.message}>
         <input
           {...register("full_name")}

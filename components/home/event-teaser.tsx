@@ -6,15 +6,15 @@ import Link from "next/link";
 import { ArrowRight, Calendar, MapPin } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 import { storageUrl } from "@/lib/constants";
-import type { Event } from "@/types/database";
-import { sessionName } from "@/lib/utils";
+import type { PublicEvent } from "@/lib/public-event";
+import { sessionName, formatEventTime, eventStart } from "@/lib/utils";
 
-function Countdown({ targetDate }: { targetDate: string }) {
+function Countdown({ targetMs }: { targetMs: number }) {
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
     function calc() {
-      const diff = new Date(targetDate).getTime() - Date.now();
+      const diff = targetMs - Date.now();
       if (diff <= 0) return;
       setTimeLeft({
         days:    Math.floor(diff / 86400000),
@@ -26,7 +26,7 @@ function Countdown({ targetDate }: { targetDate: string }) {
     calc();
     const id = setInterval(calc, 1000);
     return () => clearInterval(id);
-  }, [targetDate]);
+  }, [targetMs]);
 
   const units = [
     { label: "Days",  value: timeLeft.days    },
@@ -56,14 +56,15 @@ function Countdown({ targetDate }: { targetDate: string }) {
 
 
 
-export function EventTeaser({ event }: { event: Event | null }) {
+export function EventTeaser({ event }: { event: PublicEvent | null }) {
   if (!event) return null;
 
-  const eventDateTime = `${event.event_date}T${event.event_time}`;
+  // Fixed to Nairobi time so the countdown is the same on every device.
+  const startMs = eventStart(event.event_date, event.event_time).getTime();
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
-  const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
+  const formattedTime = formatEventTime(event.event_time);
   // Teaser shows banner only — poster (cover_image) stays on the detail page
   const coverUrl = event.banner_image
     ? storageUrl(`event-images/${event.banner_image}`, { width: 900, quality: 80 })
@@ -108,7 +109,7 @@ export function EventTeaser({ event }: { event: Event | null }) {
             <div className="flex flex-col gap-2.5 text-sm text-cream/60 mb-8">
               <div className="flex items-center gap-2">
                 <Calendar size={14} className="text-gold shrink-0" />
-                <span>{formattedDate} · {formattedTime}pm</span>
+                <span>{formattedDate}{formattedTime ? ` · ${formattedTime}` : ""}</span>
               </div>
               {event.venue_name && (
                 <div className="flex items-center gap-2">
@@ -146,7 +147,7 @@ export function EventTeaser({ event }: { event: Event | null }) {
               {/* Countdown card */}
               <div className="rounded-3xl border border-cream/15 bg-cream/8 backdrop-blur-sm p-8 lg:p-10">
                 <p className="label-caps text-cream/40 text-xs mb-5">Counting down to {sessionName(event.title)}</p>
-                <Countdown targetDate={eventDateTime} />
+                <Countdown targetMs={startMs} />
                 <div className="mt-8 pt-6 border-t border-cream/15">
                   <p className="text-sm text-cream/40">
                     {event.type === "free" ? "Free entry · All welcome" : `KES ${event.price_kes?.toLocaleString()} entry`}

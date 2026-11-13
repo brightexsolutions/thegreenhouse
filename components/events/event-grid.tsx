@@ -2,10 +2,10 @@
 
 import { EventCard } from "./event-card";
 import { FadeIn } from "@/components/motion/fade-in";
-import type { Event } from "@/types/database";
+import type { PublicEvent } from "@/lib/public-event";
 
 interface EventGridProps {
-  events: Event[];
+  events: PublicEvent[];
 }
 
 export function EventGrid({ events }: EventGridProps) {

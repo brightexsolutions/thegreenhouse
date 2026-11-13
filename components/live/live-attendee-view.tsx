@@ -132,12 +132,17 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
       })
       .subscribe();
 
-    // Polling fallback — catches any Realtime gaps every 5 s
-    const poll = setInterval(syncDisplayState, 5000);
+    // Polling fallback: catches any Realtime gaps every 15 s. Skipped while the
+    // tab is hidden (phone locked or in a pocket), then synced straight away
+    // when it comes back so nobody returns to a stale song or trivia round.
+    const poll = setInterval(() => { if (!document.hidden) syncDisplayState(); }, 15000);
+    const onVisible = () => { if (!document.hidden) syncDisplayState(); };
+    document.addEventListener("visibilitychange", onVisible);
 
     return () => {
       supabase.removeChannel(channel);
       clearInterval(poll);
+      document.removeEventListener("visibilitychange", onVisible);
     };
   }, [eventId]);
 

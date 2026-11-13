@@ -7,6 +7,7 @@ import { PreEventView } from "@/components/live/pre-event-view";
 import { PostEventView } from "@/components/live/post-event-view";
 import { Wifi } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
+import { PUBLIC_EVENT_COLUMNS } from "@/lib/public-event";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,9 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
   const [{ data: event }, { data: givingSettings }] = await Promise.all([
     supabase
       .from("events")
-      .select("*, event_sessions(*, session_songs(*, songs(*)))")
+      // Named columns, never "*": the events row carries check-in and control
+      // tokens that must not travel with a page anyone can open.
+      .select(`${PUBLIC_EVENT_COLUMNS}, event_sessions(*, session_songs(*, songs(*)))`)
       .eq("slug", slug)
       .is("deleted_at", null)
       .single(),
@@ -47,7 +50,7 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
 
   if (!event) notFound();
 
-  const typedEvent = event as {
+  const typedEvent = event as unknown as {
     id:                string;
     title:             string;
     subtitle:          string | null;

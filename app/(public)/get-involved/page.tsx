@@ -44,12 +44,11 @@ const VALUES = [
   { label: "Stay connected", body: "Keep in touch between sessions, not just on the day." },
 ];
 
-export default async function GetInvolvedPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ interest?: string }>;
-}) {
-  const { interest } = await searchParams;
+// Static, refreshed every five minutes. ?interest= is read in the browser by
+// InvolvementForm so this page never has to render per request.
+export const revalidate = 300;
+
+export default function GetInvolvedPage() {
   return (
     <>
       {/* Hero — photo background */}
@@ -367,7 +366,7 @@ export default async function GetInvolvedPage({
             {/* Right — form */}
             <FadeIn delay={0.1}>
               <div className="bg-white border border-mist rounded-3xl p-8 shadow-card">
-                <InvolvementForm defaultInterest={interest} />
+                <InvolvementForm />
               </div>
             </FadeIn>
           </div>

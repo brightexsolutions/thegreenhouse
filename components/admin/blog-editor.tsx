@@ -8,7 +8,7 @@ import {
   Send, Sparkles, Upload, Wand2, X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { BLOG_CATEGORIES, slugify, readingMinutes, deriveExcerpt } from "@/lib/blog";
+import { BLOG_CATEGORIES, slugify, readingMinutes, deriveExcerpt } from "@/lib/blog-shared";
 import { SITE_URL, storageUrl } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 

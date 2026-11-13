@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,7 +14,9 @@ import { PosterViewer }      from "@/components/events/poster-viewer";
 import { PastEventCard }           from "@/components/events/past-event-card";
 import { GalleryCarousel }         from "@/components/events/gallery-carousel";
 import { EventHighlightVideo }     from "@/components/events/event-highlight-video";
-import type { Event } from "@/types/database";
+import { PUBLIC_EVENT_COLUMNS, type PublicEvent } from "@/lib/public-event";
+import { formatEventTime } from "@/lib/utils";
+import { safeJsonLd } from "@/lib/html";
 
 export const revalidate = 60;
 
@@ -21,17 +24,22 @@ type Props = { params: Promise<{ slug: string }> };
 
 interface EventImageRow { id: string; path: string; caption: string | null; sort_order: number; }
 
-async function getEventWithCount(slug: string): Promise<{ event: Event; registrantCount: number; galleryImages: EventImageRow[] } | null> {
+// Only these statuses have a public page. Drafts and cancelled sessions 404.
+const PUBLIC_STATUSES = ["published", "live", "past"];
+
+// cache() so generateMetadata and the page share one fetch per request.
+const getEventWithCount = cache(async function getEventWithCount(slug: string): Promise<{ event: PublicEvent; registrantCount: number; galleryImages: EventImageRow[] } | null> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("events")
-      .select("*")
+      .select(PUBLIC_EVENT_COLUMNS)
       .eq("slug", slug)
+      .in("status", PUBLIC_STATUSES)
       .is("deleted_at", null)
-      .single();
+      .maybeSingle();
     if (!data) return null;
-    const event = data as Event;
+    const event = data as unknown as PublicEvent;
 
     const [registrantResult, imagesResult] = await Promise.all([
       event.capacity
@@ -47,7 +55,7 @@ async function getEventWithCount(slug: string): Promise<{ event: Event; registra
   } catch {
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -62,7 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : undefined;
 
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
-    day: "numeric", month: "long", year: "numeric",
+    day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
 
   return {
@@ -101,16 +109,14 @@ function getYouTubeEmbedUrl(url: string): string | null {
   return null;
 }
 
-function jsonLd(event: Event) {
+function jsonLd(event: PublicEvent) {
   const base = {
     "@context": "https://schema.org",
     "@type":    "Event",
     name:       event.title,
     description: event.description ?? event.subtitle ?? undefined,
-    startDate:  `${event.event_date}T${event.event_time}`,
-    eventStatus: event.status === "cancelled"
-      ? "https://schema.org/EventCancelled"
-      : "https://schema.org/EventScheduled",
+    startDate:  `${event.event_date}T${event.event_time}+03:00`,
+    eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     isAccessibleForFree: event.type === "free",
     organizer: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
@@ -129,7 +135,7 @@ function jsonLd(event: Event) {
       ? { image: storageUrl(`event-images/${event.cover_image}`, { width: 1200 }) }
       : {}),
   };
-  return JSON.stringify(base);
+  return safeJsonLd(base);
 }
 
 // African-context fallback banners (used only when no banner_image is uploaded)
@@ -152,7 +158,7 @@ export default async function EventDetailPage({ params }: Props) {
 
   // Banner = hero background. Poster (cover_image) shown in details, never as hero bg.
   const bannerUrl = event.banner_image
-    ? storageUrl(`event-images/${event.banner_image}`, { width: 1600, quality: 85 })
+    ? storageUrl(`event-images/${event.banner_image}`, { width: 1200, quality: 75 })
     : pickBannerFallback(event.slug);
 
   function resolveMedia(path: string | null | undefined): string | null {
@@ -176,9 +182,9 @@ export default async function EventDetailPage({ params }: Props) {
   const videoUrl = resolveMedia(event.highlight_video);
 
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
-  const time = event.event_time.slice(0, 5).replace(":", ".");
+  const time = formatEventTime(event.event_time);
 
   const isOpen   = event.status === "published" || event.status === "live";
   const isPast   = event.status === "past";
@@ -255,7 +261,7 @@ export default async function EventDetailPage({ params }: Props) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock size={13} />
-                  <span>{time}pm</span>
+                  <span>{time}</span>
                 </div>
                 {event.venue_name && (
                   <div className="flex items-center gap-2">
@@ -329,7 +335,7 @@ export default async function EventDetailPage({ params }: Props) {
                       youtubeEmbedUrl={ytEmbed ?? undefined}
                       label="Session Highlight"
                       eventTitle={event.title}
-                      eventDate={new Date(event.event_date).toLocaleDateString("en-KE", { month: "long", year: "numeric" })}
+                      eventDate={new Date(event.event_date).toLocaleDateString("en-KE", { month: "long", year: "numeric", timeZone: "UTC" })}
                     />
                   </FadeIn>
                 );
@@ -455,7 +461,7 @@ export default async function EventDetailPage({ params }: Props) {
 
                     <div className="space-y-3 mb-6">
                       <InfoRow icon={<Calendar size={12} />} label={formattedDate} />
-                      <InfoRow icon={<Clock size={12} />} label={`${time}pm`} />
+                      <InfoRow icon={<Clock size={12} />} label={time} />
                       {event.venue_name && <InfoRow icon={<MapPin size={12} />} label={event.venue_name} />}
                       {event.dress_code && <InfoRow icon={<Shirt size={12} />} label={event.dress_code} />}
                       {event.capacity && (

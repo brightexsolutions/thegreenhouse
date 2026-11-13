@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, ArrowUpRight, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatEventTime } from "@/lib/utils";
 import { storageUrl } from "@/lib/constants";
-import type { Event } from "@/types/database";
+import type { PublicEvent } from "@/lib/public-event";
 
 const STATUS_LABELS: Record<string, string> = {
   published: "Open",
@@ -33,15 +33,15 @@ function pickFallback(slug: string): string {
 }
 
 interface EventCardProps {
-  event:    Event;
+  event:    PublicEvent;
   featured?: boolean;
 }
 
 export function EventCard({ event, featured = false }: EventCardProps) {
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
-    day: "numeric", month: "long", year: "numeric",
+    day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
-  const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
+  const formattedTime = formatEventTime(event.event_time);
   const isPast = event.status === "past";
 
   // Cards always use banner_image — poster (cover_image) is for the detail page only
@@ -127,7 +127,7 @@ export function EventCard({ event, featured = false }: EventCardProps) {
           <div className="flex flex-col gap-1.5 mb-4">
             <div className="flex items-center gap-1.5 text-sm text-cream/60">
               <Calendar size={12} />
-              <span>{formattedDate} · {formattedTime}pm</span>
+              <span>{formattedDate}{formattedTime ? ` · ${formattedTime}` : ""}</span>
             </div>
             {event.venue_name && (
               <div className="flex items-center gap-1.5 text-sm text-cream/60">

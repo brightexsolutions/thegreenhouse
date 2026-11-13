@@ -3,7 +3,8 @@ import Image from "next/image";
 import { FadeIn } from "@/components/motion/fade-in";
 import { EventGrid } from "@/components/events/event-grid";
 import { createAdminClient } from "@/lib/supabase/server";
-import type { Event } from "@/types/database";
+import { PUBLIC_EVENT_COLUMNS, type PublicEvent } from "@/lib/public-event";
+import { todayInNairobi } from "@/lib/utils";
 
 export const revalidate = 300;
 
@@ -18,16 +19,16 @@ export const metadata: Metadata = {
   },
 };
 
-async function getEvents(): Promise<Event[]> {
+async function getEvents(): Promise<PublicEvent[]> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("events")
-      .select("*")
+      .select(PUBLIC_EVENT_COLUMNS)
       .in("status", ["published", "live", "past"])
       .is("deleted_at", null)
       .order("event_date", { ascending: false });
-    return (data as Event[]) ?? [];
+    return (data as PublicEvent[] | null) ?? [];
   } catch {
     return [];
   }
@@ -35,8 +36,17 @@ async function getEvents(): Promise<Event[]> {
 
 export default async function EventsPage() {
   const events = await getEvents();
-  const upcoming = events.filter((e) => e.status === "published" || e.status === "live");
-  const past = events.filter((e) => e.status === "past");
+  // A published session whose date has gone by is listed with the past ones,
+  // even if nobody has flipped its status yet. A live session always counts
+  // as upcoming so it stays at the top while it is running.
+  const today = todayInNairobi();
+  const isUpcoming = (e: PublicEvent) =>
+    e.status === "live" || (e.status === "published" && e.event_date >= today);
+  const upcoming = events.filter(isUpcoming);
+  const past = events
+    .filter((e) => !isUpcoming(e))
+    // So the card shows "Past Session" rather than an "Open" badge.
+    .map((e) => (e.status === "published" ? { ...e, status: "past" as const } : e));
 
   return (
     <>
