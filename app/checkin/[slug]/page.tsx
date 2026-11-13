@@ -1,7 +1,7 @@
 import { notFound, redirect } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/server";
 import { CheckinPanel } from "@/components/checkin/checkin-panel";
-import { Calendar, MapPin } from "lucide-react";
+import { Calendar, Lock, MapPin } from "lucide-react";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -21,21 +21,24 @@ export default async function CheckinPage({ params, searchParams }: Props) {
 
   const supabase = createAdminClient({ noStore: true });
 
-  const { data: event } = await supabase
+  const { data: event, error: eventError } = await supabase
     .from("events")
     .select("id, title, event_date, venue_name, checkin_token, status")
     .eq("slug", slug)
     .is("deleted_at", null)
-    .single();
+    .maybeSingle();
 
+  if (eventError) throw new Error("Could not load the event for check-in");
   if (!event) notFound();
   if ((event as { checkin_token: string | null }).checkin_token !== token) {
     return (
       <main className="min-h-screen bg-cream flex items-center justify-center px-4">
         <div className="text-center max-w-xs">
-          <p className="text-3xl mb-4">🔒</p>
-          <h1 className="font-display text-xl font-semibold text-forest mb-2">Invalid token</h1>
-          <p className="text-sm text-charcoal/50">This check-in link is no longer valid. Ask the event admin for an updated link.</p>
+          <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-forest/10">
+            <Lock size={20} className="text-forest" />
+          </div>
+          <h1 className="font-display text-2xl font-semibold text-forest mb-2">This link has been replaced</h1>
+          <p className="text-sm text-charcoal/70">The check-in link you opened is no longer valid. Ask the event admin for the current one.</p>
         </div>
       </main>
     );
@@ -63,7 +66,7 @@ export default async function CheckinPage({ params, searchParams }: Props) {
   }>) ?? [];
 
   const formattedDate = new Date((event as { event_date: string }).event_date).toLocaleDateString("en-KE", {
-    weekday: "short", day: "numeric", month: "short",
+    weekday: "short", day: "numeric", month: "short", timeZone: "UTC",
   });
 
   return (
@@ -71,17 +74,17 @@ export default async function CheckinPage({ params, searchParams }: Props) {
       {/* Header */}
       <div className="bg-forest px-4 pt-10 pb-6">
         <div className="max-w-lg mx-auto">
-          <p className="label-caps text-gold/70 text-[9px] mb-1">Check-in</p>
+          <p className="label-caps text-gold text-[10px] mb-1">Check-in</p>
           <h1 className="font-display text-2xl font-semibold text-cream leading-tight">
             {(event as { title: string }).title}
           </h1>
           <div className="flex flex-wrap gap-4 mt-2">
-            <div className="flex items-center gap-1.5 text-xs text-cream/50">
+            <div className="flex items-center gap-1.5 text-xs text-cream/75">
               <Calendar size={11} />
               <span>{formattedDate}</span>
             </div>
             {(event as { venue_name: string | null }).venue_name && (
-              <div className="flex items-center gap-1.5 text-xs text-cream/50">
+              <div className="flex items-center gap-1.5 text-xs text-cream/75">
                 <MapPin size={11} />
                 <span>{(event as { venue_name: string | null }).venue_name}</span>
               </div>

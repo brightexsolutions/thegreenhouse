@@ -3,7 +3,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const limiters = {
   register: new RateLimiterMemory({ points: 5,   duration: 60 }),
-  checkin:  new RateLimiterMemory({ points: 60,  duration: 60 }),
+  // Every volunteer phone at the door shares the venue Wi-Fi, so they share
+  // one IP. 60 a minute across all of them ran out during a busy arrival.
+  checkin:  new RateLimiterMemory({ points: 600, duration: 60 }),
   admin:    new RateLimiterMemory({ points: 120, duration: 60 }),
   public:   new RateLimiterMemory({ points: 60,  duration: 60 }),
 };
