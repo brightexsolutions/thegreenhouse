@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
+import { escapeHtml } from "@/lib/html";
+import { randomBytes } from "crypto";
 
 export const dynamic = "force-dynamic";
 
@@ -46,17 +49,17 @@ function fmtTime(time: string) {
 function statBox(label: string, value: string | number, sub?: string) {
   return `
     <div class="stat-box">
-      <div class="stat-value">${value}</div>
-      <div class="stat-label">${label}</div>
-      ${sub ? `<div class="stat-sub">${sub}</div>` : ""}
+      <div class="stat-value">${escapeHtml(value)}</div>
+      <div class="stat-label">${escapeHtml(label)}</div>
+      ${sub ? `<div class="stat-sub">${escapeHtml(sub)}</div>` : ""}
     </div>`;
 }
 
 function row(label: string, count: number, total: number) {
   return `
     <div class="row">
-      <span class="row-label">${label}</span>
-      <span class="row-count">${count}</span>
+      <span class="row-label">${escapeHtml(label)}</span>
+      <span class="row-count">${escapeHtml(count)}</span>
       <span class="row-bar-wrap"><span class="row-bar" style="width:${pct(count, total)}"></span></span>
       <span class="row-pct">${pct(count, total)}</span>
     </div>`;
@@ -75,17 +78,16 @@ function delta(current: number, prev: number): string {
 function cmpRow(label: string, curr: string | number, prev: string | number | null, d: string) {
   return `
     <tr>
-      <td class="cmp-label">${label}</td>
-      <td class="cmp-curr">${curr}</td>
-      <td class="cmp-prev">${prev ?? "–"}</td>
+      <td class="cmp-label">${escapeHtml(label)}</td>
+      <td class="cmp-curr">${escapeHtml(curr)}</td>
+      <td class="cmp-prev">${escapeHtml(prev ?? "–")}</td>
       <td class="cmp-delta">${d}</td>
     </tr>`;
 }
 
 export async function GET(req: NextRequest, { params }: Props) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return new NextResponse("Unauthorized", { status: 401 });
+  const g = await requireAdmin();
+  if (!g.ok) return g.response;
 
   const { id } = await params;
   const admin = createAdminClient();
@@ -240,12 +242,16 @@ export async function GET(req: NextRequest, { params }: Props) {
     .map(([k, v]) => row(ROLE_LABELS[k] ?? k, v, totalReg))
     .join("");
 
+  // The page needs exactly one script, for the Print button. It is allowed by
+  // a per-response nonce, so nothing injected into the markup can run.
+  const nonce = randomBytes(16).toString("base64");
+
   const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>${event.title}, Event Summary</title>
+<title>${escapeHtml(event.title)}, Event Summary</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   @page { size: A4; margin: 1.8cm 1.5cm; }
@@ -537,20 +543,20 @@ export async function GET(req: NextRequest, { params }: Props) {
 <!-- Print bar -->
 <div class="print-bar">
   <span class="print-bar-note">To save as PDF, click Print and choose <em>Save as PDF</em> from your printer options.</span>
-  <button class="print-btn" onclick="window.print()">Print / Save PDF</button>
+  <button class="print-btn" id="print-btn" type="button">Print / Save PDF</button>
 </div>
 
 <!-- Header -->
 <div class="report-header">
   <div class="org-label">The Green House W.S, Event Summary</div>
-  <h1 class="event-title">${event.title}</h1>
+  <h1 class="event-title">${escapeHtml(event.title)}</h1>
   <div class="event-meta">
-    <span>${fmtDate(event.event_date)}</span>
-    <span>${fmtTime(event.event_time)}</span>
-    ${event.venue_name ? `<span>${event.venue_name}</span>` : ""}
+    <span>${escapeHtml(fmtDate(event.event_date))}</span>
+    <span>${escapeHtml(fmtTime(event.event_time))}</span>
+    ${event.venue_name ? `<span>${escapeHtml(event.venue_name)}</span>` : ""}
   </div>
-  ${event.theme_title ? `<div class="theme-note">Theme: <strong>${event.theme_title}</strong>${event.theme_scripture ? `, ${event.theme_scripture}` : ""}</div>` : ""}
-  <div class="generated-on">Report generated on ${generatedOn}</div>
+  ${event.theme_title ? `<div class="theme-note">Theme: <strong>${escapeHtml(event.theme_title)}</strong>${event.theme_scripture ? `, ${escapeHtml(event.theme_scripture)}` : ""}</div>` : ""}
+  <div class="generated-on">Report generated on ${escapeHtml(generatedOn)}</div>
 </div>
 
 <!-- ── 1. Registrations ──────────────────────────────────────────────── -->
@@ -606,8 +612,8 @@ export async function GET(req: NextRequest, { params }: Props) {
   <div class="message-grid">
     ${sampleMessages.map(f => `
       <div class="message-card">
-        "${f.message.length > 160 ? f.message.slice(0, 157) + "…" : f.message}"
-        ${f.name ? `<span class="message-author">– ${f.name}</span>` : ""}
+        "${escapeHtml(f.message.length > 160 ? f.message.slice(0, 157) + "…" : f.message)}"
+        ${f.name ? `<span class="message-author">– ${escapeHtml(f.name)}</span>` : ""}
       </div>`).join("")}
   </div>` : ""}
   `}
@@ -626,7 +632,7 @@ export async function GET(req: NextRequest, { params }: Props) {
 
   ${topScorer ? `
   <div class="highlight-box">
-    🏆 <strong>${topScorer.name}</strong> led the leaderboard${hasMcRounds ? ` with <strong>${topScorer.correct}</strong> correct answer${topScorer.correct !== 1 ? "s" : ""} and <strong>${topScorer.points} pts</strong>` : ""}.
+    🏆 <strong>${escapeHtml(topScorer.name)}</strong> led the leaderboard${hasMcRounds ? ` with <strong>${escapeHtml(topScorer.correct)}</strong> correct answer${topScorer.correct !== 1 ? "s" : ""} and <strong>${escapeHtml(topScorer.points)} pts</strong>` : ""}.
   </div>` : ""}
 
   ${leaderboard.length > 0 ? `
@@ -646,9 +652,9 @@ export async function GET(req: NextRequest, { params }: Props) {
           const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : `${i + 1}`;
           return `<tr>
             <td class="lb-rank">${medal}</td>
-            <td class="lb-name">${p.name}</td>
-            <td class="right lb-dim">${p.answered} of ${roundsPlayed}</td>
-            ${hasMcRounds ? `<td class="right">${p.correct}</td><td class="right lb-pts">${p.points} pts</td>` : ""}
+            <td class="lb-name">${escapeHtml(p.name)}</td>
+            <td class="right lb-dim">${escapeHtml(p.answered)} of ${roundsPlayed}</td>
+            ${hasMcRounds ? `<td class="right">${escapeHtml(p.correct)}</td><td class="right lb-pts">${escapeHtml(p.points)} pts</td>` : ""}
           </tr>`;
         }).join("")}
       </tbody>
@@ -662,7 +668,7 @@ export async function GET(req: NextRequest, { params }: Props) {
   <div class="section-heading">Compared to Last Time</div>
 
   ${!prevEvent ? `<p class="no-data">This is the first event on record, comparison data will appear from the next session onwards.</p>` : `
-  <p class="prev-event-note">Previous event: ${prevEvent.title} · ${fmtDate(prevEvent.event_date)}</p>
+  <p class="prev-event-note">Previous event: ${escapeHtml(prevEvent.title)} · ${escapeHtml(fmtDate(prevEvent.event_date))}</p>
   <div style="border:1px solid #e4e0d4; border-radius:8px; overflow:hidden;">
     <table class="cmp-table">
       <thead>
@@ -708,6 +714,7 @@ export async function GET(req: NextRequest, { params }: Props) {
   <span>Confidential, for internal team use</span>
 </div>
 
+<script nonce="${nonce}">document.getElementById("print-btn").addEventListener("click", function () { window.print(); });</script>
 </body>
 </html>`;
 
@@ -715,6 +722,9 @@ export async function GET(req: NextRequest, { params }: Props) {
     headers: {
       "Content-Type": "text/html; charset=utf-8",
       "Cache-Control": "no-store",
+      "Content-Security-Policy":
+        `default-src 'none'; style-src 'unsafe-inline'; img-src data: https:; font-src https: data:; script-src 'nonce-${nonce}'; base-uri 'none'; form-action 'none'`,
+      "X-Content-Type-Options": "nosniff",
     },
   });
 }

@@ -1,14 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
 import { randomUUID } from "crypto";
 
 type Props = { params: Promise<{ id: string }> };
 
 export async function POST(_req: NextRequest, { params }: Props) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const g = await requireAdmin();
+  if (!g.ok) return g.response;
 
   const token = randomUUID();
   const adminSupa = createAdminClient();

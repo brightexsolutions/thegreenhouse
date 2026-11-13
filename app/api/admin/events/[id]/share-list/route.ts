@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
+import { csvCell } from "@/lib/html";
 import { Resend } from "resend";
 import { COMMS_FROM_EMAIL } from "@/lib/constants";
 
@@ -10,9 +12,8 @@ export const maxDuration = 60;
 type Props = { params: Promise<{ id: string }> };
 
 export async function POST(req: NextRequest, { params }: Props) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const g = await requireAdmin();
+  if (!g.ok) return g.response;
 
   const { id } = await params;
   const { email } = await req.json();
@@ -48,7 +49,7 @@ export async function POST(req: NextRequest, { params }: Props) {
   const lines = registrants.map((r) =>
     [r.first_name, r.last_name, r.email ?? "", r.phone ?? "", r.role,
      new Date(r.created_at).toLocaleDateString("en-KE"), r.checked_in ? "Yes" : "No"]
-      .map((v) => `"${String(v).replace(/"/g, '""')}"`)
+      .map((v) => csvCell(v))
       .join(",")
   );
   const csv = Buffer.from([header, ...lines].join("\n"));

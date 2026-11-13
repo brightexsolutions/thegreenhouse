@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
+import { csvCell } from "@/lib/html";
 import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { ExportPdf } from "@/lib/pdf/export-pdf";
@@ -9,9 +11,8 @@ export const dynamic = "force-dynamic";
 type Props = { params: Promise<{ id: string }> };
 
 export async function GET(req: NextRequest, { params }: Props) {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const g = await requireAdmin();
+  if (!g.ok) return g.response;
 
   const { id } = await params;
   const format = req.nextUrl.searchParams.get("format") ?? "csv";
@@ -52,7 +53,7 @@ export async function GET(req: NextRequest, { params }: Props) {
         new Date(r.created_at).toLocaleDateString("en-KE"),
         r.checked_in ? "Yes" : "No",
       ]
-        .map((v) => `"${v.replace(/"/g, '""')}"`)
+        .map((v) => csvCell(v))
         .join(",")
     );
 

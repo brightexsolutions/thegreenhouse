@@ -19,8 +19,12 @@ export async function POST(req: NextRequest, { params }: { params: { roundId: st
   };
 
   const { answer_text, answer_index, attendee_name } = body;
-  if (!answer_text?.trim())
+  if (typeof answer_text !== "string" || !answer_text.trim())
     return NextResponse.json({ error: "answer_text required" }, { status: 400 });
+  if (answer_text.length > 500)
+    return NextResponse.json({ error: "Answer is too long" }, { status: 400 });
+  if (attendee_name != null && (typeof attendee_name !== "string" || attendee_name.trim().length > 60))
+    return NextResponse.json({ error: "Name is too long" }, { status: 400 });
 
   // Fetch round + question to validate
   const { data: round } = await supabase
@@ -43,6 +47,12 @@ export async function POST(req: NextRequest, { params }: { params: { roundId: st
       return NextResponse.json({ ok: true, is_correct: existing.is_correct, already_submitted: true });
     }
   }
+
+  // A closed round takes no more answers. The attendee card treats 410 as
+  // "submitted, not scored". Answers during "revealing" are still recorded as
+  // late and unscored below, as before.
+  if (round.status === "closed")
+    return NextResponse.json({ error: "This round is closed" }, { status: 410 });
 
   // If the round is no longer active, still record the late answer but flag it
   const isLate = round.status !== "active";

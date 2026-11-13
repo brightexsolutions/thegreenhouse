@@ -3,6 +3,16 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+// The keys app/admin/system/settings/page.tsx has fields for. Nothing else
+// can be written through this route.
+const SETTING_KEYS = new Set([
+  "site_name", "site_tagline",
+  "contact_email", "whatsapp_number",
+  "instagram_handle", "twitter_handle", "facebook_url",
+  "registration_open", "default_capacity",
+  "giving_paybill", "giving_account", "giving_till", "giving_phone",
+]);
+
 async function guardSuperAdmin() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -34,8 +44,14 @@ export async function POST(req: NextRequest) {
 
   const { settings } = await req.json() as { settings: Record<string, string> };
 
+  if (!settings || typeof settings !== "object") {
+    return NextResponse.json({ error: "settings required" }, { status: 400 });
+  }
+
+  // The settings page posts back every row it loaded, so unknown keys are
+  // dropped rather than rejected: a stray row must not block a save.
   const rows = Object.entries(settings)
-    .filter(([, v]) => v !== undefined)
+    .filter(([k, v]) => SETTING_KEYS.has(k) && typeof v === "string")
     .map(([key, value]) => ({
       key,
       value,

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
 import QRCode from "qrcode";
 import { SITE_URL } from "@/lib/constants";
 
@@ -9,9 +10,8 @@ type Props = { params: Promise<{ id: string }> };
 
 export async function GET(_req: NextRequest, { params }: Props) {
   const { id } = await params;
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const g = await requireAdmin();
+  if (!g.ok) return g.response;
 
   const adminSupa = createAdminClient();
   const { data: event } = await adminSupa.from("events").select("slug").eq("id", id).single();

@@ -4,6 +4,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { normalisePhone } from "@/lib/phone";
 import { logger } from "@/lib/logger";
 import { createAdminClient } from "@/lib/supabase/server";
+import { escapeHtml } from "@/lib/html";
 import { SITE_NAME, SITE_URL, CONTACT_EMAIL, CONTACT_WHATSAPP, REPLY_TO_EMAIL, COMMS_FROM_EMAIL } from "@/lib/constants";
 
 const schema = z.object({
@@ -58,11 +59,12 @@ export async function POST(req: NextRequest) {
     const from      = COMMS_FROM_EMAIL();
     const isPartner = d.interest === "partner";
     const isGive    = d.interest === "give";
-    const firstName = d.full_name.split(" ")[0];
+    // Escaped: it is only ever placed in the confirmation email heading.
+    const firstName = escapeHtml(d.full_name.split(" ")[0]);
 
     // Quick-reply links for the team notification email
     const waLink   = d.phone ? `https://wa.me/${d.phone.replace(/\D/g, "")}` : null;
-    const mailLink = d.email ? `mailto:${d.email}` : null;
+    const mailLink = d.email ? `mailto:${escapeHtml(d.email)}` : null;
 
     const replyButtons = [
       ...(mailLink ? [`<a href="${mailLink}" style="display:inline-block;padding:10px 20px;background:#1b3a2a;color:#f7f2e8;text-decoration:none;border-radius:100px;font-size:13px;font-weight:600">Reply by email</a>`] : []),
@@ -92,12 +94,12 @@ export async function POST(req: NextRequest) {
           <h2 style="color:#1b3a2a;margin-bottom:4px">New involvement enquiry</h2>
           <p style="color:#666;margin-top:0">via The Green House website</p>
           <table style="width:100%;border-collapse:collapse;margin-top:20px">
-            <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666;width:140px">Name</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${d.full_name}</td></tr>
-            ${d.email ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Email</td><td style="padding:10px 0;border-bottom:1px solid #eee"><a href="mailto:${d.email}" style="color:#1b3a2a">${d.email}</a></td></tr>` : ""}
-            ${d.phone ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Phone</td><td style="padding:10px 0;border-bottom:1px solid #eee">${d.phone}</td></tr>` : ""}
+            <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666;width:140px">Name</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600">${escapeHtml(d.full_name)}</td></tr>
+            ${d.email ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Email</td><td style="padding:10px 0;border-bottom:1px solid #eee"><a href="mailto:${escapeHtml(d.email)}" style="color:#1b3a2a">${escapeHtml(d.email)}</a></td></tr>` : ""}
+            ${d.phone ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Phone</td><td style="padding:10px 0;border-bottom:1px solid #eee">${escapeHtml(d.phone)}</td></tr>` : ""}
             <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Interest</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600;color:#c9a24a">${interestLabel}</td></tr>
-            ${d.partner_type ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Partnership type</td><td style="padding:10px 0;border-bottom:1px solid #eee">${d.partner_type}</td></tr>` : ""}
-            ${d.message ? `<tr><td style="padding:10px 0;color:#666;vertical-align:top">Message</td><td style="padding:10px 0;white-space:pre-wrap">${d.message}</td></tr>` : ""}
+            ${d.partner_type ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#666">Partnership type</td><td style="padding:10px 0;border-bottom:1px solid #eee">${escapeHtml(d.partner_type)}</td></tr>` : ""}
+            ${d.message ? `<tr><td style="padding:10px 0;color:#666;vertical-align:top">Message</td><td style="padding:10px 0;white-space:pre-wrap">${escapeHtml(d.message)}</td></tr>` : ""}
           </table>
           ${replyButtons ? `<div style="margin-top:24px">${replyButtons}</div>` : ""}
         </div>
@@ -195,8 +197,8 @@ export async function POST(req: NextRequest) {
     ${conf.extra ?? ""}
     <table style="width:100%;border-collapse:collapse;margin:${conf.extra ? "24px" : "0"} 0 24px">
       <tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#6b7280;width:130px;font-size:13px">Interest</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-weight:600;font-size:14px">${interestLabel}</td></tr>
-      ${d.partner_type ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#6b7280;font-size:13px">Partnership type</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px">${d.partner_type}</td></tr>` : ""}
-      ${d.message ? `<tr><td style="padding:10px 0;color:#6b7280;font-size:13px;vertical-align:top">Your message</td><td style="padding:10px 0;font-size:14px;white-space:pre-wrap">${d.message}</td></tr>` : ""}
+      ${d.partner_type ? `<tr><td style="padding:10px 0;border-bottom:1px solid #eee;color:#6b7280;font-size:13px">Partnership type</td><td style="padding:10px 0;border-bottom:1px solid #eee;font-size:14px">${escapeHtml(d.partner_type)}</td></tr>` : ""}
+      ${d.message ? `<tr><td style="padding:10px 0;color:#6b7280;font-size:13px;vertical-align:top">Your message</td><td style="padding:10px 0;font-size:14px;white-space:pre-wrap">${escapeHtml(d.message)}</td></tr>` : ""}
     </table>
     ${conf.cta && !conf.extra ? `<a href="${conf.cta.href}" style="display:inline-block;padding:12px 28px;background:#1b3a2a;color:#f7f2e8;text-decoration:none;border-radius:100px;font-size:14px;font-weight:600">${conf.cta.label}</a>` : ""}
   </div>
