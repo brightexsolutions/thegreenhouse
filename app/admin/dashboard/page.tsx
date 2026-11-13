@@ -126,7 +126,7 @@ export default async function AdminDashboardPage() {
           icon={<MessageSquare size={17} />}
           label="Comms Sent"
           value={d.commsSent}
-          sub="emails + WhatsApp"
+          sub="emails"
           accent="purple"
         />
       </div>
@@ -145,8 +145,8 @@ export default async function AdminDashboardPage() {
           <div className="flex-1 overflow-y-auto min-h-0">
             {d.upcoming.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full py-8">
-                <Calendar size={24} className="text-charcoal/15 mb-2" />
-                <p className="text-xs text-charcoal/35">No upcoming sessions</p>
+                <Calendar size={24} className="text-charcoal/65 mb-2" />
+                <p className="text-xs text-charcoal/65">No upcoming sessions</p>
               </div>
             ) : (
               <div className="divide-y divide-mist">
@@ -156,12 +156,12 @@ export default async function AdminDashboardPage() {
                     href={`/admin/events/${e.id}`}
                     className="flex items-center gap-4 px-5 py-4 hover:bg-off-white transition-colors group"
                   >
-                    <div className="w-9 h-9 rounded-xl bg-forest/8 flex items-center justify-center flex-shrink-0 group-hover:bg-forest/12 transition-colors">
+                    <div className="w-9 h-9 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0 group-hover:bg-forest/10 transition-colors">
                       <Calendar size={14} className="text-forest" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-charcoal group-hover:text-forest transition-colors truncate">{e.title}</p>
-                      <p className="text-[10px] text-charcoal/40 mt-0.5">
+                      <p className="text-[10px] text-charcoal/65 mt-0.5">
                         {new Date(e.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
                       </p>
                     </div>
@@ -192,30 +192,30 @@ export default async function AdminDashboardPage() {
           <div className="flex-1 overflow-y-auto min-h-0">
             {d.recent.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-full py-8">
-                <Users size={24} className="text-charcoal/15 mb-2" />
-                <p className="text-xs text-charcoal/35">No registrations yet</p>
+                <Users size={24} className="text-charcoal/65 mb-2" />
+                <p className="text-xs text-charcoal/65">No registrations yet</p>
               </div>
             ) : (
               <div className="divide-y divide-mist">
                 {d.recent.map((r) => (
                   <div key={r.id} className="flex items-center gap-3 px-5 py-3.5">
-                    <div className="w-8 h-8 rounded-full bg-forest/8 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center flex-shrink-0">
                       <span className="text-[10px] font-bold text-forest uppercase">
                         {r.first_name[0]}{r.last_name[0]}
                       </span>
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-charcoal truncate">{r.first_name} {r.last_name}</p>
-                      <p className="text-[10px] text-charcoal/40 truncate">{r.email ?? r.phone}</p>
+                      <p className="text-[10px] text-charcoal/65 truncate">{r.email ?? r.phone}</p>
                     </div>
                     {r.events?.title && (
-                      <span className="hidden md:block text-[10px] text-charcoal/30 bg-charcoal/5 px-2 py-0.5 rounded-lg truncate max-w-[120px]">
+                      <span className="hidden md:block text-[10px] text-charcoal/65 bg-charcoal/5 px-2 py-0.5 rounded-lg truncate max-w-[120px]">
                         {sessionName(r.events.title)}
                       </span>
                     )}
-                    <p className="text-[10px] text-charcoal/30 flex-shrink-0 text-right">
+                    <p className="text-[10px] text-charcoal/65 flex-shrink-0 text-right">
                       <span className="block">{new Date(r.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}</span>
-                      <span className="block text-charcoal/20 text-[9px]">{new Date(r.created_at).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })}</span>
+                      <span className="block text-charcoal/65 text-[10px]">{new Date(r.created_at).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })}</span>
                     </p>
                   </div>
                 ))}

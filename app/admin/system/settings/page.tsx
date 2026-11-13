@@ -101,7 +101,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <Loader2 size={20} className="animate-spin text-forest/40" />
+        <Loader2 size={20} className="animate-spin text-forest/80" />
       </div>
     );
   }
@@ -110,7 +110,7 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className="mb-6">
         <h1 className="text-lg font-semibold text-charcoal">Site Settings</h1>
-        <p className="text-sm text-charcoal/45 mt-1">Global configuration for The Green House platform</p>
+        <p className="text-sm text-charcoal/65 mt-1">Global configuration for The Green House platform</p>
       </div>
 
       {msg && (
@@ -129,12 +129,12 @@ export default function SettingsPage() {
           <div key={key} className="bg-white rounded-2xl border border-mist overflow-hidden">
             {/* Section header */}
             <div className="flex items-center gap-3 px-5 py-4 border-b border-mist bg-off-white/60">
-              <div className="w-8 h-8 rounded-xl bg-forest/8 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0">
                 <Icon size={14} className="text-forest" />
               </div>
               <div>
                 <p className="text-sm font-semibold text-charcoal">{title}</p>
-                <p className="text-[11px] text-charcoal/45 mt-0.5">{description}</p>
+                <p className="text-[11px] text-charcoal/65 mt-0.5">{description}</p>
               </div>
             </div>
 
@@ -142,7 +142,7 @@ export default function SettingsPage() {
             <div className="px-5 py-4 space-y-4">
               {fields.map(({ key: fkey, label, placeholder, type }) => (
                 <div key={fkey}>
-                  <label className="block text-xs font-semibold text-charcoal/60 mb-1.5">{label}</label>
+                  <label className="block text-xs font-semibold text-charcoal/65 mb-1.5">{label}</label>
                   <input
                     type={type}
                     value={values[fkey] ?? ""}
@@ -152,7 +152,7 @@ export default function SettingsPage() {
                     className={cn(
                       "w-full px-3.5 py-2.5 rounded-xl border border-mist text-sm transition-all",
                       disabled
-                        ? "bg-off-white/60 text-charcoal/35 cursor-not-allowed"
+                        ? "bg-off-white/60 text-charcoal/65 cursor-not-allowed"
                         : "bg-white focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
                     )}
                   />

@@ -27,7 +27,7 @@ interface Props {
 const STATUS_META: Record<string, { icon: typeof CheckCircle2; cls: string; label: string }> = {
   sent:    { icon: CheckCircle2, cls: "text-green-600",    label: "Sent"    },
   failed:  { icon: XCircle,     cls: "text-red-500",      label: "Failed"  },
-  pending: { icon: Clock,       cls: "text-charcoal/40",  label: "Pending" },
+  pending: { icon: Clock,       cls: "text-charcoal/65",  label: "Pending" },
 };
 
 export function CommsLogTable({ logs }: Props) {
@@ -89,13 +89,13 @@ export function CommsLogTable({ logs }: Props) {
                 className={cn(
                   "relative px-3 py-1.5 text-xs font-medium rounded-lg transition-colors whitespace-nowrap",
                   channelFilter === key
-                    ? "text-forest bg-forest/8"
-                    : "text-charcoal/45 hover:text-charcoal/70 hover:bg-charcoal/4"
+                    ? "text-forest bg-forest/10"
+                    : "text-charcoal/65 hover:text-charcoal/70 hover:bg-charcoal/5"
                 )}
               >
                 {label}
-                <span className={cn("ml-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full",
-                  channelFilter === key ? "bg-forest/12 text-forest" : "bg-charcoal/6 text-charcoal/35"
+                <span className={cn("ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
+                  channelFilter === key ? "bg-forest/10 text-forest" : "bg-charcoal/5 text-charcoal/65"
                 )}>{count}</span>
                 {channelFilter === key && (
                   <span className="absolute bottom-0 inset-x-0 h-[2px] bg-forest rounded-t-full" />
@@ -109,7 +109,7 @@ export function CommsLogTable({ logs }: Props) {
             <select
               value={statusFilter}
               onChange={e => { setStatusFilter(e.target.value as StatusFilter); resetPage(); }}
-              className="text-xs border border-mist rounded-lg px-2.5 py-1.5 text-charcoal/60 bg-white focus:outline-none focus:ring-1 focus:ring-forest/30 flex-1 sm:flex-none"
+              className="text-xs border border-mist rounded-lg px-2.5 py-1.5 text-charcoal/65 bg-white focus:outline-none focus:ring-1 focus:ring-forest/30 flex-1 sm:flex-none"
             >
               <option value="all">All statuses</option>
               <option value="sent">Sent ({counts.sent})</option>
@@ -121,7 +121,7 @@ export function CommsLogTable({ logs }: Props) {
               <select
                 value={eventFilter}
                 onChange={e => { setEventFilter(e.target.value); resetPage(); }}
-                className="text-xs border border-mist rounded-lg px-2.5 py-1.5 text-charcoal/60 bg-white focus:outline-none focus:ring-1 focus:ring-forest/30 flex-1 sm:flex-none sm:max-w-[160px] truncate"
+                className="text-xs border border-mist rounded-lg px-2.5 py-1.5 text-charcoal/65 bg-white focus:outline-none focus:ring-1 focus:ring-forest/30 flex-1 sm:flex-none sm:max-w-[160px] truncate"
               >
                 <option value="all">All events</option>
                 {uniqueEventTitles.map(t => (
@@ -143,17 +143,17 @@ export function CommsLogTable({ logs }: Props) {
               : "border-b border-mist"
           )}>
             <tr>
-              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-5 py-3">Channel</th>
-              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-4 py-3">Recipient / Subject</th>
-              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-4 py-3 hidden md:table-cell">Event</th>
-              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-4 py-3">Status</th>
-              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-4 py-3 hidden sm:table-cell">Date</th>
+              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-5 py-3">Channel</th>
+              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-4 py-3">Recipient / Subject</th>
+              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-4 py-3 hidden md:table-cell">Event</th>
+              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-4 py-3">Status</th>
+              <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-4 py-3 hidden sm:table-cell">Date</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-mist">
             {pageRows.length === 0 ? (
               <tr>
-                <td colSpan={5} className="px-5 py-14 text-center text-sm text-charcoal/30">
+                <td colSpan={5} className="px-5 py-14 text-center text-sm text-charcoal/65">
                   No messages match the current filters
                 </td>
               </tr>
@@ -163,7 +163,7 @@ export function CommsLogTable({ logs }: Props) {
               return (
                 <tr key={log.id} className="hover:bg-off-white transition-colors">
                   <td className="px-5 py-3.5">
-                    <div className="w-7 h-7 rounded-lg bg-forest/8 flex items-center justify-center">
+                    <div className="w-7 h-7 rounded-lg bg-forest/10 flex items-center justify-center">
                       {log.channel === "email"
                         ? <Mail    size={12} className="text-forest" />
                         : <Phone   size={12} className="text-forest" />
@@ -174,10 +174,10 @@ export function CommsLogTable({ logs }: Props) {
                     <p className="text-sm text-charcoal font-medium truncate" title={log.subject ?? undefined}>
                       {log.subject ?? "–"}
                     </p>
-                    <p className="text-[10px] text-charcoal/40 truncate mt-0.5">{log.recipient}</p>
+                    <p className="text-[10px] text-charcoal/65 truncate mt-0.5">{log.recipient}</p>
                   </td>
                   <td className="px-4 py-3.5 hidden md:table-cell">
-                    <p className="text-xs text-charcoal/55 truncate max-w-[160px]">
+                    <p className="text-xs text-charcoal/70 truncate max-w-[160px]">
                       {log.events?.title ?? "–"}
                     </p>
                   </td>
@@ -188,12 +188,12 @@ export function CommsLogTable({ logs }: Props) {
                     </div>
                   </td>
                   <td className="px-4 py-3.5 hidden sm:table-cell">
-                    <p className="text-[10px] text-charcoal/40 whitespace-nowrap">
+                    <p className="text-[10px] text-charcoal/65 whitespace-nowrap">
                       {log.sent_at
                         ? new Date(log.sent_at).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "2-digit" })
                         : "–"}
                     </p>
-                    <p className="text-[9px] text-charcoal/25 mt-0.5">
+                    <p className="text-[10px] text-charcoal/65 mt-0.5">
                       {log.sent_at
                         ? new Date(log.sent_at).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })
                         : ""}
@@ -209,21 +209,21 @@ export function CommsLogTable({ logs }: Props) {
       {/* ── Pagination ── */}
       {totalPages > 1 && (
         <div className="flex-shrink-0 border-t border-mist px-5 py-3 flex items-center justify-between">
-          <p className="text-[11px] text-charcoal/40">
+          <p className="text-[11px] text-charcoal/65">
             {filtered.length} result{filtered.length !== 1 ? "s" : ""} &nbsp;·&nbsp; page {page} of {totalPages}
           </p>
           <div className="flex items-center gap-1">
             <button
               onClick={() => { setPage(p => Math.max(1, p - 1)); scrollRef.current?.scrollTo(0, 0); }}
               disabled={page === 1}
-              className="w-7 h-7 rounded-lg border border-mist flex items-center justify-center text-charcoal/40 hover:text-charcoal hover:border-charcoal/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="w-7 h-7 rounded-lg border border-mist flex items-center justify-center text-charcoal/65 hover:text-charcoal hover:border-charcoal/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
               <ChevronLeft size={13} />
             </button>
             <button
               onClick={() => { setPage(p => Math.min(totalPages, p + 1)); scrollRef.current?.scrollTo(0, 0); }}
               disabled={page === totalPages}
-              className="w-7 h-7 rounded-lg border border-mist flex items-center justify-center text-charcoal/40 hover:text-charcoal hover:border-charcoal/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              className="w-7 h-7 rounded-lg border border-mist flex items-center justify-center text-charcoal/65 hover:text-charcoal hover:border-charcoal/25 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
             >
               <ChevronRight size={13} />
             </button>

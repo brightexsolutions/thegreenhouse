@@ -18,12 +18,12 @@ export default function AdminDocsPage() {
         {/* Header */}
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-xl bg-forest/8 flex items-center justify-center">
+            <div className="w-9 h-9 rounded-xl bg-forest/10 flex items-center justify-center">
               <BookOpen size={16} className="text-forest" />
             </div>
             <h1 className="text-xl font-semibold text-charcoal">Platform Documentation</h1>
           </div>
-          <p className="text-sm text-charcoal/50 ml-12">
+          <p className="text-sm text-charcoal/70 ml-12">
             Full reference for running The Green House platform, from creating a gathering to deploying the site and getting it on Google.
           </p>
           <div className="ml-12 mt-2 flex items-center gap-4">
@@ -39,7 +39,7 @@ export default function AdminDocsPage() {
               href="/design-system"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 text-xs text-charcoal/40 hover:text-charcoal transition-colors"
+              className="inline-flex items-center gap-1.5 text-xs text-charcoal/65 hover:text-charcoal transition-colors"
             >
               <span>↗ Brand System</span>
             </a>
@@ -66,7 +66,7 @@ export default function AdminDocsPage() {
 
       {/* ── Right sidebar: Jump to section with scroll tracking ── */}
       <div className="w-52 flex-shrink-0 border-l border-mist overflow-y-auto px-4 py-6 hidden lg:block">
-        <p className="text-[10px] font-bold text-charcoal/35 uppercase tracking-widest mb-3 pl-1">Jump to section</p>
+        <p className="text-[10px] font-bold text-charcoal/65 uppercase tracking-widest mb-3 pl-1">Jump to section</p>
         <DocsNav scrollContainerId="docs-content" />
       </div>
 

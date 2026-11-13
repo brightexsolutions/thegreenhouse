@@ -1,11 +1,12 @@
 import { FadeIn } from "@/components/motion/fade-in";
+import { BookOpen, MessageCircle, Music, Wind } from "lucide-react";
 import { Photo } from "@/components/ui/photo";
 
 const MOMENTS = [
-  { icon: "🌬", label: "Pause",   body: "The room stops. You exhale. There's nowhere you need to be right now." },
-  { icon: "🎶", label: "Worship", body: "Live music from rotating teams. Different churches, one sound." },
-  { icon: "🪞", label: "Reflect", body: "Space to sit with what God is saying, without rushing past it." },
-  { icon: "💬", label: "Connect", body: "Genuine conversation with people you wouldn't normally meet." },
+  { icon: Wind, label: "Pause",   body: "The room stops. You exhale. There's nowhere you need to be right now." },
+  { icon: Music, label: "Worship", body: "Live music from rotating teams. Different churches, one sound." },
+  { icon: BookOpen, label: "Reflect", body: "Space to sit with what God is saying, without rushing past it." },
+  { icon: MessageCircle, label: "Connect", body: "Genuine conversation with people you wouldn't normally meet." },
 ];
 
 export function WhatHappens({ photos = [] }: { photos?: Array<string | null> }) {
@@ -42,7 +43,6 @@ export function WhatHappens({ photos = [] }: { photos?: Array<string | null> }) 
               </div>
 
               {/* Gold ring decoration */}
-              <div className="absolute -top-4 -left-4 w-20 h-20 rounded-full border-2 border-gold/30 pointer-events-none" />
 
               {/* Session count chip */}
               <div className="absolute top-6 left-6 bg-forest/80 backdrop-blur-sm border border-gold/30 rounded-2xl px-4 py-3 shadow-lg">
@@ -59,7 +59,7 @@ export function WhatHappens({ photos = [] }: { photos?: Array<string | null> }) 
               An evening that<br />
               <em className="not-italic text-gold">stays with you</em>
             </h2>
-            <p className="text-charcoal/60 text-base leading-relaxed mb-10">
+            <p className="text-charcoal/65 text-base leading-relaxed mb-10">
               Not a concert. Not a conference. A space built for tired souls, people from
               different churches across Nairobi who need somewhere to slow down, exhale, and
               find God and each other without the noise.
@@ -68,30 +68,18 @@ export function WhatHappens({ photos = [] }: { photos?: Array<string | null> }) 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {MOMENTS.map((m) => (
                 <div key={m.label} className="flex items-start gap-3.5 p-4 rounded-2xl bg-off-white border border-mist">
-                  <span className="text-2xl mt-0.5 shrink-0">{m.icon}</span>
+                  <m.icon className="w-6 h-6 mt-1 shrink-0 text-gold" strokeWidth={1.5} aria-hidden />
                   <div>
                     <p className="font-semibold text-forest text-sm">{m.label}</p>
-                    <p className="text-charcoal/55 text-sm leading-relaxed mt-0.5">{m.body}</p>
+                    <p className="text-charcoal/70 text-sm leading-relaxed mt-0.5">{m.body}</p>
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="mt-8 flex items-center gap-4 pt-6 border-t border-mist">
-              <div className="flex -space-x-2.5">
-                {["💚", "🌿", "✨"].map((emoji, i) => (
-                  <div
-                    key={i}
-                    className="w-9 h-9 rounded-full bg-forest/10 border-2 border-cream flex items-center justify-center text-sm"
-                  >
-                    {emoji}
-                  </div>
-                ))}
-              </div>
-              <p className="text-sm text-charcoal/55 leading-snug">
-                People from <span className="font-semibold text-forest">different churches</span> across Nairobi
-              </p>
-            </div>
+            <p className="mt-8 pt-6 border-t border-mist text-sm text-charcoal/70 leading-snug">
+              People from <span className="font-semibold text-forest">different churches</span> across Nairobi
+            </p>
           </FadeIn>
         </div>
       </div>

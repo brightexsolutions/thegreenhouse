@@ -89,24 +89,24 @@ export function PreEventView({
           >
             <div className="inline-flex items-center gap-1.5 mb-4">
               <Leaf size={12} className="text-gold" />
-              <span className="label-caps text-gold/70 text-[9px]">The Green House</span>
+              <span className="label-caps text-gold text-[10px]">The Green House</span>
             </div>
 
             <h1 className="font-display text-3xl sm:text-4xl font-semibold text-cream leading-tight mb-2">
               {eventTitle}
             </h1>
 
-            <p className="text-cream/50 text-sm">
+            <p className="text-cream/75 text-sm">
               {formattedDate} &middot; {formattedTime}
               {venueName && venueName !== "TBA" && ` · ${venueName}`}
             </p>
 
             {themeTitle && (
               <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/15 border border-gold/30">
-                <span className="text-[10px] label-caps text-gold/70">Theme</span>
+                <span className="text-[10px] label-caps text-gold">Theme</span>
                 <span className="text-xs text-gold">{themeTitle}</span>
                 {themeScripture && (
-                  <span className="text-[10px] text-gold/60">· {themeScripture}</span>
+                  <span className="text-[10px] text-gold">· {themeScripture}</span>
                 )}
               </div>
             )}
@@ -122,8 +122,8 @@ export function PreEventView({
             animate={{ opacity: 1, y: 0 }}
             className="bg-white rounded-3xl border border-mist p-6 text-center"
           >
-            <p className="text-sm font-medium text-charcoal/60">This session has ended.</p>
-            <p className="text-xs text-charcoal/35 mt-1">
+            <p className="text-sm font-medium text-charcoal/65">This session has ended.</p>
+            <p className="text-xs text-charcoal/65 mt-1">
               Thank you to everyone who joined us, see you at the next one.
             </p>
           </motion.div>
@@ -135,7 +135,7 @@ export function PreEventView({
           >
             <div className="w-2.5 h-2.5 rounded-full bg-green-400 mx-auto mb-3 animate-pulse" />
             <p className="text-cream font-semibold text-lg">Starting now</p>
-            <p className="text-cream/50 text-sm mt-1">The live program will open here automatically.</p>
+            <p className="text-cream/75 text-sm mt-1">The live program will open here automatically.</p>
           </motion.div>
         ) : (
           <motion.div
@@ -145,8 +145,8 @@ export function PreEventView({
             className="bg-white rounded-3xl border border-mist p-6"
           >
             <div className="flex items-center gap-2 mb-5">
-              <Clock size={14} className="text-charcoal/30" />
-              <p className="text-xs font-medium text-charcoal/40 uppercase tracking-wider">Session begins in</p>
+              <Clock size={14} className="text-charcoal/65" />
+              <p className="text-xs font-medium text-charcoal/65 uppercase tracking-wider">Session begins in</p>
             </div>
 
             <div className="grid grid-cols-4 gap-3">
@@ -162,7 +162,7 @@ export function PreEventView({
                       {String(value).padStart(2, "0")}
                     </span>
                   </div>
-                  <span className="text-[10px] text-charcoal/35 uppercase tracking-wider">{label}</span>
+                  <span className="text-[10px] text-charcoal/65 uppercase tracking-wider">{label}</span>
                 </div>
               ))}
             </div>
@@ -177,7 +177,7 @@ export function PreEventView({
             transition={{ delay: 0.25 }}
             className="space-y-3"
           >
-            <p className="text-xs font-semibold text-charcoal/35 uppercase tracking-wider px-1">
+            <p className="text-xs font-semibold text-charcoal/65 uppercase tracking-wider px-1">
               On the night, this page will be your
             </p>
 
@@ -189,12 +189,12 @@ export function PreEventView({
                 transition={{ delay: 0.3 + i * 0.08 }}
                 className="bg-white rounded-2xl border border-mist px-4 py-4 flex items-start gap-3"
               >
-                <div className="w-9 h-9 rounded-xl bg-forest/8 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-9 h-9 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0 mt-0.5">
                   <Icon size={15} className="text-forest" />
                 </div>
                 <div>
                   <p className="text-sm font-semibold text-charcoal">{title}</p>
-                  <p className="text-xs text-charcoal/45 mt-0.5 leading-relaxed">{desc}</p>
+                  <p className="text-xs text-charcoal/65 mt-0.5 leading-relaxed">{desc}</p>
                 </div>
               </motion.div>
             ))}
@@ -207,7 +207,7 @@ export function PreEventView({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.6 }}
-            className="text-center text-[11px] text-charcoal/30 pb-4"
+            className="text-center text-[11px] text-charcoal/65 pb-4"
           >
             Keep this page open or bookmark it, it goes live when the session starts.
           </motion.p>

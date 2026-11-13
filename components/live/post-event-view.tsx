@@ -78,17 +78,17 @@ export function PostEventView({
           >
             <div className="inline-flex items-center gap-1.5 mb-4">
               <Leaf size={12} className="text-gold" />
-              <span className="label-caps text-gold/70 text-[9px]">The Green House</span>
+              <span className="label-caps text-gold text-[10px]">The Green House</span>
             </div>
             <h1 className="font-display text-3xl sm:text-4xl font-semibold text-cream leading-tight mb-2">
               {eventTitle}
             </h1>
             {themeTitle && (
               <div className="mt-4 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/15 border border-gold/30">
-                <span className="text-[10px] label-caps text-gold/70">Theme</span>
+                <span className="text-[10px] label-caps text-gold">Theme</span>
                 <span className="text-xs text-gold">{themeTitle}</span>
                 {themeScripture && (
-                  <span className="text-[10px] text-gold/60">· {themeScripture}</span>
+                  <span className="text-[10px] text-gold">· {themeScripture}</span>
                 )}
               </div>
             )}
@@ -104,11 +104,11 @@ export function PostEventView({
           animate={{ opacity: 1, y: 0 }}
           className="bg-white rounded-3xl border border-mist p-6 text-center"
         >
-          <div className="w-10 h-10 rounded-2xl bg-forest/8 flex items-center justify-center mx-auto mb-3">
+          <div className="w-10 h-10 rounded-2xl bg-forest/10 flex items-center justify-center mx-auto mb-3">
             <CheckCircle2 size={18} className="text-forest" />
           </div>
           <p className="text-base font-semibold text-charcoal">This session has concluded.</p>
-          <p className="text-sm text-charcoal/45 mt-1.5 leading-relaxed">
+          <p className="text-sm text-charcoal/65 mt-1.5 leading-relaxed">
             Thank you to everyone who joined us, it was a beautiful evening. We&apos;d love to hear from you.
           </p>
         </motion.div>
@@ -122,7 +122,7 @@ export function PostEventView({
         >
           <div className="px-5 py-4 border-b border-mist">
             <p className="text-sm font-semibold text-charcoal">Share your thoughts</p>
-            <p className="text-xs text-charcoal/45 mt-0.5">
+            <p className="text-xs text-charcoal/65 mt-0.5">
               What did you take away from this session? What stood out?
             </p>
           </div>
@@ -131,7 +131,7 @@ export function PostEventView({
             <div className="px-5 py-10 text-center">
               <CheckCircle2 size={28} className="text-forest mx-auto mb-3" />
               <p className="text-sm font-semibold text-charcoal">Thank you!</p>
-              <p className="text-xs text-charcoal/50 mt-1.5 leading-relaxed">
+              <p className="text-xs text-charcoal/70 mt-1.5 leading-relaxed">
                 Your feedback means a lot to us and helps shape future sessions.
               </p>
               <button
@@ -144,7 +144,7 @@ export function PostEventView({
           ) : (
             <form onSubmit={submit} className="px-5 py-4 space-y-3">
               {/* Attended toggle */}
-              <div className="flex items-center gap-2 text-xs text-charcoal/60">
+              <div className="flex items-center gap-2 text-xs text-charcoal/65">
                 <span>I</span>
                 <button
                   type="button"
@@ -152,7 +152,7 @@ export function PostEventView({
                   className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
                     attended
                       ? "bg-forest text-cream border-forest"
-                      : "bg-off-white text-charcoal/50 border-charcoal/15"
+                      : "bg-off-white text-charcoal/70 border-charcoal/15"
                   }`}
                 >
                   attended in person
@@ -164,7 +164,7 @@ export function PostEventView({
                   className={`px-2.5 py-1 rounded-full text-xs font-semibold border transition-all ${
                     !attended
                       ? "bg-forest text-cream border-forest"
-                      : "bg-off-white text-charcoal/50 border-charcoal/15"
+                      : "bg-off-white text-charcoal/70 border-charcoal/15"
                   }`}
                 >
                   watched online
@@ -178,10 +178,10 @@ export function PostEventView({
                 maxLength={280}
                 rows={4}
                 className="w-full px-3.5 py-3 rounded-2xl border border-charcoal/15 text-base text-charcoal
-                           placeholder:text-charcoal/35 bg-off-white focus:outline-none focus:ring-2
+                           placeholder:text-charcoal/50 bg-off-white focus:outline-none focus:ring-2
                            focus:ring-forest/20 focus:border-forest/40 resize-none transition-all leading-relaxed"
               />
-              <p className="text-right text-[11px] text-charcoal/30 -mt-1">{message.length}/280</p>
+              <p className="text-right text-[11px] text-charcoal/65 -mt-1">{message.length}/280</p>
 
               <input
                 type="text"
@@ -190,7 +190,7 @@ export function PostEventView({
                 placeholder="Your name (optional)"
                 maxLength={60}
                 className="w-full px-3.5 py-3 rounded-xl border border-charcoal/15 text-base text-charcoal
-                           placeholder:text-charcoal/35 bg-off-white focus:outline-none focus:ring-2
+                           placeholder:text-charcoal/50 bg-off-white focus:outline-none focus:ring-2
                            focus:ring-forest/20 focus:border-forest/40 transition-all"
               />
 
@@ -226,11 +226,11 @@ export function PostEventView({
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
                   <div className="flex items-center gap-1.5 mb-2">
-                    <CalendarDays size={11} className="text-gold/80" />
-                    <span className="label-caps text-gold/70 text-[9px]">Up next</span>
+                    <CalendarDays size={11} className="text-gold" />
+                    <span className="label-caps text-gold text-[10px]">Up next</span>
                   </div>
                   <p className="text-sm font-semibold text-cream leading-snug">{nextEvent.title}</p>
-                  <p className="text-xs text-cream/50 mt-1">{nextDate}</p>
+                  <p className="text-xs text-cream/75 mt-1">{nextDate}</p>
                 </div>
                 <div className="w-8 h-8 rounded-full border border-cream/20 flex items-center justify-center flex-shrink-0 group-hover:border-cream/50 transition-colors">
                   <ArrowRight size={14} className="text-cream/60" />

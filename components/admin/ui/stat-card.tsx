@@ -5,11 +5,12 @@ import { MiniChart } from "./mini-chart";
 type Accent = "green" | "gold" | "blue" | "red" | "purple";
 
 const ACCENT: Record<Accent, { bg: string; icon: string; border: string; text: string }> = {
-  green:  { bg: "bg-forest/8",   icon: "text-forest",      border: "border-l-forest",  text: "text-forest" },
+  green:  { bg: "bg-forest/10",   icon: "text-forest",      border: "border-l-forest",  text: "text-forest" },
   gold:   { bg: "bg-gold/10",    icon: "text-gold",        border: "border-l-gold",    text: "text-gold" },
-  blue:   { bg: "bg-blue-50",    icon: "text-blue-600",    border: "border-l-blue-400",text: "text-blue-600" },
+  // "blue" and "purple" are slot names kept for callers; both now use brand tones.
+  blue:   { bg: "bg-sage/10",    icon: "text-sage",        border: "border-l-sage",    text: "text-sage" },
   red:    { bg: "bg-red-50",     icon: "text-red-500",     border: "border-l-red-400", text: "text-red-500" },
-  purple: { bg: "bg-purple-50",  icon: "text-purple-500",  border: "border-l-purple-400", text: "text-purple-500" },
+  purple: { bg: "bg-bark/10",    icon: "text-bark",        border: "border-l-bark",    text: "text-bark" },
 };
 
 interface StatCardProps {
@@ -56,8 +57,8 @@ export function StatCard({
         <p className="text-2xl font-bold text-charcoal tabular-nums leading-none">
           {typeof value === "number" ? value.toLocaleString() : value}
         </p>
-        <p className="text-xs font-semibold text-charcoal/60 mt-1">{label}</p>
-        {sub && <p className="text-[10px] text-charcoal/35 mt-0.5">{sub}</p>}
+        <p className="text-xs font-semibold text-charcoal/65 mt-1">{label}</p>
+        {sub && <p className="text-[10px] text-charcoal/65 mt-0.5">{sub}</p>}
       </div>
     </div>
   );

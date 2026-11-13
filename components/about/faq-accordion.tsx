@@ -61,7 +61,7 @@ export function FaqAccordion() {
                 <AccordionTrigger className="text-left font-medium text-forest hover:no-underline py-5 text-sm sm:text-base">
                   {faq.q}
                 </AccordionTrigger>
-                <AccordionContent className="text-charcoal/60 text-sm leading-relaxed pb-5">
+                <AccordionContent className="text-charcoal/65 text-sm leading-relaxed pb-5">
                   {faq.a}
                 </AccordionContent>
               </AccordionItem>

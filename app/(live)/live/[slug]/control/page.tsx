@@ -690,7 +690,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   if (authed === null) {
     return (
       <div className="min-h-screen bg-off-white flex items-center justify-center">
-        <Loader2 size={24} className="animate-spin text-forest/40" />
+        <Loader2 size={24} className="animate-spin text-forest/80" />
       </div>
     );
   }
@@ -699,13 +699,13 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
     return (
       <div className="min-h-screen bg-off-white flex items-center justify-center p-6">
         <div className="text-center max-w-xs">
-          <div className="w-14 h-14 rounded-2xl bg-forest/8 flex items-center justify-center mx-auto mb-4">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7 text-forest/40">
+          <div className="w-14 h-14 rounded-2xl bg-forest/10 flex items-center justify-center mx-auto mb-4">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-7 h-7 text-forest/80">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
             </svg>
           </div>
           <h2 className="font-display text-lg font-semibold text-charcoal mb-1">Access required</h2>
-          <p className="text-sm text-charcoal/50 mb-5 leading-relaxed">
+          <p className="text-sm text-charcoal/70 mb-5 leading-relaxed">
             {controlToken
               ? "This control link has expired or is invalid. Ask the event admin for an updated link."
               : "Use the link shared by the event admin, or sign in with your admin account."}
@@ -726,7 +726,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
   if (!event) {
     return (
       <div className="min-h-screen bg-off-white flex items-center justify-center">
-        <Loader2 size={24} className="animate-spin text-forest/40" />
+        <Loader2 size={24} className="animate-spin text-forest/80" />
       </div>
     );
   }
@@ -758,14 +758,14 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-5">
         <div>
-          <p className="text-cream/40 text-xs uppercase tracking-wider">Control Panel</p>
+          <p className="text-cream/65 text-xs uppercase tracking-wider">Control Panel</p>
           <h1 className="font-display text-xl font-semibold text-cream">{event.title}</h1>
         </div>
         <div className="flex items-center gap-2">
           {saveError && (
             <span className="text-[10px] text-red-400 font-medium">Save failed</span>
           )}
-          {saving && !saveError && <Loader2 size={14} className="animate-spin text-cream/40" />}
+          {saving && !saveError && <Loader2 size={14} className="animate-spin text-cream/65" />}
           {/* Realtime connection indicator */}
           <div className="flex items-center gap-1.5 px-2 py-1 rounded-lg bg-cream/10">
             <span className={cn(
@@ -774,7 +774,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               realtimeStatus === "connecting"   && "bg-amber-400 animate-pulse",
               realtimeStatus === "disconnected" && "bg-red-400",
             )} />
-            <span className="text-[10px] text-cream/40">
+            <span className="text-[10px] text-cream/65">
               {realtimeStatus === "connected"    ? "Live" :
                realtimeStatus === "connecting"   ? "Sync..." :
                "Offline"}
@@ -789,7 +789,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
 
       {/* Current scene chip */}
       <div className="bg-cream/10 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between">
-        <span className="text-xs text-cream/50">Current scene</span>
+        <span className="text-xs text-cream/75">Current scene</span>
         <span className="text-sm font-semibold text-gold uppercase tracking-wider">{display?.scene ?? "–"}</span>
       </div>
 
@@ -805,7 +805,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
         ] as const).filter(t => hasFullAccess || permissions.includes(t.key));
         if (visibleTabs.length <= 1) return null; // single-tab: no tab bar needed
         return (
-      <div className="flex items-center gap-1 mb-5 bg-cream/8 rounded-2xl p-1">
+      <div className="flex items-center gap-1 mb-5 bg-cream/10 rounded-2xl p-1">
         {visibleTabs.map(({ key, label, badge }) => (
           <button
             key={key}
@@ -814,7 +814,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               "flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-xs font-semibold transition-all",
               focusTab === key
                 ? "bg-gold text-forest shadow-sm"
-                : "text-cream/45 hover:text-cream/70"
+                : "text-cream/65 hover:text-cream/70"
             )}
           >
             {label}
@@ -830,10 +830,10 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
       {/* Active feedback chip */}
       {display?.featured_feedback && (
         <div className="bg-gold/15 border border-gold/25 rounded-2xl px-4 py-3 mb-4 flex items-center justify-between gap-3">
-          <p className="text-xs text-gold/80 truncate flex-1">Projecting: &ldquo;{display.featured_feedback}&rdquo;</p>
+          <p className="text-xs text-gold truncate flex-1">Projecting: &ldquo;{display.featured_feedback}&rdquo;</p>
           <button onClick={dismissFeedback} disabled={saving}
             className="p-1.5 rounded-lg bg-cream/10 hover:bg-cream/20 transition-colors flex-shrink-0">
-            <X size={11} className="text-cream/50" />
+            <X size={11} className="text-cream/75" />
           </button>
         </div>
       )}
@@ -855,8 +855,8 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               onClick={() => setOpenSection(s => s === "scenes" ? "" : "scenes")}
               className="w-full flex items-center justify-between mb-3 group"
             >
-              <h2 className="text-xs text-cream/40 uppercase tracking-wider">Scenes</h2>
-              <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${openSection === "scenes" ? "rotate-180" : ""}`} />
+              <h2 className="text-xs text-cream/65 uppercase tracking-wider">Scenes</h2>
+              <ChevronDown size={13} className={`text-cream/65 transition-transform duration-200 ${openSection === "scenes" ? "rotate-180" : ""}`} />
             </button>
             {openSection === "scenes" && (
               <div className="grid grid-cols-3 gap-2">
@@ -881,12 +881,12 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               onClick={() => setOpenSection(s => s === "music" ? "" : "music")}
               className="w-full flex items-center justify-between mb-3 group"
             >
-              <h2 className="text-xs text-cream/40 uppercase tracking-wider">Program</h2>
-              <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${openSection === "music" ? "rotate-180" : ""}`} />
+              <h2 className="text-xs text-cream/65 uppercase tracking-wider">Program</h2>
+              <ChevronDown size={13} className={`text-cream/65 transition-transform duration-200 ${openSection === "music" ? "rotate-180" : ""}`} />
             </button>
             {openSection === "music" && <>
             {event.event_sessions.length === 0 ? (
-              <p className="text-cream/30 text-xs text-center py-4">No program built yet</p>
+              <p className="text-cream/65 text-xs text-center py-4">No program built yet</p>
             ) : (
               <div className="space-y-2">
                 {[...event.event_sessions]
@@ -901,17 +901,17 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                         <button
                           onClick={() => setOpenSessionId(id => id === sess.id ? null : sess.id)}
                           className={`w-full px-3 py-2.5 flex items-center gap-2 text-xs font-semibold transition-colors ${
-                            sessIsActive ? "bg-gold/15 text-gold" : "bg-cream/8 text-cream/50 hover:bg-cream/12"
+                            sessIsActive ? "bg-gold/15 text-gold" : "bg-cream/10 text-cream/75 hover:bg-cream/10"
                           }`}
                         >
                           <Music size={10} className="flex-shrink-0" />
                           <span className="flex-1 text-left">{sess.title}</span>
-                          {sessIsActive && <span className="text-[9px] uppercase tracking-wider text-gold/70">active</span>}
-                          <ChevronDown size={12} className={`flex-shrink-0 transition-transform duration-200 ${openSessionId === sess.id ? "rotate-180" : ""} ${sessIsActive ? "text-gold/50" : "text-cream/25"}`} />
+                          {sessIsActive && <span className="text-[10px] uppercase tracking-wider text-gold">active</span>}
+                          <ChevronDown size={12} className={`flex-shrink-0 transition-transform duration-200 ${openSessionId === sess.id ? "rotate-180" : ""} ${sessIsActive ? "text-gold" : "text-cream/50"}`} />
                         </button>
                         {/* Program items — only shown when session is open */}
                         {openSessionId === sess.id && (sess.session_songs.length === 0 ? (
-                          <div className="px-3 py-2 text-[10px] text-cream/20">No items</div>
+                          <div className="px-3 py-2 text-[10px] text-cream/50">No items</div>
                         ) : (
                           sess.session_songs.map((ss) => {
                             const isActive = ss.id === display.session_song_id;
@@ -930,13 +930,13 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                                   <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
                                     isActive ? "bg-blue-400/40" : "bg-cream/10"
                                   }`}>
-                                    <MessageSquare size={9} className={isActive ? "text-blue-200" : "text-cream/30"} />
+                                    <MessageSquare size={9} className={isActive ? "text-blue-200" : "text-cream/65"} />
                                   </div>
                                   <div className="min-w-0 flex-1">
                                     <p className="text-sm font-medium truncate">{ss.item_text}</p>
-                                    <p className="text-[10px] text-cream/30 capitalize">{ss.item_type}</p>
+                                    <p className="text-[10px] text-cream/65 capitalize">{ss.item_type}</p>
                                   </div>
-                                  {isActive && <span className="text-[9px] text-blue-300/70 uppercase tracking-wide flex-shrink-0">on</span>}
+                                  {isActive && <span className="text-[10px] text-blue-300/70 uppercase tracking-wide flex-shrink-0">on</span>}
                                 </button>
                               );
                             }
@@ -957,25 +957,25 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                                 }`}>
                                   {isActive
                                     ? <Music size={10} className="text-forest" />
-                                    : <span className="text-[9px] text-cream/30">▶</span>
+                                    : <span className="text-[10px] text-cream/65">▶</span>
                                   }
                                 </div>
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-center gap-1.5">
                                     <p className="text-sm font-medium truncate">{song.title}</p>
                                     {song.key && (
-                                      <span className="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-gold/20 text-gold border border-gold/30">
+                                      <span className="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-gold/20 text-gold border border-gold/30">
                                         {song.key}
                                       </span>
                                     )}
                                   </div>
                                   <div className="flex items-center gap-1.5">
-                                    {song.artist && <p className="text-[10px] text-cream/35 truncate">{song.artist}</p>}
-                                    {song.artist && ss.vocalist && <span className="text-[9px] text-cream/15">·</span>}
-                                    {ss.vocalist && <p className="text-[10px] text-gold/60 truncate">{ss.vocalist}</p>}
+                                    {song.artist && <p className="text-[10px] text-cream/65 truncate">{song.artist}</p>}
+                                    {song.artist && ss.vocalist && <span className="text-[10px] text-cream/50">·</span>}
+                                    {ss.vocalist && <p className="text-[10px] text-gold truncate">{ss.vocalist}</p>}
                                   </div>
                                 </div>
-                                {isActive && <span className="text-[9px] text-gold/70 uppercase tracking-wide flex-shrink-0">now</span>}
+                                {isActive && <span className="text-[10px] text-gold uppercase tracking-wide flex-shrink-0">now</span>}
                               </button>
                             );
                           })
@@ -988,21 +988,21 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
 
             {/* Verse navigation — shown when a song is active */}
             {activeSong && verses.length > 0 && (
-              <div className="mt-3 bg-cream/8 rounded-2xl p-3">
+              <div className="mt-3 bg-cream/10 rounded-2xl p-3">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-1.5 min-w-0">
-                    <p className="text-xs text-gold/70 font-semibold truncate">{activeSong.title}</p>
+                    <p className="text-xs text-gold font-semibold truncate">{activeSong.title}</p>
                     {activeSong.key && (
-                      <span className="flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-gold/25 text-gold border border-gold/40">
+                      <span className="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-gold/25 text-gold border border-gold/40">
                         {activeSong.key}
                       </span>
                     )}
                   </div>
-                  <span className="text-[10px] text-cream/30 tabular-nums flex-shrink-0 ml-2">
+                  <span className="text-[10px] text-cream/65 tabular-nums flex-shrink-0 ml-2">
                     {display.verse_index + 1}/{verses.length}
                   </span>
                 </div>
-                <div className="bg-cream/5 rounded-xl p-2.5 mb-3 text-xs text-cream/50 min-h-[48px] whitespace-pre-line leading-relaxed">
+                <div className="bg-cream/5 rounded-xl p-2.5 mb-3 text-xs text-cream/75 min-h-[48px] whitespace-pre-line leading-relaxed">
                   {verses[display.verse_index] ?? "–"}
                 </div>
                 <div className="flex items-center gap-2">
@@ -1026,7 +1026,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
           <section className="mb-3 space-y-3">
             <textarea value={customText} onChange={e => setCustomText(e.target.value)} rows={3}
               placeholder="Push custom text to display…"
-              className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold resize-none" />
+              className="w-full bg-cream/10 border border-cream/10 rounded-xl px-3 py-2.5 text-sm text-cream placeholder:text-cream/50 focus:outline-none focus:border-gold resize-none" />
             <button onClick={pushCustom} disabled={!customText.trim() || saving}
               className="w-full py-2.5 rounded-xl bg-cream/15 hover:bg-cream/25 text-cream text-sm font-medium disabled:opacity-40 transition-colors">
               Push to display
@@ -1041,27 +1041,27 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               onClick={() => setOpenSection(s => s === "feedback" ? "" : "feedback")}
               className="w-full flex items-center justify-between mb-3 group"
             >
-              <h2 className="text-xs text-cream/40 uppercase tracking-wider">Attendee feedback</h2>
+              <h2 className="text-xs text-cream/65 uppercase tracking-wider">Attendee feedback</h2>
               <div className="flex items-center gap-2">
-                {loadingFeedback && <Loader2 size={12} className="animate-spin text-cream/30" />}
+                {loadingFeedback && <Loader2 size={12} className="animate-spin text-cream/65" />}
                 {!loadingFeedback && feedback.length > 0 && (
-                  <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">{feedback.length}</span>
+                  <span className="text-[10px] text-gold bg-gold/15 px-2 py-0.5 rounded-full">{feedback.length}</span>
                 )}
-                <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${openSection === "feedback" ? "rotate-180" : ""}`} />
+                <ChevronDown size={13} className={`text-cream/65 transition-transform duration-200 ${openSection === "feedback" ? "rotate-180" : ""}`} />
               </div>
             </button>
 
             {openSection === "feedback" && (
               feedback.length === 0 ? (
-                <p className="text-cream/25 text-xs text-center py-4">No feedback yet</p>
+                <p className="text-cream/50 text-xs text-center py-4">No feedback yet</p>
               ) : (
                 <div className="space-y-2 overflow-y-auto max-h-72">
                   {feedback.map((fb) => (
-                    <div key={fb.id} className="bg-cream/8 rounded-xl p-3 flex items-start gap-2.5">
+                    <div key={fb.id} className="bg-cream/10 rounded-xl p-3 flex items-start gap-2.5">
                       <div className="flex-1 min-w-0">
                         <p className="text-xs text-cream/80 leading-relaxed">&ldquo;{fb.message}&rdquo;</p>
                         {fb.author_name && (
-                          <p className="text-[10px] text-cream/35 mt-1">– {fb.author_name}</p>
+                          <p className="text-[10px] text-cream/65 mt-1">– {fb.author_name}</p>
                         )}
                       </div>
                       <div className="flex flex-col gap-1.5 flex-shrink-0">
@@ -1072,7 +1072,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                           className={`p-1.5 rounded-lg text-[10px] font-medium transition-all flex items-center gap-1 ${
                             display.featured_feedback === fb.message
                               ? "bg-gold/30 text-gold"
-                              : "bg-cream/15 text-cream/50 hover:bg-gold/20 hover:text-gold"
+                              : "bg-cream/15 text-cream/75 hover:bg-gold/20 hover:text-gold"
                           }`}
                         >
                           {projecting === fb.message
@@ -1108,7 +1108,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               onClick={() => setOpenSection(s => s === "trivia" ? "" : "trivia")}
               className="w-full flex items-center justify-between mb-3 group"
             >
-              <h2 className="text-xs text-cream/40 uppercase tracking-wider">Trivia</h2>
+              <h2 className="text-xs text-cream/65 uppercase tracking-wider">Trivia</h2>
               <div className="flex items-center gap-2">
                 {triviaRound && triviaRound.status === "active" && (
                   <span className="flex items-center gap-1 text-[10px] text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">
@@ -1117,12 +1117,12 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                   </span>
                 )}
                 {triviaRound && triviaRound.status === "revealing" && (
-                  <span className="text-[10px] text-gold/70 bg-gold/15 px-2 py-0.5 rounded-full">Revealing</span>
+                  <span className="text-[10px] text-gold bg-gold/15 px-2 py-0.5 rounded-full">Revealing</span>
                 )}
                 {triviaRound && triviaRound.status === "closed" && (
                   <span className="text-[10px] text-gold font-bold bg-gold/20 px-2 py-0.5 rounded-full">Scores up</span>
                 )}
-                <ChevronDown size={13} className={`text-cream/30 transition-transform duration-200 ${openSection === "trivia" ? "rotate-180" : ""}`} />
+                <ChevronDown size={13} className={`text-cream/65 transition-transform duration-200 ${openSection === "trivia" ? "rotate-180" : ""}`} />
               </div>
             </button>
 
@@ -1135,7 +1135,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                       <span className="text-lg">🏆</span>
                       <div>
                         <p className="text-xs font-semibold text-gold">Round complete</p>
-                        <p className="text-[10px] text-cream/40 mt-0.5">
+                        <p className="text-[10px] text-cream/65 mt-0.5">
                           {triviaCount} played · {triviaCorrect} correct
                         </p>
                       </div>
@@ -1160,17 +1160,17 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                   </div>
                 ) : triviaRound && ["active", "revealing"].includes(triviaRound.status) ? (
                   /* Active round controls */
-                  <div className="bg-cream/8 rounded-2xl p-3 space-y-3">
+                  <div className="bg-cream/10 rounded-2xl p-3 space-y-3">
                     <div className="flex items-center justify-between">
                       <div>
                         <p className="text-xs font-semibold text-gold">Round in progress</p>
-                        <p className="text-[10px] text-cream/40 mt-0.5">
+                        <p className="text-[10px] text-cream/65 mt-0.5">
                           {triviaCount} answered
                           {triviaRound.type !== "open_input" && ` · ${triviaCorrect} correct`}
                           {triviaRound.type === "open_input" && triviaCorrect > 0 && ` · ${triviaCorrect} scored`}
                         </p>
                       </div>
-                      <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
+                      <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-1 rounded-full ${
                         triviaRound.status === "active" ? "bg-green-500/20 text-green-300" : "bg-gold/20 text-gold"
                       }`}>
                         {triviaRound.status === "active" ? "Live" : "Revealing"}
@@ -1210,18 +1210,18 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                     {triviaRound.type === "open_input" && triviaRound.status === "revealing" && (
                       <div className="space-y-2 pt-1 border-t border-cream/10">
                         <div className="flex items-center justify-between">
-                          <p className="text-[10px] text-cream/35 uppercase tracking-wider">Responses</p>
+                          <p className="text-[10px] text-cream/65 uppercase tracking-wider">Responses</p>
                           {openKeywords && openResponses.length > 0 && (
                             <button
                               onClick={applyKeywordDetection}
-                              className="text-[9px] text-gold/55 hover:text-gold transition-colors"
+                              className="text-[10px] text-gold hover:text-gold transition-colors"
                             >
                               Auto-detect
                             </button>
                           )}
                         </div>
                         {openResponses.length === 0 ? (
-                          <p className="text-[11px] text-cream/25 text-center py-2">No responses yet</p>
+                          <p className="text-[11px] text-cream/50 text-center py-2">No responses yet</p>
                         ) : (
                           <div className="space-y-1 max-h-48 overflow-y-auto pr-0.5">
                             {openResponses.map(r => {
@@ -1229,27 +1229,27 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                               return (
                                 <div key={r.id} className={cn(
                                   "flex items-center gap-2 px-2.5 py-2 rounded-xl border transition-all",
-                                  score === true  ? "bg-green-500/12 border-green-500/20" :
+                                  score === true  ? "bg-green-500/10 border-green-500/20" :
                                   score === false ? "bg-red-500/10 border-red-500/15" :
-                                                    "bg-cream/6 border-transparent"
+                                                    "bg-cream/5 border-transparent"
                                 )}>
                                   <div className="flex-1 min-w-0">
                                     <p className="text-[11px] text-cream/85 leading-snug break-words">{r.answer_text}</p>
-                                    <p className="text-[9px] text-cream/30 mt-0.5">{r.attendee_name ?? "Anonymous"}</p>
+                                    <p className="text-[10px] text-cream/65 mt-0.5">{r.attendee_name ?? "Anonymous"}</p>
                                   </div>
                                   <div className="flex items-center gap-1 flex-shrink-0">
                                     <button
                                       onClick={() => setLocalScores(prev => ({ ...prev, [r.id]: score === true ? null : true }))}
                                       className={cn(
                                         "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all",
-                                        score === true ? "bg-green-500/40 text-green-300" : "bg-cream/10 text-cream/30 hover:bg-green-500/20 hover:text-green-400"
+                                        score === true ? "bg-green-500/40 text-green-300" : "bg-cream/10 text-cream/65 hover:bg-green-500/20 hover:text-green-400"
                                       )}
                                     >✓</button>
                                     <button
                                       onClick={() => setLocalScores(prev => ({ ...prev, [r.id]: score === false ? null : false }))}
                                       className={cn(
                                         "w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold transition-all",
-                                        score === false ? "bg-red-500/35 text-red-300" : "bg-cream/10 text-cream/30 hover:bg-red-500/20 hover:text-red-400"
+                                        score === false ? "bg-red-500/35 text-red-300" : "bg-cream/10 text-cream/65 hover:bg-red-500/20 hover:text-red-400"
                                       )}
                                     >✗</button>
                                   </div>
@@ -1282,7 +1282,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                           <span className="text-base">🏆</span>
                           <div>
                             <p className="text-xs font-semibold text-gold">Final leaderboard on display</p>
-                            <p className="text-[10px] text-cream/35 mt-0.5">Close when you&apos;re ready to move on</p>
+                            <p className="text-[10px] text-cream/65 mt-0.5">Close when you&apos;re ready to move on</p>
                           </div>
                         </div>
                         <button
@@ -1296,7 +1296,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                       </div>
                     )}
                     {triviaQuestions.length === 0 ? (
-                      <p className="text-[11px] text-cream/30 text-center py-3">
+                      <p className="text-[11px] text-cream/65 text-center py-3">
                         No trivia questions yet, add some in Library → Trivia
                       </p>
                     ) : (
@@ -1304,7 +1304,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                         {/* Unified question picker: planned questions first, then rest of library */}
                         <div className="space-y-1 max-h-56 overflow-y-auto pr-0.5">
                           {triviaPlanned.length > 0 && (
-                            <p className="text-[9px] text-cream/30 uppercase tracking-wider px-0.5 pb-0.5">Planned</p>
+                            <p className="text-[10px] text-cream/65 uppercase tracking-wider px-0.5 pb-0.5">Planned</p>
                           )}
                           {triviaPlanned.map(entry => (
                             <button
@@ -1314,7 +1314,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                                 "w-full text-left px-3 py-2 rounded-xl border transition-all",
                                 selectedQId === entry.id
                                   ? "bg-gold/15 border-gold/40"
-                                  : "bg-cream/6 border-transparent text-cream/60 hover:bg-cream/12 hover:text-cream/80"
+                                  : "bg-cream/5 border-transparent text-cream/60 hover:bg-cream/10 hover:text-cream/80"
                               )}
                             >
                               <div className="flex items-start gap-2">
@@ -1325,10 +1325,10 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                                 <div className="min-w-0 flex-1">
                                   <p className="text-[11px] leading-snug line-clamp-2 text-cream/80">{entry.question}</p>
                                   <div className="flex items-center gap-2 mt-0.5">
-                                    <span className="text-[9px] text-gold/50 uppercase tracking-wide">{entry.category}</span>
-                                    <span className="text-[9px] text-cream/30">· {entry.sessionLabel}</span>
+                                    <span className="text-[10px] text-gold uppercase tracking-wide">{entry.category}</span>
+                                    <span className="text-[10px] text-cream/65">· {entry.sessionLabel}</span>
                                     {usedQIds.has(entry.id) && (
-                                      <span className="text-[9px] text-cream/25">· played</span>
+                                      <span className="text-[10px] text-cream/50">· played</span>
                                     )}
                                   </div>
                                 </div>
@@ -1338,7 +1338,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
 
                           {triviaLibrary.length > 0 && (
                             <p className={cn(
-                              "text-[9px] text-cream/30 uppercase tracking-wider px-0.5 pb-0.5",
+                              "text-[10px] text-cream/65 uppercase tracking-wider px-0.5 pb-0.5",
                               triviaPlanned.length > 0 && "pt-2"
                             )}>
                               {triviaPlanned.length > 0 ? "Library" : "Questions"}
@@ -1352,7 +1352,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                                 "w-full text-left px-3 py-2 rounded-xl border transition-all",
                                 selectedQId === entry.id
                                   ? "bg-gold/15 border-gold/40"
-                                  : "bg-cream/6 border-transparent text-cream/60 hover:bg-cream/12 hover:text-cream/80"
+                                  : "bg-cream/5 border-transparent text-cream/60 hover:bg-cream/10 hover:text-cream/80"
                               )}
                             >
                               <div className="flex items-start gap-2">
@@ -1363,9 +1363,9 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                                 <div className="min-w-0 flex-1">
                                   <p className="text-[11px] leading-snug line-clamp-2 text-cream/80">{entry.question}</p>
                                   <div className="flex items-center gap-2 mt-0.5">
-                                    <span className="text-[9px] text-gold/50 uppercase tracking-wide">{entry.category}</span>
+                                    <span className="text-[10px] text-gold uppercase tracking-wide">{entry.category}</span>
                                     {usedQIds.has(entry.id) && (
-                                      <span className="text-[9px] text-cream/25">· played</span>
+                                      <span className="text-[10px] text-cream/50">· played</span>
                                     )}
                                   </div>
                                 </div>
@@ -1375,7 +1375,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                         </div>
 
                         {selectedQId && usedQIds.has(selectedQId) && (
-                          <p className="text-[10px] text-gold/50">This question was already played this event.</p>
+                          <p className="text-[10px] text-gold">This question was already played this event.</p>
                         )}
 
                         {/* Timer + Launch */}
@@ -1401,7 +1401,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
                             Launch
                           </button>
                         </div>
-                        <p className="text-[10px] text-cream/20 leading-relaxed">
+                        <p className="text-[10px] text-cream/50 leading-relaxed">
                           Switching to Trivia scene opens answering for attendees.
                         </p>
                       </>
@@ -1416,7 +1416,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
           {/* Display theme — shown in scenes section */}
           {(focusTab === "all" || focusTab === "scenes") && openSection === "scenes" && (
           <section className="mb-3">
-            <p className="text-[10px] font-semibold text-cream/30 uppercase tracking-wider mb-2">Display theme</p>
+            <p className="text-[10px] font-semibold text-cream/65 uppercase tracking-wider mb-2">Display theme</p>
             <div className="grid grid-cols-3 gap-2">
               {DISPLAY_THEMES.map(({ key, label, icon: Icon, bg, fg }) => (
                 <button key={key} onClick={() => setTheme(key)} disabled={saving}
@@ -1451,7 +1451,7 @@ export default function ControlPage({ params }: { params: { slug: string } }) {
               className={`flex-shrink-0 px-4 py-3.5 rounded-2xl border text-sm font-semibold transition-all disabled:opacity-50 shadow-lg flex items-center gap-1.5 ${
                 display.show_qr
                   ? "bg-gold/25 border-gold/40 text-gold"
-                  : "bg-cream/10 border-cream/15 text-cream/55 hover:bg-cream/20"
+                  : "bg-cream/10 border-cream/15 text-cream/75 hover:bg-cream/20"
               }`}>
               <QrCode size={15} />
             </button>

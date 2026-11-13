@@ -28,7 +28,7 @@ function NotificationBell() {
       <button
         disabled
         title="Notifications blocked, allow them in your browser settings"
-        className="w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/25 cursor-not-allowed"
+        className="w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/65 cursor-not-allowed"
       >
         <BellOff size={13} />
       </button>
@@ -89,7 +89,7 @@ export function AdminTopbar({ fullName, role, onMenuOpen }: AdminTopbarProps) {
       {onMenuOpen && (
         <button
           onClick={onMenuOpen}
-          className="md:hidden w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/50 hover:text-charcoal hover:border-charcoal/20 transition-all"
+          className="md:hidden w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/70 hover:text-charcoal hover:border-charcoal/20 transition-all"
           aria-label="Open menu"
         >
           <Menu size={15} />
@@ -106,7 +106,7 @@ export function AdminTopbar({ fullName, role, onMenuOpen }: AdminTopbarProps) {
         <button
           onClick={handleRefresh}
           disabled={refreshing}
-          className="w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/40 hover:text-forest hover:border-forest/30 transition-all disabled:opacity-50"
+          className="w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/65 hover:text-forest hover:border-forest/30 transition-all disabled:opacity-50"
           title="Refresh data"
         >
           <RefreshCw size={13} className={refreshing ? "animate-spin" : ""} />
@@ -118,13 +118,13 @@ export function AdminTopbar({ fullName, role, onMenuOpen }: AdminTopbarProps) {
           </div>
           <div className="text-right hidden sm:block">
             <p className="text-xs font-semibold text-charcoal leading-none">{fullName}</p>
-            <p className="text-[10px] text-charcoal/40 mt-0.5 capitalize">{role.replace("_", " ")}</p>
+            <p className="text-[10px] text-charcoal/65 mt-0.5 capitalize">{role.replace("_", " ")}</p>
           </div>
         </div>
 
         <button
           onClick={handleSignOut}
-          className="w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/40 hover:text-charcoal hover:border-charcoal/20 transition-all"
+          className="w-8 h-8 rounded-lg border border-mist flex items-center justify-center text-charcoal/65 hover:text-charcoal hover:border-charcoal/20 transition-all"
           title="Sign out"
         >
           <LogOut size={13} />

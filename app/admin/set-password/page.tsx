@@ -53,7 +53,7 @@ export default function SetPasswordPage() {
   }
 
   const inputCls =
-    "w-full px-4 py-3 rounded-2xl border border-mist bg-off-white text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all pr-11";
+    "w-full px-4 py-3 rounded-2xl border border-mist bg-off-white text-sm text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all pr-11";
 
   return (
     <div className="flex items-center justify-center py-10 px-4">
@@ -63,7 +63,7 @@ export default function SetPasswordPage() {
             <KeyRound size={20} className="text-gold" />
           </div>
           <h1 className="font-display text-2xl font-semibold text-forest">Set your password</h1>
-          <p className="text-charcoal/50 text-sm mt-1">
+          <p className="text-charcoal/70 text-sm mt-1">
             Choose a password for signing in to the admin panel.
           </p>
         </div>
@@ -86,12 +86,12 @@ export default function SetPasswordPage() {
                 type="button"
                 onClick={() => setShow(!show)}
                 aria-label={show ? "Hide password" : "Show password"}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/30 hover:text-charcoal/60 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/65 hover:text-charcoal/65 transition-colors"
               >
                 {show ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>
             </div>
-            <p className="text-[11px] text-charcoal/40">At least {MIN_LENGTH} characters.</p>
+            <p className="text-[11px] text-charcoal/65">At least {MIN_LENGTH} characters.</p>
           </div>
 
           <div className="space-y-1.5">

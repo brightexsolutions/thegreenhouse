@@ -57,7 +57,7 @@ export function CommunityCircles() {
                   <h3 className="font-display text-2xl font-semibold text-forest mt-1">{c.name}</h3>
                 </div>
 
-                <p className="text-sm text-charcoal/60 leading-relaxed">{c.description}</p>
+                <p className="text-sm text-charcoal/65 leading-relaxed">{c.description}</p>
               </div>
             </StaggerChild>
           ))}

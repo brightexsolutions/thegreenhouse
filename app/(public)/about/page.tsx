@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { BatteryLow, BookOpen, Brain, Flame, GraduationCap, HandHeart, Handshake, UsersRound } from "lucide-react";
 import { Photo } from "@/components/ui/photo";
 import { getSitePhotos } from "@/lib/site-photos";
 import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
@@ -25,7 +26,7 @@ export default async function AboutPage() {
   return (
     <>
       {/* Hero — full-bleed photo with dark overlay */}
-      <section className="relative min-h-[70vh] flex items-end overflow-hidden pt-20">
+      <section className="on-dark relative min-h-[70vh] flex items-end overflow-hidden pt-20">
         {/* Background photo */}
         <div className="absolute inset-0">
           <Photo
@@ -39,14 +40,10 @@ export default async function AboutPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/85 to-forest/50" />
         </div>
 
-        {/* Decorative rings */}
-        <div className="absolute top-20 right-20 w-64 h-64 rounded-full border border-cream/5 hidden lg:block" />
-        <div className="absolute bottom-10 left-10 w-32 h-32 rounded-full border border-gold/10 hidden lg:block" />
-
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 pt-10 w-full">
           <div className="grid lg:grid-cols-2 gap-10 items-end">
             <FadeIn>
-              <span className="label-caps text-gold/80">About</span>
+              <span className="label-caps text-gold">About</span>
               <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream mt-2 leading-[0.95]">
                 Not a service.
                 <br />
@@ -90,7 +87,7 @@ export default async function AboutPage() {
                   </ul>
                 </div>
                 <div>
-                  <span className="label-caps text-charcoal/50">What it isn&apos;t</span>
+                  <span className="label-caps text-charcoal/70">What it isn&apos;t</span>
                   <ul className="mt-5 space-y-3">
                     {[
                       "A replacement for your local church",
@@ -99,7 +96,7 @@ export default async function AboutPage() {
                       "A weekly service",
                       "Exclusive to any denomination",
                     ].map((item) => (
-                      <li key={item} className="flex items-start gap-3 text-sm text-charcoal/55">
+                      <li key={item} className="flex items-start gap-3 text-sm text-charcoal/70">
                         <span className="mt-1 w-4 h-4 rounded-full bg-charcoal/10 flex items-center justify-center shrink-0">
                           <span className="w-1.5 h-1.5 rounded-full bg-charcoal/30" />
                         </span>
@@ -133,8 +130,6 @@ export default async function AboutPage() {
                     sizes="(max-width:1024px) 40vw, 20vw"
                   />
                 </div>
-                {/* Gold ring */}
-                <div className="absolute -top-3 -right-3 w-16 h-16 rounded-full border-2 border-gold/30 pointer-events-none" />
               </div>
             </FadeIn>
           </div>
@@ -146,11 +141,10 @@ export default async function AboutPage() {
         className="py-20 md:py-28 relative overflow-hidden"
         style={{ background: "linear-gradient(160deg, #1b3a2a 0%, #2d5240 50%, #1b3a2a 100%)" }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,rgba(201,162,74,0.06),transparent)]" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid lg:grid-cols-2 gap-16 items-center">
             <FadeIn>
-              <span className="label-caps text-gold/80">Our Mission</span>
+              <span className="label-caps text-gold">Our Mission</span>
               <h2 className="font-display text-4xl md:text-5xl font-semibold text-cream mt-2 mb-6 leading-tight">
                 Addressing a crisis<br />
                 <em className="not-italic text-gold">few are naming</em>
@@ -171,13 +165,13 @@ export default async function AboutPage() {
             <FadeIn delay={0.1}>
               <div className="grid grid-cols-2 gap-4">
                 {[
-                  { icon: "😮‍💨", label: "Burnout",     body: "We exist specifically for those running on empty, spiritually and emotionally depleted." },
-                  { icon: "🏘",  label: "Isolation",   body: "We replace disconnection with genuine fellowship across church walls." },
-                  { icon: "🛐",  label: "Deep Worship", body: "Extended time in worship and prayer: unhurried, unperformed, and real." },
-                  { icon: "🤝",  label: "Connection",  body: "Cross-church fellowship built on vulnerability, not networking." },
+                  { icon: BatteryLow, label: "Burnout",     body: "We exist specifically for those running on empty, spiritually and emotionally depleted." },
+                  { icon: UsersRound, label: "Isolation",   body: "We replace disconnection with genuine fellowship across church walls." },
+                  { icon: Flame, label: "Deep Worship", body: "Extended time in worship and prayer: unhurried, unperformed, and real." },
+                  { icon: Handshake, label: "Connection",  body: "Cross-church fellowship built on vulnerability, not networking." },
                 ].map((item) => (
                   <div key={item.label} className="rounded-2xl bg-white/5 border border-white/10 p-6">
-                    <span className="text-3xl">{item.icon}</span>
+                    <item.icon className="w-7 h-7 text-gold" strokeWidth={1.5} aria-hidden />
                     <h3 className="font-semibold text-white text-base mt-3 mb-2">{item.label}</h3>
                     <p className="text-cream/80 text-sm leading-relaxed">{item.body}</p>
                   </div>
@@ -206,7 +200,7 @@ export default async function AboutPage() {
               <h2 className="font-display text-4xl md:text-5xl font-semibold text-forest mt-2 leading-tight">
                 Beyond the worship session
               </h2>
-              <p className="text-charcoal/60 text-base mt-4 leading-relaxed">
+              <p className="text-charcoal/65 text-base mt-4 leading-relaxed">
                 We believe spiritual growth must be matched by practical love. The larger vision
                 is to branch into the community to meet deep physical and emotional needs through
                 targeted outreach and support.
@@ -218,37 +212,36 @@ export default async function AboutPage() {
             {[
               {
                 num: "01",
-                icon: "🧠",
+                icon: Brain,
                 title: "Mental & Emotional Health",
                 body: "Structured counselling resources and mental health awareness workshops for those navigating life's weight.",
               },
               {
                 num: "02",
-                icon: "🤲",
+                icon: HandHeart,
                 title: "Holistic Community Care",
                 body: "Food and clothing drives alongside donations of essential personal effects: meeting real, practical needs.",
               },
               {
                 num: "03",
-                icon: "🎓",
+                icon: GraduationCap,
                 title: "Youth & School Outreach",
                 body: "High school and university campus visits to support teenagers and young adults navigating life's pressures.",
               },
               {
                 num: "04",
-                icon: "📖",
+                icon: BookOpen,
                 title: "Discipleship",
                 body: "Deep-dive Bible study circles and mentorship frameworks to anchor people firmly in their faith.",
               },
             ].map((item) => (
               <StaggerChild key={item.title}>
                 <div className="group relative rounded-3xl bg-white border border-mist p-7 h-full flex flex-col gap-4 hover:-translate-y-1 transition-all duration-300 shadow-card hover:shadow-card-hover overflow-hidden">
-                  <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gold group-hover:w-full transition-all duration-500" />
                   <span className="font-display text-5xl font-semibold text-forest/[0.06] select-none absolute top-4 right-5">{item.num}</span>
-                  <span className="text-3xl">{item.icon}</span>
+                  <item.icon className="w-7 h-7 text-gold" strokeWidth={1.5} aria-hidden />
                   <div>
                     <h3 className="font-display text-xl font-semibold text-forest leading-tight">{item.title}</h3>
-                    <p className="text-sm text-charcoal/60 mt-2 leading-relaxed">{item.body}</p>
+                    <p className="text-sm text-charcoal/65 mt-2 leading-relaxed">{item.body}</p>
                   </div>
                 </div>
               </StaggerChild>
@@ -258,7 +251,7 @@ export default async function AboutPage() {
       </section>
 
       {/* CTA — photo background */}
-      <section className="relative py-24 text-center overflow-hidden">
+      <section className="on-dark relative py-24 text-center overflow-hidden">
         <div className="absolute inset-0">
           <Photo
             src={ctaPhoto}

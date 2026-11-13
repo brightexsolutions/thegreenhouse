@@ -45,7 +45,7 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
         <LinkIcon size={13} className="text-forest" />
         <h3 className="text-sm font-semibold text-charcoal">Check-in Link</h3>
       </div>
-      <p className="text-xs text-charcoal/50 mb-4 leading-relaxed">
+      <p className="text-xs text-charcoal/70 mb-4 leading-relaxed">
         Share with your door team. No admin login required, access is protected by the token in the link.
       </p>
 
@@ -65,7 +65,7 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
         <>
           {/* URL preview */}
           <div className="bg-off-white rounded-xl px-3 py-2.5 mb-3 border border-mist">
-            <p className="text-[11px] text-charcoal/50 font-mono truncate">
+            <p className="text-[11px] text-charcoal/70 font-mono truncate">
               {checkinUrl}
             </p>
           </div>
@@ -94,7 +94,7 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
           {!confirm ? (
             <button
               onClick={() => setConfirm(true)}
-              className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] text-charcoal/35 hover:text-charcoal/60 transition-colors"
+              className="w-full flex items-center justify-center gap-1.5 py-2 text-[11px] text-charcoal/65 hover:text-charcoal/65 transition-colors"
             >
               <RefreshCw size={11} />
               Regenerate link
@@ -118,7 +118,7 @@ export function CheckinLinkPanel({ eventId, eventSlug, checkinToken }: CheckinLi
                 </button>
                 <button
                   onClick={() => setConfirm(false)}
-                  className="flex-1 py-2 rounded-lg border border-mist text-xs text-charcoal/60 hover:border-charcoal/30 transition-colors"
+                  className="flex-1 py-2 rounded-lg border border-mist text-xs text-charcoal/65 hover:border-charcoal/30 transition-colors"
                 >
                   Cancel
                 </button>

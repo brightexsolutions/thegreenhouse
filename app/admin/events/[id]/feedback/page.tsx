@@ -34,7 +34,7 @@ export default async function EventFeedbackPage({ params }: Props) {
 
       {/* Summary row */}
       <div className="flex items-center gap-3 flex-wrap">
-        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/8 text-forest text-xs font-medium">
+        <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/10 text-forest text-xs font-medium">
           <MessageSquare size={11} />
           {list.length} response{list.length !== 1 ? "s" : ""}
         </div>
@@ -51,9 +51,9 @@ export default async function EventFeedbackPage({ params }: Props) {
       {/* Feedback list */}
       {list.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-center">
-          <MessageSquare size={28} className="text-charcoal/20 mb-3" />
-          <p className="text-sm text-charcoal/40">No feedback submitted yet</p>
-          <p className="text-xs text-charcoal/30 mt-1">Responses will appear here as attendees submit them</p>
+          <MessageSquare size={28} className="text-charcoal/65 mb-3" />
+          <p className="text-sm text-charcoal/65">No feedback submitted yet</p>
+          <p className="text-xs text-charcoal/65 mt-1">Responses will appear here as attendees submit them</p>
         </div>
       ) : (
         <div className="grid gap-3">
@@ -68,11 +68,11 @@ export default async function EventFeedbackPage({ params }: Props) {
                 </span>
               </div>
               <div className="flex items-center gap-3 mt-3 pt-3 border-t border-mist">
-                <span className="text-xs text-charcoal/40">
+                <span className="text-xs text-charcoal/65">
                   {item.name ?? <span className="italic">Anonymous</span>}
                 </span>
-                <span className="text-charcoal/20">·</span>
-                <span className="text-xs text-charcoal/30">
+                <span className="text-charcoal/65">·</span>
+                <span className="text-xs text-charcoal/65">
                   {new Date(item.created_at).toLocaleDateString("en-KE", {
                     day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit",
                   })}

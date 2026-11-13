@@ -27,7 +27,7 @@ export default async function EventDetailLayout({ params, children }: Props) {
         <div className="flex items-center justify-between mb-0 pb-4">
           <div className="flex items-center gap-3 min-w-0">
             <div className="min-w-0">
-              <p className="text-[10px] text-charcoal/40 uppercase tracking-wider mb-0.5">Event</p>
+              <p className="text-[10px] text-charcoal/65 uppercase tracking-wider mb-0.5">Event</p>
               <h1 className="text-lg font-semibold text-charcoal truncate">{event.title}</h1>
             </div>
             <StatusBadge status={event.status as EventStatus} />
@@ -35,7 +35,7 @@ export default async function EventDetailLayout({ params, children }: Props) {
           <Link
             href={`/events/${event.slug}`}
             target="_blank"
-            className="text-xs text-charcoal/40 hover:text-forest transition-colors flex-shrink-0"
+            className="text-xs text-charcoal/65 hover:text-forest transition-colors flex-shrink-0"
           >
             ↗ View public
           </Link>

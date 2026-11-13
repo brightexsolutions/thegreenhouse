@@ -31,12 +31,12 @@ export function SongContributionPanel({ eventTitle, songSubmissionToken }: Props
   return (
     <div className="bg-white rounded-2xl border border-mist p-5">
       <div className="flex items-start gap-3 mb-4">
-        <div className="w-9 h-9 rounded-xl bg-forest/8 flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0">
           <Music2 size={15} className="text-forest" />
         </div>
         <div>
           <h3 className="text-sm font-semibold text-charcoal">Song Contributions</h3>
-          <p className="text-xs text-charcoal/50 mt-0.5">
+          <p className="text-xs text-charcoal/70 mt-0.5">
             Share this link with your vocalists and worship team. They can submit song titles and lyrics without needing an account.
           </p>
         </div>
@@ -44,7 +44,7 @@ export function SongContributionPanel({ eventTitle, songSubmissionToken }: Props
 
       {/* Link display */}
       <div className="flex items-center gap-2 p-3 bg-off-white rounded-xl border border-mist mb-3">
-        <p className="flex-1 text-xs text-charcoal/50 font-mono truncate">{link}</p>
+        <p className="flex-1 text-xs text-charcoal/70 font-mono truncate">{link}</p>
         <button
           onClick={copyLink}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-mist text-xs font-semibold text-charcoal/70 hover:border-forest/30 hover:text-forest transition-all flex-shrink-0"
@@ -69,7 +69,7 @@ export function SongContributionPanel({ eventTitle, songSubmissionToken }: Props
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-mist text-xs font-semibold text-charcoal/60 hover:border-forest/30 hover:text-forest transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-mist text-xs font-semibold text-charcoal/65 hover:border-forest/30 hover:text-forest transition-colors"
         >
           <ExternalLink size={11} /> Preview page
         </a>

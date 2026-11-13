@@ -40,17 +40,17 @@ export default async function EventRegistrantsPage({ params }: Props) {
   return (
     <div className="flex flex-col gap-3">
       <div className="flex items-center justify-between flex-shrink-0">
-        <p className="text-sm text-charcoal/50">{list.length} registrant{list.length !== 1 ? "s" : ""}</p>
+        <p className="text-sm text-charcoal/70">{list.length} registrant{list.length !== 1 ? "s" : ""}</p>
         <div className="flex items-center gap-2">
           <a
             href={`/api/admin/events/${id}/export?format=csv`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-mist text-xs text-charcoal/60 hover:border-forest/30 hover:text-forest transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-mist text-xs text-charcoal/65 hover:border-forest/30 hover:text-forest transition-all"
           >
             <Download size={11} /> CSV
           </a>
           <a
             href={`/api/admin/events/${id}/export?format=pdf`}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-mist text-xs text-charcoal/60 hover:border-forest/30 hover:text-forest transition-all"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-mist text-xs text-charcoal/65 hover:border-forest/30 hover:text-forest transition-all"
           >
             <Download size={11} /> PDF
           </a>

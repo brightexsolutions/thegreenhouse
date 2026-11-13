@@ -197,7 +197,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
       <div className="bg-white rounded-2xl border border-mist p-6 space-y-5">
         <div>
           <h3 className="text-sm font-semibold text-charcoal">Media</h3>
-          <p className="text-xs text-charcoal/45 mt-0.5">Banner: wide hero background. Poster: portrait shown in event details.</p>
+          <p className="text-xs text-charcoal/65 mt-0.5">Banner: wide hero background. Poster: portrait shown in event details.</p>
         </div>
 
         {/* Banner + Poster — stacked on mobile, side by side on sm+ */}
@@ -206,8 +206,8 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
           {/* Banner */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-charcoal/60">Banner</span>
-              <span className="text-[11px] text-charcoal/30">landscape · hero bg</span>
+              <span className="text-xs font-semibold text-charcoal/65">Banner</span>
+              <span className="text-[11px] text-charcoal/65">landscape · hero bg</span>
             </div>
             {bannerPath ? (
               <div className="rounded-2xl overflow-hidden border border-mist">
@@ -222,16 +222,16 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
                 </div>
                 <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
                   <button type="button" onClick={() => setLightboxSrc(mediaUrl(bannerPath))}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all">
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/70 hover:text-forest hover:bg-forest/10 transition-all">
                     <Eye size={10} /> View
                   </button>
-                  <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
+                  <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/70 hover:text-forest hover:bg-forest/10 transition-all cursor-pointer">
                     <RefreshCw size={10} /> Replace
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
                       onChange={(e) => uploadImage(e, setUploadingBanner, setBannerPath)} />
                   </label>
                   <button type="button" onClick={() => setBannerPath(null)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/70 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
                     <Trash2 size={10} /> Delete
                   </button>
                 </div>
@@ -244,24 +244,24 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
             ) : (
               <div className="space-y-2">
                 <label className={cn(
-                  "flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3"
+                  "flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/5"
                 )}>
                   {uploadingBanner
                     ? <Loader2 size={16} className="animate-spin text-forest" />
-                    : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload banner</span></>
+                    : <><Upload size={16} className="text-charcoal/65" /><span className="text-xs text-charcoal/65">Upload banner</span></>
                   }
                   <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
                     onChange={(e) => uploadImage(e, setUploadingBanner, setBannerPath)} />
                 </label>
                 <div className="flex items-center gap-1.5">
-                  <Link2 size={11} className="text-charcoal/25 flex-shrink-0" />
+                  <Link2 size={11} className="text-charcoal/65 flex-shrink-0" />
                   <input
                     type="url"
                     value={bannerUrlInput}
                     onChange={e => setBannerUrlInput(e.target.value)}
                     onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); if (bannerUrlInput.trim()) { setBannerPath(bannerUrlInput.trim()); setBannerUrlInput(""); } } }}
                     placeholder="Or paste image URL"
-                    className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/40"
+                    className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:border-forest/40"
                   />
                   <button type="button" onClick={() => { if (bannerUrlInput.trim()) { setBannerPath(bannerUrlInput.trim()); setBannerUrlInput(""); } }}
                     disabled={!bannerUrlInput.trim()}
@@ -276,8 +276,8 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
           {/* Poster */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-semibold text-charcoal/60">Poster</span>
-              <span className="text-[11px] text-charcoal/30">portrait · event details</span>
+              <span className="text-xs font-semibold text-charcoal/65">Poster</span>
+              <span className="text-[11px] text-charcoal/65">portrait · event details</span>
             </div>
             {coverPath ? (
               <div className="rounded-2xl overflow-hidden border border-mist">
@@ -292,16 +292,16 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
                 </div>
                 <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
                   <button type="button" onClick={() => setLightboxSrc(mediaUrl(coverPath))}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all">
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/70 hover:text-forest hover:bg-forest/10 transition-all">
                     <Eye size={10} /> View
                   </button>
-                  <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
+                  <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/70 hover:text-forest hover:bg-forest/10 transition-all cursor-pointer">
                     <RefreshCw size={10} /> Replace
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
                       onChange={(e) => uploadImage(e, setUploadingCover, setCoverPath)} />
                   </label>
                   <button type="button" onClick={() => setCoverPath(null)}
-                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/70 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
                     <Trash2 size={10} /> Delete
                   </button>
                 </div>
@@ -313,23 +313,23 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
               </div>
             ) : (
               <div className="space-y-2">
-                <label className="flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
+                <label className="flex flex-col items-center justify-center gap-2 h-28 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/5">
                   {uploadingCover
                     ? <Loader2 size={16} className="animate-spin text-forest" />
-                    : <><Upload size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload poster</span></>
+                    : <><Upload size={16} className="text-charcoal/65" /><span className="text-xs text-charcoal/65">Upload poster</span></>
                   }
                   <input type="file" accept="image/jpeg,image/png,image/webp" className="sr-only"
                     onChange={(e) => uploadImage(e, setUploadingCover, setCoverPath)} />
                 </label>
                 <div className="flex items-center gap-1.5">
-                  <Link2 size={11} className="text-charcoal/25 flex-shrink-0" />
+                  <Link2 size={11} className="text-charcoal/65 flex-shrink-0" />
                   <input
                     type="url"
                     value={coverUrlInput}
                     onChange={e => setCoverUrlInput(e.target.value)}
                     onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); if (coverUrlInput.trim()) { setCoverPath(coverUrlInput.trim()); setCoverUrlInput(""); } } }}
                     placeholder="Or paste image URL"
-                    className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/40"
+                    className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:border-forest/40"
                   />
                   <button type="button" onClick={() => { if (coverUrlInput.trim()) { setCoverPath(coverUrlInput.trim()); setCoverUrlInput(""); } }}
                     disabled={!coverUrlInput.trim()}
@@ -345,8 +345,8 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         {/* Highlight video — full width */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-semibold text-charcoal/60">Highlight video</span>
-            <span className="text-[11px] text-charcoal/30">looping clip · past event page</span>
+            <span className="text-xs font-semibold text-charcoal/65">Highlight video</span>
+            <span className="text-[11px] text-charcoal/65">looping clip · past event page</span>
           </div>
           {videoPath ? (
             <div className="rounded-2xl overflow-hidden border border-mist">
@@ -359,16 +359,16 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
               </div>
               <div className="flex items-center gap-1 px-2 py-1.5 bg-off-white border-t border-mist">
                 <button type="button" onClick={() => setLightboxSrc(mediaUrl(videoPath))}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all">
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/70 hover:text-forest hover:bg-forest/10 transition-all">
                   <Eye size={10} /> View
                 </button>
-                <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-forest hover:bg-forest/8 transition-all cursor-pointer">
+                <label className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/70 hover:text-forest hover:bg-forest/10 transition-all cursor-pointer">
                   <RefreshCw size={10} /> Replace
                   <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only"
                     onChange={handleVideoUpload} />
                 </label>
                 <button type="button" onClick={() => setVideoPath(null)}
-                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/50 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
+                  className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] text-charcoal/70 hover:text-red-500 hover:bg-red-50 transition-all ml-auto">
                   <Trash2 size={10} /> Delete
                 </button>
               </div>
@@ -380,23 +380,23 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
             </div>
           ) : (
             <div className="space-y-2">
-              <label className="flex flex-col items-center justify-center gap-2 h-24 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/3">
+              <label className="flex flex-col items-center justify-center gap-2 h-24 rounded-2xl border-2 border-dashed border-mist cursor-pointer transition-all hover:border-forest/30 hover:bg-forest/5">
                 {uploadingVideo
                   ? <Loader2 size={16} className="animate-spin text-forest" />
-                  : <><Video size={16} className="text-charcoal/25" /><span className="text-xs text-charcoal/35">Upload highlight video (MP4 · max 100MB)</span></>
+                  : <><Video size={16} className="text-charcoal/65" /><span className="text-xs text-charcoal/65">Upload highlight video (MP4 · max 100MB)</span></>
                 }
                 <input type="file" accept="video/mp4,video/webm,video/quicktime" className="sr-only"
                   onChange={handleVideoUpload} />
               </label>
               <div className="flex items-center gap-1.5">
-                <Link2 size={11} className="text-charcoal/25 flex-shrink-0" />
+                <Link2 size={11} className="text-charcoal/65 flex-shrink-0" />
                 <input
                   type="url"
                   value={videoUrlInput}
                   onChange={e => setVideoUrlInput(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") { e.preventDefault(); if (videoUrlInput.trim()) { setVideoPath(videoUrlInput.trim()); setVideoUrlInput(""); } } }}
                   placeholder="Or paste video URL"
-                  className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/40"
+                  className="flex-1 px-2.5 py-1.5 rounded-xl border border-mist bg-white text-xs text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:border-forest/40"
                 />
                 <button type="button" onClick={() => { if (videoUrlInput.trim()) { setVideoPath(videoUrlInput.trim()); setVideoUrlInput(""); } }}
                   disabled={!videoUrlInput.trim()}
@@ -455,7 +455,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
             </Field>
             <Field label="Early bird deadline (optional)" error={errors.early_bird_deadline?.message}>
               <input {...register("early_bird_deadline")} type="date" className={inp(false)} />
-              <p className="text-[11px] text-charcoal/40 mt-1 leading-relaxed">Past attendees who register before this date get free entry. Leave blank for no early bird offer.</p>
+              <p className="text-[11px] text-charcoal/65 mt-1 leading-relaxed">Past attendees who register before this date get free entry. Leave blank for no early bird offer.</p>
             </Field>
           </>
         )}
@@ -535,7 +535,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
           <button
             type="button"
             onClick={() => router.back()}
-            className="px-5 py-2.5 rounded-full border border-mist text-charcoal/60 text-sm hover:border-charcoal/20 transition-colors"
+            className="px-5 py-2.5 rounded-full border border-mist text-charcoal/65 text-sm hover:border-charcoal/20 transition-colors"
           >
             Cancel
           </button>
@@ -589,7 +589,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
 
 function inp(hasError: boolean) {
   return cn(
-    "w-full px-4 py-2.5 rounded-xl border text-sm text-charcoal bg-off-white placeholder:text-charcoal/30",
+    "w-full px-4 py-2.5 rounded-xl border text-sm text-charcoal bg-off-white placeholder:text-charcoal/50",
     "focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all",
     hasError ? "border-red-300" : "border-mist"
   );

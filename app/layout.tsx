@@ -141,7 +141,7 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={cn(displayFont.variable, bodyFont.variable)}>
-      <body className="antialiased force-light grain" suppressHydrationWarning>
+      <body className="antialiased force-light" suppressHydrationWarning>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: safeJsonLd(orgJsonLd) }}

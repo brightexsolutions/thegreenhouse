@@ -186,9 +186,9 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                     <Heart size={16} className="text-gold" />
                   </div>
                   <div>
-                    <p className="text-[10px] label-caps text-gold/70 mb-0.5">Support the mission</p>
+                    <p className="text-[10px] label-caps text-gold mb-0.5">Support the mission</p>
                     <h3 className="font-display text-xl font-semibold text-cream leading-tight">Give now</h3>
-                    <p className="text-cream/55 text-xs mt-1 leading-relaxed">
+                    <p className="text-cream/75 text-xs mt-1 leading-relaxed">
                       Venue, production, outreach, your contribution keeps this going.
                     </p>
                   </div>
@@ -196,12 +196,12 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
               </div>
               <div className="bg-white px-6 pt-5 pb-6 space-y-3">
                 <div className="flex items-center gap-2 mb-1">
-                  <Smartphone size={13} className="text-forest/60" />
+                  <Smartphone size={13} className="text-forest/80" />
                   <span className="text-xs font-semibold text-charcoal/70">Via M-Pesa</span>
                 </div>
                 {giving.paybill && (
                   <div className="rounded-2xl bg-off-white border border-mist px-4 py-3">
-                    <p className="text-[10px] label-caps text-charcoal/40 mb-2">Paybill</p>
+                    <p className="text-[10px] label-caps text-charcoal/65 mb-2">Paybill</p>
                     <div className="space-y-1.5">
                       <PayRow step="1" label="Business No." value={giving.paybill} />
                       {giving.account && <PayRow step="2" label="Account No." value={giving.account} />}
@@ -211,17 +211,17 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                 )}
                 {giving.till && !giving.paybill && (
                   <div className="rounded-2xl bg-off-white border border-mist px-4 py-3">
-                    <p className="text-[10px] label-caps text-charcoal/40 mb-2">Buy Goods</p>
+                    <p className="text-[10px] label-caps text-charcoal/65 mb-2">Buy Goods</p>
                     <PayRow step="1" label="Till number" value={giving.till} />
                   </div>
                 )}
                 {giving.phone && (
                   <div className="rounded-2xl bg-off-white border border-mist px-4 py-3">
-                    <p className="text-[10px] label-caps text-charcoal/40 mb-2">Send Money</p>
+                    <p className="text-[10px] label-caps text-charcoal/65 mb-2">Send Money</p>
                     <PayRow step="1" label="Phone" value={giving.phone} />
                   </div>
                 )}
-                <button onClick={closePanel} className="w-full py-2.5 rounded-full border border-mist text-xs text-charcoal/50 hover:border-forest/20 hover:text-forest transition-all mt-1">
+                <button onClick={closePanel} className="w-full py-2.5 rounded-full border border-mist text-xs text-charcoal/70 hover:border-forest/20 hover:text-forest transition-all mt-1">
                   Maybe later
                 </button>
               </div>
@@ -241,11 +241,11 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                     <MessageCircle size={16} className="text-gold" />
                   </div>
                   <div>
-                    <p className="text-[10px] label-caps text-gold/70 mb-0.5">Share your heart</p>
+                    <p className="text-[10px] label-caps text-gold mb-0.5">Share your heart</p>
                     <h3 className="font-display text-xl font-semibold text-cream leading-tight">
                       {submitted ? "Thank you." : "Leave a reflection"}
                     </h3>
-                    <p className="text-cream/55 text-xs mt-1 leading-relaxed">
+                    <p className="text-cream/75 text-xs mt-1 leading-relaxed">
                       {submitted ? "Your words mean a lot to us." : "What's on your heart right now?"}
                     </p>
                   </div>
@@ -265,12 +265,12 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                         onChange={e => setName(e.target.value)}
                         placeholder="Your name (optional)"
                         maxLength={80}
-                        className="w-full px-4 py-2.5 rounded-xl border border-mist text-sm focus:outline-none focus:ring-2 focus:ring-forest/20 placeholder:text-charcoal/30"
+                        className="w-full px-4 py-2.5 rounded-xl border border-mist text-sm focus:outline-none focus:ring-2 focus:ring-forest/20 placeholder:text-charcoal/50"
                       />
                     )}
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={anonymous} onChange={e => setAnonymous(e.target.checked)} className="w-3.5 h-3.5 rounded accent-forest" />
-                      <span className="text-xs text-charcoal/50">Stay anonymous</span>
+                      <span className="text-xs text-charcoal/70">Stay anonymous</span>
                     </label>
                     <div>
                       <textarea
@@ -278,9 +278,9 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                         onChange={e => setMessage(e.target.value.slice(0, 280))}
                         placeholder="What's moved you today?"
                         rows={3}
-                        className="w-full px-4 py-3 rounded-xl border border-mist text-sm resize-none focus:outline-none focus:ring-2 focus:ring-forest/20 placeholder:text-charcoal/30"
+                        className="w-full px-4 py-3 rounded-xl border border-mist text-sm resize-none focus:outline-none focus:ring-2 focus:ring-forest/20 placeholder:text-charcoal/50"
                       />
-                      <span className="text-[11px] text-charcoal/30 float-right">{message.length}/280</span>
+                      <span className="text-[11px] text-charcoal/65 float-right">{message.length}/280</span>
                     </div>
                     {fbError && <p className="text-xs text-red-500">{fbError}</p>}
                     <button
@@ -309,11 +309,11 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                     <Camera size={16} className="text-gold" />
                   </div>
                   <div>
-                    <p className="text-[10px] label-caps text-gold/70 mb-0.5">Capture the night</p>
+                    <p className="text-[10px] label-caps text-gold mb-0.5">Capture the night</p>
                     <h3 className="font-display text-xl font-semibold text-cream leading-tight">
                       {photoSuccess ? "Photo shared!" : "Share a photo"}
                     </h3>
-                    <p className="text-cream/55 text-xs mt-1 leading-relaxed">
+                    <p className="text-cream/75 text-xs mt-1 leading-relaxed">
                       {photoSuccess
                         ? "Thanks for capturing this moment with us."
                         : atPhotoLimit
@@ -332,7 +332,7 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                     {uploadCount < MAX_PHOTOS ? (
                       <button
                         onClick={resetPhoto}
-                        className="px-5 py-2 rounded-full border border-mist text-xs text-charcoal/60 hover:border-forest/30 hover:text-forest transition-colors"
+                        className="px-5 py-2 rounded-full border border-mist text-xs text-charcoal/65 hover:border-forest/30 hover:text-forest transition-colors"
                       >
                         Share another · {MAX_PHOTOS - uploadCount} left
                       </button>
@@ -343,14 +343,14 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                     )}
                   </div>
                 ) : atPhotoLimit ? (
-                  <button onClick={closePanel} className="w-full py-2.5 rounded-full border border-mist text-xs text-charcoal/50 hover:border-forest/20 hover:text-forest transition-all">
+                  <button onClick={closePanel} className="w-full py-2.5 rounded-full border border-mist text-xs text-charcoal/70 hover:border-forest/20 hover:text-forest transition-all">
                     Close
                   </button>
                 ) : (
                   <div className="space-y-3">
                     {!photoFile ? (
                       <div
-                        className="border-2 border-dashed border-mist rounded-2xl p-6 text-center cursor-pointer hover:border-forest/40 hover:bg-forest/3 transition-all"
+                        className="border-2 border-dashed border-mist rounded-2xl p-6 text-center cursor-pointer hover:border-forest/40 hover:bg-forest/5 transition-all"
                         onClick={() => photoInputRef.current?.click()}
                       >
                         <input
@@ -361,11 +361,11 @@ export function DonationPrompt({ eventId, slug, giving, delayMs = 3 * 60 * 1000 
                           onChange={e => { const f = e.target.files?.[0]; if (f) pickPhotoFile(f); e.target.value = ""; }}
                         />
                         <div className="flex flex-col items-center gap-2">
-                          <div className="w-10 h-10 rounded-xl bg-forest/8 flex items-center justify-center">
-                            <Upload size={18} className="text-forest/50" />
+                          <div className="w-10 h-10 rounded-xl bg-forest/10 flex items-center justify-center">
+                            <Upload size={18} className="text-forest/80" />
                           </div>
-                          <p className="text-sm font-medium text-charcoal/60">Tap to choose a photo</p>
-                          <p className="text-xs text-charcoal/35">JPEG, PNG, or WebP · Max {MAX_MB}MB</p>
+                          <p className="text-sm font-medium text-charcoal/65">Tap to choose a photo</p>
+                          <p className="text-xs text-charcoal/65">JPEG, PNG, or WebP · Max {MAX_MB}MB</p>
                         </div>
                       </div>
                     ) : (
@@ -506,10 +506,10 @@ function PayRow({ step, label, value, dim }: { step: string; label: string; valu
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
-        <span className="w-4 h-4 rounded-full bg-forest/10 flex items-center justify-center text-[9px] font-bold text-forest/60 flex-shrink-0">{step}</span>
-        <span className="text-xs text-charcoal/50">{label}</span>
+        <span className="w-4 h-4 rounded-full bg-forest/10 flex items-center justify-center text-[10px] font-bold text-forest/80 flex-shrink-0">{step}</span>
+        <span className="text-xs text-charcoal/70">{label}</span>
       </div>
-      <span className={`text-xs font-semibold ${dim ? "text-charcoal/35" : "text-forest"}`}>{value}</span>
+      <span className={`text-xs font-semibold ${dim ? "text-charcoal/65" : "text-forest"}`}>{value}</span>
     </div>
   );
 }

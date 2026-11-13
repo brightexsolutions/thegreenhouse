@@ -177,7 +177,7 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
 
       {/* Sessions */}
       {sessions.length === 0 ? (
-        <div className="text-center py-16 text-charcoal/30">
+        <div className="text-center py-16 text-charcoal/65">
           <Music2 size={32} className="mx-auto mb-3" />
           <p className="text-sm">Program coming soon</p>
         </div>
@@ -215,13 +215,13 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
               >
                 <div className={cn(
                   "w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0",
-                  hasActive ? "bg-forest/15" : "bg-forest/8"
+                  hasActive ? "bg-forest/15" : "bg-forest/10"
                 )}>
                   <Icon size={16} className="text-forest" />
                 </div>
                 <div className="flex-1 min-w-0 text-left">
                   <p className="text-sm font-semibold text-charcoal">{session.title}</p>
-                  <p className="text-[11px] text-charcoal/40 capitalize mt-0.5">
+                  <p className="text-[11px] text-charcoal/65 capitalize mt-0.5">
                     {session.type}{session.duration_min ? ` · ${session.duration_min} min` : ""}
                     {hasSongs ? ` · ${session.session_songs.length} item${session.session_songs.length > 1 ? "s" : ""}` : ""}
                   </p>
@@ -230,11 +230,11 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
                   {hasActive && (
                     <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
                   )}
-                  <span className="text-[10px] text-charcoal/20 font-medium">#{i + 1}</span>
+                  <span className="text-[10px] text-charcoal/65 font-medium">#{i + 1}</span>
                   {hasSongs && (
                     <ChevronDown
                       size={16}
-                      className={cn("text-charcoal/25 transition-transform duration-200", isOpen && "rotate-180")}
+                      className={cn("text-charcoal/65 transition-transform duration-200", isOpen && "rotate-180")}
                     />
                   )}
                 </div>
@@ -261,7 +261,7 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
                                 </div>
                                 <div className="flex-1 min-w-0">
                                   <p className="text-sm text-charcoal/80 leading-snug">{ss.item_text}</p>
-                                  <p className="text-[10px] text-charcoal/35 capitalize mt-1">{ss.item_type}</p>
+                                  <p className="text-[10px] text-charcoal/65 capitalize mt-1">{ss.item_type}</p>
                                 </div>
                               </div>
                             );
@@ -301,10 +301,10 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
         >
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_100%_0%,rgba(201,162,74,0.12),transparent)]" />
           <div className="relative">
-            <span className="label-caps text-gold/70 text-[9px]">Tonight&apos;s Theme</span>
+            <span className="label-caps text-gold text-[10px]">Tonight&apos;s Theme</span>
             <h3 className="font-display text-2xl font-semibold mt-1 mb-2">{theme.title}</h3>
             {theme.scripture && (
-              <p className="text-gold/80 text-sm flex items-center gap-1.5">
+              <p className="text-gold text-sm flex items-center gap-1.5">
                 <BookOpen size={12} />
                 {theme.scripture}
               </p>
@@ -329,16 +329,16 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
               setShowFeedback(true);
               promptRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
             }}
-            className="w-full flex items-center gap-3 px-5 py-4 bg-white rounded-3xl border border-forest/15 hover:border-forest/30 hover:bg-forest/3 transition-all text-left"
+            className="w-full flex items-center gap-3 px-5 py-4 bg-white rounded-3xl border border-forest/15 hover:border-forest/30 hover:bg-forest/5 transition-all text-left"
           >
-            <div className="w-10 h-10 rounded-xl bg-forest/8 flex items-center justify-center flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0">
               <currentPrompt.icon size={16} className="text-forest" />
             </div>
             <div className="flex-1">
               <p className="text-sm font-semibold text-charcoal">{currentPrompt.text}</p>
-              <p className="text-[11px] text-charcoal/40 mt-0.5">Tap to share, anonymous or with your name</p>
+              <p className="text-[11px] text-charcoal/65 mt-0.5">Tap to share, anonymous or with your name</p>
             </div>
-            <MessageSquare size={14} className="text-charcoal/20 flex-shrink-0" />
+            <MessageSquare size={14} className="text-charcoal/65 flex-shrink-0" />
           </motion.button>
         )}
       </AnimatePresence>
@@ -391,10 +391,10 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
             <div className="bg-forest rounded-3xl shadow-2xl shadow-forest/30 overflow-hidden border border-forest/20">
               {/* Header strip */}
               <div className="flex items-center justify-between px-5 pt-4 pb-0">
-                <span className="text-[9px] font-bold uppercase tracking-widest text-gold/70">Your thoughts matter</span>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-gold">Your thoughts matter</span>
                 <button
                   onClick={() => dismissNudge()}
-                  className="w-6 h-6 rounded-full bg-cream/10 flex items-center justify-center hover:bg-cream/20 transition-colors text-cream/50 hover:text-cream/80 text-xs"
+                  className="w-6 h-6 rounded-full bg-cream/10 flex items-center justify-center hover:bg-cream/20 transition-colors text-cream/75 hover:text-cream/80 text-xs"
                   aria-label="Dismiss"
                 >✕</button>
               </div>
@@ -404,7 +404,7 @@ export function LiveAttendeeView({ eventId, sessions, theme, slug }: Props) {
                 <p className="text-cream font-semibold text-sm leading-snug mb-0.5">
                   {FEEDBACK_PROMPTS[0].text}
                 </p>
-                <p className="text-cream/45 text-xs">
+                <p className="text-cream/65 text-xs">
                   Takes 10 seconds. Helps us make every session better.
                 </p>
               </div>
@@ -445,7 +445,7 @@ function SongRow({
   return (
     <div className={cn(
       "border-b border-mist last:border-none transition-colors",
-      isActive && "bg-forest/4"
+      isActive && "bg-forest/5"
     )}>
       <button
         className="w-full flex items-center gap-3 px-5 py-3.5 hover:bg-off-white active:bg-mist/40 transition-colors text-left"
@@ -453,7 +453,7 @@ function SongRow({
         aria-expanded={isOpen}
       >
         <div className="relative flex-shrink-0">
-          <Music2 size={13} className={cn(isActive ? "text-forest" : "text-charcoal/25")} />
+          <Music2 size={13} className={cn(isActive ? "text-forest" : "text-charcoal/65")} />
           {isActive && (
             <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-green-500 border border-white" />
           )}
@@ -467,12 +467,12 @@ function SongRow({
             {isActive && <span className="ml-2 text-[10px] font-normal text-green-600 bg-green-50 px-1.5 py-0.5 rounded-full">now</span>}
           </span>
           <div className="flex items-center gap-1.5 mt-0.5">
-            {song.artist && <span className="text-[11px] text-charcoal/35 truncate">{song.artist}</span>}
-            {song.artist && vocalist && <span className="text-[9px] text-charcoal/20">·</span>}
+            {song.artist && <span className="text-[11px] text-charcoal/65 truncate">{song.artist}</span>}
+            {song.artist && vocalist && <span className="text-[10px] text-charcoal/65">·</span>}
             {vocalist && (
               <span className={cn(
                 "text-[11px] flex items-center gap-1",
-                isActive ? "text-forest/70 font-medium" : "text-charcoal/40"
+                isActive ? "text-forest/70 font-medium" : "text-charcoal/65"
               )}>
                 <Mic size={9} />
                 {vocalist}
@@ -483,7 +483,7 @@ function SongRow({
         {verses.length > 0 && (
           <ChevronDown
             size={15}
-            className={cn("text-charcoal/25 transition-transform duration-200 ml-1", isOpen && "rotate-180")}
+            className={cn("text-charcoal/65 transition-transform duration-200 ml-1", isOpen && "rotate-180")}
           />
         )}
       </button>

@@ -104,15 +104,15 @@ export function UmwemaMoment({ photo }: { photo?: string | null }) {
 
               {/* Caption strip */}
               <div className="pt-3.5 pb-1 px-1 flex items-center justify-between">
-                <span className="font-display text-sm text-charcoal/45 italic tracking-wide">
+                <span className="font-display text-sm text-charcoal/65 italic tracking-wide">
                   Session 01 · March 2026
                 </span>
-                <span className="label-caps text-gold/55 text-[10px]">Nairobi</span>
+                <span className="label-caps text-gold text-[10px]">Nairobi</span>
               </div>
             </div>
 
             {/* Offset shadow card */}
-            <div className="absolute -bottom-3 -right-3 w-full h-full bg-forest/5 rounded-[2px] border border-forest/8 -z-10" />
+            <div className="absolute -bottom-3 -right-3 w-full h-full bg-forest/5 rounded-[2px] border border-forest/10 -z-10" />
           </motion.div>
 
           {/* Right — song info */}
@@ -160,7 +160,7 @@ export function UmwemaMoment({ photo }: { photo?: string | null }) {
               initial={{ opacity: 0, y: 12 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.48 }}
-              className="text-charcoal/60 text-base leading-relaxed max-w-sm"
+              className="text-charcoal/65 text-base leading-relaxed max-w-sm"
             >
               Sung live at Session 01, this is the sound of what happens when
               tired souls find a room with no pressure and a lot of grace.
@@ -175,11 +175,11 @@ export function UmwemaMoment({ photo }: { photo?: string | null }) {
               className="flex items-center gap-3 pt-1"
             >
               <div className="w-8 h-8 rounded-full bg-gold/15 border border-gold/25 flex items-center justify-center shrink-0">
-                <span className="text-sm">🎵</span>
+                <Music className="w-4 h-4 text-gold" strokeWidth={1.5} aria-hidden />
               </div>
               <div>
                 <p className="text-xs font-semibold text-forest">Worship Team · Session 01</p>
-                <p className="text-xs text-charcoal/40 mt-0.5">March 28, 2026 · Nairobi, Kenya</p>
+                <p className="text-xs text-charcoal/65 mt-0.5">March 28, 2026 · Nairobi, Kenya</p>
               </div>
             </motion.div>
           </div>

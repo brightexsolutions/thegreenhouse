@@ -42,7 +42,7 @@ export default async function LogsPage() {
     <div className="space-y-6">
       <div className="mb-6">
         <h1 className="text-2xl font-semibold text-forest">System Logs</h1>
-        <p className="text-sm text-charcoal/50 mt-1">Communications history, last 200 entries</p>
+        <p className="text-sm text-charcoal/70 mt-1">Communications history, last 200 entries</p>
       </div>
 
       {/* Summary chips */}
@@ -62,8 +62,8 @@ export default async function LogsPage() {
 
       {logs.length === 0 ? (
         <div className="bg-white rounded-2xl border border-mist p-12 text-center">
-          <Info size={24} className="mx-auto text-charcoal/20 mb-3" />
-          <p className="text-sm text-charcoal/50">No log entries yet</p>
+          <Info size={24} className="mx-auto text-charcoal/65 mb-3" />
+          <p className="text-sm text-charcoal/70">No log entries yet</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-mist overflow-hidden">
@@ -71,12 +71,12 @@ export default async function LogsPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-mist bg-off-white">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider w-8" />
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Channel</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Recipient</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Event</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Subject / Message</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Time</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider w-8" />
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Channel</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Recipient</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Event</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Subject / Message</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Time</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-mist/60">
@@ -100,16 +100,16 @@ export default async function LogsPage() {
                       <td className="px-4 py-3 text-charcoal/70 font-mono text-xs max-w-[160px] truncate">
                         {log.recipient}
                       </td>
-                      <td className="px-4 py-3 text-charcoal/60 text-xs max-w-[140px] truncate">
+                      <td className="px-4 py-3 text-charcoal/65 text-xs max-w-[140px] truncate">
                         {(log.events as { title: string } | null)?.title ?? "–"}
                       </td>
-                      <td className="px-4 py-3 text-charcoal/60 text-xs max-w-[200px] truncate">
+                      <td className="px-4 py-3 text-charcoal/65 text-xs max-w-[200px] truncate">
                         {log.error_message
                           ? <span className="text-red-500">{log.error_message}</span>
                           : (log.subject ?? "–")
                         }
                       </td>
-                      <td className="px-4 py-3 text-charcoal/40 text-xs whitespace-nowrap">
+                      <td className="px-4 py-3 text-charcoal/65 text-xs whitespace-nowrap">
                         <span className="flex items-center gap-1">
                           <Clock size={11} />
                           {new Date(log.created_at).toLocaleString("en-KE", { dateStyle: "short", timeStyle: "short" })}

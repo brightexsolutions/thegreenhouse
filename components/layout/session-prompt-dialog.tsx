@@ -22,7 +22,7 @@ const SESSION_KEY = "gh_session_prompt_dismissed";
 
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("en-KE", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
 }
 
@@ -95,7 +95,6 @@ export function SessionPromptDialog({ event }: SessionPromptProps) {
         {/* Header — forest green with gold accent */}
         <div className="relative bg-forest px-7 pt-8 pb-6 overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(201,162,74,0.12),transparent)]" />
-          <div className="absolute top-4 right-16 w-20 h-20 rounded-full border border-cream/5" />
 
           <button
             onClick={dismiss}
@@ -105,32 +104,32 @@ export function SessionPromptDialog({ event }: SessionPromptProps) {
             <X size={14} className="text-cream/70" />
           </button>
 
-          <span className="label-caps text-gold/80 text-xs">Upcoming session</span>
+          <span className="label-caps text-gold text-xs">Upcoming session</span>
           <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream mt-1 leading-tight">
             {event.title}
           </h2>
           {event.theme_title && (
-            <p className="text-gold/80 text-sm mt-1 italic">&ldquo;{event.theme_title}&rdquo;</p>
+            <p className="text-gold text-sm mt-1 italic">&ldquo;{event.theme_title}&rdquo;</p>
           )}
         </div>
 
         {/* Body + Actions — single white block, no internal seams */}
         <div className="bg-white px-7 pt-6 pb-8 space-y-3">
           <div className="flex items-start gap-3">
-            <Calendar size={15} className="text-forest/50 mt-0.5 shrink-0" />
+            <Calendar size={15} className="text-forest/80 mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-forest">{formatDate(event.event_date)}</p>
-              <p className="text-xs text-charcoal/50 mt-0.5">{formatTime(event.event_time)} · {entryLabel}</p>
+              <p className="text-xs text-charcoal/70 mt-0.5">{formatTime(event.event_time)} · {entryLabel}</p>
             </div>
           </div>
           {event.venue_name && (
             <div className="flex items-start gap-3">
-              <MapPin size={15} className="text-forest/50 mt-0.5 shrink-0" />
+              <MapPin size={15} className="text-forest/80 mt-0.5 shrink-0" />
               <p className="text-sm text-charcoal/70">{event.venue_name}</p>
             </div>
           )}
 
-          <p className="text-charcoal/55 text-sm leading-relaxed pt-1">
+          <p className="text-charcoal/70 text-sm leading-relaxed pt-1">
             We&apos;d love to have you. Grab your spot, it only takes a moment.
           </p>
 
@@ -144,7 +143,7 @@ export function SessionPromptDialog({ event }: SessionPromptProps) {
             </Link>
             <button
               onClick={dismiss}
-              className="px-5 py-3.5 rounded-full border border-mist text-charcoal/60 text-sm font-medium hover:border-charcoal/20 hover:text-charcoal/80 transition-colors"
+              className="px-5 py-3.5 rounded-full border border-mist text-charcoal/65 text-sm font-medium hover:border-charcoal/20 hover:text-charcoal/80 transition-colors"
             >
               Maybe later
             </button>

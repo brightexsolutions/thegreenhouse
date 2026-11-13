@@ -7,9 +7,9 @@ type Accent = "green" | "gold" | "blue" | "red" | "purple";
 const COLORS: Record<Accent, { stroke: string; fill: string }> = {
   green:  { stroke: "#1b3a2a", fill: "rgba(27,58,42,0.08)" },
   gold:   { stroke: "#c9a24a", fill: "rgba(201,162,74,0.1)" },
-  blue:   { stroke: "#3b82f6", fill: "rgba(59,130,246,0.08)" },
+  blue:   { stroke: "#4e7a5e", fill: "rgba(78,122,94,0.10)" },
   red:    { stroke: "#ef4444", fill: "rgba(239,68,68,0.08)" },
-  purple: { stroke: "#a855f7", fill: "rgba(168,85,247,0.08)" },
+  purple: { stroke: "#5c4a35", fill: "rgba(92,74,53,0.10)" },
 };
 
 interface MiniChartProps {

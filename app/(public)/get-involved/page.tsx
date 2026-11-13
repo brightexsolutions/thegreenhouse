@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { CalendarDays, Coffee, Landmark, MicVocal, Speaker, Sprout } from "lucide-react";
 import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
 import { InvolvementForm } from "@/components/get-involved/involvement-form";
 
@@ -52,7 +53,7 @@ export default function GetInvolvedPage() {
   return (
     <>
       {/* Hero — photo background */}
-      <section className="relative min-h-[60vh] flex items-end overflow-hidden pt-20">
+      <section className="on-dark relative min-h-[60vh] flex items-end overflow-hidden pt-20">
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=1600&q=75"
@@ -66,12 +67,11 @@ export default function GetInvolvedPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/88 to-forest/55" />
         </div>
-        <div className="absolute top-24 left-16 w-36 h-36 rounded-full border border-cream/5 hidden lg:block" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">
           <div className="grid lg:grid-cols-2 gap-10 items-end">
             <FadeIn>
-              <span className="label-caps text-gold/80">Get Involved</span>
+              <span className="label-caps text-gold">Get Involved</span>
               <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream mt-2 leading-[0.95]">
                 Help build
                 <br />
@@ -88,7 +88,7 @@ export default function GetInvolvedPage() {
       </section>
 
       {/* Two-path — dramatic asymmetric split */}
-      <section className="relative overflow-hidden">
+      <section className="on-dark relative overflow-hidden">
         <div className="grid sm:grid-cols-[58fr_42fr]">
 
           {/* Volunteer panel */}
@@ -107,8 +107,6 @@ export default function GetInvolvedPage() {
             <span className="absolute right-0 top-0 font-display text-[clamp(140px,18vw,220px)] font-semibold leading-none text-white/[0.04] select-none pointer-events-none translate-x-6">
               01
             </span>
-            {/* Vertical accent line */}
-            <div className="absolute left-10 sm:left-14 top-0 bottom-0 w-px bg-gradient-to-b from-transparent via-gold/25 to-transparent hidden sm:block" />
 
             <div className="relative p-8 sm:p-14 pb-10 sm:pb-16">
               <span className="label-caps text-gold text-xs">Ways to serve</span>
@@ -118,10 +116,7 @@ export default function GetInvolvedPage() {
               <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-sm">
                 Worship, hosting, creative, vision, every gifted person has a role here.
               </p>
-              <div className="flex items-center gap-3 mt-7">
-                <div className="w-10 h-px bg-gold group-hover:w-16 transition-all duration-300" />
-                <span className="text-gold text-sm font-semibold tracking-wide">Explore roles</span>
-              </div>
+              <span className="block mt-7 text-gold text-sm font-semibold tracking-wide">Explore roles</span>
             </div>
           </a>
 
@@ -141,9 +136,6 @@ export default function GetInvolvedPage() {
             <span className="absolute right-0 top-0 font-display text-[clamp(140px,16vw,200px)] font-semibold leading-none text-white/[0.04] select-none pointer-events-none translate-x-4">
               02
             </span>
-            {/* Decorative rings */}
-            <div className="absolute top-10 right-10 w-28 h-28 rounded-full border border-gold/15 hidden sm:block" />
-            <div className="absolute top-[52px] right-[52px] w-14 h-14 rounded-full border border-gold/20 hidden sm:block" />
 
             <div className="relative p-8 sm:p-12 pb-10 sm:pb-16">
               <span className="label-caps text-gold text-xs">Partner with us</span>
@@ -153,10 +145,7 @@ export default function GetInvolvedPage() {
               <p className="text-white/70 text-sm sm:text-base leading-relaxed max-w-xs">
                 Fund the space, the sound, and the people who make it all possible.
               </p>
-              <div className="flex items-center gap-3 mt-7">
-                <div className="w-10 h-px bg-gold group-hover:w-16 transition-all duration-300" />
-                <span className="text-gold text-sm font-semibold tracking-wide">Partner with us</span>
-              </div>
+              <span className="block mt-7 text-gold text-sm font-semibold tracking-wide">Partner with us</span>
             </div>
           </a>
         </div>
@@ -193,7 +182,7 @@ export default function GetInvolvedPage() {
                     unoptimized
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0d2218] via-[#0d2218]/80 to-[#0d2218]/15" />
-                  <div className="relative p-7">
+                  <div className="on-dark relative p-7">
                     <span className="label-caps text-gold text-xs">{role.tagline}</span>
                     <h3 className="font-display text-2xl font-semibold text-white mt-1 mb-2">{role.title}</h3>
                     <p className="text-white/85 text-sm leading-relaxed">{role.body}</p>
@@ -206,7 +195,7 @@ export default function GetInvolvedPage() {
       </section>
 
       {/* Cinematic quote strip */}
-      <section className="relative h-[42vh] min-h-[280px] overflow-hidden flex items-center justify-center">
+      <section className="on-dark relative h-[42vh] min-h-[280px] overflow-hidden flex items-center justify-center">
         <Image
           src="https://images.unsplash.com/photo-1516450360452-9312f5e86fc7?auto=format&fit=crop&w=1600&q=70"
           alt=""
@@ -217,7 +206,6 @@ export default function GetInvolvedPage() {
           unoptimized
         />
         <div className="absolute inset-0 bg-forest/75" />
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_80%_at_50%_50%,rgba(201,162,74,0.08),transparent)]" />
         <FadeIn>
           <div className="relative text-center px-6 max-w-2xl mx-auto">
             <p className="font-display text-3xl sm:text-4xl md:text-5xl font-semibold text-cream leading-tight">
@@ -237,11 +225,11 @@ export default function GetInvolvedPage() {
               <h2 className="font-display text-4xl md:text-5xl font-semibold text-forest mt-2 mb-5 leading-tight">
                 Why your generosity<br />matters
               </h2>
-              <p className="text-charcoal/60 text-base leading-relaxed mb-4">
+              <p className="text-charcoal/65 text-base leading-relaxed mb-4">
                 Every session has real costs: a warm venue, quality sound, invited guests, and the
                 small touches that make the room feel like a haven, not just a hall.
               </p>
-              <p className="text-charcoal/60 text-base leading-relaxed">
+              <p className="text-charcoal/65 text-base leading-relaxed">
                 By giving, you&apos;re not just covering expenses. You&apos;re directly investing in a space
                 where many people come tired and leave restored, and in the larger vision of community
                 outreach, mental health support, and discipleship that lies ahead.
@@ -268,15 +256,15 @@ export default function GetInvolvedPage() {
                   />
                   {/* Strong gradient so text is always legible */}
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0d2218] via-[#0d2218]/85 to-[#0d2218]/25" />
-                  <div className="absolute inset-x-0 bottom-0 p-7 space-y-3.5">
+                  <div className="on-dark absolute inset-x-0 bottom-0 p-7 space-y-3.5">
                     {[
-                      { icon: "🏛", label: "Venue & Space",     body: "A warm, comfortable physical setting, the foundation of everything." },
-                      { icon: "🎵", label: "Sound & Equipment", body: "Quality acoustics so worship doesn't feel like an afterthought." },
-                      { icon: "👤", label: "Invited Guests",    body: "Voices and gifts that enrich every session for everyone in the room." },
-                      { icon: "☕", label: "Hospitality",       body: "The small touches that turn a gathering into a community." },
+                      { icon: Landmark, label: "Venue & Space",     body: "A warm, comfortable physical setting, the foundation of everything." },
+                      { icon: Speaker, label: "Sound & Equipment", body: "Quality acoustics so worship doesn't feel like an afterthought." },
+                      { icon: MicVocal, label: "Invited Guests",    body: "Voices and gifts that enrich every session for everyone in the room." },
+                      { icon: Coffee, label: "Hospitality",       body: "The small touches that turn a gathering into a community." },
                     ].map((item) => (
                       <div key={item.label} className="flex items-start gap-3">
-                        <span className="text-base mt-0.5 shrink-0">{item.icon}</span>
+                        <item.icon className="w-4 h-4 mt-0.5 shrink-0 text-gold" strokeWidth={1.5} aria-hidden />
                         <div>
                           <p className="font-semibold text-white text-sm leading-snug">{item.label}</p>
                           <p className="text-white/70 text-xs leading-relaxed mt-0.5">{item.body}</p>
@@ -296,11 +284,10 @@ export default function GetInvolvedPage() {
         className="py-20 md:py-28 relative overflow-hidden"
         style={{ background: "linear-gradient(160deg, #1b3a2a 0%, #2d5240 50%, #1b3a2a 100%)" }}
       >
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,rgba(201,162,74,0.06),transparent)]" />
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
             <div className="text-center mb-14">
-              <span className="label-caps text-gold/80">How we serve</span>
+              <span className="label-caps text-gold">How we serve</span>
               <h2 className="font-display text-4xl md:text-5xl font-semibold text-cream mt-2">
                 The posture we carry
               </h2>
@@ -331,27 +318,27 @@ export default function GetInvolvedPage() {
               <h2 className="font-display text-4xl md:text-5xl font-semibold text-forest mt-2 mb-5 leading-tight">
                 Tell us a little<br />about yourself
               </h2>
-              <p className="text-charcoal/60 text-base leading-relaxed mb-8">
+              <p className="text-charcoal/65 text-base leading-relaxed mb-8">
                 Fill in the form and someone from the team will reach out.
                 No pressure, no commitment, just a conversation.
               </p>
               <div className="space-y-4">
                 <div className="flex items-start gap-3">
                   <span className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-sm">🌱</span>
+                    <Sprout className="w-4 h-4 text-forest" strokeWidth={1.5} aria-hidden />
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-forest">Not sure where to start?</p>
-                    <p className="text-sm text-charcoal/60 mt-0.5">Just attend a session first. Let the room show you where you belong.</p>
+                    <p className="text-sm text-charcoal/65 mt-0.5">Just attend a session first. Let the room show you where you belong.</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center shrink-0 mt-0.5">
-                    <span className="text-sm">📅</span>
+                    <CalendarDays className="w-4 h-4 text-forest" strokeWidth={1.5} aria-hidden />
                   </span>
                   <div>
                     <p className="text-sm font-semibold text-forest">Sessions are quarterly</p>
-                    <p className="text-sm text-charcoal/60 mt-0.5">We gather four times a year in different venues across Nairobi.</p>
+                    <p className="text-sm text-charcoal/65 mt-0.5">We gather four times a year in different venues across Nairobi.</p>
                   </div>
                 </div>
               </div>

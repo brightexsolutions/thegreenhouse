@@ -1,5 +1,6 @@
 "use client";
 
+import { Leaf } from "lucide-react";
 import { EventCard } from "./event-card";
 import { FadeIn } from "@/components/motion/fade-in";
 import type { PublicEvent } from "@/lib/public-event";
@@ -13,9 +14,9 @@ export function EventGrid({ events }: EventGridProps) {
     return (
       <div className="text-center py-20">
         <div className="w-16 h-16 rounded-full border-2 border-mist flex items-center justify-center mx-auto mb-4">
-          <span className="text-2xl">🌿</span>
+          <Leaf className="w-6 h-6 text-sage" strokeWidth={1.5} aria-hidden />
         </div>
-        <p className="text-charcoal/40 text-sm">No sessions yet. Check back soon.</p>
+        <p className="text-charcoal/65 text-sm">No sessions yet. Check back soon.</p>
       </div>
     );
   }

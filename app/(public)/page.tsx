@@ -50,18 +50,35 @@ async function getNextEvent(): Promise<PublicEvent | null> {
   }
 }
 
+/** Sessions held or announced, for the hero badge and the stats strip. */
+async function getSessionCount(): Promise<number | undefined> {
+  try {
+    const supabase = createAdminClient();
+    const { count } = await supabase
+      .from("events")
+      .select("id", { count: "exact", head: true })
+      .in("status", ["published", "live", "past"])
+      .is("deleted_at", null);
+    return count && count > 0 ? count : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
 export default async function HomePage() {
-  const [nextEvent, gallery] = await Promise.all([getNextEvent(), getSitePhotos(8)]);
+  const [nextEvent, gallery, sessionCount] = await Promise.all([
+    getNextEvent(), getSitePhotos(8), getSessionCount(),
+  ]);
   const photos = gallery.map(g => g.path);
 
   return (
     <>
       {/* 1 — Hero with 4-card floating collage */}
-      <HeroCollage photos={photos} />
+      <HeroCollage photos={photos} sessionCount={sessionCount} />
 
       {/* Thin identity strip */}
       <MarqueeStrip />
-      <StatsStrip entryDisplay={
+      <StatsStrip sessionCount={sessionCount} entryDisplay={
         nextEvent
           ? nextEvent.type === "paid" && nextEvent.price_kes
             ? `KES ${nextEvent.price_kes.toLocaleString()}`

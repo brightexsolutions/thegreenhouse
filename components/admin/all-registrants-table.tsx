@@ -137,12 +137,12 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
       {/* Toolbar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative flex-1 w-full sm:max-w-xs">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/65" />
           <input
             value={query}
             onChange={e => { setQuery(e.target.value); reset(); }}
             placeholder="Search name, email, phone…"
-            className="w-full pl-9 pr-4 py-2 rounded-xl border border-mist bg-white text-sm placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
+            className="w-full pl-9 pr-4 py-2 rounded-xl border border-mist bg-white text-sm placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
           />
         </div>
 
@@ -168,7 +168,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
               onClick={() => { setAttended(f); reset(); }}
               className={cn(
                 "px-3 py-1.5 rounded-lg text-xs font-medium transition-all capitalize",
-                attended === f ? "bg-forest text-cream" : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
+                attended === f ? "bg-forest text-cream" : "text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5"
               )}
             >
               {f}
@@ -179,7 +179,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
         <button
           onClick={refresh}
           title="Refresh"
-          className="flex-shrink-0 p-2 rounded-xl border border-mist bg-white text-charcoal/40 hover:text-forest hover:border-forest/30 transition-all"
+          className="flex-shrink-0 p-2 rounded-xl border border-mist bg-white text-charcoal/65 hover:text-forest hover:border-forest/30 transition-all"
         >
           <RefreshCw size={14} className={cn("transition-transform", spinning && "animate-spin")} />
         </button>
@@ -190,10 +190,10 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="w-12 h-12 rounded-2xl bg-charcoal/5 flex items-center justify-center mb-3">
-              <Users size={20} className="text-charcoal/25" />
+              <Users size={20} className="text-charcoal/65" />
             </div>
-            <p className="text-sm font-medium text-charcoal/40">No registrants found</p>
-            <p className="text-xs text-charcoal/25 mt-1">
+            <p className="text-sm font-medium text-charcoal/65">No registrants found</p>
+            <p className="text-xs text-charcoal/65 mt-1">
               {query || eventId !== "all" || attended !== "all"
                 ? "Try adjusting your filters"
                 : "Registrations will appear here"}
@@ -205,12 +205,12 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
               <table className="w-full">
                 <thead className="sticky top-0 bg-white z-10">
                   <tr className="border-b border-mist">
-                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3">Person</th>
-                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden md:table-cell">Session</th>
-                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden sm:table-cell">Role</th>
-                    <th className="text-center text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3">Ticket</th>
-                    <th className="text-center text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3">Attended</th>
-                    <th className="text-right text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3 hidden lg:table-cell">Registered</th>
+                    <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-5 py-3">Person</th>
+                    <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3 hidden md:table-cell">Session</th>
+                    <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3 hidden sm:table-cell">Role</th>
+                    <th className="text-center text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3">Ticket</th>
+                    <th className="text-center text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3">Attended</th>
+                    <th className="text-right text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-5 py-3 hidden lg:table-cell">Registered</th>
                     <th className="px-4 py-3" />
                   </tr>
                 </thead>
@@ -219,7 +219,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                     <tr key={r.id} className="hover:bg-off-white transition-colors">
                       <td className="px-5 py-3">
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-full bg-forest/8 flex items-center justify-center flex-shrink-0">
+                          <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center flex-shrink-0">
                             <span className="text-[10px] font-bold text-forest uppercase">
                               {r.first_name[0]}{r.last_name[0]}
                             </span>
@@ -228,12 +228,12 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                             <p className="text-sm font-medium text-charcoal truncate">{r.first_name} {r.last_name}</p>
                             <div className="flex items-center gap-2 mt-0.5">
                               {r.email && (
-                                <span className="flex items-center gap-1 text-[10px] text-charcoal/40 truncate">
+                                <span className="flex items-center gap-1 text-[10px] text-charcoal/65 truncate">
                                   <Mail size={9} /> {r.email}
                                 </span>
                               )}
                               {r.phone && (
-                                <span className="flex items-center gap-1 text-[10px] text-charcoal/40">
+                                <span className="flex items-center gap-1 text-[10px] text-charcoal/65">
                                   <Phone size={9} /> {r.phone}
                                 </span>
                               )}
@@ -243,15 +243,15 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                       </td>
                       <td className="px-4 py-3 hidden md:table-cell">
                         {r.events ? (
-                          <p className="text-xs text-charcoal/60 truncate max-w-[140px]">
+                          <p className="text-xs text-charcoal/65 truncate max-w-[140px]">
                             {sessionName(r.events.title)}
                           </p>
                         ) : (
-                          <span className="text-[10px] text-charcoal/30">–</span>
+                          <span className="text-[10px] text-charcoal/65">–</span>
                         )}
                       </td>
                       <td className="px-4 py-3 hidden sm:table-cell">
-                        <span className="text-[10px] text-charcoal/50 bg-charcoal/5 px-2 py-0.5 rounded-lg">
+                        <span className="text-[10px] text-charcoal/70 bg-charcoal/5 px-2 py-0.5 rounded-lg">
                           {ROLE_LABELS[r.role] ?? r.role}
                         </span>
                       </td>
@@ -259,22 +259,22 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                         <span title={r.ticket_sent ? "Ticket sent" : "Not sent"}>
                           {r.ticket_sent
                             ? <CheckCircle2 size={14} className="text-green-500 mx-auto" />
-                            : <Circle size={14} className="text-charcoal/20 mx-auto" />
+                            : <Circle size={14} className="text-charcoal/65 mx-auto" />
                           }
                         </span>
                       </td>
                       <td className="px-4 py-3 text-center">
                         <span className={cn(
                           "text-[10px] px-2 py-0.5 rounded-full font-semibold",
-                          r.checked_in ? "bg-green-100 text-green-700" : "bg-charcoal/5 text-charcoal/40"
+                          r.checked_in ? "bg-green-100 text-green-700" : "bg-charcoal/5 text-charcoal/65"
                         )}>
                           {r.checked_in ? "Present" : "Absent"}
                         </span>
                       </td>
                       <td className="px-5 py-3 text-right hidden lg:table-cell">
-                        <p className="text-[10px] text-charcoal/35">
+                        <p className="text-[10px] text-charcoal/65">
                           {new Date(r.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "2-digit" })}
-                          <span className="block text-charcoal/25 text-[9px] mt-0.5">
+                          <span className="block text-charcoal/65 text-[10px] mt-0.5">
                             {new Date(r.created_at).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })}
                           </span>
                         </p>
@@ -286,7 +286,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                               onClick={() => resendTicket(r.id)}
                               disabled={resending === r.id}
                               title="Resend ticket email"
-                              className="p-1.5 rounded-lg text-charcoal/30 hover:text-forest hover:bg-forest/8 transition-colors disabled:opacity-40"
+                              className="p-1.5 rounded-lg text-charcoal/65 hover:text-forest hover:bg-forest/10 transition-colors disabled:opacity-40"
                             >
                               {resending === r.id
                                 ? <span className="block w-3 h-3 rounded-full border border-forest/30 border-t-forest animate-spin" />
@@ -298,7 +298,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                             <button
                               onClick={() => copyTicketLink(r.ticket_token, r.id)}
                               title="Copy ticket link"
-                              className="p-1.5 rounded-lg text-charcoal/30 hover:text-forest hover:bg-forest/8 transition-colors"
+                              className="p-1.5 rounded-lg text-charcoal/65 hover:text-forest hover:bg-forest/10 transition-colors"
                             >
                               {copied === r.id
                                 ? <CheckCircle2 size={12} className="text-green-500" />
@@ -314,7 +314,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                                 target="_blank"
                                 rel="noopener noreferrer"
                                 title="Share via WhatsApp"
-                                className="p-1.5 rounded-lg text-charcoal/30 hover:text-[#25d366] hover:bg-green-50 transition-colors"
+                                className="p-1.5 rounded-lg text-charcoal/65 hover:text-[#25d366] hover:bg-green-50 transition-colors"
                               >
                                 <ExternalLink size={12} />
                               </a>
@@ -334,14 +334,14 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
             </div>
 
             <div className="flex items-center justify-between px-5 py-3 border-t border-mist flex-shrink-0">
-              <p className="text-xs text-charcoal/40">
+              <p className="text-xs text-charcoal/65">
                 {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length}
               </p>
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setPage(p => Math.max(1, p - 1))}
                   disabled={safePage === 1}
-                  className="px-3 py-1.5 rounded-lg text-xs text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5 disabled:opacity-30 transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5 disabled:opacity-30 transition-all"
                 >
                   ← Prev
                 </button>
@@ -356,7 +356,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                       onClick={() => setPage(n)}
                       className={cn(
                         "w-7 h-7 rounded-lg text-xs font-medium transition-all",
-                        n === safePage ? "bg-forest text-cream" : "text-charcoal/50 hover:bg-charcoal/5"
+                        n === safePage ? "bg-forest text-cream" : "text-charcoal/70 hover:bg-charcoal/5"
                       )}
                     >
                       {n}
@@ -366,7 +366,7 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                 <button
                   onClick={() => setPage(p => Math.min(pages, p + 1))}
                   disabled={safePage === pages}
-                  className="px-3 py-1.5 rounded-lg text-xs text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5 disabled:opacity-30 transition-all"
+                  className="px-3 py-1.5 rounded-lg text-xs text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5 disabled:opacity-30 transition-all"
                 >
                   Next →
                 </button>

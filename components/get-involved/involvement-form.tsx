@@ -46,7 +46,7 @@ const INTEREST_OPTIONS = [
 function inputCls(hasError: boolean) {
   return cn(
     "w-full px-4 py-3 rounded-2xl border text-sm text-charcoal bg-white",
-    "placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40",
+    "placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40",
     "transition-all duration-150",
     hasError ? "border-red-300 focus:ring-red-200 focus:border-red-400" : "border-mist hover:border-forest/20"
   );
@@ -64,7 +64,7 @@ function Field({ label, hint, error, children }: FieldProps) {
     <div className="space-y-1.5">
       <div className="flex items-baseline justify-between gap-2">
         <label className="text-sm font-semibold text-charcoal/80">{label}</label>
-        {hint && <span className="text-xs text-charcoal/40">{hint}</span>}
+        {hint && <span className="text-xs text-charcoal/65">{hint}</span>}
       </div>
       {children}
       {error && <p className="text-xs text-red-500">{error}</p>}
@@ -152,7 +152,7 @@ export function InvolvementForm({ defaultInterest }: InvolvementFormProps = {}) 
           <CheckCircle2 className="text-forest" size={28} />
         </div>
         <h3 className="font-display text-2xl font-semibold text-forest mb-2">We&apos;ve got your message</h3>
-        <p className="text-charcoal/60 text-sm leading-relaxed max-w-xs mx-auto">
+        <p className="text-charcoal/65 text-sm leading-relaxed max-w-xs mx-auto">
           Someone from the team will be in touch soon. Check your inbox, we&apos;ve sent you a copy of your message.
         </p>
       </div>
@@ -229,10 +229,10 @@ export function InvolvementForm({ defaultInterest }: InvolvementFormProps = {}) 
               <p>Send to: <span className="font-bold text-forest">{givingSettings.giving_phone}</span></p>
             )}
             {!givingSettings.giving_paybill && !givingSettings.giving_till && !givingSettings.giving_phone && (
-              <p className="text-charcoal/50 italic text-xs">Payment details coming soon, fill in the form and we&apos;ll be in touch.</p>
+              <p className="text-charcoal/70 italic text-xs">Payment details coming soon, fill in the form and we&apos;ll be in touch.</p>
             )}
           </div>
-          <p className="text-xs text-charcoal/45 mt-2">Fill in the form below so we can acknowledge your support.</p>
+          <p className="text-xs text-charcoal/65 mt-2">Fill in the form below so we can acknowledge your support.</p>
         </div>
       )}
 
@@ -267,7 +267,7 @@ export function InvolvementForm({ defaultInterest }: InvolvementFormProps = {}) 
         )}
       </button>
 
-      <p className="text-center text-xs text-charcoal/40 leading-relaxed">
+      <p className="text-center text-xs text-charcoal/65 leading-relaxed">
         We don&apos;t spam. Your details are only used to follow up on your interest.
       </p>
     </form>

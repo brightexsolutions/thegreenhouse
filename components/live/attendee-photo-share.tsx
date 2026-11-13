@@ -88,21 +88,21 @@ export function AttendeePhotoShare({ slug }: Props) {
         className={cn(
           "w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl border transition-all",
           atLimit
-            ? "bg-charcoal/4 border-mist cursor-not-allowed"
-            : "bg-forest/6 hover:bg-forest/10 border-forest/15"
+            ? "bg-charcoal/5 border-mist cursor-not-allowed"
+            : "bg-forest/5 hover:bg-forest/10 border-forest/15"
         )}
       >
         <div className={cn(
           "w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0",
-          atLimit ? "bg-charcoal/8" : "bg-forest/10"
+          atLimit ? "bg-charcoal/10" : "bg-forest/10"
         )}>
-          <Camera size={16} className={atLimit ? "text-charcoal/30" : "text-forest"} />
+          <Camera size={16} className={atLimit ? "text-charcoal/65" : "text-forest"} />
         </div>
         <div className="text-left flex-1">
-          <p className={cn("text-sm font-semibold", atLimit ? "text-charcoal/40" : "text-forest")}>
+          <p className={cn("text-sm font-semibold", atLimit ? "text-charcoal/65" : "text-forest")}>
             Share a photo from the session
           </p>
-          <p className="text-xs text-charcoal/50 mt-0.5">
+          <p className="text-xs text-charcoal/70 mt-0.5">
             {atLimit
               ? `You've shared ${MAX_PHOTOS} photos, limit reached`
               : `Got a great shot? Drop it here · ${MAX_PHOTOS - uploadCount} remaining`}
@@ -120,7 +120,7 @@ export function AttendeePhotoShare({ slug }: Props) {
           <Camera size={14} className="text-forest" />
           <p className="text-sm font-semibold text-forest">Share a photo</p>
         </div>
-        <button onClick={() => { setOpen(false); reset(); }} className="p-1.5 rounded-lg text-charcoal/35 hover:text-charcoal hover:bg-charcoal/8 transition-colors">
+        <button onClick={() => { setOpen(false); reset(); }} className="p-1.5 rounded-lg text-charcoal/65 hover:text-charcoal hover:bg-charcoal/10 transition-colors">
           <X size={14} />
         </button>
       </div>
@@ -132,16 +132,16 @@ export function AttendeePhotoShare({ slug }: Props) {
               <CheckCircle2 size={28} className="text-green-500" />
             </div>
             <p className="text-sm font-semibold text-charcoal">Photo shared!</p>
-            <p className="text-xs text-charcoal/50">Thanks for sharing the moment.</p>
+            <p className="text-xs text-charcoal/70">Thanks for sharing the moment.</p>
             {uploadCount < MAX_PHOTOS ? (
               <button
                 onClick={reset}
-                className="mt-1 px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60 hover:border-forest/30 hover:text-forest transition-colors"
+                className="mt-1 px-4 py-2 rounded-full border border-mist text-xs text-charcoal/65 hover:border-forest/30 hover:text-forest transition-colors"
               >
                 Share another · {MAX_PHOTOS - uploadCount} left
               </button>
             ) : (
-              <p className="text-xs text-charcoal/35 mt-1">You&apos;ve reached the {MAX_PHOTOS}-photo limit</p>
+              <p className="text-xs text-charcoal/65 mt-1">You&apos;ve reached the {MAX_PHOTOS}-photo limit</p>
             )}
           </div>
         ) : (
@@ -149,7 +149,7 @@ export function AttendeePhotoShare({ slug }: Props) {
             {/* File picker */}
             {!file ? (
               <div
-                className="border-2 border-dashed border-mist rounded-2xl p-6 text-center cursor-pointer hover:border-forest/40 hover:bg-forest/3 transition-all"
+                className="border-2 border-dashed border-mist rounded-2xl p-6 text-center cursor-pointer hover:border-forest/40 hover:bg-forest/5 transition-all"
                 onClick={() => inputRef.current?.click()}
               >
                 <input
@@ -160,11 +160,11 @@ export function AttendeePhotoShare({ slug }: Props) {
                   onChange={e => { const f = e.target.files?.[0]; if (f) pickFile(f); e.target.value = ""; }}
                 />
                 <div className="flex flex-col items-center gap-2">
-                  <div className="w-10 h-10 rounded-xl bg-forest/8 flex items-center justify-center">
-                    <Upload size={18} className="text-forest/50" />
+                  <div className="w-10 h-10 rounded-xl bg-forest/10 flex items-center justify-center">
+                    <Upload size={18} className="text-forest/80" />
                   </div>
-                  <p className="text-sm font-medium text-charcoal/60">Tap to choose a photo</p>
-                  <p className="text-xs text-charcoal/35">JPEG, PNG, or WebP · Max {MAX_MB}MB</p>
+                  <p className="text-sm font-medium text-charcoal/65">Tap to choose a photo</p>
+                  <p className="text-xs text-charcoal/65">JPEG, PNG, or WebP · Max {MAX_MB}MB</p>
                 </div>
               </div>
             ) : (
@@ -213,7 +213,7 @@ export function AttendeePhotoShare({ slug }: Props) {
                 "w-full py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2",
                 file && !uploading
                   ? "bg-forest text-cream hover:bg-moss"
-                  : "bg-charcoal/8 text-charcoal/30 cursor-not-allowed"
+                  : "bg-charcoal/10 text-charcoal/65 cursor-not-allowed"
               )}
             >
               {uploading ? (

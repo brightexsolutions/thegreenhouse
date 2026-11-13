@@ -65,7 +65,7 @@ export function EventHighlightVideo({
       {/* Label */}
       <div className="flex items-center gap-3 mb-4">
         <span className="h-px w-6 bg-gradient-to-r from-transparent to-gold/45" />
-        <span className="text-[10px] uppercase tracking-[0.22em] text-charcoal/45 font-semibold">
+        <span className="text-[10px] uppercase tracking-[0.22em] text-charcoal/65 font-semibold">
           {label}
         </span>
         <span className="h-px flex-1 bg-gradient-to-r from-gold/20 to-transparent" />
@@ -165,14 +165,14 @@ export function EventHighlightVideo({
                 ))}
               </span>
               {eventTitle && (
-                <span className="text-[9px] uppercase tracking-[0.16em] text-charcoal/30 font-medium leading-none truncate max-w-[180px]">
+                <span className="text-[10px] uppercase tracking-[0.16em] text-charcoal/65 font-medium leading-none truncate max-w-[180px]">
                   {eventTitle}
                 </span>
               )}
             </div>
             <div className="flex items-center gap-2">
               {eventDate && (
-                <span className="text-[9px] text-charcoal/25 tabular-nums">{eventDate}</span>
+                <span className="text-[10px] text-charcoal/65 tabular-nums">{eventDate}</span>
               )}
               <span className="flex gap-[3px]">
                 {[0, 1, 2].map(n => (

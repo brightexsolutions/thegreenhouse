@@ -30,17 +30,17 @@ function Counter({ target, suffix = "" }: { target: number; suffix?: string }) {
   );
 }
 
-function buildStats(entryDisplay: string) {
+function buildStats(entryDisplay: string, sessionCount: number) {
   return [
-    { label: "Sessions",  value: 2,    suffix: "", display: null },
+    { label: sessionCount === 1 ? "Session" : "Sessions", value: sessionCount, suffix: "", display: null },
     { label: "Frequency", value: null, suffix: "", display: SESSION_FREQUENCY.charAt(0).toUpperCase() + SESSION_FREQUENCY.slice(1) },
     { label: "Duration",  value: null, suffix: "", display: "2–3 hrs" },
     { label: "Entry",     value: null, suffix: "", display: entryDisplay },
   ];
 }
 
-export function StatsStrip({ entryDisplay = "Free" }: { entryDisplay?: string }) {
-  const stats = buildStats(entryDisplay);
+export function StatsStrip({ entryDisplay = "Free", sessionCount = 4 }: { entryDisplay?: string; sessionCount?: number }) {
+  const stats = buildStats(entryDisplay, sessionCount);
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 divide-x divide-y sm:divide-y-0 divide-mist border-y border-mist">
       {stats.map((s) => (
@@ -48,7 +48,7 @@ export function StatsStrip({ entryDisplay = "Free" }: { entryDisplay?: string })
           <span className="font-display text-3xl md:text-4xl font-semibold text-forest">
             {s.value !== null ? <Counter target={s.value} suffix={s.suffix} /> : s.display}
           </span>
-          <span className="label-caps text-charcoal/40">{s.label}</span>
+          <span className="label-caps text-charcoal/65">{s.label}</span>
         </div>
       ))}
     </div>

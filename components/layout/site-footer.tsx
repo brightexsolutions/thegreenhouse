@@ -108,7 +108,7 @@ export function SiteFooter() {
 
           {/* Navigate */}
           <div>
-            <p className="label-caps text-gold/80 mb-4">Navigate</p>
+            <p className="label-caps text-gold mb-4">Navigate</p>
             <ul className="space-y-2.5 text-sm">
               {[
                 { label: "Home",   href: "/" },
@@ -126,7 +126,7 @@ export function SiteFooter() {
 
           {/* Community */}
           <div>
-            <p className="label-caps text-gold/80 mb-4">Community</p>
+            <p className="label-caps text-gold mb-4">Community</p>
             <ul className="space-y-2.5 text-sm">
               <li>
                 <a href={whatsappUrl()} target="_blank" rel="noopener noreferrer" className="text-cream/60 hover:text-cream transition-colors">
@@ -170,7 +170,7 @@ export function SiteFooter() {
         {/* Bottom bar */}
         <div className={cn(
           "mt-12 pt-6 border-t border-cream/10",
-          "flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-cream/40"
+          "flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-cream/65"
         )}>
           <span>© {year} {SITE_NAME}. All rights reserved.</span>
           <span className="flex items-center gap-1.5">
@@ -179,7 +179,7 @@ export function SiteFooter() {
               href="https://brightexsolutions.co.ke"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-cream/55 hover:text-gold transition-colors underline-offset-2 hover:underline"
+              className="text-cream/75 hover:text-gold transition-colors underline-offset-2 hover:underline"
             >
               Brightex Solutions
             </a>

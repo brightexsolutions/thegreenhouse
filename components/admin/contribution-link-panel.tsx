@@ -38,20 +38,20 @@ function LinkRow({
   return (
     <div className="space-y-2">
       <div className="flex items-start gap-2.5">
-        <div className="w-7 h-7 rounded-lg bg-forest/8 flex items-center justify-center flex-shrink-0 mt-0.5">
+        <div className="w-7 h-7 rounded-lg bg-forest/10 flex items-center justify-center flex-shrink-0 mt-0.5">
           {icon}
         </div>
         <div>
           <p className="text-xs font-semibold text-charcoal">{label}</p>
-          <p className="text-[11px] text-charcoal/45 mt-0.5 leading-relaxed">{description}</p>
+          <p className="text-[11px] text-charcoal/65 mt-0.5 leading-relaxed">{description}</p>
         </div>
       </div>
 
       <div className="flex items-center gap-2 p-2.5 bg-off-white rounded-xl border border-mist">
-        <p className="flex-1 text-[11px] text-charcoal/45 font-mono truncate">{link}</p>
+        <p className="flex-1 text-[11px] text-charcoal/65 font-mono truncate">{link}</p>
         <button
           onClick={copyLink}
-          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-mist text-[11px] font-semibold text-charcoal/60 hover:border-forest/30 hover:text-forest transition-all flex-shrink-0"
+          className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-mist text-[11px] font-semibold text-charcoal/65 hover:border-forest/30 hover:text-forest transition-all flex-shrink-0"
         >
           {copied ? <Check size={10} className="text-green-600" /> : <Copy size={10} />}
           {copied ? "Copied!" : "Copy"}
@@ -72,7 +72,7 @@ function LinkRow({
           href={link}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-mist text-[11px] font-semibold text-charcoal/50 hover:border-forest/30 hover:text-forest transition-colors"
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-mist text-[11px] font-semibold text-charcoal/70 hover:border-forest/30 hover:text-forest transition-colors"
         >
           <ExternalLink size={10} /> Preview
         </a>
@@ -91,7 +91,7 @@ export function ContributionLinkPanel({ eventTitle, themeContributionToken, triv
     <div className="bg-white rounded-2xl border border-mist p-5">
       <div className="mb-4">
         <h3 className="text-sm font-semibold text-charcoal">Program Contributions</h3>
-        <p className="text-xs text-charcoal/50 mt-0.5">
+        <p className="text-xs text-charcoal/70 mt-0.5">
           Share these links with team members so they can prepare content without needing an admin account.
         </p>
       </div>

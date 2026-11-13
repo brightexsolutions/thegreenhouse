@@ -220,12 +220,12 @@ function getBotReply(input: string, hasGreeted: boolean, event?: UpcomingEvent |
     if (!hasGreeted) {
       return {
         isGreeting: true,
-        text:  "Hey there! 👋 Welcome to The Green House. I'm here to help you learn about our community. What would you like to know?",
+        text:  "Hey there! Welcome to The Green House. I'm here to help you learn about our community. What would you like to know?",
         chips: ["What is The Green House?", "When is the next session?", "How do I register?", "Is it free?"],
       };
     }
     return {
-      text:  "Still here! 😊 What would you like to know?",
+      text:  "Still here! What would you like to know?",
       chips: ["What is The Green House?", "When is the next session?", "How do I register?"],
     };
   }
@@ -338,9 +338,13 @@ export function ChatFab({ event }: { event?: UpcomingEvent | null }) {
   // Close chat pane on navigation
   useEffect(() => { setOpen(false); }, [pathname]);
 
-  // Show popup on every page load
+  // Show the teaser on page load, unless a dialog (the upcoming-session
+  // prompt) is already asking for attention: two popups at once is one too many.
   useEffect(() => {
-    const t = setTimeout(() => setPopup(true), POPUP_DELAY);
+    const t = setTimeout(() => {
+      if (document.querySelector('[role="dialog"][aria-modal="true"]')) return;
+      setPopup(true);
+    }, POPUP_DELAY);
     return () => clearTimeout(t);
   }, []);
 
@@ -406,7 +410,7 @@ export function ChatFab({ event }: { event?: UpcomingEvent | null }) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-white font-semibold text-sm leading-none">{SITE_NAME}</p>
-                <p className="text-white/45 text-[11px] mt-0.5">Community assistant</p>
+                <p className="text-white/70 text-[11px] mt-0.5">Community assistant</p>
               </div>
               <button
                 onClick={() => setOpen(false)}
@@ -507,7 +511,7 @@ export function ChatFab({ event }: { event?: UpcomingEvent | null }) {
                 }}
                 placeholder="Ask me anything..."
                 aria-label="Chat message"
-                className="flex-1 text-sm bg-off-white rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-forest/20 text-charcoal placeholder:text-charcoal/30"
+                className="flex-1 text-sm bg-off-white rounded-xl px-3.5 py-2.5 outline-none focus:ring-2 focus:ring-forest/20 text-charcoal placeholder:text-charcoal/50"
               />
               <button
                 onClick={() => send()}
@@ -540,7 +544,7 @@ export function ChatFab({ event }: { event?: UpcomingEvent | null }) {
               aria-label="Open chat"
             >
               <p className="text-sm font-semibold text-forest leading-snug">Questions about The Green House?</p>
-              <p className="text-[11px] text-charcoal/45 mt-0.5">Ask me anything ✦</p>
+              <p className="text-[11px] text-charcoal/65 mt-0.5">Ask me anything</p>
               {/* Down-pointing arrow toward FAB */}
               <div className="absolute -bottom-[7px] right-5 w-3.5 h-3.5 bg-white border-r border-b border-mist rotate-45" />
             </motion.div>

@@ -59,10 +59,6 @@ export function TicketBadgeSection({ pdfUrl, ...badgeProps }: Props) {
           className="relative rounded-3xl overflow-hidden p-6 text-center"
           style={{ background: "linear-gradient(145deg,#1b3a2a 0%,#0d2218 60%,#1b3a2a 100%)" }}
         >
-          {/* Decorative glow */}
-          <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%,rgba(201,162,74,0.2),transparent)" }} />
-          <div className="absolute inset-0 opacity-[0.05] pointer-events-none" style={{ backgroundImage: "radial-gradient(circle,#c9a24a 1px,transparent 1px)", backgroundSize: "22px 22px" }} />
-
           <div className="relative">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#c9a24a]/15 border border-[#c9a24a]/25 mb-4">
               <Sparkles size={10} className="text-[#c9a24a]" />

@@ -43,10 +43,10 @@ function Countdown({ targetMs }: { targetMs: number }) {
             <span className="font-display text-4xl sm:text-5xl font-semibold text-cream tabular-nums leading-none">
               {String(u.value).padStart(2, "0")}
             </span>
-            <span className="label-caps text-cream/45 text-[10px] mt-1.5">{u.label}</span>
+            <span className="label-caps text-cream/65 text-[10px] mt-1.5">{u.label}</span>
           </div>
           {i < units.length - 1 && (
-            <span className="text-gold/60 font-semibold text-2xl mb-4 leading-none">:</span>
+            <span className="text-gold font-semibold text-2xl mb-4 leading-none">:</span>
           )}
         </div>
       ))}
@@ -86,23 +86,20 @@ export function EventTeaser({ event }: { event: PublicEvent | null }) {
         <div className="absolute inset-0 bg-gradient-to-br from-forest/95 via-forest/80 to-moss/60" />
       </div>
 
-      {/* Radial glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_60%_50%_at_50%_100%,rgba(201,162,74,0.12),transparent)]" />
-
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           {/* Left — event details */}
           <FadeIn>
-            <span className="label-caps text-gold/80">Next Session</span>
+            <span className="label-caps text-gold">Next Session</span>
             <h2 className="font-display text-4xl md:text-5xl font-semibold text-cream mt-2 mb-4 leading-tight">
               {event.title}
             </h2>
             {event.theme_title && (
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-cream/10 border border-cream/20 mb-5">
-                <span className="label-caps text-cream/50 text-xs">Theme</span>
+                <span className="label-caps text-cream/75 text-xs">Theme</span>
                 <span className="text-sm font-semibold text-cream">{event.theme_title}</span>
                 {event.theme_scripture && (
-                  <span className="text-sm text-cream/50">· {event.theme_scripture}</span>
+                  <span className="text-sm text-cream/75">· {event.theme_scripture}</span>
                 )}
               </div>
             )}
@@ -145,11 +142,11 @@ export function EventTeaser({ event }: { event: PublicEvent | null }) {
               )}
 
               {/* Countdown card */}
-              <div className="rounded-3xl border border-cream/15 bg-cream/8 backdrop-blur-sm p-8 lg:p-10">
-                <p className="label-caps text-cream/40 text-xs mb-5">Counting down to {sessionName(event.title)}</p>
+              <div className="rounded-3xl border border-cream/15 bg-cream/10 backdrop-blur-sm p-8 lg:p-10">
+                <p className="label-caps text-cream/65 text-xs mb-5">Counting down to {sessionName(event.title)}</p>
                 <Countdown targetMs={startMs} />
                 <div className="mt-8 pt-6 border-t border-cream/15">
-                  <p className="text-sm text-cream/40">
+                  <p className="text-sm text-cream/65">
                     {event.type === "free" ? "Free entry · All welcome" : `KES ${event.price_kes?.toLocaleString()} entry`}
                     {event.capacity ? ` · ${event.capacity} spots` : ""}
                   </p>

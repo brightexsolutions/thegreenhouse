@@ -33,7 +33,7 @@ export default async function AdminCommsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-charcoal">Communications</h1>
-          <p className="text-sm text-charcoal/40 mt-0.5">Send broadcasts and view message history</p>
+          <p className="text-sm text-charcoal/65 mt-0.5">Send broadcasts and view message history</p>
         </div>
         <CommsSendDialog events={eventList} />
       </div>

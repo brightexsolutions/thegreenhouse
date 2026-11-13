@@ -135,7 +135,7 @@ export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormP
         {/* ── Email path ───────────────────────────────────── */}
         {hasEmail && (
           <>
-            <p className="text-charcoal/60 text-sm max-w-xs mx-auto leading-relaxed mb-6">
+            <p className="text-charcoal/65 text-sm max-w-xs mx-auto leading-relaxed mb-6">
               Your ticket has been sent to your email. We look forward to seeing you.
             </p>
             <div className="inline-flex items-center gap-2 text-sm text-forest/70 bg-forest/5 px-5 py-2.5 rounded-full border border-forest/15">
@@ -148,7 +148,7 @@ export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormP
         {/* ── Phone-only path ──────────────────────────────── */}
         {!hasEmail && (
           <>
-            <p className="text-charcoal/60 text-sm max-w-xs mx-auto leading-relaxed mb-6">
+            <p className="text-charcoal/65 text-sm max-w-xs mx-auto leading-relaxed mb-6">
               {typedEmail
                 ? "Your spot is confirmed, but we could not email your ticket just now. Download it below or copy the link to save it somewhere handy, you'll need it at the door."
                 : "Your spot is confirmed. Download your ticket below or copy the link to save it somewhere handy, you'll need it at the door."}
@@ -192,7 +192,7 @@ export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormP
                 )}
               </div>
 
-              <p className="text-xs text-charcoal/45 leading-relaxed">
+              <p className="text-xs text-charcoal/65 leading-relaxed">
                 Keep the PDF or link handy, you&apos;ll need it to check in at the door.
               </p>
             </div>
@@ -200,7 +200,7 @@ export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormP
         )}
 
         {/* Support note — shown for all registrants */}
-        <p className="text-[11px] text-charcoal/38 mt-5 leading-relaxed">
+        <p className="text-[11px] text-charcoal/65 mt-5 leading-relaxed">
           Didn&apos;t receive your ticket?{" "}
           <a
             href={`https://wa.me/${REGISTRATION_SUPPORT_WA}?text=${encodeURIComponent("Hi, I registered for The Green House but didn't receive my ticket.")}`}
@@ -225,23 +225,23 @@ export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormP
           <div className="mt-6 max-w-xs mx-auto">
             <a
               href={ticketPageUrl}
-              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-forest/8 border border-forest/15 hover:bg-forest/12 hover:border-forest/25 transition-all group"
+              className="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-forest/10 border border-forest/15 hover:bg-forest/10 hover:border-forest/25 transition-all group"
             >
               <div className="w-9 h-9 rounded-xl bg-[#c9a24a]/15 border border-[#c9a24a]/25 flex items-center justify-center flex-shrink-0">
                 <Sparkles size={15} className="text-[#c9a24a]" />
               </div>
               <div className="flex-1 min-w-0 text-left">
                 <p className="text-sm font-semibold text-forest">You have a digital badge</p>
-                <p className="text-xs text-charcoal/50 leading-snug">Customize with your photo &amp; share with friends</p>
+                <p className="text-xs text-charcoal/70 leading-snug">Customize with your photo &amp; share with friends</p>
               </div>
-              <span className="text-forest/30 group-hover:text-forest/60 transition-colors text-sm">→</span>
+              <span className="text-forest/80 group-hover:text-forest/80 transition-colors text-sm">→</span>
             </a>
           </div>
         )}
 
         {/* Where next? */}
         <div className="mt-8 max-w-xs mx-auto w-full">
-          <p className="text-[10px] uppercase tracking-widest text-charcoal/30 font-semibold mb-3">While you wait</p>
+          <p className="text-[10px] uppercase tracking-widest text-charcoal/65 font-semibold mb-3">While you wait</p>
           <div className="grid grid-cols-3 gap-2">
             {[
               { href: "/about",        Icon: Users,     label: "About us" },
@@ -253,10 +253,10 @@ export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormP
                 href={href}
                 className="flex flex-col items-center gap-2 px-2 py-3.5 rounded-2xl border border-mist hover:border-forest/25 hover:bg-forest/5 transition-all group"
               >
-                <div className="w-8 h-8 rounded-xl bg-forest/8 group-hover:bg-forest/14 flex items-center justify-center transition-colors">
-                  <Icon size={14} className="text-forest/60 group-hover:text-forest transition-colors" />
+                <div className="w-8 h-8 rounded-xl bg-forest/10 group-hover:bg-forest/15 flex items-center justify-center transition-colors">
+                  <Icon size={14} className="text-forest/80 group-hover:text-forest transition-colors" />
                 </div>
-                <span className="text-[11px] text-charcoal/55 group-hover:text-charcoal font-medium text-center leading-tight transition-colors">{label}</span>
+                <span className="text-[11px] text-charcoal/70 group-hover:text-charcoal font-medium text-center leading-tight transition-colors">{label}</span>
               </a>
             ))}
           </div>
@@ -356,12 +356,12 @@ export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormP
         </div>
         <span className="text-[13px] text-charcoal/65 leading-snug">
           I&apos;m okay with being photographed or filmed during the gathering for social media.
-          <span className="block text-[11px] text-charcoal/38 mt-0.5">Let us know on the night if you&apos;d prefer not to.</span>
+          <span className="block text-[11px] text-charcoal/65 mt-0.5">Let us know on the night if you&apos;d prefer not to.</span>
         </span>
       </label>
 
       {/* Data note */}
-      <p className="text-[11px] text-charcoal/45 leading-relaxed border border-mist rounded-xl px-3.5 py-2.5 bg-off-white">
+      <p className="text-[11px] text-charcoal/65 leading-relaxed border border-mist rounded-xl px-3.5 py-2.5 bg-off-white">
         Your details are stored securely to manage this event and never shared.
       </p>
 
@@ -412,12 +412,12 @@ export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormP
         )}
       </button>
 
-      <p className="text-center text-[11px] text-charcoal/45">
+      <p className="text-center text-[11px] text-charcoal/65">
         {emailValue ? "Ticket will be sent to your email." : "Provide an email or phone to receive your ticket."}
       </p>
 
       {/* Support contact */}
-      <p className="text-center text-[11px] text-charcoal/40 leading-relaxed">
+      <p className="text-center text-[11px] text-charcoal/65 leading-relaxed">
         Having trouble?{" "}
         <a
           href={`https://wa.me/${REGISTRATION_SUPPORT_WA}?text=${encodeURIComponent("Hi, I need help registering for The Green House.")}`}
@@ -444,7 +444,7 @@ export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormP
 function inputCls(hasError: boolean) {
   return cn(
     "w-full px-3.5 py-2.5 rounded-xl border text-base text-charcoal bg-off-white",
-    "placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40",
+    "placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40",
     "transition-all duration-150",
     hasError
       ? "border-red-300 focus:ring-red-200 focus:border-red-400"
@@ -464,7 +464,7 @@ function Field({ label, hint, error, children }: FieldProps) {
     <div className="space-y-1">
       <div className="flex items-baseline justify-between gap-2">
         <label className="text-xs font-semibold text-charcoal/65">{label}</label>
-        {hint && <span className="text-[10px] text-charcoal/45">{hint}</span>}
+        {hint && <span className="text-[10px] text-charcoal/65">{hint}</span>}
       </div>
       {children}
       {error && <p className="text-[11px] text-red-500">{error}</p>}

@@ -128,16 +128,16 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
       <div className="bg-forest pt-10 pb-8 px-4">
         <div className="max-w-2xl mx-auto">
           <FadeIn>
-            <span className="label-caps text-gold/70 text-[9px]">Tonight&apos;s Program</span>
+            <span className="label-caps text-gold text-[10px]">Tonight&apos;s Program</span>
             <h1 className="font-display text-3xl sm:text-4xl font-semibold text-cream mt-1">
               {typedEvent.title}
             </h1>
             {typedEvent.theme_title && (
               <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/15 border border-gold/30">
-                <span className="text-[10px] label-caps text-gold/70">Theme</span>
+                <span className="text-[10px] label-caps text-gold">Theme</span>
                 <span className="text-xs text-gold">{typedEvent.theme_title}</span>
                 {typedEvent.theme_scripture && (
-                  <span className="text-[10px] text-gold/60">· {typedEvent.theme_scripture}</span>
+                  <span className="text-[10px] text-gold">· {typedEvent.theme_scripture}</span>
                 )}
               </div>
             )}

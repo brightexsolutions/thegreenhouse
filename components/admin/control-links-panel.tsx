@@ -11,7 +11,7 @@ type Permission = "full" | "music" | "scenes" | "trivia" | "feedback";
 
 const PERMISSION_META: Record<Permission, { label: string; desc: string; color: string }> = {
   full:     { label: "Full access",  desc: "All tabs: scenes, music, trivia, feedback", color: "bg-forest/15 text-forest border-forest/25" },
-  music:    { label: "Music",        desc: "Song selection and verse navigation",         color: "bg-gold/15 text-gold/80 border-gold/25" },
+  music:    { label: "Music",        desc: "Song selection and verse navigation",         color: "bg-gold/15 text-gold border-gold/25" },
   scenes:   { label: "Scenes",       desc: "Scene switcher and display themes",           color: "bg-blue-50 text-blue-700 border-blue-200" },
   trivia:   { label: "Trivia",       desc: "Launch and manage trivia rounds",             color: "bg-purple-50 text-purple-700 border-purple-200" },
   feedback: { label: "Feedback",     desc: "View and project audience reflections",       color: "bg-amber-50 text-amber-700 border-amber-200" },
@@ -102,13 +102,13 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
           onClick={() => { setShowForm(s => !s); setLabel(""); setPerms(["full"]); }}
           className={cn(
             "flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all",
-            showForm ? "bg-charcoal/8 text-charcoal/60" : "bg-forest text-cream hover:bg-moss"
+            showForm ? "bg-charcoal/10 text-charcoal/65" : "bg-forest text-cream hover:bg-moss"
           )}
         >
           {showForm ? <><ChevronUp size={12} /> Cancel</> : <><Plus size={12} /> Add link</>}
         </button>
       </div>
-      <p className="text-xs text-charcoal/50 mb-4 leading-relaxed">
+      <p className="text-xs text-charcoal/70 mb-4 leading-relaxed">
         Generate access links for worship leaders and team members. Each link can be scoped to specific sections, no admin login needed.
       </p>
 
@@ -126,7 +126,7 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
           />
 
           <div>
-            <p className="text-[10px] font-semibold text-charcoal/40 uppercase tracking-wider mb-2">Permissions</p>
+            <p className="text-[10px] font-semibold text-charcoal/65 uppercase tracking-wider mb-2">Permissions</p>
             <div className="space-y-1.5">
               {(Object.entries(PERMISSION_META) as [Permission, typeof PERMISSION_META[Permission]][]).map(([key, meta]) => {
                 const effectivelyChecked = key === "full" ? perms.includes("full") : perms.includes(key);
@@ -137,7 +137,7 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
                     onClick={() => togglePerm(key)}
                     className={cn(
                       "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border text-left transition-all",
-                      effectivelyChecked ? "border-forest/30 bg-forest/5" : "border-mist bg-white hover:border-forest/20 hover:bg-forest/3"
+                      effectivelyChecked ? "border-forest/30 bg-forest/5" : "border-mist bg-white hover:border-forest/20 hover:bg-forest/5"
                     )}
                   >
                     <div className={cn(
@@ -152,10 +152,10 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
                     </div>
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-semibold text-charcoal">{meta.label}</p>
-                      <p className="text-[10px] text-charcoal/40 mt-0.5">{meta.desc}</p>
+                      <p className="text-[10px] text-charcoal/65 mt-0.5">{meta.desc}</p>
                     </div>
                     {key !== "full" && perms.includes("full") && (
-                      <span className="text-[9px] text-charcoal/25 flex-shrink-0">click to switch</span>
+                      <span className="text-[10px] text-charcoal/65 flex-shrink-0">click to switch</span>
                     )}
                   </button>
                 );
@@ -179,11 +179,11 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
       {/* ── Links list ── */}
       {links.length === 0 ? (
         <div className="text-center py-8">
-          <div className="w-12 h-12 rounded-2xl bg-forest/6 flex items-center justify-center mx-auto mb-3">
-            <Gamepad2 size={18} className="text-forest/30" />
+          <div className="w-12 h-12 rounded-2xl bg-forest/5 flex items-center justify-center mx-auto mb-3">
+            <Gamepad2 size={18} className="text-forest/80" />
           </div>
-          <p className="text-xs text-charcoal/35">No access links yet</p>
-          <p className="text-[11px] text-charcoal/25 mt-0.5">Create one to share the control panel with team members</p>
+          <p className="text-xs text-charcoal/65">No access links yet</p>
+          <p className="text-[11px] text-charcoal/65 mt-0.5">Create one to share the control panel with team members</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -196,7 +196,7 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
                     {link.permissions.map(p => (
                       <span key={p} className={cn(
                         "text-[10px] font-semibold px-1.5 py-0.5 rounded-md border",
-                        PERMISSION_META[p]?.color ?? "bg-charcoal/8 text-charcoal/50 border-charcoal/10"
+                        PERMISSION_META[p]?.color ?? "bg-charcoal/10 text-charcoal/70 border-charcoal/10"
                       )}>
                         {PERMISSION_META[p]?.label ?? p}
                       </span>
@@ -217,7 +217,7 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
                     </button>
                     <button
                       onClick={() => setConfirmDel(null)}
-                      className="px-2 py-1 rounded-lg border border-mist text-[10px] text-charcoal/50 hover:border-charcoal/30"
+                      className="px-2 py-1 rounded-lg border border-mist text-[10px] text-charcoal/70 hover:border-charcoal/30"
                     >
                       No
                     </button>
@@ -226,7 +226,7 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
                   <button
                     onClick={() => setConfirmDel(link.id)}
                     title="Revoke link"
-                    className="p-1.5 rounded-lg text-charcoal/25 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
+                    className="p-1.5 rounded-lg text-charcoal/65 hover:text-red-500 hover:bg-red-50 transition-all flex-shrink-0"
                   >
                     <Trash2 size={12} />
                   </button>
@@ -235,7 +235,7 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
 
               {/* URL + actions */}
               <div className="bg-white rounded-lg border border-mist px-2.5 py-1.5 mb-2">
-                <p className="text-[10px] font-mono text-charcoal/40 truncate">{controlUrl(link.token)}</p>
+                <p className="text-[10px] font-mono text-charcoal/65 truncate">{controlUrl(link.token)}</p>
               </div>
               <div className="grid grid-cols-2 gap-1.5">
                 <button
@@ -261,7 +261,7 @@ export function ControlLinksPanel({ eventId, eventSlug, initial }: Props) {
       )}
 
       {links.length > 0 && (
-        <p className="text-[10px] text-charcoal/30 mt-3 flex items-center gap-1">
+        <p className="text-[10px] text-charcoal/65 mt-3 flex items-center gap-1">
           <AlertTriangle size={9} />
           Revoking a link immediately invalidates it, the holder will lose access.
         </p>

@@ -1085,7 +1085,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
                       </div>
                       {/* Chat bubble */}
                       <div
-                        className="rounded-full text-[9px] font-bold whitespace-nowrap px-2 py-0.5"
+                        className="rounded-full text-[10px] font-bold whitespace-nowrap px-2 py-0.5"
                         style={{
                           background: "rgba(78,195,120,0.18)",
                           border: "1px solid rgba(78,195,120,0.38)",
@@ -1393,7 +1393,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
             <p className="text-[11px] font-bold text-center tracking-wide" style={{ color: t.qrFg, opacity: 0.85 }}>
               {liveUrl.replace(/^https?:\/\//, "")}
             </p>
-            <p className="text-[9px] font-mono" style={{ color: t.qrFg, opacity: 0.3 }}>
+            <p className="text-[10px] font-mono" style={{ color: t.qrFg, opacity: 0.3 }}>
               Program · Lyrics · Feedback
             </p>
           </motion.div>
@@ -1914,7 +1914,7 @@ function TriviaScene({
           <div className="flex flex-col items-center gap-2 rounded-2xl p-4"
             style={{ background: t.qrBg, border: `1px solid ${t.border}` }}>
             <QRCodeSVG value={liveUrl} size={110} bgColor={t.qrBg} fgColor={t.qrFg} level="M" />
-            <p className="text-[9px] uppercase tracking-widest text-center font-medium"
+            <p className="text-[10px] uppercase tracking-widest text-center font-medium"
               style={{ color: t.qrFg, opacity: 0.55 }}>
               Scan to answer
             </p>

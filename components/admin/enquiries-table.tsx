@@ -26,7 +26,7 @@ const INTEREST_LABELS: Record<string, string> = {
 const INTEREST_COLORS: Record<string, string> = {
   partner:        "bg-gold/15 text-[#8a6a1a] border-gold/25",
   give:           "bg-blue-50 text-blue-700 border-blue-200",
-  worship_team:   "bg-forest/8 text-forest border-forest/15",
+  worship_team:   "bg-forest/10 text-forest border-forest/15",
   creative_team:  "bg-purple-50 text-purple-700 border-purple-200",
   host_venue:     "bg-orange-50 text-orange-700 border-orange-200",
   vision_carrier: "bg-moss/10 text-moss border-moss/20",
@@ -79,12 +79,12 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
             className={`relative px-3.5 py-2 text-xs font-medium rounded-t-lg transition-colors whitespace-nowrap
               ${filter === key
                 ? "text-forest bg-forest/5"
-                : "text-charcoal/45 hover:text-charcoal/70 hover:bg-charcoal/4"
+                : "text-charcoal/65 hover:text-charcoal/70 hover:bg-charcoal/5"
               }`}
           >
             {label}
-            <span className={`ml-1.5 text-[9px] font-semibold px-1.5 py-0.5 rounded-full
-              ${filter === key ? "bg-forest/12 text-forest" : "bg-charcoal/6 text-charcoal/35"}`}>
+            <span className={`ml-1.5 text-[10px] font-semibold px-1.5 py-0.5 rounded-full
+              ${filter === key ? "bg-forest/10 text-forest" : "bg-charcoal/5 text-charcoal/65"}`}>
               {counts[key]}
             </span>
             {filter === key && (
@@ -108,17 +108,17 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
           }`}
         >
           <tr>
-            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-5 py-3.5">Person</th>
-            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-4 py-3.5">Interest</th>
-            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-4 py-3.5 hidden md:table-cell">Message</th>
-            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-4 py-3.5">Reply</th>
-            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/40 px-4 py-3.5 whitespace-nowrap">Date</th>
+            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-5 py-3.5">Person</th>
+            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-4 py-3.5">Interest</th>
+            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-4 py-3.5 hidden md:table-cell">Message</th>
+            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-4 py-3.5">Reply</th>
+            <th className="text-left text-[10px] font-semibold uppercase tracking-widest text-charcoal/65 px-4 py-3.5 whitespace-nowrap">Date</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-mist">
           {visible.length === 0 ? (
             <tr>
-              <td colSpan={5} className="px-5 py-14 text-center text-sm text-charcoal/30">
+              <td colSpan={5} className="px-5 py-14 text-center text-sm text-charcoal/65">
                 No {filter === "all" ? "" : FILTERS.find(f => f.key === filter)?.label.toLowerCase() + " "}enquiries yet
               </td>
             </tr>
@@ -133,7 +133,7 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
                 {/* Person */}
                 <td className="px-5 py-4">
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-full bg-forest/8 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center flex-shrink-0">
                       <span className="text-[10px] font-bold text-forest uppercase">
                         {e.full_name.charAt(0)}
                       </span>
@@ -142,12 +142,12 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
                       <p className="text-sm font-medium text-charcoal truncate max-w-[160px]">
                         {e.full_name}
                         {isPartner && (
-                          <span className="ml-1.5 text-[9px] bg-gold/15 text-[#8a6a1a] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wide">
+                          <span className="ml-1.5 text-[10px] bg-gold/15 text-[#8a6a1a] px-1.5 py-0.5 rounded-full font-semibold uppercase tracking-wide">
                             Partner
                           </span>
                         )}
                       </p>
-                      <p className="text-[10px] text-charcoal/35 truncate max-w-[160px] mt-0.5">
+                      <p className="text-[10px] text-charcoal/65 truncate max-w-[160px] mt-0.5">
                         {e.email ?? e.phone ?? "–"}
                       </p>
                     </div>
@@ -161,7 +161,7 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
                       {label}
                     </span>
                     {e.partner_type && (
-                      <p className="text-[10px] text-charcoal/40 mt-1.5 max-w-[140px] truncate">{e.partner_type}</p>
+                      <p className="text-[10px] text-charcoal/65 mt-1.5 max-w-[140px] truncate">{e.partner_type}</p>
                     )}
                   </div>
                 </td>
@@ -171,12 +171,12 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
                   {e.message ? (
                     <p
                       title={e.message}
-                      className="text-xs text-charcoal/55 leading-relaxed line-clamp-2 cursor-default"
+                      className="text-xs text-charcoal/70 leading-relaxed line-clamp-2 cursor-default"
                     >
                       {e.message}
                     </p>
                   ) : (
-                    <span className="text-[10px] text-charcoal/20">–</span>
+                    <span className="text-[10px] text-charcoal/65">–</span>
                   )}
                 </td>
 
@@ -186,7 +186,7 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
                     {e.email && (
                       <a
                         href={`mailto:${e.email}`}
-                        className="w-7 h-7 rounded-lg bg-forest/8 hover:bg-forest/15 flex items-center justify-center text-forest/70 hover:text-forest transition-colors"
+                        className="w-7 h-7 rounded-lg bg-forest/10 hover:bg-forest/15 flex items-center justify-center text-forest/70 hover:text-forest transition-colors"
                         title={`Email ${e.full_name}`}
                       >
                         <Mail size={12} />
@@ -208,10 +208,10 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
 
                 {/* Date */}
                 <td className="px-4 py-4 text-right">
-                  <p className="text-[10px] text-charcoal/40 whitespace-nowrap">
+                  <p className="text-[10px] text-charcoal/65 whitespace-nowrap">
                     {new Date(e.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "2-digit" })}
                   </p>
-                  <p className="text-[9px] text-charcoal/25 mt-0.5">
+                  <p className="text-[10px] text-charcoal/65 mt-0.5">
                     {new Date(e.created_at).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })}
                   </p>
                 </td>

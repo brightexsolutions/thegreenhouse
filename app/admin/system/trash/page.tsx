@@ -71,9 +71,9 @@ export default function TrashPage() {
       <div className="mb-6 flex items-start justify-between">
         <div>
           <h1 className="text-2xl font-semibold text-forest">Trash</h1>
-          <p className="text-sm text-charcoal/50 mt-1">Soft-deleted items, restore or leave to expire</p>
+          <p className="text-sm text-charcoal/70 mt-1">Soft-deleted items, restore or leave to expire</p>
         </div>
-        <div className="flex items-center gap-1.5 text-xs text-charcoal/40 bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2">
+        <div className="flex items-center gap-1.5 text-xs text-charcoal/65 bg-yellow-50 border border-yellow-200 rounded-xl px-3 py-2">
           <Trash2 size={12} className="text-yellow-600" />
           <span>Items here are not permanently deleted</span>
         </div>
@@ -89,7 +89,7 @@ export default function TrashPage() {
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
               tab === key
                 ? "bg-white text-forest shadow-sm"
-                : "text-charcoal/50 hover:text-charcoal"
+                : "text-charcoal/70 hover:text-charcoal"
             }`}
           >
             <Icon size={14} />
@@ -104,7 +104,7 @@ export default function TrashPage() {
 
       {loading ? (
         <div className="bg-white rounded-2xl border border-mist p-8 text-center">
-          <p className="text-sm text-charcoal/40">Loading...</p>
+          <p className="text-sm text-charcoal/65">Loading...</p>
         </div>
       ) : tab === "events" ? (
         events.length === 0 ? (
@@ -114,9 +114,9 @@ export default function TrashPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-mist bg-off-white">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Event</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Date</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Deleted</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Event</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Date</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Deleted</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -124,10 +124,10 @@ export default function TrashPage() {
                 {events.map(ev => (
                   <tr key={ev.id} className="hover:bg-off-white/50 transition-colors">
                     <td className="px-4 py-3 font-medium text-charcoal/80">{ev.title}</td>
-                    <td className="px-4 py-3 text-charcoal/50 text-xs">
+                    <td className="px-4 py-3 text-charcoal/70 text-xs">
                       {new Date(ev.event_date).toLocaleDateString("en-KE", { dateStyle: "medium" })}
                     </td>
-                    <td className="px-4 py-3 text-charcoal/40 text-xs">
+                    <td className="px-4 py-3 text-charcoal/65 text-xs">
                       {new Date(ev.deleted_at).toLocaleDateString("en-KE", { dateStyle: "medium" })}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -154,10 +154,10 @@ export default function TrashPage() {
             <table className="w-full text-sm">
               <thead>
                 <tr className="border-b border-mist bg-off-white">
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Name</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Contact</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Event</th>
-                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Deleted</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Name</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Contact</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Event</th>
+                  <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Deleted</th>
                   <th className="px-4 py-3" />
                 </tr>
               </thead>
@@ -165,11 +165,11 @@ export default function TrashPage() {
                 {registrations.map(r => (
                   <tr key={r.id} className="hover:bg-off-white/50 transition-colors">
                     <td className="px-4 py-3 font-medium text-charcoal/80">{r.first_name} {r.last_name}</td>
-                    <td className="px-4 py-3 text-charcoal/50 text-xs">{r.email ?? r.phone ?? "–"}</td>
-                    <td className="px-4 py-3 text-charcoal/50 text-xs">
+                    <td className="px-4 py-3 text-charcoal/70 text-xs">{r.email ?? r.phone ?? "–"}</td>
+                    <td className="px-4 py-3 text-charcoal/70 text-xs">
                       {(r.events as { title: string } | null)?.title ?? "–"}
                     </td>
-                    <td className="px-4 py-3 text-charcoal/40 text-xs">
+                    <td className="px-4 py-3 text-charcoal/65 text-xs">
                       {new Date(r.deleted_at).toLocaleDateString("en-KE", { dateStyle: "medium" })}
                     </td>
                     <td className="px-4 py-3 text-right">
@@ -196,8 +196,8 @@ export default function TrashPage() {
 function EmptyState({ label }: { label: string }) {
   return (
     <div className="bg-white rounded-2xl border border-mist p-12 text-center">
-      <Trash2 size={24} className="mx-auto text-charcoal/20 mb-3" />
-      <p className="text-sm text-charcoal/50">{label}</p>
+      <Trash2 size={24} className="mx-auto text-charcoal/65 mb-3" />
+      <p className="text-sm text-charcoal/70">{label}</p>
     </div>
   );
 }

@@ -89,7 +89,7 @@ export default function AdminsPage() {
       <div className="mb-6 flex items-start justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-semibold text-forest">Admin Accounts</h1>
-          <p className="text-sm text-charcoal/50 mt-1">Manage who has access to this dashboard</p>
+          <p className="text-sm text-charcoal/70 mt-1">Manage who has access to this dashboard</p>
         </div>
         <button
           onClick={() => setAdding(true)}
@@ -116,7 +116,7 @@ export default function AdminsPage() {
           <h3 className="text-sm font-semibold text-forest mb-4">New admin account</h3>
           <div className="grid sm:grid-cols-2 gap-3 mb-3">
             <div>
-              <label className="block text-xs font-medium text-charcoal/60 mb-1">Email *</label>
+              <label className="block text-xs font-medium text-charcoal/65 mb-1">Email *</label>
               <input
                 type="email" required value={email} onChange={e => setEmail(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest"
@@ -124,7 +124,7 @@ export default function AdminsPage() {
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-charcoal/60 mb-1">Full name</label>
+              <label className="block text-xs font-medium text-charcoal/65 mb-1">Full name</label>
               <input
                 type="text" value={name} onChange={e => setName(e.target.value)}
                 className="w-full px-3 py-2 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest"
@@ -133,7 +133,7 @@ export default function AdminsPage() {
             </div>
           </div>
           <div className="mb-4">
-            <label className="block text-xs font-medium text-charcoal/60 mb-1">Role</label>
+            <label className="block text-xs font-medium text-charcoal/65 mb-1">Role</label>
             <select value={role} onChange={e => setRole(e.target.value as "admin" | "super_admin")}
               className="w-full sm:w-48 px-3 py-2 rounded-lg border border-mist text-sm focus:outline-none focus:border-forest">
               <option value="admin">Admin</option>
@@ -146,7 +146,7 @@ export default function AdminsPage() {
               {busy === "add" ? "Adding…" : "Add admin"}
             </button>
             <button type="button" onClick={() => setAdding(false)}
-              className="px-4 py-2 rounded-xl border border-mist text-sm text-charcoal/60 hover:text-charcoal">
+              className="px-4 py-2 rounded-xl border border-mist text-sm text-charcoal/65 hover:text-charcoal">
               Cancel
             </button>
           </div>
@@ -155,16 +155,16 @@ export default function AdminsPage() {
 
       {loading ? (
         <div className="bg-white rounded-2xl border border-mist p-8 text-center">
-          <p className="text-sm text-charcoal/40">Loading...</p>
+          <p className="text-sm text-charcoal/65">Loading...</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl border border-mist overflow-hidden">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-mist bg-off-white">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Name</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Role</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Added</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Name</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Role</th>
+                <th className="text-left px-4 py-3 text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Added</th>
                 <th className="px-4 py-3" />
               </tr>
             </thead>
@@ -187,10 +187,10 @@ export default function AdminsPage() {
                           <div className="flex items-center gap-1.5">
                             <p className="font-medium text-charcoal/80">{admin.full_name ?? "–"}</p>
                             {isSelf && (
-                              <span className="text-[10px] text-charcoal/30 bg-mist px-1.5 py-0.5 rounded-full">you</span>
+                              <span className="text-[10px] text-charcoal/65 bg-mist px-1.5 py-0.5 rounded-full">you</span>
                             )}
                           </div>
-                          {admin.email && <p className="text-xs text-charcoal/40">{admin.email}</p>}
+                          {admin.email && <p className="text-xs text-charcoal/65">{admin.email}</p>}
                         </div>
                       </div>
                     </td>
@@ -217,7 +217,7 @@ export default function AdminsPage() {
                     </td>
 
                     {/* Added date */}
-                    <td className="px-4 py-3 text-charcoal/40 text-xs">
+                    <td className="px-4 py-3 text-charcoal/65 text-xs">
                       {new Date(admin.created_at).toLocaleDateString("en-KE", { dateStyle: "medium" })}
                     </td>
 
@@ -227,7 +227,7 @@ export default function AdminsPage() {
                         <button
                           onClick={() => removeAdmin(admin.id, admin.full_name)}
                           disabled={busy === admin.id + "-del"}
-                          className="p-1.5 rounded-lg text-charcoal/30 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
+                          className="p-1.5 rounded-lg text-charcoal/65 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                           title="Remove admin"
                         >
                           <Trash2 size={14} />

@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 type EventStatus = "draft" | "published" | "live" | "past" | "cancelled";
 
 const STYLES: Record<EventStatus, string> = {
-  draft:     "bg-charcoal/6 text-charcoal/40 border-charcoal/8",
+  draft:     "bg-charcoal/5 text-charcoal/65 border-charcoal/10",
   published: "bg-gold/10 text-amber-700 border-gold/25",
   live:      "bg-green-100 text-green-700 border-green-200",
-  past:      "bg-charcoal/8 text-charcoal/50 border-charcoal/10",
+  past:      "bg-charcoal/10 text-charcoal/70 border-charcoal/10",
   cancelled: "bg-red-50 text-red-600 border-red-100",
 };
 

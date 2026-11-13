@@ -12,7 +12,7 @@ export function PageHeader({ title, description, action }: PageHeaderProps) {
       <div>
         <h1 className="text-lg font-semibold text-charcoal leading-none">{title}</h1>
         {description && (
-          <p className="text-sm text-charcoal/40 mt-1">{description}</p>
+          <p className="text-sm text-charcoal/65 mt-1">{description}</p>
         )}
       </div>
       {action && <div className="flex-shrink-0">{action}</div>}

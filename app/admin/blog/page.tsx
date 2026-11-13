@@ -52,9 +52,9 @@ export default async function AdminBlogPage() {
       <div className="flex-1 min-h-0 bg-white rounded-2xl border border-mist overflow-hidden flex flex-col">
         {posts.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1 py-16 px-6 text-center">
-            <PenSquare size={28} className="text-charcoal/15 mb-3" />
-            <p className="text-sm text-charcoal/40">Nothing published yet</p>
-            <p className="text-xs text-charcoal/25 mt-1 max-w-xs">
+            <PenSquare size={28} className="text-charcoal/65 mb-3" />
+            <p className="text-sm text-charcoal/65">Nothing published yet</p>
+            <p className="text-xs text-charcoal/65 mt-1 max-w-xs">
               Posts keep the site fresh between sessions and give search engines something new to index.
             </p>
             <Link

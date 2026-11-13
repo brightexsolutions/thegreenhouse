@@ -54,14 +54,14 @@ export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
   return (
     <aside className="h-full w-56 bg-forest flex flex-col flex-shrink-0 border-r border-cream/5">
       {/* Logo */}
-      <div className="px-5 py-6 border-b border-cream/8">
+      <div className="px-5 py-6 border-b border-cream/10">
         <Link href="/admin/dashboard" className="flex items-center gap-2.5">
           <div className="w-7 h-7 rounded-lg bg-gold/20 flex items-center justify-center">
             <Leaf size={13} className="text-gold" />
           </div>
           <div>
             <span className="text-cream font-semibold text-sm block leading-none">The Green House</span>
-            <span className="text-cream/30 text-[9px] mt-0.5 block">Admin</span>
+            <span className="text-cream/65 text-[10px] mt-0.5 block">Admin</span>
           </div>
         </Link>
       </div>
@@ -71,9 +71,9 @@ export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
         <div className="mx-3 mt-3 rounded-xl bg-green-600/20 border border-green-500/25 px-3 py-2.5">
           <div className="flex items-center gap-1.5 mb-1.5">
             <Radio size={10} className="text-green-400 animate-pulse" />
-            <span className="text-[9px] font-bold text-green-400 uppercase tracking-wider">Live now</span>
+            <span className="text-[10px] font-bold text-green-400 uppercase tracking-wider">Live now</span>
           </div>
-          {liveName && <p className="text-[10px] text-cream/55 truncate mb-1.5">{liveName}</p>}
+          {liveName && <p className="text-[10px] text-cream/75 truncate mb-1.5">{liveName}</p>}
           <Link
             href={`/live/${liveSlug}/control`}
             className="flex items-center gap-1 text-[10px] font-semibold text-green-300 hover:text-green-200 transition-colors"
@@ -95,7 +95,7 @@ export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
               onClick={() => handleNav(href)}
               className={cn(
                 "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
-                active   ? "bg-gold/20 text-gold"
+                active   ? "bg-gold/20 text-gold-light font-medium"
                 : loading ? "bg-cream/15 text-cream"
                 :           "text-cream/75 hover:text-cream hover:bg-cream/10"
               )}
@@ -111,7 +111,7 @@ export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
         {role === "super_admin" && (
           <>
             <div className="px-3 pt-5 pb-2">
-              <span className="text-[10px] font-semibold uppercase tracking-widest text-cream/35">System</span>
+              <span className="text-[10px] font-semibold uppercase tracking-widest text-cream/65">System</span>
             </div>
             {SYSTEM_NAV.map(({ href, icon: Icon, label }) => {
               const active  = isActive(href);
@@ -123,7 +123,7 @@ export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
                   onClick={() => handleNav(href)}
                   className={cn(
                     "flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150",
-                    active   ? "bg-gold/20 text-gold"
+                    active   ? "bg-gold/20 text-gold-light font-medium"
                     : loading ? "bg-cream/15 text-cream"
                     :           "text-cream/60 hover:text-cream hover:bg-cream/10"
                   )}
@@ -140,11 +140,11 @@ export function AdminSidebar({ role, liveSlug, liveName }: AdminSidebarProps) {
       </nav>
 
       {/* View site */}
-      <div className="px-3 py-3 border-t border-cream/8">
+      <div className="px-3 py-3 border-t border-cream/10">
         <Link
           href="/"
           target="_blank"
-          className="flex items-center gap-2.5 text-[11px] text-cream/35 hover:text-cream/65 transition-colors px-3 py-2 rounded-xl hover:bg-cream/5"
+          className="flex items-center gap-2.5 text-[11px] text-cream/65 hover:text-cream/65 transition-colors px-3 py-2 rounded-xl hover:bg-cream/5"
         >
           <ExternalLink size={12} />
           <span>View public site</span>

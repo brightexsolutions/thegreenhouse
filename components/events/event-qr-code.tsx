@@ -14,8 +14,8 @@ export function EventQRCode({ slug }: EventQRCodeProps) {
   return (
     <div className="flex flex-col items-center gap-3 p-5 rounded-2xl bg-white border border-mist">
       <div className="flex items-center gap-2 self-start">
-        <QrCode size={13} className="text-charcoal/40" />
-        <span className="text-[10px] font-semibold text-charcoal/40 uppercase tracking-wider">Scan to register</span>
+        <QrCode size={13} className="text-charcoal/65" />
+        <span className="text-[10px] font-semibold text-charcoal/65 uppercase tracking-wider">Scan to register</span>
       </div>
       <div className="p-3 bg-white rounded-xl border border-mist/60">
         <QRCodeSVG
@@ -26,7 +26,7 @@ export function EventQRCode({ slug }: EventQRCodeProps) {
           level="M"
         />
       </div>
-      <p className="text-[10px] text-charcoal/35 text-center leading-relaxed">
+      <p className="text-[10px] text-charcoal/65 text-center leading-relaxed">
         Share this QR code at the venue or in printed materials
       </p>
     </div>

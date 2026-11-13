@@ -57,11 +57,11 @@ export function PastEventCard({ event }: { event: PublicEvent }) {
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(201,162,74,0.10),transparent)]" />
         <div className="absolute top-3 right-14 w-14 h-14 rounded-full border border-cream/5" />
         <div className="relative">
-          <span className="label-caps text-gold/70 text-xs">Session complete</span>
+          <span className="label-caps text-gold text-xs">Session complete</span>
           <h3 className="font-display text-2xl font-semibold text-cream mt-1 leading-tight">
             {submitted ? "Thank you." : "We want to hear from you"}
           </h3>
-          <p className="text-cream/55 text-sm mt-1.5 leading-relaxed">
+          <p className="text-cream/75 text-sm mt-1.5 leading-relaxed">
             {submitted
               ? "Your reflection has been received, it shapes what we build next."
               : "Whether you were there or couldn't make it, your voice matters to us."
@@ -76,15 +76,15 @@ export function PastEventCard({ event }: { event: PublicEvent }) {
         {submitted ? (
           <div className="space-y-5">
             <div className="flex flex-col items-center gap-3 py-4 text-center">
-              <CheckCircle2 size={32} className="text-forest/60" />
-              <p className="text-sm text-charcoal/60 leading-relaxed max-w-[200px]">
+              <CheckCircle2 size={32} className="text-forest/80" />
+              <p className="text-sm text-charcoal/65 leading-relaxed max-w-[200px]">
                 {attended
                   ? `We're glad you were part of ${event.title}.`
                   : "We hope to see you at the next one."}
               </p>
             </div>
             <div className="pt-3 border-t border-mist">
-              <p className="text-xs text-charcoal/40 mb-2 text-center">Share this session</p>
+              <p className="text-xs text-charcoal/65 mb-2 text-center">Share this session</p>
               <EventShareButtons
                 url={shareUrl}
                 title={event.title}
@@ -102,14 +102,14 @@ export function PastEventCard({ event }: { event: PublicEvent }) {
               <button
                 type="button"
                 onClick={() => setAttended(true)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${attended ? "bg-forest text-cream shadow-sm" : "text-charcoal/50"}`}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${attended ? "bg-forest text-cream shadow-sm" : "text-charcoal/70"}`}
               >
                 I attended
               </button>
               <button
                 type="button"
                 onClick={() => setAttended(false)}
-                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${!attended ? "bg-forest text-cream shadow-sm" : "text-charcoal/50"}`}
+                className={`px-4 py-1.5 rounded-full text-xs font-semibold transition-all ${!attended ? "bg-forest text-cream shadow-sm" : "text-charcoal/70"}`}
               >
                 Couldn&apos;t make it
               </button>
@@ -124,7 +124,7 @@ export function PastEventCard({ event }: { event: PublicEvent }) {
                   onChange={e => setName(e.target.value)}
                   placeholder="Your name (optional)"
                   maxLength={80}
-                  className="w-full px-4 py-2.5 rounded-xl border border-mist text-sm bg-white focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all placeholder:text-charcoal/30"
+                  className="w-full px-4 py-2.5 rounded-xl border border-mist text-sm bg-white focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all placeholder:text-charcoal/50"
                 />
               </div>
             )}
@@ -135,7 +135,7 @@ export function PastEventCard({ event }: { event: PublicEvent }) {
                 onChange={e => setAnonymous(e.target.checked)}
                 className="w-3.5 h-3.5 rounded accent-forest"
               />
-              <span className="text-xs text-charcoal/50">Stay anonymous</span>
+              <span className="text-xs text-charcoal/70">Stay anonymous</span>
             </label>
 
             {/* Feedback textarea */}
@@ -148,13 +148,13 @@ export function PastEventCard({ event }: { event: PublicEvent }) {
                   : "What made it hard to attend? What would you hope for next time?"
                 }
                 rows={4}
-                className="w-full px-4 py-3 rounded-xl border border-mist text-sm bg-white resize-none focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all placeholder:text-charcoal/30"
+                className="w-full px-4 py-3 rounded-xl border border-mist text-sm bg-white resize-none focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/30 transition-all placeholder:text-charcoal/50"
               />
               <div className="flex justify-between items-center mt-1">
-                <span className="text-[11px] text-charcoal/35">
+                <span className="text-[11px] text-charcoal/65">
                   {charsLeft < 50 ? `${charsLeft} characters left` : ""}
                 </span>
-                <span className="text-[11px] text-charcoal/30">{message.length}/{MAX_CHARS}</span>
+                <span className="text-[11px] text-charcoal/65">{message.length}/{MAX_CHARS}</span>
               </div>
             </div>
 

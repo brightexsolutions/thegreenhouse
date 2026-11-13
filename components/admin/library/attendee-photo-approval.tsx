@@ -90,7 +90,7 @@ export function AttendeePhotoApproval({ events }: Props) {
       {/* Event selector */}
       <div className="bg-white rounded-2xl border border-mist p-4 flex flex-col sm:flex-row gap-3 items-start sm:items-end">
         <div className="flex-1 min-w-0">
-          <label className="block text-[10px] font-semibold text-charcoal/50 uppercase tracking-wider mb-1.5">
+          <label className="block text-[10px] font-semibold text-charcoal/70 uppercase tracking-wider mb-1.5">
             Select event
           </label>
           <select
@@ -123,8 +123,8 @@ export function AttendeePhotoApproval({ events }: Props) {
         <>
           {photos.length === 0 ? (
             <div className="bg-white rounded-2xl border border-mist p-12 flex flex-col items-center gap-3 text-center">
-              <Camera size={26} className="text-charcoal/15" />
-              <p className="text-sm text-charcoal/40">No attendee photos submitted yet</p>
+              <Camera size={26} className="text-charcoal/65" />
+              <p className="text-sm text-charcoal/65">No attendee photos submitted yet</p>
             </div>
           ) : (
             <>
@@ -158,7 +158,7 @@ export function AttendeePhotoApproval({ events }: Props) {
                 <div className="bg-white rounded-2xl border border-mist overflow-hidden">
                   <div className="px-5 py-3 border-b border-mist flex items-center gap-2">
                     <CheckCircle2 size={13} className="text-green-500" />
-                    <p className="text-sm font-semibold text-charcoal/60">
+                    <p className="text-sm font-semibold text-charcoal/65">
                       Approved, {approved_photos.length} photo{approved_photos.length > 1 ? "s" : ""}
                     </p>
                   </div>
@@ -215,12 +215,12 @@ function PhotoCard({
           />
         ) : (
           <div className="w-full h-full flex items-center justify-center">
-            <Camera size={24} className="text-charcoal/20" />
+            <Camera size={24} className="text-charcoal/65" />
           </div>
         )}
         {photo.is_approved && (
           <div className={cn(
-            "absolute top-2 right-2 text-[9px] font-semibold px-1.5 py-0.5 rounded-full",
+            "absolute top-2 right-2 text-[10px] font-semibold px-1.5 py-0.5 rounded-full",
             photo.show_on_site
               ? "bg-green-500 text-white"
               : "bg-charcoal/60 text-white/80"
@@ -239,10 +239,10 @@ function PhotoCard({
       {(photo.caption || photo.submitted_by) && (
         <div className="px-0.5">
           {photo.submitted_by && (
-            <p className="text-[10px] font-semibold text-charcoal/60 truncate">{photo.submitted_by}</p>
+            <p className="text-[10px] font-semibold text-charcoal/65 truncate">{photo.submitted_by}</p>
           )}
           {photo.caption && (
-            <p className="text-[10px] text-charcoal/40 truncate">{photo.caption}</p>
+            <p className="text-[10px] text-charcoal/65 truncate">{photo.caption}</p>
           )}
         </div>
       )}
@@ -255,7 +255,7 @@ function PhotoCard({
           className={cn(
             "flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg text-[10px] font-semibold transition-colors disabled:opacity-50",
             photo.is_approved
-              ? "bg-charcoal/8 text-charcoal/50 hover:bg-charcoal/12"
+              ? "bg-charcoal/10 text-charcoal/70 hover:bg-charcoal/10"
               : "bg-green-50 text-green-700 hover:bg-green-100"
           )}
         >
@@ -279,7 +279,7 @@ function PhotoCard({
             onClick={onToggleVisible}
             disabled={busy}
             title={photo.show_on_site ? "Hide from site" : "Show on site"}
-            className="flex items-center justify-center py-1.5 px-2 rounded-lg bg-charcoal/6 text-charcoal/50 hover:bg-charcoal/12 transition-colors disabled:opacity-50"
+            className="flex items-center justify-center py-1.5 px-2 rounded-lg bg-charcoal/5 text-charcoal/70 hover:bg-charcoal/10 transition-colors disabled:opacity-50"
           >
             {photo.show_on_site ? <EyeOff size={11} /> : <Eye size={11} />}
           </button>
