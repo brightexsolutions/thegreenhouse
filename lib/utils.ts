@@ -23,3 +23,31 @@ export function sessionName(title: string | null | undefined, fallback = "the se
     .trim();
   return stripped || title.trim() || fallback;
 }
+
+/**
+ * Format a database `time` value ("19:00:00", 24 hour) for display: "7:00 PM".
+ * Never slice the raw value and append "pm": that is how "19.00pm" got onto
+ * tickets.
+ */
+export function formatEventTime(time: string | null | undefined, fallback = ""): string {
+  if (!time) return fallback;
+  const [h, m] = time.split(":").map(Number);
+  if (Number.isNaN(h)) return fallback;
+  const hour12 = h % 12 || 12;
+  return `${hour12}:${String(m || 0).padStart(2, "0")} ${h >= 12 ? "PM" : "AM"}`;
+}
+
+/**
+ * The instant an event starts. Sessions happen in Nairobi (UTC+3, no DST), so
+ * the offset is fixed here rather than left to the visitor's device, which
+ * would shift every countdown for anyone outside Kenya.
+ */
+export function eventStart(date: string, time?: string | null): Date {
+  const t = (time ?? "00:00:00").slice(0, 8);
+  return new Date(`${date}T${t.length === 5 ? `${t}:00` : t}+03:00`);
+}
+
+/** Today's date in Nairobi as YYYY-MM-DD, for comparing against event_date. */
+export function todayInNairobi(): string {
+  return new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
