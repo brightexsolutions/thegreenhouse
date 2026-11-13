@@ -34,7 +34,7 @@ export const revalidate = 300;
 
 async function getNextEvent(): Promise<PublicEvent | null> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 300 });
     const { data } = await supabase
       .from("events")
       .select(PUBLIC_EVENT_COLUMNS)
@@ -53,7 +53,7 @@ async function getNextEvent(): Promise<PublicEvent | null> {
 /** Sessions held or announced, for the hero badge and the stats strip. */
 async function getSessionCount(): Promise<number | undefined> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 300 });
     const { count } = await supabase
       .from("events")
       .select("id", { count: "exact", head: true })

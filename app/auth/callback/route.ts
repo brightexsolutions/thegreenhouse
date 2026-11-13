@@ -1,3 +1,4 @@
+import { safeInternalPath } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 
@@ -8,7 +9,7 @@ export async function GET(req: NextRequest) {
   // Only same-site paths. "//host" and "/\\host" are read by browsers as
   // another origin, so a crafted link could bounce a signed-in admin away.
   const requested = req.nextUrl.searchParams.get("next");
-  const next = requested && /^\/(?![\/\\])/.test(requested) ? requested : "/admin/dashboard";
+  const next = safeInternalPath(requested, "/admin/dashboard");
 
   if (code) {
     const supabase = await createClient();

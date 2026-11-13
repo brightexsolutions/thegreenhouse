@@ -51,3 +51,16 @@ export function eventStart(date: string, time?: string | null): Date {
 export function todayInNairobi(): string {
   return new Date(Date.now() + 3 * 60 * 60 * 1000).toISOString().slice(0, 10);
 }
+
+/**
+ * Accept a redirect target only if it is a path on this site.
+ *
+ * Checking the first two characters is not enough: `new URL()` strips tabs
+ * and newlines, so "/\t/evil.example" becomes "//evil.example", which a
+ * browser reads as another origin. Only printable ASCII is allowed, starting
+ * with exactly one slash, with no backslash anywhere.
+ */
+export function safeInternalPath(value: string | null | undefined, fallback: string): string {
+  if (!value) return fallback;
+  return /^\/(?!\/)[\x21-\x7e]*$/.test(value) && !value.includes("\\") ? value : fallback;
+}

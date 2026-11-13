@@ -11,7 +11,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   let posts:  Array<{ slug: string; updated_at: string; published_at: string | null }> = [];
 
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 300 });
     const [eventRes, postRes] = await Promise.all([
       supabase
         .from("events")

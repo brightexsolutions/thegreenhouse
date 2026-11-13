@@ -11,8 +11,8 @@ import { REGISTRATION_SUPPORT_WA } from "@/lib/constants";
 import type { Event } from "@/types/database";
 
 const formSchema = z.object({
-  first_name:      z.string().min(2, "First name required"),
-  last_name:       z.string().min(2, "Last name required"),
+  first_name:      z.string().trim().min(2, "First name required"),
+  last_name:       z.string().trim().min(2, "Last name required"),
   email:           z.string().email("Invalid email").optional().or(z.literal("")),
   phone:           z.string().min(9, "Invalid phone number").optional().or(z.literal("")),
   role:            z.enum(["guest","vocalist","instrumentalist","vision_carrier","curious"]),

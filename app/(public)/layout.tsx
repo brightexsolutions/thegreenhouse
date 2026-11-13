@@ -6,7 +6,7 @@ import { todayInNairobi } from "@/lib/utils";
 
 async function getUpcomingEvent() {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 60 });
     const { data } = await supabase
       .from("events")
       .select("slug, title, event_date, event_time, venue_name, venue_address, theme_title, theme_scripture, type, price_kes, status")

@@ -33,7 +33,7 @@ type IndexPost = Pick<
 
 async function getPosts(): Promise<IndexPost[]> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 120 });
     const { data } = await supabase
       .from("blog_posts")
       .select("id, slug, title, excerpt, cover_image, cover_alt, author_name, category, reading_minutes, published_at")

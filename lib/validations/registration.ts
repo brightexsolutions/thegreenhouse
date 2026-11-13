@@ -4,8 +4,8 @@ import { normalisePhone } from "@/lib/phone";
 export const registrationSchema = z
   .object({
     event_id:        z.string().uuid(),
-    first_name:      z.string().min(1, "First name is required").max(60),
-    last_name:       z.string().min(1, "Last name is required").max(60),
+    first_name:      z.string().trim().min(1, "First name is required").max(60),
+    last_name:       z.string().trim().min(1, "Last name is required").max(60),
     // Trimmed and lowercased before validation so "Amara@Mail.com" and
     // "amara@mail.com" count as the same person in the duplicate check.
     email:           z.preprocess(

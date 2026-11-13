@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatEventTime } from "@/lib/utils";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { X, Calendar, MapPin, ArrowRight } from "lucide-react";
@@ -26,12 +27,6 @@ function formatDate(iso: string) {
   });
 }
 
-function formatTime(time: string) {
-  const [h, m] = time.split(":").map(Number);
-  const suffix = h >= 12 ? "pm" : "am";
-  const hour   = h % 12 || 12;
-  return `${hour}:${String(m).padStart(2, "0")}${suffix}`;
-}
 
 export function SessionPromptDialog({ event }: SessionPromptProps) {
   const [visible, setVisible] = useState(false);
@@ -119,7 +114,7 @@ export function SessionPromptDialog({ event }: SessionPromptProps) {
             <Calendar size={15} className="text-forest/80 mt-0.5 shrink-0" />
             <div>
               <p className="text-sm font-semibold text-forest">{formatDate(event.event_date)}</p>
-              <p className="text-xs text-charcoal/70 mt-0.5">{formatTime(event.event_time)} · {entryLabel}</p>
+              <p className="text-xs text-charcoal/70 mt-0.5">{formatEventTime(event.event_time)} · {entryLabel}</p>
             </div>
           </div>
           {event.venue_name && (

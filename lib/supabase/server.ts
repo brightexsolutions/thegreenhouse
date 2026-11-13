@@ -24,27 +24,37 @@ export async function createClient() {
 }
 
 /**
- * Service-role client — bypasses RLS. Use for all DB operations in API routes.
- * Never expose to client.
+ * Service-role client: bypasses RLS. Use for all DB operations on the server.
+ * Never expose to the client.
  *
- * `noStore: true` makes every query from this client bypass Next.js's fetch
- * Data Cache. postgrest-js just calls the ambient `fetch` with no `cache`
- * option, so on Server Components (not Route Handlers) that fetch can still
- * get cached even when the page sets `dynamic = "force-dynamic"` — this is
- * what let the check-in page keep comparing against a stale checkin_token
- * after it had been regenerated. Route Handlers don't need this: they read
- * fresh by default. Not applied everywhere by default because the blog
- * relies on this client's queries being cacheable for its static pages.
+ * Reads are FRESH by default. postgrest-js calls the ambient `fetch` with no
+ * cache option, and Next 14 caches such a fetch in its Data Cache unless the
+ * request has already touched cookies or headers. `dynamic = "force-dynamic"`
+ * does not prevent it, in pages or in Route Handlers. That silently froze
+ * live-session data: the live page stayed on its pre-event view after the
+ * status changed, attendance counts stopped moving, and a revoked control
+ * link kept reading as valid. So every query is sent with `cache: "no-store"`
+ * unless the caller opts in.
+ *
+ * Pass `{ revalidate: seconds }` ONLY from statically generated (ISR) pages,
+ * using the page's own `revalidate` value. A no-store fetch inside one of
+ * those turns the page dynamic at runtime, which Next reports as a 500.
+ *
+ * `noStore` is accepted for older call sites and is now the default.
  */
-export function createAdminClient(options?: { noStore?: boolean }) {
+export function createAdminClient(options?: { noStore?: boolean; revalidate?: number }) {
+  const revalidate = options?.noStore ? undefined : options?.revalidate;
+  const cachedFetch = (url: RequestInfo | URL, init?: RequestInit) =>
+    revalidate === undefined
+      ? fetch(url, { ...init, cache: "no-store" })
+      : fetch(url, { ...init, next: { revalidate } } as RequestInit);
+
   return createRawClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
     {
       auth: { autoRefreshToken: false, persistSession: false },
-      ...(options?.noStore
-        ? { global: { fetch: (url: RequestInfo | URL, init?: RequestInit) => fetch(url, { ...init, cache: "no-store" }) } }
-        : {}),
+      global: { fetch: cachedFetch },
     }
   );
 }

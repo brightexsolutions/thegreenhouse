@@ -26,7 +26,7 @@ interface GalleryImage {
 
 async function getGalleryImages(): Promise<GalleryImage[]> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 300 });
     const { data } = await supabase
       .from("event_images")
       .select("id, path, caption, event_id, events(title, slug, event_date)")
