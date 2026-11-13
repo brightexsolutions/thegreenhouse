@@ -71,7 +71,7 @@ export function EventCard({ event, featured = false }: EventCardProps) {
 
       {/* Scrim: posters are busy, so the lower half goes nearly solid to keep
           the title and details readable whatever artwork is behind them. */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 via-45% to-black/25" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 from-0% via-black/70 via-40% to-black/5 to-75%" />
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-between p-6 lg:p-7">
