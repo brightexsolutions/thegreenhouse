@@ -7,6 +7,7 @@ import { PreEventView } from "@/components/live/pre-event-view";
 import { PostEventView } from "@/components/live/post-event-view";
 import { Wifi } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
+import { PUBLIC_EVENT_COLUMNS } from "@/lib/public-event";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,9 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
   const [{ data: event }, { data: givingSettings }] = await Promise.all([
     supabase
       .from("events")
-      .select("*, event_sessions(*, session_songs(*, songs(*)))")
+      // Named columns, never "*": the events row carries check-in and control
+      // tokens that must not travel with a page anyone can open.
+      .select(`${PUBLIC_EVENT_COLUMNS}, event_sessions(*, session_songs(*, songs(*)))`)
       .eq("slug", slug)
       .is("deleted_at", null)
       .single(),
@@ -47,7 +50,7 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
 
   if (!event) notFound();
 
-  const typedEvent = event as {
+  const typedEvent = event as unknown as {
     id:                string;
     title:             string;
     subtitle:          string | null;
@@ -125,16 +128,16 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
       <div className="bg-forest pt-10 pb-8 px-4">
         <div className="max-w-2xl mx-auto">
           <FadeIn>
-            <span className="label-caps text-gold/70 text-[9px]">Tonight&apos;s Program</span>
+            <span className="label-caps text-gold text-[10px]">Tonight&apos;s Program</span>
             <h1 className="font-display text-3xl sm:text-4xl font-semibold text-cream mt-1">
               {typedEvent.title}
             </h1>
             {typedEvent.theme_title && (
               <div className="mt-3 inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-gold/15 border border-gold/30">
-                <span className="text-[10px] label-caps text-gold/70">Theme</span>
+                <span className="text-[10px] label-caps text-gold">Theme</span>
                 <span className="text-xs text-gold">{typedEvent.theme_title}</span>
                 {typedEvent.theme_scripture && (
-                  <span className="text-[10px] text-gold/60">· {typedEvent.theme_scripture}</span>
+                  <span className="text-[10px] text-gold">· {typedEvent.theme_scripture}</span>
                 )}
               </div>
             )}
@@ -153,8 +156,7 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
         }}
       />
 
-      {/* TESTING: remove delayMs before go-live */}
-      <DonationPrompt eventId={typedEvent.id} slug={slug} giving={giving} delayMs={5000} />
+      <DonationPrompt eventId={typedEvent.id} slug={slug} giving={giving} />
     </div>
   );
 }

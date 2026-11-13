@@ -33,7 +33,11 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
       });
       const data = await res.json();
       if (res.ok) {
-        setResult({ ok: true, text: `Sent to ${data.count} recipient${data.count !== 1 ? "s" : ""}` });
+        const failed = Number(data.failed ?? 0);
+        setResult({
+          ok:   failed === 0,
+          text: `Sent to ${data.count} recipient${data.count !== 1 ? "s" : ""}${failed > 0 ? `, ${failed} failed. Check the log below for details.` : ""}`,
+        });
         setMessage(""); setSubject("");
       } else {
         setResult({ ok: false, text: data.error ?? "Something went wrong" });
@@ -61,9 +65,9 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
             <div className="px-6 pt-5 pb-4 border-b border-mist flex items-center justify-between">
               <div>
                 <h2 className="text-base font-semibold text-charcoal leading-tight">Send Broadcast</h2>
-                <p className="text-[11px] text-charcoal/40 mt-0.5">Message will be sent to all matched registrants</p>
+                <p className="text-[11px] text-charcoal/65 mt-0.5">Message will be sent to all matched registrants</p>
               </div>
-              <button onClick={close} className="w-8 h-8 rounded-full border border-mist flex items-center justify-center text-charcoal/40 hover:text-charcoal transition-colors">
+              <button onClick={close} className="w-8 h-8 rounded-full border border-mist flex items-center justify-center text-charcoal/65 hover:text-charcoal transition-colors">
                 <X size={14} />
               </button>
             </div>
@@ -72,7 +76,7 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
 
               {/* Event */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-charcoal/50 uppercase tracking-wider">Event</label>
+                <label className="text-[11px] font-semibold text-charcoal/70 uppercase tracking-wider">Event</label>
                 <div className="relative">
                   <select
                     value={eventId}
@@ -83,7 +87,7 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
                       <option key={ev.id} value={ev.id}>{ev.title}</option>
                     ))}
                   </select>
-                  <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/35" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                  <svg className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/65" width="12" height="12" viewBox="0 0 12 12" fill="none">
                     <path d="M2.5 4.5L6 8L9.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                 </div>
@@ -91,7 +95,7 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
 
               {/* Send to toggle */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-charcoal/50 uppercase tracking-wider">Send to</label>
+                <label className="text-[11px] font-semibold text-charcoal/70 uppercase tracking-wider">Send to</label>
                 <div className="grid grid-cols-2 gap-2">
                   {([
                     { value: "all",     Icon: Users,  label: "All registrants" },
@@ -104,7 +108,7 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
                         "flex items-center justify-center gap-2 py-2.5 rounded-xl border text-sm font-medium transition-all",
                         scope === value
                           ? "border-forest bg-forest text-cream shadow-sm"
-                          : "border-mist bg-white text-charcoal/55 hover:border-forest/30 hover:text-charcoal"
+                          : "border-mist bg-white text-charcoal/70 hover:border-forest/30 hover:text-charcoal"
                       )}
                     >
                       <Icon size={13} />
@@ -117,7 +121,7 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
               {/* Subject */}
               {(
                 <div className="space-y-1.5">
-                  <label className="text-[11px] font-semibold text-charcoal/50 uppercase tracking-wider">Subject</label>
+                  <label className="text-[11px] font-semibold text-charcoal/70 uppercase tracking-wider">Subject</label>
                   <input
                     value={subject}
                     onChange={e => setSubject(e.target.value)}
@@ -129,7 +133,7 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
 
               {/* Message */}
               <div className="space-y-1.5">
-                <label className="text-[11px] font-semibold text-charcoal/50 uppercase tracking-wider">Message</label>
+                <label className="text-[11px] font-semibold text-charcoal/70 uppercase tracking-wider">Message</label>
                 <textarea
                   value={message}
                   onChange={e => setMessage(e.target.value)}
@@ -166,4 +170,4 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
   );
 }
 
-const inp = "w-full px-4 py-2.5 rounded-xl border border-mist bg-white text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:border-forest/50 focus:ring-2 focus:ring-forest/10 transition-all";
+const inp = "w-full px-4 py-2.5 rounded-xl border border-mist bg-white text-sm text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:border-forest/50 focus:ring-2 focus:ring-forest/10 transition-all";

@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { Sprout } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 import { EventGrid } from "@/components/events/event-grid";
 import { createAdminClient } from "@/lib/supabase/server";
-import type { Event } from "@/types/database";
+import { PUBLIC_EVENT_COLUMNS, type PublicEvent } from "@/lib/public-event";
+import { todayInNairobi } from "@/lib/utils";
 
 export const revalidate = 300;
 
@@ -18,16 +20,16 @@ export const metadata: Metadata = {
   },
 };
 
-async function getEvents(): Promise<Event[]> {
+async function getEvents(): Promise<PublicEvent[]> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("events")
-      .select("*")
+      .select(PUBLIC_EVENT_COLUMNS)
       .in("status", ["published", "live", "past"])
       .is("deleted_at", null)
       .order("event_date", { ascending: false });
-    return (data as Event[]) ?? [];
+    return (data as PublicEvent[] | null) ?? [];
   } catch {
     return [];
   }
@@ -35,13 +37,22 @@ async function getEvents(): Promise<Event[]> {
 
 export default async function EventsPage() {
   const events = await getEvents();
-  const upcoming = events.filter((e) => e.status === "published" || e.status === "live");
-  const past = events.filter((e) => e.status === "past");
+  // A published session whose date has gone by is listed with the past ones,
+  // even if nobody has flipped its status yet. A live session always counts
+  // as upcoming so it stays at the top while it is running.
+  const today = todayInNairobi();
+  const isUpcoming = (e: PublicEvent) =>
+    e.status === "live" || (e.status === "published" && e.event_date >= today);
+  const upcoming = events.filter(isUpcoming);
+  const past = events
+    .filter((e) => !isUpcoming(e))
+    // So the card shows "Past Session" rather than an "Open" badge.
+    .map((e) => (e.status === "published" ? { ...e, status: "past" as const } : e));
 
   return (
     <>
       {/* Hero — photo background */}
-      <section className="relative min-h-[55vh] flex items-end overflow-hidden pt-20">
+      <section className="on-dark relative min-h-[55vh] flex items-end overflow-hidden pt-20">
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?auto=format&fit=crop&w=1600&q=75"
@@ -56,12 +67,9 @@ export default async function EventsPage() {
           <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/85 to-forest/55" />
         </div>
 
-        <div className="absolute top-20 right-32 w-48 h-48 rounded-full border border-cream/5 hidden lg:block" />
-        <div className="absolute bottom-8 left-16 w-24 h-24 rounded-full border border-gold/10 hidden lg:block" />
-
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">
           <FadeIn>
-            <span className="label-caps text-gold/80">Sessions</span>
+            <span className="label-caps text-gold">Sessions</span>
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream mt-2 leading-[0.95]">
               Every gathering,
               <br />
@@ -85,7 +93,7 @@ export default async function EventsPage() {
                 <div className="flex items-center gap-3 mb-8">
                   <span className="label-caps text-forest">Upcoming</span>
                   <div className="flex-1 h-px bg-mist" />
-                  <span className="text-xs text-charcoal/40 font-medium">{upcoming.length} session{upcoming.length !== 1 ? "s" : ""}</span>
+                  <span className="text-xs text-charcoal/65 font-medium">{upcoming.length} session{upcoming.length !== 1 ? "s" : ""}</span>
                 </div>
               </FadeIn>
               <EventGrid events={upcoming} />
@@ -96,9 +104,9 @@ export default async function EventsPage() {
             <div>
               <FadeIn>
                 <div className="flex items-center gap-3 mb-8">
-                  <span className="label-caps text-charcoal/40">Past Sessions</span>
+                  <span className="label-caps text-charcoal/65">Past Sessions</span>
                   <div className="flex-1 h-px bg-mist" />
-                  <span className="text-xs text-charcoal/40 font-medium">{past.length} session{past.length !== 1 ? "s" : ""}</span>
+                  <span className="text-xs text-charcoal/65 font-medium">{past.length} session{past.length !== 1 ? "s" : ""}</span>
                 </div>
               </FadeIn>
               <EventGrid events={past} />
@@ -109,12 +117,12 @@ export default async function EventsPage() {
             <FadeIn>
               <div className="text-center py-24">
                 <div className="w-20 h-20 rounded-full bg-forest/5 border border-mist flex items-center justify-center mx-auto mb-6">
-                  <span className="text-3xl">🌱</span>
+                  <Sprout className="w-8 h-8 text-forest" strokeWidth={1.5} aria-hidden />
                 </div>
                 <h3 className="font-display text-2xl font-semibold text-forest mb-2">
                   First session coming soon
                 </h3>
-                <p className="text-charcoal/50 text-sm max-w-xs mx-auto">
+                <p className="text-charcoal/70 text-sm max-w-xs mx-auto">
                   We&apos;re preparing something worth your evening. Stay close.
                 </p>
               </div>

@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { TicketBadgeSection } from "@/components/ticket/ticket-badge-section";
 import type { Metadata } from "next";
-import { sessionName } from "@/lib/utils";
+import { sessionName, formatEventTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +81,7 @@ export default async function TicketPage({ params }: Props) {
   const shortDate = new Date(event.event_date).toLocaleDateString("en-KE", {
     day: "numeric", month: "long", year: "numeric",
   });
-  const formattedTime = `${event.event_time.slice(0, 5).replace(":", ".")} pm`;
+  const formattedTime = formatEventTime(event.event_time);
   // Strip "The Green House — " prefix for cleaner display
   const sessionLabel = sessionName(event.title);
 
@@ -94,7 +94,7 @@ export default async function TicketPage({ params }: Props) {
       <div className="w-full max-w-sm mb-6">
         <Link
           href={`/events/${event.slug}`}
-          className="inline-flex items-center gap-1.5 text-xs text-cream/30 hover:text-cream/70 transition-colors"
+          className="inline-flex items-center gap-1.5 text-xs text-cream/65 hover:text-cream/70 transition-colors"
         >
           <ArrowLeft size={12} />
           Back to event
@@ -107,7 +107,7 @@ export default async function TicketPage({ params }: Props) {
           style={{ background: "rgba(201,162,74,0.08)" }}>
           <div className="px-5 py-4">
             <p className="text-sm font-semibold text-gold leading-snug">This session has concluded.</p>
-            <p className="text-xs text-cream/55 mt-1 leading-relaxed">
+            <p className="text-xs text-cream/75 mt-1 leading-relaxed">
               Thank you for being part of it. We&apos;d love to hear your thoughts, share your feedback below.
             </p>
           </div>
@@ -121,11 +121,11 @@ export default async function TicketPage({ params }: Props) {
             {nextEvent && (
               <Link
                 href={`/events/${nextEvent.slug}`}
-                className="inline-flex items-center gap-1.5 px-3 py-2 rounded bg-cream/8 border border-cream/15 text-xs font-semibold text-cream/70 hover:text-cream transition-colors"
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded bg-cream/10 border border-cream/15 text-xs font-semibold text-cream/70 hover:text-cream transition-colors"
               >
                 <CalendarDays size={11} />
                 {sessionName(nextEvent.title)}
-                <span className="text-cream/40">
+                <span className="text-cream/65">
                   {new Date(nextEvent.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
                 </span>
               </Link>
@@ -145,22 +145,8 @@ export default async function TicketPage({ params }: Props) {
             borderBottom: "none",
           }}
         >
-          {/* Dot grid overlay */}
-          <div
-            className="absolute inset-0 opacity-[0.07] pointer-events-none"
-            style={{
-              backgroundImage: "radial-gradient(circle, #f7f2e8 1px, transparent 1px)",
-              backgroundSize: "18px 18px",
-            }}
-          />
-          {/* Gold radial glow */}
-          <div
-            className="absolute top-0 right-0 w-56 h-56 pointer-events-none"
-            style={{ background: "radial-gradient(ellipse at 80% 0%, rgba(201,162,74,0.18), transparent 70%)" }}
-          />
-
           <div className="relative">
-            <p className="label-caps text-gold/60 text-[9px] tracking-[0.35em]">{SITE_NAME}</p>
+            <p className="label-caps text-gold text-[10px] tracking-[0.35em]">{SITE_NAME}</p>
             <h1
               className="font-display font-semibold mt-3 leading-tight"
               style={{ color: "#f7f2e8", fontSize: "clamp(1.5rem,5vw,2rem)" }}
@@ -200,7 +186,7 @@ export default async function TicketPage({ params }: Props) {
           <div className="px-8 pt-7 pb-6">
             {/* Attendee name — the hero element */}
             <div className="mb-6">
-              <p className="text-[9px] label-caps text-charcoal/35 tracking-[0.3em] mb-1.5">Registered to</p>
+              <p className="text-[10px] label-caps text-charcoal/65 tracking-[0.3em] mb-1.5">Registered to</p>
               <p
                 className="font-display font-semibold leading-tight"
                 style={{ fontSize: "clamp(1.6rem,5vw,2rem)", color: "#1b3a2a" }}
@@ -215,22 +201,22 @@ export default async function TicketPage({ params }: Props) {
               style={{ background: "rgba(27,58,42,0.06)", border: "1px solid rgba(27,58,42,0.1)" }}
             >
               <div>
-                <p className="text-[9px] label-caps text-charcoal/35 tracking-[0.25em] mb-1">Date</p>
+                <p className="text-[10px] label-caps text-charcoal/65 tracking-[0.25em] mb-1">Date</p>
                 <p className="text-sm font-semibold text-charcoal">{shortDate}</p>
               </div>
               <div>
-                <p className="text-[9px] label-caps text-charcoal/35 tracking-[0.25em] mb-1">Time</p>
+                <p className="text-[10px] label-caps text-charcoal/65 tracking-[0.25em] mb-1">Time</p>
                 <p className="text-sm font-semibold text-charcoal">{formattedTime}</p>
               </div>
               {event.venue_name && (
                 <div className="col-span-2">
-                  <p className="text-[9px] label-caps text-charcoal/35 tracking-[0.25em] mb-1">Venue</p>
+                  <p className="text-[10px] label-caps text-charcoal/65 tracking-[0.25em] mb-1">Venue</p>
                   <p className="text-sm font-semibold text-charcoal">{event.venue_name}</p>
                 </div>
               )}
               {event.dress_code && (
                 <div className="col-span-2">
-                  <p className="text-[9px] label-caps text-charcoal/35 tracking-[0.25em] mb-1">Dress Code</p>
+                  <p className="text-[10px] label-caps text-charcoal/65 tracking-[0.25em] mb-1">Dress Code</p>
                   <p className="text-sm font-semibold text-charcoal">{event.dress_code}</p>
                 </div>
               )}
@@ -241,14 +227,7 @@ export default async function TicketPage({ params }: Props) {
               className="rounded-2xl px-6 py-5 text-center mb-4 relative overflow-hidden"
               style={{ background: "#1b3a2a" }}
             >
-              <div
-                className="absolute inset-0 pointer-events-none opacity-[0.06]"
-                style={{
-                  backgroundImage: "radial-gradient(circle, #c9a24a 1px, transparent 1px)",
-                  backgroundSize: "14px 14px",
-                }}
-              />
-              <p className="text-[9px] label-caps tracking-[0.35em] mb-2" style={{ color: "rgba(201,162,74,0.6)" }}>
+              <p className="text-[10px] label-caps tracking-[0.35em] mb-2" style={{ color: "rgba(201,162,74,0.6)" }}>
                 Ticket Reference
               </p>
               <p
@@ -259,7 +238,7 @@ export default async function TicketPage({ params }: Props) {
               </p>
             </div>
 
-            <p className="text-[11px] text-charcoal/40 text-center leading-relaxed">
+            <p className="text-[11px] text-charcoal/65 text-center leading-relaxed">
               Entry is free · Present at the door · Doors open 30 min early
             </p>
           </div>

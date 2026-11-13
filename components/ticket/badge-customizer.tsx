@@ -2,7 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { Download, X, Share2, Loader2, ImagePlus, Check, ChevronRight } from "lucide-react";
+import { Download, X, Share2, Loader2, ImagePlus, Check, ChevronRight, Leaf } from "lucide-react";
 import QRCode from "qrcode";
 import { cn } from "@/lib/utils";
 
@@ -601,7 +601,7 @@ export function BadgeCustomizerModal({ open, onClose, ...props }: ModalProps) {
                   style={{ background: v.bg }}
                 >
                   <div className="absolute inset-0 flex flex-col items-center justify-center p-1">
-                    <span className="text-[8px] font-semibold leading-tight text-center" style={{ color: v.accent }}>{v.name}</span>
+                    <span className="text-[10px] font-semibold leading-tight text-center" style={{ color: v.accent }}>{v.name}</span>
                   </div>
                   {variant === v.id && (
                     <div className="absolute top-1 right-1 w-3.5 h-3.5 rounded-full bg-[#c9a24a] flex items-center justify-center">
@@ -716,10 +716,10 @@ export function BadgePromptDialog({ open, onClose, onCustomize }: PromptProps) {
         <div className="absolute inset-0 pointer-events-none" style={{ background: "radial-gradient(ellipse 80% 60% at 50% 0%,rgba(201,162,74,0.2),transparent)" }} />
         <div className="relative px-6 pt-8 pb-6">
           <button onClick={onClose} className="absolute top-4 right-4 p-1.5 rounded-full hover:bg-white/10 transition-colors">
-            <X size={14} className="text-white/50" />
+            <X size={14} className="text-white/70" />
           </button>
           <div className="w-12 h-12 rounded-2xl bg-[#c9a24a]/15 border border-[#c9a24a]/25 flex items-center justify-center mb-4">
-            <span className="text-2xl">🌿</span>
+            <Leaf className="w-6 h-6 text-[#c9a24a]" strokeWidth={1.5} aria-hidden />
           </div>
           <h3 className="font-display text-xl font-semibold text-[#f7f2e8] mb-2 leading-snug">
             You have a digital badge

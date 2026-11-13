@@ -90,18 +90,18 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
       {/* Toolbar row 1: search + refresh */}
       <div className="flex items-center gap-2">
         <div className="relative flex-1">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/65" />
           <input
             value={query}
             onChange={e => changeQuery(e.target.value)}
             placeholder="Search events…"
-            className="w-full pl-9 pr-4 py-2 rounded-xl border border-mist bg-white text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
+            className="w-full pl-9 pr-4 py-2 rounded-xl border border-mist bg-white text-sm text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
           />
         </div>
         <button
           onClick={refresh}
           title="Refresh"
-          className="flex-shrink-0 p-2 rounded-xl border border-mist bg-white text-charcoal/40 hover:text-forest hover:border-forest/30 transition-all"
+          className="flex-shrink-0 p-2 rounded-xl border border-mist bg-white text-charcoal/65 hover:text-forest hover:border-forest/30 transition-all"
         >
           <RefreshCw size={14} className={cn("transition-transform", spinning && "animate-spin")} />
         </button>
@@ -118,7 +118,7 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
                 "px-3 py-1.5 rounded-lg text-xs font-medium transition-all whitespace-nowrap",
                 status === key
                   ? "bg-forest text-cream shadow-sm"
-                  : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
+                  : "text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5"
               )}
             >
               {label}
@@ -132,10 +132,10 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
         {filtered.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-16">
             <div className="w-12 h-12 rounded-2xl bg-charcoal/5 flex items-center justify-center mb-3">
-              <Calendar size={20} className="text-charcoal/25" />
+              <Calendar size={20} className="text-charcoal/65" />
             </div>
-            <p className="text-sm font-medium text-charcoal/40">No events found</p>
-            <p className="text-xs text-charcoal/25 mt-1">
+            <p className="text-sm font-medium text-charcoal/65">No events found</p>
+            <p className="text-xs text-charcoal/65 mt-1">
               {query || status !== "all" ? "Try adjusting your filters" : "Create your first event to get started"}
             </p>
           </div>
@@ -145,11 +145,11 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
               <table className="w-full">
                 <thead className="sticky top-0 bg-white z-10">
                   <tr className="border-b border-mist">
-                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3">Event</th>
-                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden sm:table-cell">Date</th>
-                    <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3">Status</th>
-                    <th className="text-center text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden md:table-cell">Registrations</th>
-                    <th className="text-right text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3">Actions</th>
+                    <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-5 py-3">Event</th>
+                    <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3 hidden sm:table-cell">Date</th>
+                    <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3">Status</th>
+                    <th className="text-center text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3 hidden md:table-cell">Registrations</th>
+                    <th className="text-right text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-5 py-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-mist">
@@ -157,20 +157,20 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
                     <tr key={e.id} className="hover:bg-off-white transition-colors group">
                       <td className="px-5 py-3.5">
                         <p className="text-sm font-medium text-charcoal group-hover:text-forest transition-colors line-clamp-1">{e.title}</p>
-                        <p className="text-[10px] text-charcoal/35 mt-0.5">/events/{e.slug}</p>
+                        <p className="text-[10px] text-charcoal/65 mt-0.5">/events/{e.slug}</p>
                       </td>
                       <td className="px-4 py-3.5 hidden sm:table-cell">
                         <p className="text-xs text-charcoal/70">
                           {new Date(e.event_date).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "numeric" })}
                         </p>
-                        <p className="text-[10px] text-charcoal/35 mt-0.5">
+                        <p className="text-[10px] text-charcoal/65 mt-0.5">
                           {new Date(e.event_date).toLocaleDateString("en-KE", { weekday: "long" })}
                         </p>
                       </td>
                       <td className="px-4 py-3.5"><StatusBadge status={e.status} /></td>
                       <td className="px-4 py-3.5 hidden md:table-cell text-center">
-                        <div className="inline-flex items-center gap-1.5 text-xs text-charcoal/60">
-                          <Users size={11} className="text-charcoal/35" />
+                        <div className="inline-flex items-center gap-1.5 text-xs text-charcoal/65">
+                          <Users size={11} className="text-charcoal/65" />
                           {e.registrations}
                         </div>
                       </td>
@@ -178,14 +178,14 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
                         <div className="flex items-center justify-end gap-1">
                           <Link
                             href={`/admin/events/${e.id}/sessions`}
-                            className="p-1.5 rounded-lg text-charcoal/35 hover:text-forest hover:bg-forest/8 transition-all"
+                            className="p-1.5 rounded-lg text-charcoal/65 hover:text-forest hover:bg-forest/10 transition-all"
                             title="Program & lyrics"
                           >
                             <Music2 size={14} />
                           </Link>
                           <Link
                             href={`/admin/events/${e.id}/registrants`}
-                            className="p-1.5 rounded-lg text-charcoal/35 hover:text-forest hover:bg-forest/8 transition-all"
+                            className="p-1.5 rounded-lg text-charcoal/65 hover:text-forest hover:bg-forest/10 transition-all"
                             title="Registrants"
                           >
                             <Users size={14} />
@@ -193,14 +193,14 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
                           <Link
                             href={`/events/${e.slug}`}
                             target="_blank"
-                            className="p-1.5 rounded-lg text-charcoal/35 hover:text-charcoal hover:bg-charcoal/8 transition-all"
+                            className="p-1.5 rounded-lg text-charcoal/65 hover:text-charcoal hover:bg-charcoal/10 transition-all"
                             title="View public page"
                           >
                             <ExternalLink size={13} />
                           </Link>
                           <Link
                             href={`/admin/events/${e.id}`}
-                            className="flex items-center gap-1.5 text-[11px] font-semibold text-forest bg-forest/8 hover:bg-forest/15 transition-colors px-3 py-1.5 rounded-lg"
+                            className="flex items-center gap-1.5 text-[11px] font-semibold text-forest bg-forest/10 hover:bg-forest/15 transition-colors px-3 py-1.5 rounded-lg"
                           >
                             <Edit2 size={11} /> Edit
                           </Link>
@@ -214,14 +214,14 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
 
             {pages > 1 && (
               <div className="flex items-center justify-between px-5 py-3 border-t border-mist flex-shrink-0">
-                <p className="text-xs text-charcoal/40">
+                <p className="text-xs text-charcoal/65">
                   {(safePage - 1) * PAGE_SIZE + 1}–{Math.min(safePage * PAGE_SIZE, filtered.length)} of {filtered.length}
                 </p>
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => setPage(p => Math.max(1, p - 1))}
                     disabled={safePage === 1}
-                    className="px-3 py-1.5 rounded-lg text-xs text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5 disabled:opacity-30 transition-all"
+                    className="px-3 py-1.5 rounded-lg text-xs text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5 disabled:opacity-30 transition-all"
                   >
                     ← Prev
                   </button>
@@ -231,7 +231,7 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
                       onClick={() => setPage(n)}
                       className={cn(
                         "w-7 h-7 rounded-lg text-xs font-medium transition-all",
-                        n === safePage ? "bg-forest text-cream" : "text-charcoal/50 hover:bg-charcoal/5"
+                        n === safePage ? "bg-forest text-cream" : "text-charcoal/70 hover:bg-charcoal/5"
                       )}
                     >
                       {n}
@@ -240,7 +240,7 @@ export function EventsTable({ events: initialEvents }: { events: EventRow[] }) {
                   <button
                     onClick={() => setPage(p => Math.min(pages, p + 1))}
                     disabled={safePage === pages}
-                    className="px-3 py-1.5 rounded-lg text-xs text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5 disabled:opacity-30 transition-all"
+                    className="px-3 py-1.5 rounded-lg text-xs text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5 disabled:opacity-30 transition-all"
                   >
                     Next →
                   </button>

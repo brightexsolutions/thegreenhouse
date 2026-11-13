@@ -32,7 +32,7 @@ export default async function EnquiriesPage() {
       <div className="flex-shrink-0 flex items-center justify-between">
         <div>
           <h1 className="text-xl font-semibold text-charcoal">Get Involved Enquiries</h1>
-          <p className="text-sm text-charcoal/45 mt-0.5">
+          <p className="text-sm text-charcoal/65 mt-0.5">
             {enquiries.length} total
             {partnerCount > 0 && (
               <> · <span className="text-[#8a6a1a] font-medium">{partnerCount} partnership</span></>
@@ -45,9 +45,9 @@ export default async function EnquiriesPage() {
       <div className="flex-1 min-h-0 bg-white rounded-2xl border border-mist overflow-hidden flex flex-col">
         {enquiries.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1 py-16">
-            <MessageSquare size={28} className="text-charcoal/15 mb-3" />
-            <p className="text-sm text-charcoal/35">No enquiries yet</p>
-            <p className="text-xs text-charcoal/25 mt-1">Submissions from the Get Involved form appear here</p>
+            <MessageSquare size={28} className="text-charcoal/65 mb-3" />
+            <p className="text-sm text-charcoal/65">No enquiries yet</p>
+            <p className="text-xs text-charcoal/65 mt-1">Submissions from the Get Involved form appear here</p>
           </div>
         ) : (
           <EnquiriesTable enquiries={enquiries} />

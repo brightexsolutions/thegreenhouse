@@ -216,7 +216,7 @@ export function GalleryCarousel({ images, eventTitle }: Props) {
               </button>
             )}
 
-            <div className="absolute bottom-5 left-0 right-0 text-center text-xs text-white/35 pointer-events-none tabular-nums">
+            <div className="absolute bottom-5 left-0 right-0 text-center text-xs text-white/70 pointer-events-none tabular-nums">
               {lightboxIdx + 1} / {images.length}
             </div>
           </motion.div>

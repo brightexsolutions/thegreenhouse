@@ -51,7 +51,7 @@ const SESSION_TYPES: Array<{ value: string; label: string; icon: React.ElementTy
   { value: "sharing",   label: "Sharing",   icon: Mic,        color: "bg-blue-50 text-blue-600" },
   { value: "teaching",  label: "Teaching",  icon: BookOpen,   color: "bg-purple-50 text-purple-600" },
   { value: "open_mic",  label: "Open Mic",  icon: Headphones, color: "bg-pink-50 text-pink-600" },
-  { value: "other",     label: "Other",     icon: Zap,        color: "bg-charcoal/6 text-charcoal/60" },
+  { value: "other",     label: "Other",     icon: Zap,        color: "bg-charcoal/5 text-charcoal/65" },
 ];
 
 const SESSION_HINTS: Record<string, { items: string[]; tip: string }> = {
@@ -238,14 +238,14 @@ export function SessionManager({ eventId, initialSessions }: Props) {
       {/* Header */}
       <div className="flex items-center justify-between flex-shrink-0">
         <div>
-          <p className="text-sm text-charcoal/50">
+          <p className="text-sm text-charcoal/70">
             {sessions.length} section{sessions.length !== 1 ? "s" : ""}
             {totalItems > 0 && <> · {totalItems} item{totalItems !== 1 ? "s" : ""}</>}
           </p>
         </div>
         <div className="flex items-center gap-2">
           {saving && (
-            <span className="flex items-center gap-1.5 text-xs text-charcoal/40">
+            <span className="flex items-center gap-1.5 text-xs text-charcoal/65">
               <Loader2 size={11} className="animate-spin" /> Saving
             </span>
           )}
@@ -264,7 +264,7 @@ export function SessionManager({ eventId, initialSessions }: Props) {
           <p className="text-xs font-semibold text-forest mb-3">New section</p>
           <div className="grid sm:grid-cols-2 gap-3 mb-3">
             <div>
-              <label className="block text-[11px] font-semibold text-charcoal/60 mb-1.5 uppercase tracking-wider">Title</label>
+              <label className="block text-[11px] font-semibold text-charcoal/65 mb-1.5 uppercase tracking-wider">Title</label>
               <input
                 autoFocus
                 value={newTitle}
@@ -275,7 +275,7 @@ export function SessionManager({ eventId, initialSessions }: Props) {
               />
             </div>
             <div>
-              <label className="block text-[11px] font-semibold text-charcoal/60 mb-1.5 uppercase tracking-wider">Type</label>
+              <label className="block text-[11px] font-semibold text-charcoal/65 mb-1.5 uppercase tracking-wider">Type</label>
               <select
                 value={newType}
                 onChange={e => setNewType(e.target.value)}
@@ -295,7 +295,7 @@ export function SessionManager({ eventId, initialSessions }: Props) {
             </button>
             <button
               onClick={() => { setAddingSession(false); setNewTitle(""); }}
-              className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
+              className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/65"
             >
               Cancel
             </button>
@@ -306,11 +306,11 @@ export function SessionManager({ eventId, initialSessions }: Props) {
       {/* Sessions list */}
       {sessions.length === 0 ? (
         <div className="bg-white rounded-2xl border border-mist p-12 text-center flex-1">
-          <div className="w-14 h-14 rounded-2xl bg-forest/6 flex items-center justify-center mx-auto mb-4">
-            <Music2 size={22} className="text-forest/40" />
+          <div className="w-14 h-14 rounded-2xl bg-forest/5 flex items-center justify-center mx-auto mb-4">
+            <Music2 size={22} className="text-forest/80" />
           </div>
-          <p className="text-sm font-medium text-charcoal/50 mb-1">No program yet</p>
-          <p className="text-xs text-charcoal/30 mb-5">Add sections to build the evening&apos;s program</p>
+          <p className="text-sm font-medium text-charcoal/70 mb-1">No program yet</p>
+          <p className="text-xs text-charcoal/65 mb-5">Add sections to build the evening&apos;s program</p>
           <button
             onClick={() => setAddingSession(true)}
             className="inline-flex items-center gap-2 px-4 py-2.5 rounded-full bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
@@ -518,7 +518,7 @@ function SortableSessionCard({
         <button
           {...attributes}
           {...listeners}
-          className="cursor-grab active:cursor-grabbing text-cream/20 hover:text-cream/50 transition-colors touch-none flex-shrink-0"
+          className="cursor-grab active:cursor-grabbing text-cream/50 hover:text-cream/75 transition-colors touch-none flex-shrink-0"
         >
           <GripVertical size={15} />
         </button>
@@ -533,7 +533,7 @@ function SortableSessionCard({
           value={session.title}
           onChange={e => onUpdate({ title: e.target.value })}
           onBlur={e => onUpdate({ title: e.target.value })}
-          className="flex-1 min-w-0 bg-transparent text-cream text-sm font-semibold border-none outline-none placeholder:text-cream/30"
+          className="flex-1 min-w-0 bg-transparent text-cream text-sm font-semibold border-none outline-none placeholder:text-cream/50"
           placeholder="Section title"
         />
 
@@ -556,16 +556,16 @@ function SortableSessionCard({
             type="number"
             value={session.duration_min ?? ""}
             onChange={e => onUpdate({ duration_min: e.target.value ? Number(e.target.value) : null })}
-            className="w-10 bg-transparent text-cream/50 text-xs border-none outline-none text-right"
+            className="w-10 bg-transparent text-cream/75 text-xs border-none outline-none text-right"
             placeholder="–"
             min="1"
           />
-          <span className="text-cream/30 text-[10px]">min</span>
+          <span className="text-cream/65 text-[10px]">min</span>
         </div>
 
         {/* Item count chip */}
         {session.session_songs.length > 0 && (
-          <span className="text-[10px] text-cream/40 flex-shrink-0 tabular-nums">
+          <span className="text-[10px] text-cream/65 flex-shrink-0 tabular-nums">
             {session.session_songs.length}
           </span>
         )}
@@ -573,13 +573,13 @@ function SortableSessionCard({
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={onToggle}
-            className="p-1.5 rounded-lg text-cream/40 hover:text-cream hover:bg-cream/10 transition-colors"
+            className="p-1.5 rounded-lg text-cream/65 hover:text-cream hover:bg-cream/10 transition-colors"
           >
             {expanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
           <button
             onClick={onDelete}
-            className="p-1.5 rounded-lg text-cream/20 hover:text-red-400 hover:bg-red-500/10 transition-colors"
+            className="p-1.5 rounded-lg text-cream/50 hover:text-red-400 hover:bg-red-500/10 transition-colors"
           >
             <Trash2 size={13} />
           </button>
@@ -594,41 +594,41 @@ function SortableSessionCard({
             const hint = SESSION_HINTS[session.type] ?? SESSION_HINTS.other;
             return (
               <div className="mx-4 mt-4 mb-3 rounded-xl bg-forest/5 border border-forest/10 px-3.5 py-3">
-                <p className="text-[10px] font-semibold text-forest/60 uppercase tracking-wider mb-2">Program guide · {getTypeInfo(session.type).label}</p>
+                <p className="text-[10px] font-semibold text-forest/80 uppercase tracking-wider mb-2">Program guide · {getTypeInfo(session.type).label}</p>
                 <ul className="space-y-1 mb-2">
                   {hint.items.map((item, i) => (
-                    <li key={i} className="flex items-start gap-1.5 text-[11px] text-charcoal/55">
-                      <span className="text-forest/40 mt-0.5 flex-shrink-0">·</span>
+                    <li key={i} className="flex items-start gap-1.5 text-[11px] text-charcoal/70">
+                      <span className="text-forest/80 mt-0.5 flex-shrink-0">·</span>
                       {item}
                     </li>
                   ))}
                 </ul>
-                <p className="text-[10px] text-charcoal/35 italic">{hint.tip}</p>
+                <p className="text-[10px] text-charcoal/65 italic">{hint.tip}</p>
               </div>
             );
           })()}
 
           {/* Notes */}
           <div className="px-4 pt-4 pb-3">
-            <label className="block text-[11px] font-semibold text-charcoal/55 uppercase tracking-wider mb-1.5">
+            <label className="block text-[11px] font-semibold text-charcoal/70 uppercase tracking-wider mb-1.5">
               Internal notes
             </label>
             <textarea
               value={session.notes ?? ""}
               onChange={e => onUpdate({ notes: e.target.value || null })}
               rows={2}
-              className="w-full px-3 py-2 rounded-xl border border-mist text-sm text-charcoal/70 focus:outline-none focus:border-forest resize-none placeholder:text-charcoal/25"
+              className="w-full px-3 py-2 rounded-xl border border-mist text-sm text-charcoal/70 focus:outline-none focus:border-forest resize-none placeholder:text-charcoal/50"
               placeholder="Notes visible only to admins…"
             />
           </div>
 
           {/* Trivia planning */}
           <div className="px-4 pb-4">
-            <label className="flex items-center gap-1.5 text-[11px] font-semibold text-charcoal/55 uppercase tracking-wider mb-1.5">
+            <label className="flex items-center gap-1.5 text-[11px] font-semibold text-charcoal/70 uppercase tracking-wider mb-1.5">
               <Sparkles size={10} className="text-amber-500" /> Planned trivia
             </label>
             {triviaQuestions.length === 0 ? (
-              <p className="text-[11px] text-charcoal/35 italic">No trivia questions in library yet</p>
+              <p className="text-[11px] text-charcoal/65 italic">No trivia questions in library yet</p>
             ) : (
               <select
                 value={session.trivia_question_id ?? ""}
@@ -655,8 +655,8 @@ function SortableSessionCard({
             {/* Tracks header */}
             <div className="bg-[#1b3a2a]/5 px-4 py-2 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <span className="text-[11px] font-semibold text-charcoal/50 w-5 text-center">#</span>
-                <span className="text-[11px] font-semibold text-charcoal/50 uppercase tracking-wider">Program items</span>
+                <span className="text-[11px] font-semibold text-charcoal/70 w-5 text-center">#</span>
+                <span className="text-[11px] font-semibold text-charcoal/70 uppercase tracking-wider">Program items</span>
               </div>
               <div className="flex items-center gap-3">
                 <button
@@ -676,8 +676,8 @@ function SortableSessionCard({
 
             {session.session_songs.length === 0 && !addingSong && !addingText ? (
               <div className="px-4 py-6 text-center">
-                <Music2 size={18} className="text-charcoal/15 mx-auto mb-1.5" />
-                <p className="text-[11px] text-charcoal/35">No items in this section yet</p>
+                <Music2 size={18} className="text-charcoal/65 mx-auto mb-1.5" />
+                <p className="text-[11px] text-charcoal/65">No items in this section yet</p>
               </div>
             ) : (
               <DndContext sensors={itemSensors} collisionDetection={closestCenter} onDragEnd={handleItemDragEnd}>
@@ -687,10 +687,10 @@ function SortableSessionCard({
                   <SortableProgramItem key={ss.id} id={ss.id}>
                     {(handleProps) => ss.item_type !== "song" ? (
                       <div className="px-4 py-2.5 flex items-center gap-3 group hover:bg-blue-50/40 transition-colors">
-                        <span {...handleProps} className="cursor-grab active:cursor-grabbing text-charcoal/15 group-hover:text-charcoal/35 transition-colors flex-shrink-0 touch-none">
+                        <span {...handleProps} className="cursor-grab active:cursor-grabbing text-charcoal/65 group-hover:text-charcoal/65 transition-colors flex-shrink-0 touch-none">
                           <GripVertical size={13} />
                         </span>
-                        <span className="text-[11px] text-charcoal/30 w-5 text-center tabular-nums flex-shrink-0">
+                        <span className="text-[11px] text-charcoal/65 w-5 text-center tabular-nums flex-shrink-0">
                           {i + 1}
                         </span>
                         <div className="w-7 h-7 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
@@ -703,7 +703,7 @@ function SortableSessionCard({
                         <button
                           onClick={() => onRemoveSong(ss.id)}
                           title="Remove"
-                          className="p-1 rounded-lg text-charcoal/20 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
+                          className="p-1 rounded-lg text-charcoal/65 hover:text-red-500 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 flex-shrink-0"
                         >
                           <X size={13} />
                         </button>
@@ -719,21 +719,21 @@ function SortableSessionCard({
                         >
                           <span
                             {...handleProps}
-                            className="cursor-grab active:cursor-grabbing text-charcoal/15 group-hover:text-charcoal/30 transition-colors flex-shrink-0 touch-none"
+                            className="cursor-grab active:cursor-grabbing text-charcoal/65 group-hover:text-charcoal/65 transition-colors flex-shrink-0 touch-none"
                             onClick={e => e.stopPropagation()}
                           >
                             <GripVertical size={13} />
                           </span>
-                          <span className="text-[11px] text-charcoal/30 w-5 text-center tabular-nums flex-shrink-0">
+                          <span className="text-[11px] text-charcoal/65 w-5 text-center tabular-nums flex-shrink-0">
                             {i + 1}
                           </span>
                           <div className="w-7 h-7 rounded-lg bg-[#1b3a2a]/8 flex items-center justify-center flex-shrink-0">
-                            <Music2 size={12} className="text-forest/60" />
+                            <Music2 size={12} className="text-forest/80" />
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-semibold text-charcoal truncate">{ss.songs?.title}</p>
                             {ss.songs?.artist && (
-                              <p className="text-xs text-charcoal/50 truncate mt-0.5">{ss.songs.artist}</p>
+                              <p className="text-xs text-charcoal/70 truncate mt-0.5">{ss.songs.artist}</p>
                             )}
                             {/* Vocalist row */}
                             <div className="mt-1.5" onClick={e => e.stopPropagation()}>
@@ -748,7 +748,7 @@ function SortableSessionCard({
                                       if (e.key === "Enter") saveVocalist(ss.id, (e.target as HTMLInputElement).value.trim());
                                       if (e.key === "Escape") setEditingVocalist(null);
                                     }}
-                                    className="text-xs text-forest font-medium bg-forest/8 border border-forest/30 rounded-lg px-2 py-1 outline-none focus:border-forest w-32 placeholder:text-forest/30"
+                                    className="text-xs text-forest font-medium bg-forest/10 border border-forest/30 rounded-lg px-2 py-1 outline-none focus:border-forest w-32 placeholder:text-forest/30"
                                   />
                                   <button
                                     onClick={() => saveVocalist(ss.id, vocalistRefs.current[ss.id]?.value ?? "")}
@@ -759,7 +759,7 @@ function SortableSessionCard({
                                   </button>
                                   <button
                                     onClick={() => setEditingVocalist(null)}
-                                    className="p-1 rounded-md bg-charcoal/8 hover:bg-charcoal/15 text-charcoal/50 transition-colors"
+                                    className="p-1 rounded-md bg-charcoal/10 hover:bg-charcoal/15 text-charcoal/70 transition-colors"
                                     title="Cancel"
                                   >
                                     <X size={12} />
@@ -774,14 +774,14 @@ function SortableSessionCard({
                                   onClick={() => setEditingVocalist(ss.id)}
                                   className="inline-flex items-center gap-1.5 text-xs hover:opacity-75 transition-opacity"
                                 >
-                                  <Mic size={11} className="text-forest/60 flex-shrink-0" />
+                                  <Mic size={11} className="text-forest/80 flex-shrink-0" />
                                   <span className="font-semibold text-forest">{ss.vocalist}</span>
-                                  <span className="font-normal text-charcoal/40">&nbsp;· session vocalist</span>
+                                  <span className="font-normal text-charcoal/65">&nbsp;· session vocalist</span>
                                 </button>
                               ) : (
                                 <button
                                   onClick={() => setEditingVocalist(ss.id)}
-                                  className="inline-flex items-center gap-1.5 text-xs font-medium text-charcoal/40 hover:text-forest transition-colors"
+                                  className="inline-flex items-center gap-1.5 text-xs font-medium text-charcoal/65 hover:text-forest transition-colors"
                                 >
                                   <Mic size={11} />
                                   Assign vocalist
@@ -799,14 +799,14 @@ function SortableSessionCard({
                             <button
                               onClick={(e) => { e.stopPropagation(); onRemoveSong(ss.id); }}
                               title="Remove from this section"
-                              className="p-1 rounded-lg text-charcoal/25 hover:text-red-500 hover:bg-red-50 transition-colors"
+                              className="p-1 rounded-lg text-charcoal/65 hover:text-red-500 hover:bg-red-50 transition-colors"
                             >
                               <X size={13} />
                             </button>
                           </div>
                           <ChevronDown
                             size={13}
-                            className={cn("text-charcoal/25 transition-transform flex-shrink-0", expandedSong === ss.id && "rotate-180")}
+                            className={cn("text-charcoal/65 transition-transform flex-shrink-0", expandedSong === ss.id && "rotate-180")}
                           />
                         </div>
 
@@ -814,7 +814,7 @@ function SortableSessionCard({
                         {(expandedSong === ss.id || editingSong === ss.id) && (
                           <div className="bg-[#0f1f15] px-4 py-4">
                             <div className="flex items-center justify-between mb-2">
-                              <p className="text-[10px] font-semibold text-gold/60 uppercase tracking-wider">{ss.songs?.title}</p>
+                              <p className="text-[10px] font-semibold text-gold uppercase tracking-wider">{ss.songs?.title}</p>
                               {editingSong === ss.id ? (
                                 <button
                                   onClick={() => { handleLyricsBlur(ss.id); setEditingSong(null); }}
@@ -825,7 +825,7 @@ function SortableSessionCard({
                               ) : (
                                 <button
                                   onClick={() => setEditingSong(ss.id)}
-                                  className="text-[11px] text-cream/30 hover:text-cream transition-colors"
+                                  className="text-[11px] text-cream/65 hover:text-cream transition-colors"
                                 >
                                   Edit
                                 </button>
@@ -837,15 +837,15 @@ function SortableSessionCard({
                                 defaultValue={ss.songs?.lyrics ?? ""}
                                 rows={10}
                                 onBlur={() => handleLyricsBlur(ss.id)}
-                                className="w-full bg-transparent text-cream/70 text-sm leading-loose resize-y outline-none placeholder:text-cream/20 font-mono"
+                                className="w-full bg-transparent text-cream/70 text-sm leading-loose resize-y outline-none placeholder:text-cream/50 font-mono"
                                 placeholder={"Verse 1:\n...\n\nChorus:\n..."}
                               />
                             ) : (
-                              <pre className="text-cream/55 text-sm leading-loose whitespace-pre-wrap font-sans min-h-[60px]">
-                                {ss.songs?.lyrics || <span className="text-cream/20 italic text-xs">No lyrics yet, click Edit to add</span>}
+                              <pre className="text-cream/75 text-sm leading-loose whitespace-pre-wrap font-sans min-h-[60px]">
+                                {ss.songs?.lyrics || <span className="text-cream/50 italic text-xs">No lyrics yet, click Edit to add</span>}
                               </pre>
                             )}
-                            <p className="text-[10px] text-cream/20 mt-3">
+                            <p className="text-[10px] text-cream/50 mt-3">
                               Separate verses/sections with a blank line. The display screen advances one section at a time.
                             </p>
                           </div>
@@ -888,7 +888,7 @@ function SortableSessionCard({
                     textType === "verse"  ? "e.g. John 3:16, For God so loved the world…" :
                     "Enter the text to display…"
                   }
-                  className="w-full px-3 py-2 rounded-xl border border-blue-200 text-sm text-charcoal focus:outline-none focus:border-blue-400 resize-none placeholder:text-charcoal/30"
+                  className="w-full px-3 py-2 rounded-xl border border-blue-200 text-sm text-charcoal focus:outline-none focus:border-blue-400 resize-none placeholder:text-charcoal/50"
                 />
                 <div className="flex gap-2">
                   <button
@@ -904,7 +904,7 @@ function SortableSessionCard({
                   </button>
                   <button
                     onClick={() => { setAddingText(false); setTextContent(""); }}
-                    className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
+                    className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/65"
                   >
                     Cancel
                   </button>
@@ -921,7 +921,7 @@ function SortableSessionCard({
                     onClick={() => setAddMode("new")}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all",
-                      addMode === "new" ? "bg-forest text-cream" : "text-charcoal/50 hover:text-charcoal"
+                      addMode === "new" ? "bg-forest text-cream" : "text-charcoal/70 hover:text-charcoal"
                     )}
                   >
                     <Plus size={10} /> New song
@@ -930,7 +930,7 @@ function SortableSessionCard({
                     onClick={() => { setAddMode("library"); if (!libResults.length) searchLib(""); }}
                     className={cn(
                       "flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-medium transition-all",
-                      addMode === "library" ? "bg-forest text-cream" : "text-charcoal/50 hover:text-charcoal"
+                      addMode === "library" ? "bg-forest text-cream" : "text-charcoal/70 hover:text-charcoal"
                     )}
                   >
                     <Library size={10} /> From library
@@ -960,7 +960,7 @@ function SortableSessionCard({
                       onChange={e => setSongLyrics(e.target.value)}
                       placeholder={"Verse 1:\n...\n\nChorus:\n..."}
                       rows={5}
-                      className="w-full px-3 py-2 rounded-xl border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-y placeholder:text-charcoal/25"
+                      className="w-full px-3 py-2 rounded-xl border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-y placeholder:text-charcoal/50"
                     />
                     <div className="flex gap-2 pt-1">
                       <button
@@ -972,7 +972,7 @@ function SortableSessionCard({
                       </button>
                       <button
                         onClick={() => { setAddingSong(false); setSongTitle(""); setSongArtist(""); setSongLyrics(""); }}
-                        className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
+                        className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/65"
                       >
                         Cancel
                       </button>
@@ -981,7 +981,7 @@ function SortableSessionCard({
                 ) : (
                   <>
                     <div className="relative">
-                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+                      <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/65" />
                       <input
                         autoFocus
                         value={libQuery}
@@ -993,10 +993,10 @@ function SortableSessionCard({
                     <div className="max-h-52 overflow-y-auto rounded-xl border border-mist bg-white divide-y divide-mist">
                       {libLoading ? (
                         <div className="py-6 text-center">
-                          <Loader2 size={14} className="animate-spin text-charcoal/30 mx-auto" />
+                          <Loader2 size={14} className="animate-spin text-charcoal/65 mx-auto" />
                         </div>
                       ) : libResults.length === 0 ? (
-                        <div className="py-5 text-center text-xs text-charcoal/35">
+                        <div className="py-5 text-center text-xs text-charcoal/65">
                           {libQuery ? "No songs found" : "No songs in library yet"}
                         </div>
                       ) : libResults.map(song => {
@@ -1010,38 +1010,38 @@ function SortableSessionCard({
                             disabled={alreadyAdded || addingBulk}
                             className={cn(
                               "w-full flex items-center gap-3 px-4 py-2.5 transition-colors text-left",
-                              alreadyAdded ? "opacity-40 cursor-not-allowed" : isSelected ? "bg-forest/8 hover:bg-forest/12" : "hover:bg-forest/4"
+                              alreadyAdded ? "opacity-40 cursor-not-allowed" : isSelected ? "bg-forest/10 hover:bg-forest/10" : "hover:bg-forest/5"
                             )}
                           >
                             {/* Checkbox */}
                             <div className={cn(
                               "w-4 h-4 rounded border flex items-center justify-center flex-shrink-0 transition-all",
-                              alreadyAdded ? "border-charcoal/20 bg-charcoal/8"
+                              alreadyAdded ? "border-charcoal/20 bg-charcoal/10"
                                 : isSelected ? "border-forest bg-forest" : "border-charcoal/25"
                             )}>
                               {alreadyAdded
-                                ? <span className="text-[8px] text-charcoal/40">✓</span>
-                                : isSelected && <span className="text-[8px] text-cream font-bold">✓</span>
+                                ? <span className="text-[10px] text-charcoal/65">✓</span>
+                                : isSelected && <span className="text-[10px] text-cream font-bold">✓</span>
                               }
                             </div>
                             <div className="min-w-0 flex-1">
                               <p className="text-sm font-medium text-charcoal truncate">{song.title}</p>
-                              {song.artist && <p className="text-xs text-charcoal/55 truncate">{song.artist}</p>}
+                              {song.artist && <p className="text-xs text-charcoal/70 truncate">{song.artist}</p>}
                             </div>
                             <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap justify-end">
                               {alreadyAdded && (
-                                <span className="text-[11px] text-charcoal/40">in this section</span>
+                                <span className="text-[11px] text-charcoal/65">in this section</span>
                               )}
                               {otherSections.slice(0, 2).map(name => (
-                                <span key={name} className="text-[10px] bg-gold/12 text-amber-700 px-1.5 py-0.5 rounded-full max-w-[80px] truncate">
+                                <span key={name} className="text-[10px] bg-gold/10 text-amber-700 px-1.5 py-0.5 rounded-full max-w-[80px] truncate">
                                   {name}
                                 </span>
                               ))}
                               {otherSections.length > 2 && (
-                                <span className="text-[11px] text-charcoal/40">+{otherSections.length - 2}</span>
+                                <span className="text-[11px] text-charcoal/65">+{otherSections.length - 2}</span>
                               )}
                               {!alreadyAdded && otherSections.length === 0 && song.lyrics && (
-                                <span className="text-[11px] text-charcoal/35">lyrics</span>
+                                <span className="text-[11px] text-charcoal/65">lyrics</span>
                               )}
                             </div>
                           </button>
@@ -1063,7 +1063,7 @@ function SortableSessionCard({
                       ) : null}
                       <button
                         onClick={() => { setAddingSong(false); setLibQuery(""); setLibResults([]); setSelectedSongs(new Set()); }}
-                        className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
+                        className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/65"
                       >
                         Cancel
                       </button>

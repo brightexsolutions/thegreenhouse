@@ -49,22 +49,22 @@ export function AnnounceAttendeesPanel({ eventId, eventTitle, isPaid, hasEarlyBi
     <div className="bg-white rounded-2xl border border-mist p-5">
       <div className="flex items-start gap-3 mb-4">
         <div className="w-9 h-9 rounded-xl bg-gold/10 flex items-center justify-center flex-shrink-0 mt-0.5">
-          <Megaphone size={16} className="text-gold/80" />
+          <Megaphone size={16} className="text-gold" />
         </div>
         <div>
           <h3 className="text-sm font-semibold text-charcoal">Announce to past attendees</h3>
-          <p className="text-xs text-charcoal/50 mt-0.5 leading-relaxed">
+          <p className="text-xs text-charcoal/70 mt-0.5 leading-relaxed">
             Emails every past session attendee (with an email address) who hasn&apos;t yet registered for this event.
             {hasEarlyBird && earlyBirdDate && (
-              <> Includes an <span className="text-gold/80 font-medium">early bird offer</span>, free entry until {earlyBirdDate}.</>
+              <> Includes an <span className="text-gold font-medium">early bird offer</span>, free entry until {earlyBirdDate}.</>
             )}
           </p>
         </div>
       </div>
 
       {isPaid && hasEarlyBird && earlyBirdDate && (
-        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gold/8 border border-gold/20 mb-4">
-          <Gift size={13} className="text-gold/80 mt-0.5 flex-shrink-0" />
+        <div className="flex items-start gap-2.5 p-3 rounded-xl bg-gold/10 border border-gold/20 mb-4">
+          <Gift size={13} className="text-gold mt-0.5 flex-shrink-0" />
           <p className="text-xs text-charcoal/70 leading-relaxed">
             Early bird active, past attendees who register before <strong>{earlyBirdDate}</strong> will receive a waived entry fee.
           </p>
@@ -74,7 +74,7 @@ export function AnnounceAttendeesPanel({ eventId, eventTitle, isPaid, hasEarlyBi
       {result && (
         <div className="py-3 px-4 rounded-xl bg-off-white border border-mist mb-4 space-y-1">
           {result.message ? (
-            <p className="text-xs text-charcoal/60 leading-relaxed">{result.message}</p>
+            <p className="text-xs text-charcoal/65 leading-relaxed">{result.message}</p>
           ) : (
             <>
               <p className="text-xs font-medium text-emerald-600">
@@ -82,7 +82,7 @@ export function AnnounceAttendeesPanel({ eventId, eventTitle, isPaid, hasEarlyBi
                 {result.sent} announcement{result.sent !== 1 ? "s" : ""} sent
               </p>
               {result.failed > 0 && <p className="text-xs text-red-500">{result.failed} failed</p>}
-              {result.skipped > 0 && <p className="text-xs text-charcoal/40">{result.skipped} already registered, skipped</p>}
+              {result.skipped > 0 && <p className="text-xs text-charcoal/65">{result.skipped} already registered, skipped</p>}
             </>
           )}
         </div>
@@ -101,7 +101,7 @@ export function AnnounceAttendeesPanel({ eventId, eventTitle, isPaid, hasEarlyBi
       </button>
 
       {sent && !loading && (
-        <p className="text-[11px] text-charcoal/30 mt-3 text-center leading-relaxed">
+        <p className="text-[11px] text-charcoal/65 mt-3 text-center leading-relaxed">
           Already sent once. You can send again to catch anyone added since.
         </p>
       )}

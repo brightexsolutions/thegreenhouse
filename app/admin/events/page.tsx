@@ -18,17 +18,18 @@ export default async function AdminEventsPage() {
 
   const eventIds = (eventsRaw ?? []).map((e: { id: string }) => e.id);
 
+  // One count per event, done by the database (head: true sends no rows).
+  // Downloading every registration row to count it here was silently capped
+  // at the 1000 row page size, so the totals went wrong past that.
   const regCounts: Record<string, number> = {};
-  if (eventIds.length > 0) {
-    const { data: counts } = await supabase
+  await Promise.all(eventIds.map(async (id: string) => {
+    const { count } = await supabase
       .from("registrations")
-      .select("event_id")
-      .in("event_id", eventIds)
+      .select("id", { count: "exact", head: true })
+      .eq("event_id", id)
       .is("deleted_at", null);
-    for (const r of (counts ?? []) as { event_id: string }[]) {
-      regCounts[r.event_id] = (regCounts[r.event_id] ?? 0) + 1;
-    }
-  }
+    regCounts[id] = count ?? 0;
+  }));
 
   const events = ((eventsRaw ?? []) as Array<{
     id: string; slug: string; title: string; event_date: string; status: EventStatus; cover_image: string | null;

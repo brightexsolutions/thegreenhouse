@@ -96,21 +96,21 @@ function VideoModal({ video, onClose }: { video: typeof ALL_VIDEOS[0]; onClose: 
             <p className="text-cream font-display font-medium text-xl leading-tight">
               {video.title}
               {video.translation && (
-                <span className="text-gold/60 italic text-base ml-2">&ldquo;{video.translation}&rdquo;</span>
+                <span className="text-gold italic text-base ml-2">&ldquo;{video.translation}&rdquo;</span>
               )}
             </p>
-            <p className="text-cream/35 text-xs mt-1">{video.label}</p>
+            <p className="text-cream/65 text-xs mt-1">{video.label}</p>
           </div>
           <div className="flex items-center gap-2">
             <button
               onClick={toggleMute}
-              className="w-8 h-8 rounded-full bg-white/8 hover:bg-white/15 flex items-center justify-center text-cream/50 hover:text-cream transition-all"
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 flex items-center justify-center text-cream/75 hover:text-cream transition-all"
             >
               {muted ? <VolumeX size={13} /> : <Volume2 size={13} />}
             </button>
             <button
               onClick={onClose}
-              className="w-8 h-8 rounded-full bg-white/8 hover:bg-white/15 flex items-center justify-center text-cream/50 hover:text-cream transition-all"
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/15 flex items-center justify-center text-cream/75 hover:text-cream transition-all"
             >
               <X size={14} />
             </button>
@@ -188,7 +188,7 @@ export function GalleryVideos() {
             className="flex items-center justify-center gap-3 mb-9"
           >
             <span className="h-px w-10 bg-gradient-to-r from-transparent to-gold/55" />
-            <span className="text-[10px] uppercase tracking-[0.22em] text-gold/70 font-semibold">Session Recordings</span>
+            <span className="text-[10px] uppercase tracking-[0.22em] text-gold font-semibold">Session Recordings</span>
             <span className="h-px w-10 bg-gradient-to-l from-transparent to-gold/55" />
           </motion.div>
 
@@ -203,7 +203,7 @@ export function GalleryVideos() {
                 transition={{ duration: 0.6, delay: 0.38 + i * 0.16, ease: [0.16, 1, 0.3, 1] }}
                 whileHover={{ y: -4 }}
                 className="group relative w-full rounded-2xl overflow-hidden text-left
-                           border border-white/[0.055] hover:border-gold/28
+                           border border-white/[0.055] hover:border-gold/30
                            shadow-xl shadow-black/50 hover:shadow-[0_12px_44px_rgba(201,162,74,0.18)]
                            transition-[border-color,box-shadow] duration-400
                            focus:outline-none focus-visible:ring-2 focus-visible:ring-gold"
@@ -242,7 +242,7 @@ export function GalleryVideos() {
                   </div>
 
                   {v.duration && (
-                    <span className="absolute bottom-2 right-2 px-1.5 py-[2px] rounded bg-black/55 text-cream/60 text-[9px] font-medium tabular-nums backdrop-blur-sm">
+                    <span className="absolute bottom-2 right-2 px-1.5 py-[2px] rounded bg-black/55 text-cream/60 text-[10px] font-medium tabular-nums backdrop-blur-sm">
                       {v.duration}
                     </span>
                   )}
@@ -254,9 +254,9 @@ export function GalleryVideos() {
                     {v.title}
                   </p>
                   {v.translation && (
-                    <p className="text-gold/50 italic text-[11px] mt-0.5">&ldquo;{v.translation}&rdquo;</p>
+                    <p className="text-gold italic text-[11px] mt-0.5">&ldquo;{v.translation}&rdquo;</p>
                   )}
-                  <p className="text-cream/35 text-[10px] mt-2 tracking-wide">{v.label}</p>
+                  <p className="text-cream/65 text-[10px] mt-2 tracking-wide">{v.label}</p>
                 </div>
               </motion.button>
             ))}
@@ -267,7 +267,7 @@ export function GalleryVideos() {
             initial={{ opacity: 0 }}
             animate={isInView ? { opacity: 1 } : {}}
             transition={{ duration: 0.5, delay: 0.75 }}
-            className="text-center text-cream/45 text-[10px] tracking-[0.2em] mt-8 uppercase"
+            className="text-center text-cream/65 text-[10px] tracking-[0.2em] mt-8 uppercase"
           >
             More recordings after each session
           </motion.p>
@@ -276,8 +276,8 @@ export function GalleryVideos() {
 
       {/* Photo grid divider */}
       <div className="flex items-center gap-4 mb-6">
-        <span className="text-[10px] uppercase tracking-[0.18em] text-charcoal/35 font-medium">Photos</span>
-        <span className="flex-1 h-px bg-gradient-to-r from-charcoal/12 to-transparent" />
+        <span className="text-[10px] uppercase tracking-[0.18em] text-charcoal/65 font-medium">Photos</span>
+        <span className="flex-1 h-px bg-gradient-to-r from-charcoal/10 to-transparent" />
       </div>
 
       <AnimatePresence>

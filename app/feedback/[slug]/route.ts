@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { SITE_URL } from "@/lib/constants";
 
 export const dynamic = "force-dynamic";
 
@@ -16,7 +17,7 @@ export async function GET(_req: NextRequest, { params }: Props) {
     .single();
 
   const url = (event as { feedback_url: string | null } | null)?.feedback_url;
-  if (!url) return NextResponse.redirect(new URL("/", process.env.NEXT_PUBLIC_SITE_URL ?? "https://thegreenhouseke.com"));
+  if (!url) return NextResponse.redirect(new URL("/", SITE_URL));
 
   return NextResponse.redirect(url, 302);
 }

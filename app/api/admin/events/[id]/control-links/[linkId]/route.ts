@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
 
 async function guard() {
-  const supabase = await createClient();
-  const { data: { user } } = await supabase.auth.getUser();
-  return user ? createAdminClient() : null;
+  const g = await requireAdmin();
+  return g.ok ? g.supabase : null;
 }
 
 type Props = { params: Promise<{ id: string; linkId: string }> };

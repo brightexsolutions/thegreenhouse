@@ -78,6 +78,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
   const [submitted,      setSubmitted]     = useState(false);
   const [isCorrect,      setIsCorrect]     = useState<boolean | null>(null);
   const [submitting,     setSubmitting]    = useState(false);
+  const [submitError,    setSubmitError]   = useState<string | null>(null);
   const [timeLeft,       setTimeLeft]      = useState<number | null>(null);
   const nameRef = useRef<HTMLInputElement>(null);
 
@@ -96,11 +97,17 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
   useEffect(() => {
     let cancelled = false;
 
-    async function fetchAll() {
+    // Both endpoints are cached at the edge for a couple of seconds so the
+    // fallback poll from a full room does not hit the database once per phone.
+    // `fresh` adds a unique query string, which skips that cache: used for the
+    // first load, a Realtime status change and coming back to the tab, where a
+    // stale "active" would delay the reveal.
+    async function fetchAll(fresh = false) {
+      const bust = fresh ? `?fresh=${Date.now()}` : "";
       try {
         const [rRes, resRes] = await Promise.all([
-          fetch(`/api/trivia/${roundId}`, { cache: "no-store" }),
-          fetch(`/api/trivia/${roundId}/results`, { cache: "no-store" }),
+          fetch(`/api/trivia/${roundId}${bust}`, { cache: "no-store" }),
+          fetch(`/api/trivia/${roundId}/results${bust}`, { cache: "no-store" }),
         ]);
         if (cancelled) return;
         if (rRes.ok)   setRound(await rRes.json() as TriviaRound);
@@ -108,9 +115,13 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
       } catch { /* ignore */ }
     }
 
-    fetchAll();
-    // Poll every 4s as fallback in case Realtime misses an event
-    const pollId = setInterval(fetchAll, 4000);
+    fetchAll(true);
+    // Poll every 10s as fallback in case Realtime misses an event. Skipped
+    // while the tab is hidden (phone locked or in a pocket); it catches up the
+    // moment the tab is visible again.
+    const pollId = setInterval(() => { if (!document.hidden) fetchAll(); }, 10000);
+    const onVisible = () => { if (!document.hidden && !cancelled) fetchAll(true); };
+    document.addEventListener("visibilitychange", onVisible);
 
     // Realtime subscription on trivia_rounds for near-instant status changes.
     // Re-fetch the full round (not just merging raw fields) so that correct_index
@@ -125,13 +136,14 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
         event: "UPDATE", schema: "public", table: "trivia_rounds",
         filter: `id=eq.${roundId}`,
       }, () => {
-        if (!cancelled) fetchAll();
+        if (!cancelled) fetchAll(true);
       })
       .subscribe();
 
     return () => {
       cancelled = true;
       clearInterval(pollId);
+      document.removeEventListener("visibilitychange", onVisible);
       supabase.removeChannel(channel);
     };
   }, [roundId]);
@@ -173,6 +185,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
     if (round?.type === "open_input" && !openAnswer.trim()) return;
 
     setSubmitting(true);
+    setSubmitError(null);
     const payload: Record<string, unknown> = {
       answer_text:   round?.type === "multiple_choice"
         ? (round.options?.[selectedIndex!] ?? "")
@@ -195,6 +208,9 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
         // Round closed before answer recorded — show as submitted with no score
         setSubmitted(true);
         setIsCorrect(null);
+      } else if (res.status === 429) {
+        // Everyone in the room can share one IP address on the venue wifi.
+        setSubmitError("Too many answers from this network, try again in a moment");
       }
       // Ignore 500s silently — no feedback to attendee needed
     } catch { /* ignore network errors */ }
@@ -209,8 +225,8 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
   if (!round) {
     return (
       <div className="rounded-3xl border border-gold/20 bg-white p-6 flex items-center justify-center gap-3">
-        <Loader2 size={18} className="animate-spin text-forest/30" />
-        <p className="text-sm text-charcoal/40">Loading trivia…</p>
+        <Loader2 size={18} className="animate-spin text-forest/80" />
+        <p className="text-sm text-charcoal/65">Loading trivia…</p>
       </div>
     );
   }
@@ -232,7 +248,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
           </div>
           <span className="text-xs font-bold uppercase tracking-widest text-gold">Trivia Time</span>
           {!submitted && !isRevealing && round.status === "active" && (
-            <span className="flex items-center gap-1 text-[9px] text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">
+            <span className="flex items-center gap-1 text-[10px] text-green-300 bg-green-500/20 px-2 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
               Live
             </span>
@@ -246,7 +262,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
             </div>
           )}
           {onClose && (
-            <button onClick={onClose} className="w-7 h-7 rounded-xl bg-cream/10 hover:bg-cream/20 flex items-center justify-center text-cream/40 hover:text-cream/70 transition-colors">
+            <button onClick={onClose} className="w-7 h-7 rounded-xl bg-cream/10 hover:bg-cream/20 flex items-center justify-center text-cream/65 hover:text-cream/70 transition-colors">
               <X size={13} />
             </button>
           )}
@@ -255,9 +271,9 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
 
       {/* ── Name section ── */}
       {mounted && !submitted && round.status === "active" && (
-        <div className="mx-4 mb-3 rounded-2xl bg-cream/8 border border-cream/10 p-3 space-y-2.5">
+        <div className="mx-4 mb-3 rounded-2xl bg-cream/10 border border-cream/10 p-3 space-y-2.5">
           <div className="flex items-center justify-between">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-cream/50">Playing as</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-cream/75">Playing as</p>
             {/* Anonymous toggle */}
             <button
               onClick={toggleAnon}
@@ -265,7 +281,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
                 "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-semibold transition-all",
                 anonMode
                   ? "bg-cream/20 text-cream border border-cream/20"
-                  : "bg-cream/8 text-cream/40 border border-cream/10 hover:border-cream/20 hover:text-cream/60"
+                  : "bg-cream/10 text-cream/65 border border-cream/10 hover:border-cream/20 hover:text-cream/60"
               )}
             >
               <EyeOff size={10} />
@@ -277,11 +293,11 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
             /* Anonymous mode — show generated name */
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-full bg-cream/15 flex items-center justify-center flex-shrink-0">
-                <EyeOff size={13} className="text-cream/50" />
+                <EyeOff size={13} className="text-cream/75" />
               </div>
               <div>
                 <p className="text-sm font-bold text-cream">{`Anonymous${anonNumber}`}</p>
-                <p className="text-[10px] text-cream/35">Your identity is hidden</p>
+                <p className="text-[10px] text-cream/65">Your identity is hidden</p>
               </div>
             </div>
           ) : (
@@ -299,7 +315,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
                   placeholder="Your name"
                   autoFocus
                   maxLength={40}
-                  className="flex-1 px-3 py-2 rounded-xl bg-cream/10 border border-gold/30 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold"
+                  className="flex-1 px-3 py-2 rounded-xl bg-cream/10 border border-gold/30 text-sm text-cream placeholder:text-cream/50 focus:outline-none focus:border-gold"
                 />
                 <button
                   onClick={saveNameInput}
@@ -321,11 +337,11 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
                 <div className="flex-1 min-w-0">
                   {name
                     ? <p className="text-sm font-semibold text-cream truncate">{name}</p>
-                    : <p className="text-sm text-cream/35 italic">Tap to add your name</p>
+                    : <p className="text-sm text-cream/65 italic">Tap to add your name</p>
                   }
-                  <p className="text-[10px] text-cream/30">{name ? "Tap to change" : "Shown on the big screen"}</p>
+                  <p className="text-[10px] text-cream/65">{name ? "Tap to change" : "Shown on the big screen"}</p>
                 </div>
-                <span className="text-[10px] text-gold/50 flex-shrink-0">Edit</span>
+                <span className="text-[10px] text-gold flex-shrink-0">Edit</span>
               </button>
             )
           )}
@@ -337,7 +353,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
         <p className="text-cream font-semibold text-sm md:text-base leading-snug">{round.question}</p>
 
         {round.hint && !submitted && round.status === "active" && (
-          <p className="text-xs text-cream/40 italic">💡 {round.hint}</p>
+          <p className="text-xs text-cream/65 italic">💡 {round.hint}</p>
         )}
 
         {/* Multiple choice options */}
@@ -382,7 +398,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
             onChange={e => setOpenAnswer(e.target.value)}
             placeholder="Type your answer…"
             rows={2}
-            className="w-full px-3 py-2.5 rounded-2xl bg-cream/10 border border-cream/15 text-sm text-cream placeholder:text-cream/30 focus:outline-none focus:border-gold resize-none"
+            className="w-full px-3 py-2.5 rounded-2xl bg-cream/10 border border-cream/15 text-sm text-cream placeholder:text-cream/50 focus:outline-none focus:border-gold resize-none"
           />
         )}
 
@@ -403,6 +419,10 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
           </button>
         )}
 
+        {submitError && !submitted && round.status === "active" && (
+          <p role="alert" className="text-xs text-rose-300 text-center">{submitError}</p>
+        )}
+
         {/* Submission confirmation */}
         {submitted && !isRevealing && !isClosed && (
           <motion.div
@@ -420,8 +440,8 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
             </div>
             <div className="space-y-1">
               <p className="text-xl font-bold text-cream">Locked in!</p>
-              <p className="text-sm text-cream/50">Playing as <span className="text-cream/80 font-semibold">{effectiveName}</span></p>
-              <p className="text-xs text-cream/30 mt-2">Waiting for the host to reveal…</p>
+              <p className="text-sm text-cream/75">Playing as <span className="text-cream/80 font-semibold">{effectiveName}</span></p>
+              <p className="text-xs text-cream/65 mt-2">Waiting for the host to reveal…</p>
             </div>
           </motion.div>
         )}
@@ -454,7 +474,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
                       {isCorrect ? "You got it! 🎉" : "Not quite!"}
                     </p>
                     {!isCorrect && round.correct_index != null && round.options && (
-                      <p className="text-[11px] text-cream/50 mt-0.5">
+                      <p className="text-[11px] text-cream/75 mt-0.5">
                         Correct: <span className="text-cream/80 font-semibold">{round.options[round.correct_index]}</span>
                       </p>
                     )}
@@ -482,7 +502,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
                           style={{ background: isCorrectOpt ? "rgba(74,195,120,0.25)" : "rgba(255,255,255,0.06)" }}
                         />
                         <div className="relative flex items-center gap-2 px-3 py-2">
-                          <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-[9px] font-bold flex-shrink-0", col.label)}>
+                          <span className={cn("w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold flex-shrink-0", col.label)}>
                             {OPTION_LABELS[i]}
                           </span>
                           {/* Correct/wrong icon on revealed options */}
@@ -495,10 +515,10 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
                           <span className={cn("text-xs flex-1", isCorrectOpt ? "text-green-300 font-semibold" : "text-cream/70")}>
                             {opt}
                             {wasPicked && !isCorrectOpt && (
-                              <span className="ml-1.5 text-[9px] text-cream/35">(your pick)</span>
+                              <span className="ml-1.5 text-[10px] text-cream/65">(your pick)</span>
                             )}
                             {wasPicked && isCorrectOpt && (
-                              <span className="ml-1.5 text-[9px] text-green-400">✓ your pick</span>
+                              <span className="ml-1.5 text-[10px] text-green-400">✓ your pick</span>
                             )}
                           </span>
                           <span className="text-[10px] font-bold tabular-nums"
@@ -509,7 +529,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
                       </div>
                     );
                   })}
-                  <p className="text-[10px] text-cream/30 text-center">{total} response{total !== 1 ? "s" : ""}</p>
+                  <p className="text-[10px] text-cream/65 text-center">{total} response{total !== 1 ? "s" : ""}</p>
                 </div>
               )}
 
@@ -522,8 +542,8 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
                       <p className="text-xs text-cream/60 font-medium">Your answer: <span className="text-cream/80">{openAnswer}</span></p>
                     </div>
                   )}
-                  <p className="text-sm text-cream/50">{total} response{total !== 1 ? "s" : ""} submitted</p>
-                  <p className="text-xs text-cream/30 mt-1">The host will reveal the best answers</p>
+                  <p className="text-sm text-cream/75">{total} response{total !== 1 ? "s" : ""} submitted</p>
+                  <p className="text-xs text-cream/65 mt-1">The host will reveal the best answers</p>
                 </div>
               )}
             </motion.div>
@@ -532,7 +552,7 @@ export function TriviaAttendeeCard({ roundId, onClose }: Props) {
 
         {isClosed && !submitted && (
           <div className="text-center py-2">
-            <p className="text-xs text-cream/35">This round has ended</p>
+            <p className="text-xs text-cream/65">This round has ended</p>
           </div>
         )}
       </div>

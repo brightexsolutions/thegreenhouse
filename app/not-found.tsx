@@ -8,11 +8,6 @@ export const metadata: Metadata = {
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-forest flex flex-col items-center justify-center px-4 relative overflow-hidden">
-      {/* Background glow */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_50%_40%,rgba(201,162,74,0.07),transparent)]" />
-      <div className="absolute top-16 right-16 w-64 h-64 rounded-full border border-cream/5 hidden lg:block" />
-      <div className="absolute bottom-20 left-12 w-40 h-40 rounded-full border border-gold/8 hidden lg:block" />
-
       <div className="relative text-center max-w-lg">
         {/* Leaf mark */}
         <div className="w-16 h-16 rounded-full bg-gold/15 border border-gold/30 flex items-center justify-center mx-auto mb-8">

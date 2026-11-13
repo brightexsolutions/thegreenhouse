@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -6,6 +7,7 @@ import { ArrowLeft, ArrowRight, Clock } from "lucide-react";
 import { FadeIn } from "@/components/motion/fade-in";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_URL, SITE_NAME, storageUrl } from "@/lib/constants";
+import { safeJsonLd } from "@/lib/html";
 import {
   categoryLabel, deriveExcerpt, extractHeadings, formatPostDate, renderMarkdown,
   type BlogPost,
@@ -15,7 +17,8 @@ export const revalidate = 120;
 
 type Props = { params: Promise<{ slug: string }> };
 
-async function getPost(slug: string): Promise<BlogPost | null> {
+// cache() so generateMetadata and the page share one fetch per request.
+const getPost = cache(async function getPost(slug: string): Promise<BlogPost | null> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
@@ -29,7 +32,7 @@ async function getPost(slug: string): Promise<BlogPost | null> {
   } catch {
     return null;
   }
-}
+});
 
 async function getMorePosts(excludeId: string) {
   try {
@@ -142,8 +145,8 @@ export default async function BlogPostPage({ params }: Props) {
 
   return (
     <>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }} />
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(articleJsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: safeJsonLd(breadcrumbJsonLd) }} />
 
       {/* Header */}
       <section className="relative bg-forest overflow-hidden pt-28 pb-14">
@@ -152,13 +155,13 @@ export default async function BlogPostPage({ params }: Props) {
         <div className="relative max-w-3xl mx-auto px-4 sm:px-6">
           <FadeIn>
             {/* Visible breadcrumb, matching the structured data above */}
-            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-cream/40">
+            <nav aria-label="Breadcrumb" className="flex items-center gap-2 text-[11px] uppercase tracking-widest text-cream/65">
               <Link href="/" className="hover:text-gold transition-colors">Home</Link>
               <span aria-hidden>/</span>
               <Link href="/blog" className="hover:text-gold transition-colors">Blog</Link>
             </nav>
 
-            <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-cream/45 mt-6">
+            <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-cream/65 mt-6">
               <span className="text-gold">{categoryLabel(post.category)}</span>
               <span aria-hidden>·</span>
               <span>{formatPostDate(post.published_at)}</span>
@@ -176,7 +179,7 @@ export default async function BlogPostPage({ params }: Props) {
               <p className="text-cream/60 mt-5 text-lg leading-relaxed">{post.excerpt}</p>
             )}
 
-            <p className="text-[11px] uppercase tracking-widest text-cream/35 mt-7">
+            <p className="text-[11px] uppercase tracking-widest text-cream/65 mt-7">
               By {post.author_name}
             </p>
           </FadeIn>
@@ -208,11 +211,11 @@ export default async function BlogPostPage({ params }: Props) {
 
           {headings.length >= 3 && (
             <nav aria-label="On this page" className="mb-12 border-l-2 border-gold/40 pl-5">
-              <p className="text-[10px] uppercase tracking-widest text-charcoal/35 mb-2">On this page</p>
+              <p className="text-[10px] uppercase tracking-widest text-charcoal/65 mb-2">On this page</p>
               <ul className="flex flex-col gap-1.5">
                 {headings.map(h => (
                   <li key={h.id} className={h.level === 3 ? "pl-4" : ""}>
-                    <a href={`#${h.id}`} className="text-sm text-charcoal/60 hover:text-forest transition-colors">
+                    <a href={`#${h.id}`} className="text-sm text-charcoal/65 hover:text-forest transition-colors">
                       {h.text}
                     </a>
                   </li>
@@ -226,7 +229,7 @@ export default async function BlogPostPage({ params }: Props) {
           {post.tags?.length > 0 && (
             <div className="flex flex-wrap gap-2 mt-12 pt-8 border-t border-mist">
               {post.tags.map(t => (
-                <span key={t} className="text-[11px] uppercase tracking-widest text-charcoal/45 bg-mist/60 rounded px-3 py-1.5">
+                <span key={t} className="text-[11px] uppercase tracking-widest text-charcoal/65 bg-mist/60 rounded px-3 py-1.5">
                   {t}
                 </span>
               ))}
@@ -236,7 +239,7 @@ export default async function BlogPostPage({ params }: Props) {
           <div className="mt-12 flex flex-wrap items-center justify-between gap-4">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-2 text-sm font-medium text-charcoal/60 hover:text-forest transition-colors"
+              className="inline-flex items-center gap-2 text-sm font-medium text-charcoal/65 hover:text-forest transition-colors"
             >
               <ArrowLeft size={15} />
               All posts
@@ -256,7 +259,7 @@ export default async function BlogPostPage({ params }: Props) {
       {more.length > 0 && (
         <section className="bg-cream-dark/40 py-16 border-t border-mist">
           <div className="max-w-5xl mx-auto px-4 sm:px-6">
-            <p className="label-caps text-charcoal/35">Keep reading</p>
+            <p className="label-caps text-charcoal/65">Keep reading</p>
             <div className="grid sm:grid-cols-3 gap-8 mt-6">
               {more.map(p => (
                 <Link key={p.id} href={`/blog/${p.slug}`} className="group flex flex-col">
@@ -266,7 +269,7 @@ export default async function BlogPostPage({ params }: Props) {
                   <h3 className="font-display text-lg font-semibold text-charcoal mt-1.5 leading-snug text-balance group-hover:text-forest transition-colors">
                     {p.title}
                   </h3>
-                  <span className="text-[11px] text-charcoal/35 mt-2">
+                  <span className="text-[11px] text-charcoal/65 mt-2">
                     {formatPostDate(p.published_at)} · {p.reading_minutes} min
                   </span>
                 </Link>

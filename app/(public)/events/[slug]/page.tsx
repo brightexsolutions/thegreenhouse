@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,7 +14,9 @@ import { PosterViewer }      from "@/components/events/poster-viewer";
 import { PastEventCard }           from "@/components/events/past-event-card";
 import { GalleryCarousel }         from "@/components/events/gallery-carousel";
 import { EventHighlightVideo }     from "@/components/events/event-highlight-video";
-import type { Event } from "@/types/database";
+import { PUBLIC_EVENT_COLUMNS, type PublicEvent } from "@/lib/public-event";
+import { formatEventTime } from "@/lib/utils";
+import { safeJsonLd } from "@/lib/html";
 
 export const revalidate = 60;
 
@@ -21,17 +24,22 @@ type Props = { params: Promise<{ slug: string }> };
 
 interface EventImageRow { id: string; path: string; caption: string | null; sort_order: number; }
 
-async function getEventWithCount(slug: string): Promise<{ event: Event; registrantCount: number; galleryImages: EventImageRow[] } | null> {
+// Only these statuses have a public page. Drafts and cancelled sessions 404.
+const PUBLIC_STATUSES = ["published", "live", "past"];
+
+// cache() so generateMetadata and the page share one fetch per request.
+const getEventWithCount = cache(async function getEventWithCount(slug: string): Promise<{ event: PublicEvent; registrantCount: number; galleryImages: EventImageRow[] } | null> {
   try {
     const supabase = createAdminClient();
     const { data } = await supabase
       .from("events")
-      .select("*")
+      .select(PUBLIC_EVENT_COLUMNS)
       .eq("slug", slug)
+      .in("status", PUBLIC_STATUSES)
       .is("deleted_at", null)
-      .single();
+      .maybeSingle();
     if (!data) return null;
-    const event = data as Event;
+    const event = data as unknown as PublicEvent;
 
     const [registrantResult, imagesResult] = await Promise.all([
       event.capacity
@@ -47,7 +55,7 @@ async function getEventWithCount(slug: string): Promise<{ event: Event; registra
   } catch {
     return null;
   }
-}
+});
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
@@ -62,7 +70,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     : undefined;
 
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
-    day: "numeric", month: "long", year: "numeric",
+    day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
 
   return {
@@ -101,16 +109,14 @@ function getYouTubeEmbedUrl(url: string): string | null {
   return null;
 }
 
-function jsonLd(event: Event) {
+function jsonLd(event: PublicEvent) {
   const base = {
     "@context": "https://schema.org",
     "@type":    "Event",
     name:       event.title,
     description: event.description ?? event.subtitle ?? undefined,
-    startDate:  `${event.event_date}T${event.event_time}`,
-    eventStatus: event.status === "cancelled"
-      ? "https://schema.org/EventCancelled"
-      : "https://schema.org/EventScheduled",
+    startDate:  `${event.event_date}T${event.event_time}+03:00`,
+    eventStatus: "https://schema.org/EventScheduled",
     eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
     isAccessibleForFree: event.type === "free",
     organizer: { "@type": "Organization", name: SITE_NAME, url: SITE_URL },
@@ -129,7 +135,7 @@ function jsonLd(event: Event) {
       ? { image: storageUrl(`event-images/${event.cover_image}`, { width: 1200 }) }
       : {}),
   };
-  return JSON.stringify(base);
+  return safeJsonLd(base);
 }
 
 // African-context fallback banners (used only when no banner_image is uploaded)
@@ -152,7 +158,7 @@ export default async function EventDetailPage({ params }: Props) {
 
   // Banner = hero background. Poster (cover_image) shown in details, never as hero bg.
   const bannerUrl = event.banner_image
-    ? storageUrl(`event-images/${event.banner_image}`, { width: 1600, quality: 85 })
+    ? storageUrl(`event-images/${event.banner_image}`, { width: 1200, quality: 75 })
     : pickBannerFallback(event.slug);
 
   function resolveMedia(path: string | null | undefined): string | null {
@@ -176,9 +182,9 @@ export default async function EventDetailPage({ params }: Props) {
   const videoUrl = resolveMedia(event.highlight_video);
 
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
-  const time = event.event_time.slice(0, 5).replace(":", ".");
+  const time = formatEventTime(event.event_time);
 
   const isOpen   = event.status === "published" || event.status === "live";
   const isPast   = event.status === "past";
@@ -190,7 +196,7 @@ export default async function EventDetailPage({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLd(event) }} />
 
       {/* Hero — banner image only */}
-      <section className="relative min-h-[70vh] flex items-end overflow-hidden pt-20">
+      <section className="on-dark relative min-h-[70vh] flex items-end overflow-hidden pt-20">
         <div className="absolute inset-0">
           <Image
             src={bannerUrl}
@@ -211,7 +217,7 @@ export default async function EventDetailPage({ params }: Props) {
         {isPast && (
           <div className="absolute top-[72px] left-0 right-0 z-10 flex justify-center pointer-events-none">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-black/50 backdrop-blur-md border border-cream/15 text-cream/70 text-xs font-medium">
-              <History size={11} className="text-cream/50" />
+              <History size={11} className="text-cream/75" />
               This session has ended
             </div>
           </div>
@@ -228,20 +234,12 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
         )}
 
-        <div className="absolute top-24 right-12 w-64 h-64 rounded-full border border-cream/5 hidden lg:block" />
-        <div className="absolute inset-0 opacity-[0.03]"
-          style={{
-            backgroundImage: "radial-gradient(circle, #fdfcf8 1px, transparent 1px)",
-            backgroundSize: "28px 28px",
-          }}
-        />
-
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-14 w-full">
           <FadeIn>
             <div className="max-w-3xl">
               {event.theme_title && (
                 <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full bg-gold/15 border border-gold/30">
-                  <span className="label-caps text-xs text-gold/80">Theme</span>
+                  <span className="label-caps text-xs text-gold">Theme</span>
                   <span className="text-xs text-gold font-medium">{event.theme_title}</span>
                 </div>
               )}
@@ -255,7 +253,7 @@ export default async function EventDetailPage({ params }: Props) {
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock size={13} />
-                  <span>{time}pm</span>
+                  <span>{time}</span>
                 </div>
                 {event.venue_name && (
                   <div className="flex items-center gap-2">
@@ -289,15 +287,14 @@ export default async function EventDetailPage({ params }: Props) {
               {event.theme_title && (
                 <FadeIn>
                   <div className="rounded-3xl bg-forest p-8 text-cream relative overflow-hidden">
-                    <div className="absolute inset-0 bg-[radial-gradient(ellipse_80%_80%_at_100%_0%,rgba(201,162,74,0.12),transparent)]" />
                     <div className="relative flex items-start gap-6">
                       <div className="flex-1 min-w-0">
-                        <span className="label-caps text-gold/70 text-xs">Tonight&apos;s Theme</span>
+                        <span className="label-caps text-gold text-xs">Tonight&apos;s Theme</span>
                         <h2 className="font-display text-3xl sm:text-4xl font-semibold mt-1 mb-3">
                           {event.theme_title}
                         </h2>
                         {event.theme_scripture && (
-                          <div className="flex items-center gap-2 text-cream/50 text-sm mb-4">
+                          <div className="flex items-center gap-2 text-cream/75 text-sm mb-4">
                             <BookOpen size={13} />
                             <span>{event.theme_scripture}</span>
                           </div>
@@ -329,7 +326,7 @@ export default async function EventDetailPage({ params }: Props) {
                       youtubeEmbedUrl={ytEmbed ?? undefined}
                       label="Session Highlight"
                       eventTitle={event.title}
-                      eventDate={new Date(event.event_date).toLocaleDateString("en-KE", { month: "long", year: "numeric" })}
+                      eventDate={new Date(event.event_date).toLocaleDateString("en-KE", { month: "long", year: "numeric", timeZone: "UTC" })}
                     />
                   </FadeIn>
                 );
@@ -342,7 +339,7 @@ export default async function EventDetailPage({ params }: Props) {
                     <PosterViewer src={posterUrl} fullSrc={posterFullUrl ?? posterUrl} title={event.title} />
                     <div>
                       <p className="text-sm font-medium text-charcoal">Event Poster</p>
-                      <p className="text-xs text-charcoal/40 mt-0.5">Tap to view</p>
+                      <p className="text-xs text-charcoal/65 mt-0.5">Tap to view</p>
                     </div>
                   </div>
                 </FadeIn>
@@ -351,12 +348,12 @@ export default async function EventDetailPage({ params }: Props) {
               {/* Dress code — not relevant on past events */}
               {event.dress_code && !isPast && (
                 <FadeIn>
-                  <div className="rounded-2xl bg-gold/8 border border-gold/20 p-5 flex items-start gap-4">
+                  <div className="rounded-2xl bg-gold/10 border border-gold/20 p-5 flex items-start gap-4">
                     <div className="w-9 h-9 rounded-xl bg-gold/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                       <Shirt size={15} className="text-gold" />
                     </div>
                     <div>
-                      <span className="label-caps text-gold/80 text-xs">Dress Code</span>
+                      <span className="label-caps text-gold text-xs">Dress Code</span>
                       <p className="text-sm text-charcoal/80 mt-1 leading-relaxed">{event.dress_code}</p>
                     </div>
                   </div>
@@ -367,7 +364,7 @@ export default async function EventDetailPage({ params }: Props) {
               {!isPast && (event.venue_name || event.venue_address) && (
                 <FadeIn>
                   <div>
-                    <span className="label-caps text-charcoal/50 text-xs">Venue</span>
+                    <span className="label-caps text-charcoal/70 text-xs">Venue</span>
                     <div className="mt-3 rounded-2xl bg-off-white border border-mist p-5">
                       <div className="flex items-start gap-3">
                         <div className="w-8 h-8 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0 mt-0.5">
@@ -378,7 +375,7 @@ export default async function EventDetailPage({ params }: Props) {
                             <p className="font-medium text-charcoal text-sm">{event.venue_name}</p>
                           )}
                           {event.venue_address && (
-                            <p className="text-charcoal/50 text-sm mt-0.5">{event.venue_address}</p>
+                            <p className="text-charcoal/70 text-sm mt-0.5">{event.venue_address}</p>
                           )}
                           {event.venue_map_url && (
                             <a
@@ -404,7 +401,7 @@ export default async function EventDetailPage({ params }: Props) {
                     href={event.playlist_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 text-sm text-charcoal/60 hover:text-forest transition-colors"
+                    className="inline-flex items-center gap-2 text-sm text-charcoal/65 hover:text-forest transition-colors"
                   >
                     <Music2 size={14} />
                     <span>Listen to the session playlist</span>
@@ -431,7 +428,7 @@ export default async function EventDetailPage({ params }: Props) {
                               <p className="font-medium text-charcoal text-sm">{event.venue_name}</p>
                             )}
                             {event.venue_address && (
-                              <p className="text-charcoal/50 text-xs mt-0.5">{event.venue_address}</p>
+                              <p className="text-charcoal/70 text-xs mt-0.5">{event.venue_address}</p>
                             )}
                             {event.venue_map_url && (
                               <a href={event.venue_map_url} target="_blank" rel="noopener noreferrer"
@@ -455,7 +452,7 @@ export default async function EventDetailPage({ params }: Props) {
 
                     <div className="space-y-3 mb-6">
                       <InfoRow icon={<Calendar size={12} />} label={formattedDate} />
-                      <InfoRow icon={<Clock size={12} />} label={`${time}pm`} />
+                      <InfoRow icon={<Clock size={12} />} label={time} />
                       {event.venue_name && <InfoRow icon={<MapPin size={12} />} label={event.venue_name} />}
                       {event.dress_code && <InfoRow icon={<Shirt size={12} />} label={event.dress_code} />}
                       {event.capacity && (
@@ -476,7 +473,7 @@ export default async function EventDetailPage({ params }: Props) {
                       const deadlineLabel = new Date(earlyBirdDeadline).toLocaleDateString("en-KE", { day: "numeric", month: "long" });
                       return (
                         <div className="mb-4 px-4 py-3 rounded-xl bg-gold/10 border border-gold/30 text-center">
-                          <p className="text-xs font-semibold text-gold/90 uppercase tracking-wide mb-0.5">Early bird</p>
+                          <p className="text-xs font-semibold text-gold uppercase tracking-wide mb-0.5">Early bird</p>
                           <p className="text-sm text-charcoal/80 leading-snug">Free entry if you register before <strong>{deadlineLabel}</strong></p>
                         </div>
                       );
@@ -489,13 +486,13 @@ export default async function EventDetailPage({ params }: Props) {
                     ) : isOpen ? (
                       <RegistrationModal event={event} />
                     ) : (
-                      <div className="w-full py-3.5 rounded-full bg-charcoal/8 text-charcoal/40 text-sm text-center font-medium cursor-not-allowed">
+                      <div className="w-full py-3.5 rounded-full bg-charcoal/10 text-charcoal/65 text-sm text-center font-medium cursor-not-allowed">
                         Registration closed
                       </div>
                     )}
 
                     {isOpen && !isFull && (
-                      <p className="text-center text-xs text-charcoal/50 mt-3 leading-relaxed">
+                      <p className="text-center text-xs text-charcoal/70 mt-3 leading-relaxed">
                         Ticket sent to your email, link can also be copied &amp; shared
                       </p>
                     )}
@@ -504,7 +501,7 @@ export default async function EventDetailPage({ params }: Props) {
                       <div className="mt-5 space-y-4">
                         <EventQRCode slug={event.slug} />
                         <div className="pt-2 border-t border-mist">
-                          <p className="text-xs text-charcoal/40 mb-2 text-center">Share this session</p>
+                          <p className="text-xs text-charcoal/65 mb-2 text-center">Share this session</p>
                           <EventShareButtons url={eventUrl} title={event.title} date={formattedDate} variant="card" />
                         </div>
                       </div>
@@ -521,18 +518,6 @@ export default async function EventDetailPage({ params }: Props) {
       {/* Event photos — auto-scrolling carousel */}
       {galleryImages.length > 0 && (
         <section className="relative py-16 md:py-20 bg-charcoal overflow-hidden">
-          {/* Ambient: gold glow top-left */}
-          <div
-            aria-hidden
-            className="absolute -top-16 left-1/4 w-[500px] h-[350px] pointer-events-none"
-            style={{ background: "radial-gradient(ellipse at 30% 0%, rgba(201,162,74,0.08) 0%, transparent 60%)" }}
-          />
-          {/* Ambient: forest glow bottom-right */}
-          <div
-            aria-hidden
-            className="absolute bottom-0 right-0 w-[600px] h-[420px] pointer-events-none"
-            style={{ background: "radial-gradient(ellipse at 100% 100%, rgba(27,58,42,0.45) 0%, transparent 65%)" }}
-          />
           {/* Subtle grain texture */}
           <div
             aria-hidden
@@ -553,13 +538,13 @@ export default async function EventDetailPage({ params }: Props) {
                 <div>
                   <div className="flex items-center gap-2 mb-1">
                     <span className="h-px w-5 bg-gold/50" />
-                    <span className="label-caps text-gold/60 text-xs">From the session</span>
+                    <span className="label-caps text-gold text-xs">From the session</span>
                   </div>
                   <h2 className="font-display text-2xl sm:text-3xl font-semibold text-cream">{event.title}</h2>
                 </div>
                 <Link
                   href="/gallery"
-                  className="inline-flex items-center gap-1.5 text-xs text-cream/40 hover:text-gold font-medium transition-colors"
+                  className="inline-flex items-center gap-1.5 text-xs text-cream/65 hover:text-gold font-medium transition-colors"
                 >
                   View full gallery <ArrowRight size={11} />
                 </Link>
@@ -585,8 +570,8 @@ export default async function EventDetailPage({ params }: Props) {
 
 function InfoRow({ icon, label }: { icon: React.ReactNode; label: string }) {
   return (
-    <div className="flex items-center gap-2.5 text-xs text-charcoal/60">
-      <span className="text-charcoal/30 flex-shrink-0">{icon}</span>
+    <div className="flex items-center gap-2.5 text-xs text-charcoal/65">
+      <span className="text-charcoal/65 flex-shrink-0">{icon}</span>
       <span>{label}</span>
     </div>
   );

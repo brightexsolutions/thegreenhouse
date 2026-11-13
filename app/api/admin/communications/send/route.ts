@@ -3,26 +3,17 @@ import { requireAdmin } from "@/lib/auth-guard";
 import { sendBroadcastEmail } from "@/lib/communications/email";
 import { SITE_NAME } from "@/lib/constants";
 import { logger } from "@/lib/logger";
+import { escapeHtml } from "@/lib/html";
 
 export const dynamic = "force-dynamic";
 // A batch of 100 plus the log write needs headroom well past the default.
 export const maxDuration = 60;
 
-/** Escape before interpolating into the email body. */
-function escapeHtml(input: string): string {
-  return input
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#39;");
-}
-
 export async function POST(req: NextRequest) {
   const guard = await requireAdmin();
   if (!guard.ok) return guard.response;
 
-  const { event_id, channel, subject, message } = await req.json();
+  const { event_id, channel, subject, message, scope } = await req.json();
   if (!event_id || !channel || !message) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
   }
@@ -34,11 +25,17 @@ export async function POST(req: NextRequest) {
 
   const adminSupa = guard.supabase;
 
-  const { data: recipients } = await adminSupa
+  let recipientQuery = adminSupa
     .from("registrations")
     .select("id, email")
     .eq("event_id", event_id)
     .is("deleted_at", null);
+
+  // "Opted-in only" was sent by the dialog and ignored here, so it mailed
+  // everyone, including people who had not asked for updates.
+  if (scope === "opt_in") recipientQuery = recipientQuery.eq("whatsapp_opt_in", true);
+
+  const { data: recipients } = await recipientQuery;
 
   const list = (recipients as Array<{ id: string; email: string | null }>) ?? [];
   const emails = list.map(r => r.email).filter(Boolean) as string[];
@@ -81,6 +78,18 @@ export async function POST(req: NextRequest) {
 
   const count = results.filter(r => r.success).length;
   const failed = results.length - count;
+
+  // Every batch failed: say so. A 200 here showed a green "Sent to 0
+  // recipients" while nobody had been emailed.
+  if (count === 0 && failed > 0) {
+    const reason = results.find(r => r.error)?.error;
+    return NextResponse.json({
+      success: false,
+      count,
+      failed,
+      error: `No emails were sent. All ${failed} failed${reason ? `: ${reason}` : "."}`,
+    }, { status: 502 });
+  }
 
   return NextResponse.json({ success: true, count, failed });
 }

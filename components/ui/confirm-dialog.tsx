@@ -57,7 +57,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
             <h3 className="text-sm font-semibold text-charcoal mb-1.5">
               {options.title ?? (options.destructive ? "Are you sure?" : "Confirm")}
             </h3>
-            <p className="text-sm text-charcoal/55 leading-relaxed mb-6">
+            <p className="text-sm text-charcoal/70 leading-relaxed mb-6">
               {options.message}
             </p>
 
@@ -65,7 +65,7 @@ export function ConfirmProvider({ children }: { children: React.ReactNode }) {
             <div className="flex items-center gap-2.5">
               <button
                 onClick={() => respond(false)}
-                className="flex-1 py-2.5 rounded-full border border-mist text-sm text-charcoal/60 font-medium hover:border-charcoal/20 transition-colors"
+                className="flex-1 py-2.5 rounded-full border border-mist text-sm text-charcoal/65 font-medium hover:border-charcoal/20 transition-colors"
               >
                 {options.cancelLabel ?? "Cancel"}
               </button>

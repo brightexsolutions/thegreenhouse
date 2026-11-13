@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { sendBroadcastEmail } from "@/lib/communications/email";
+import { sendPersonalisedEmails, buildEmailLogRows, type PersonalisedEmail } from "@/lib/communications/email";
+import { formatEventTime } from "@/lib/utils";
 import { reminderEmailHtml, reminderEmailText } from "@/lib/email-templates";
 import { logger } from "@/lib/logger";
 
@@ -51,13 +52,26 @@ export async function GET(req: NextRequest) {
   const summary: Array<{ eventId: string; title: string; sent: number; failed: number }> = [];
 
   for (const event of events) {
+    // Claim the event before sending. If two runs overlap (cron and the manual
+    // button, or a retry after a timeout) only one of them gets a row back, so
+    // the same list is never emailed twice.
+    const { data: claimed, error: claimError } = await supabase
+      .from("events")
+      .update({ reminder_email_sent: true })
+      .eq("id", event.id)
+      .eq("reminder_email_sent", false)
+      .select("id");
+    if (claimError) {
+      logger.error("cron_pre_event_reminder_claim_failed", { eventId: event.id, error: claimError.message });
+      continue;
+    }
+    if (!claimed || claimed.length === 0) continue;
+
     const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
       weekday: "long", day: "numeric", month: "long", year: "numeric",
     });
 
-    // event_time is stored as "HH:MM:SS" — format as "7:00" for the template
-    const [hours, minutes] = (event.event_time as string).split(":");
-    const formattedTime = minutes === "00" ? hours.replace(/^0/, "") : `${hours.replace(/^0/, "")}:${minutes}`;
+    const formattedTime = formatEventTime(event.event_time as string);
 
     // Fetch all registrants for this event who have an email address.
     const { data: registrantRows } = await supabase
@@ -74,12 +88,9 @@ export async function GET(req: NextRequest) {
       ticket_token: string;
     }>;
 
-    let sent = 0;
-    let failed = 0;
-
-    for (const r of registrants) {
-      const subject = `See you tomorrow, ${event.title}`;
-      const html = reminderEmailHtml({
+    const subject = `See you tomorrow, ${event.title}`;
+    const messages: PersonalisedEmail[] = registrants.map(r => {
+      const data = {
         firstName:       r.first_name,
         eventTitle:      event.title,
         eventDate:       formattedDate,
@@ -91,53 +102,27 @@ export async function GET(req: NextRequest) {
         themeScripture:  event.theme_scripture,
         ticketToken:     r.ticket_token,
         eventSlug:       event.slug,
-      });
-      const text = reminderEmailText({
-        firstName:       r.first_name,
-        eventTitle:      event.title,
-        eventDate:       formattedDate,
-        eventTime:       formattedTime,
-        venueName:       event.venue_name,
-        venueMapUrl:     event.venue_map_url,
-        dressCode:       event.dress_code,
-        themeTitle:      event.theme_title,
-        themeScripture:  event.theme_scripture,
-        ticketToken:     r.ticket_token,
-        eventSlug:       event.slug,
-      });
+      };
+      return {
+        to: r.email, registrationId: r.id, subject,
+        html: reminderEmailHtml(data),
+        text: reminderEmailText(data),
+      };
+    });
 
-      const results = await sendBroadcastEmail({ to: [r.email], subject, html, text });
-      const result = results[0];
+    const results = await sendPersonalisedEmails(messages);
+    const sent = results.filter(r => r.success).length;
+    const failed = results.length - sent;
 
-      if (result?.success) {
-        sent++;
-        await supabase.from("communications_log").insert({
-          event_id:        event.id,
-          registration_id: r.id,
-          channel:         "email",
-          recipient:       r.email,
-          subject,
-          message_body:    text,
-          status:          "sent",
-          provider_id:     result.providerId,
-          sent_at:         new Date().toISOString(),
-        });
-      } else {
-        failed++;
-        await supabase.from("communications_log").insert({
-          event_id:        event.id,
-          registration_id: r.id,
-          channel:         "email",
-          recipient:       r.email,
-          subject,
-          status:          "failed",
-          error_message:   result?.error ?? "Unknown error",
-        });
-      }
+    if (messages.length > 0) {
+      const { error: logError } = await supabase
+        .from("communications_log")
+        .insert(buildEmailLogRows(event.id, messages, results));
+      if (logError) logger.error("comms_log_insert_failed", { error: logError.message, rows: messages.length });
     }
-
-    // Prevent re-sending if the cron fires again on the same day.
-    await supabase.from("events").update({ reminder_email_sent: true }).eq("id", event.id);
+    if (failed > 0) {
+      logger.error("cron_pre_event_reminder_failures", { eventId: event.id, sent, failed });
+    }
 
     logger.info("cron_pre_event_reminder_sent", {
       eventId:     event.id,

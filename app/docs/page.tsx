@@ -26,7 +26,7 @@ export default function PublicDocsPage() {
 
         {/* Sticky sidebar — offset accounts for the compact sticky banner height */}
         <nav className="hidden lg:block w-48 flex-shrink-0 sticky top-14 self-start">
-          <p className="text-[10px] font-bold text-charcoal/35 uppercase tracking-widest mb-3 pl-1">Contents</p>
+          <p className="text-[10px] font-bold text-charcoal/65 uppercase tracking-widest mb-3 pl-1">Contents</p>
           <DocsNav excludeIds={[...PUBLIC_EXCLUDE]} />
         </nav>
 
@@ -52,30 +52,30 @@ export default function PublicDocsPage() {
       <footer className="border-t border-mist bg-white">
         <div className="max-w-5xl mx-auto px-6 py-8 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <div className="w-7 h-7 rounded-xl bg-forest/8 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-xl bg-forest/10 flex items-center justify-center">
               <Leaf size={12} className="text-forest" />
             </div>
             <div>
               <p className="text-xs font-semibold text-charcoal">The Green House</p>
-              <p className="text-[10px] text-charcoal/45">Worship Community · Nairobi, Kenya</p>
+              <p className="text-[10px] text-charcoal/65">Worship Community · Nairobi, Kenya</p>
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-[11px] text-charcoal/40 text-center sm:text-right">
+          <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-6 text-[11px] text-charcoal/65 text-center sm:text-right">
             <span>
               Built by{" "}
               <a
                 href="https://brightexsolutions.co.ke"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-charcoal/60 hover:text-forest transition-colors font-medium"
+                className="text-charcoal/65 hover:text-forest transition-colors font-medium"
               >
                 Brightex Solutions
               </a>
             </span>
-            <span className="hidden sm:inline text-charcoal/20">·</span>
+            <span className="hidden sm:inline text-charcoal/65">·</span>
             <span>{VERSION} · {DATE_UPDATED}</span>
-            <span className="hidden sm:inline text-charcoal/20">·</span>
+            <span className="hidden sm:inline text-charcoal/65">·</span>
             <span>© {new Date().getFullYear()} The Green House Worship Community</span>
           </div>
         </div>

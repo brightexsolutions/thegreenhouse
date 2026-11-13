@@ -14,18 +14,6 @@ const CORNERS = [
   { key: "br", cls: "-bottom-3 -right-3 border-b-2 border-r-2 rounded-br-2xl" },
 ];
 
-const PARTICLES = [
-  { size: 2,   left: "12%",  delay: 0,    duration: 6.5, amp: 55 },
-  { size: 1.5, left: "28%",  delay: 1.3,  duration: 8.2, amp: 40 },
-  { size: 3,   left: "51%",  delay: 0.6,  duration: 7.1, amp: 65 },
-  { size: 1,   left: "67%",  delay: 2.1,  duration: 9,   amp: 45 },
-  { size: 2,   left: "83%",  delay: 0.4,  duration: 6.8, amp: 50 },
-  { size: 1.5, left: "40%",  delay: 1.7,  duration: 7.6, amp: 38 },
-  { size: 1,   left: "74%",  delay: 3.0,  duration: 8.5, amp: 60 },
-];
-
-const WAVE = [2, 5, 8, 4, 9, 5, 7, 3, 8, 6, 4, 9, 3, 7, 5, 8, 4, 6, 3, 7, 5, 4, 8, 3, 6];
-
 export function SessionHighlight({ photo }: { photo?: string | null }) {
   // Session 01's recording was lost with the Cloudinary account. Until there is
   // footage again, the frame holds a photograph instead of a dead player.
@@ -108,62 +96,6 @@ export function SessionHighlight({ photo }: { photo?: string | null }) {
         </motion.span>
       </div>
 
-      {/* Breathing top-left gold glow */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={isInView ? { opacity: 1 } : {}}
-        transition={{ duration: 2.5 }}
-        className="absolute -top-40 -left-40 w-[750px] h-[750px] rounded-full pointer-events-none"
-      >
-        <motion.div
-          animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
-          transition={{ duration: 7, repeat: Infinity, ease: "easeInOut" }}
-          className="w-full h-full rounded-full"
-          style={{ background: "radial-gradient(circle, rgba(201,162,74,0.22) 0%, transparent 65%)" }}
-        />
-      </motion.div>
-
-      {/* Breathing bottom-right forest glow */}
-      <motion.div
-        animate={{ scale: [1, 1.15, 1], opacity: [0.6, 1, 0.6] }}
-        transition={{ duration: 9, repeat: Infinity, ease: "easeInOut", delay: 3 }}
-        className="absolute -bottom-32 -right-32 w-[650px] h-[650px] rounded-full pointer-events-none"
-        style={{ background: "radial-gradient(circle, rgba(46,90,62,0.85) 0%, transparent 70%)" }}
-      />
-
-      {/* One-shot horizontal light leak on entrance */}
-      <motion.div
-        initial={{ opacity: 0, scaleX: 0 }}
-        animate={isInView ? { opacity: [0, 0.55, 0], scaleX: [0, 1, 1] } : {}}
-        transition={{ duration: 2.8, delay: 1.0, ease: "easeOut" }}
-        className="absolute top-[40%] left-0 right-0 h-[2px] pointer-events-none origin-left"
-        style={{
-          background: "linear-gradient(90deg, transparent 0%, rgba(201,162,74,0.7) 25%, rgba(228,201,126,0.9) 50%, rgba(201,162,74,0.5) 75%, transparent 100%)",
-        }}
-      />
-
-      {/* Dot grid */}
-      <div
-        className="absolute inset-0 opacity-[0.07] pointer-events-none"
-        style={{
-          backgroundImage: "radial-gradient(circle, #f7f2e8 1px, transparent 1px)",
-          backgroundSize: "32px 32px",
-        }}
-      />
-
-      {/* Floating gold particles */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {PARTICLES.map((p, i) => (
-          <motion.div
-            key={i}
-            className="absolute rounded-full bg-gold"
-            style={{ width: p.size * 2, height: p.size * 2, left: p.left, bottom: "8%", opacity: 0 }}
-            animate={{ y: [0, -p.amp, -p.amp * 2.2], opacity: [0, 0.75, 0] }}
-            transition={{ duration: p.duration, repeat: Infinity, ease: "easeInOut", delay: p.delay }}
-          />
-        ))}
-      </div>
-
       {/* ── Content ── */}
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
 
@@ -175,14 +107,13 @@ export function SessionHighlight({ photo }: { photo?: string | null }) {
           className="flex items-center gap-3 mb-8"
         >
           <div className="h-px w-10 bg-gold/50" />
-          <span className="label-caps text-gold/65 text-xs tracking-widest">From the last session</span>
+          <span className="label-caps text-gold text-xs tracking-widest">From the last session</span>
           <div className="h-px w-6 bg-gold/20" />
         </motion.div>
 
         {/* Title row */}
-        <div className="flex items-start justify-between gap-8 mb-8">
-
-          <div className="flex-1 overflow-hidden">
+        <div className="mb-12">
+          <div className="overflow-hidden">
             <motion.h2
               initial={{ y: 90, opacity: 0 }}
               animate={isInView ? { y: 0, opacity: 1 } : {}}
@@ -202,16 +133,6 @@ export function SessionHighlight({ photo }: { photo?: string | null }) {
                 style={{ fontSize: "clamp(2.8rem, 7vw, 5.5rem)" }}
               >
                 Wangu,
-                {/* Shimmer sweep */}
-                <motion.span
-                  className="absolute inset-0 pointer-events-none"
-                  initial={{ x: "-110%" }}
-                  animate={isInView ? { x: "210%" } : {}}
-                  transition={{ duration: 1.6, delay: 1.4, repeat: Infinity, repeatDelay: 5, ease: "easeInOut" }}
-                  style={{
-                    background: "linear-gradient(105deg, transparent 30%, rgba(255,255,255,0.28) 50%, transparent 70%)",
-                  }}
-                />
               </motion.h2>
 
               {/* Underline */}
@@ -228,57 +149,12 @@ export function SessionHighlight({ photo }: { photo?: string | null }) {
               initial={{ opacity: 0, y: 10 }}
               animate={isInView ? { opacity: 1, y: 0 } : {}}
               transition={{ duration: 0.6, delay: 0.45 }}
-              className="text-cream/30 text-sm mt-5 tracking-wide"
+              className="text-cream/65 text-sm mt-5 tracking-wide"
             >
               Session 01 &nbsp;·&nbsp; 2026 &nbsp;·&nbsp; Nairobi, Kenya
             </motion.p>
           </div>
-
-          {/* Ring cluster — desktop */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.6 }}
-            animate={isInView ? { opacity: 1, scale: 1 } : {}}
-            transition={{ duration: 1, delay: 0.5 }}
-            className="relative w-28 h-28 hidden md:flex items-center justify-center flex-shrink-0 mt-3"
-          >
-            {/* Slow rotating dashed outer ring */}
-            <motion.div
-              animate={{ rotate: 360 }}
-              transition={{ duration: 22, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-0 rounded-full border border-dashed border-gold/30"
-            />
-            {/* Slow counter-rotate inner dashed */}
-            <motion.div
-              animate={{ rotate: -360 }}
-              transition={{ duration: 16, repeat: Infinity, ease: "linear" }}
-              className="absolute inset-3 rounded-full border border-dashed border-gold/20"
-            />
-            <div className="absolute inset-0 rounded-full border border-gold/25 animate-ping" style={{ animationDuration: "3.8s" }} />
-            <div className="absolute inset-2 rounded-full border border-gold/40" />
-            <div className="absolute inset-5 rounded-full border border-gold/55" />
-            <div className="w-3.5 h-3.5 rounded-full bg-gold/80" />
-            <div className="absolute top-1.5 right-3 w-1.5 h-1.5 rounded-full bg-gold/50" />
-            <div className="absolute bottom-2 left-1.5 w-1 h-1 rounded-full bg-gold/35" />
-          </motion.div>
         </div>
-
-        {/* Decorative animated waveform */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={isInView ? { opacity: 1 } : {}}
-          transition={{ duration: 1, delay: 0.85 }}
-          className="flex items-end gap-[3px] mb-12 h-7"
-        >
-          {WAVE.map((h, i) => (
-            <motion.div
-              key={i}
-              className="w-[3px] rounded-full bg-gold/50"
-              style={{ height: `${h * 11}%` }}
-              animate={{ scaleY: [0.6, 1, 0.6], opacity: [0.4, 0.8, 0.4] }}
-              transition={{ duration: 1.8 + (i % 5) * 0.3, repeat: Infinity, ease: "easeInOut", delay: i * 0.06 }}
-            />
-          ))}
-        </motion.div>
 
         {/* ── Video ── */}
         <motion.div
@@ -289,17 +165,7 @@ export function SessionHighlight({ photo }: { photo?: string | null }) {
           onMouseEnter={() => setHovering(true)}
           onMouseLeave={() => setHovering(false)}
         >
-          {/* Ambient cinema blur */}
-          <motion.div
-            animate={{ opacity: hovering ? 1 : 0.75, scale: hovering ? 1.05 : 1 }}
-            transition={{ duration: 0.8 }}
-            className="absolute -inset-6 rounded-3xl pointer-events-none blur-3xl"
-            style={{
-              background: "radial-gradient(ellipse at 25% 65%, rgba(201,162,74,0.55) 0%, transparent 50%), radial-gradient(ellipse at 75% 25%, rgba(180,80,40,0.40) 0%, transparent 50%), radial-gradient(ellipse at 55% 85%, rgba(100,60,20,0.30) 0%, transparent 45%)",
-            }}
-          />
-
-          {/* Gradient glow border */}
+          {/* Gradient border, brightens on hover */}
           <div
             className="p-[1.5px] rounded-2xl transition-all duration-700"
             style={{
@@ -357,7 +223,7 @@ export function SessionHighlight({ photo }: { photo?: string | null }) {
 
               {hasVideo && (<>
               {/* Progress bar */}
-              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/8">
+              <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-white/10">
                 <div
                   className="h-full bg-gradient-to-r from-gold/50 to-gold/80"
                   style={{ width: `${progress * 100}%`, transition: "width 0.5s linear" }}
@@ -377,7 +243,7 @@ export function SessionHighlight({ photo }: { photo?: string | null }) {
                       : <Pause size={10} />
                     }
                   </button>
-                  <span className="text-cream/40 text-[11px] font-medium tabular-nums">5:07</span>
+                  <span className="text-cream/65 text-[11px] font-medium tabular-nums">5:07</span>
                 </div>
 
                 <button
@@ -408,14 +274,14 @@ export function SessionHighlight({ photo }: { photo?: string | null }) {
           transition={{ duration: 0.6, delay: 0.9 }}
           className="flex items-center justify-between mt-7"
         >
-          <p className="text-cream/20 text-xs">
+          <p className="text-cream/50 text-xs">
             {!hasVideo
               ? "A moment from the last gathering"
               : muted ? "Unmute to hear the session" : "Now playing with sound"}
           </p>
           <Link
             href="/events/session-01"
-            className="inline-flex items-center gap-1.5 text-xs text-gold/50 hover:text-gold font-medium transition-colors group"
+            className="inline-flex items-center gap-1.5 text-xs text-gold hover:text-gold font-medium transition-colors group"
           >
             View full session
             <ArrowUpRight size={11} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />

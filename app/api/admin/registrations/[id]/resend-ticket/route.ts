@@ -5,6 +5,9 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { TicketPdf } from "@/lib/pdf/ticket-pdf";
 import { logger } from "@/lib/logger";
+import QRCode from "qrcode";
+import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { formatEventTime } from "@/lib/utils";
 
 type Props = { params: Promise<{ id: string }> };
 
@@ -44,7 +47,7 @@ export async function POST(_req: NextRequest, { params }: Props) {
 
   const { data: event } = await supabase
     .from("events")
-    .select("title, event_date, event_time, venue_name, slug, type, price_kes")
+    .select("title, event_date, event_time, venue_name, slug, type, price_kes, dress_code, theme_title, theme_scripture")
     .eq("id", r.event_id)
     .single();
 
@@ -52,15 +55,19 @@ export async function POST(_req: NextRequest, { params }: Props) {
     return NextResponse.json({ error: "Event not found" }, { status: 404 });
   }
 
-  const ev = event as { title: string; event_date: string; event_time: string; venue_name: string | null; slug: string; type: string; price_kes: number | null };
+  const ev = event as { title: string; event_date: string; event_time: string; venue_name: string | null; slug: string; type: string; price_kes: number | null; dress_code: string | null; theme_title: string | null; theme_scripture: string | null };
 
   const formattedDate = new Date(ev.event_date).toLocaleDateString("en-KE", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
-  const formattedTime = ev.event_time.slice(0, 5).replace(":", ".");
+  const formattedTime = formatEventTime(ev.event_time);
 
   let pdfBuffer: Buffer | null = null;
   try {
+    // Same ticket the attendee got at registration: QR, theme and dress code
+    // included. The resend used to produce a stripped-down PDF.
+    const liveUrl   = `${SITE_URL}/live/${ev.slug}`;
+    const qrDataUrl = await QRCode.toDataURL(liveUrl, { width: 200, margin: 1, color: { dark: "#1b3a2a", light: "#f7f2e8" } });
     pdfBuffer = await renderToBuffer(
       // @ts-expect-error react-pdf JSX type
       createElement(TicketPdf, {
@@ -70,7 +77,13 @@ export async function POST(_req: NextRequest, { params }: Props) {
         eventDate:   formattedDate,
         eventTime:   formattedTime,
         venueName:   ev.venue_name,
+        dressCode:   ev.dress_code,
+        themeTitle:     ev.theme_title,
+        themeScripture: ev.theme_scripture,
         ticketToken: r.ticket_token,
+        qrDataUrl,
+        siteName:    SITE_NAME,
+        siteUrl:     SITE_URL,
       })
     );
   } catch (err) {
@@ -89,6 +102,8 @@ export async function POST(_req: NextRequest, { params }: Props) {
     eventDate:   formattedDate,
     eventTime:   formattedTime,
     venueName:   ev.venue_name,
+    themeTitle:     ev.theme_title,
+    themeScripture: ev.theme_scripture,
     ticketToken: r.ticket_token,
     eventSlug:   ev.slug,
     isFree:      ev.type === "free",

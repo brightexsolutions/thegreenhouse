@@ -120,7 +120,7 @@ function ThemeCard({
     <div className="bg-white rounded-2xl border border-mist overflow-hidden">
       {/* Card header */}
       <div className="flex items-start gap-4 p-5">
-        <div className="w-10 h-10 rounded-xl bg-forest/8 flex items-center justify-center flex-shrink-0">
+        <div className="w-10 h-10 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0">
           <Palette size={16} className="text-forest" />
         </div>
         <div className="flex-1 min-w-0">
@@ -158,7 +158,7 @@ function ThemeCard({
                 <button
                   type="button"
                   onClick={() => setEditing(false)}
-                  className="px-3 py-1.5 rounded-xl border border-mist text-xs text-charcoal/60"
+                  className="px-3 py-1.5 rounded-xl border border-mist text-xs text-charcoal/65"
                 >
                   Cancel
                 </button>
@@ -168,22 +168,22 @@ function ThemeCard({
             <>
               <h3 className="text-base font-semibold text-forest font-display">{theme.title}</h3>
               {theme.scripture && (
-                <p className="text-xs text-charcoal/50 mt-0.5 flex items-center gap-1">
+                <p className="text-xs text-charcoal/70 mt-0.5 flex items-center gap-1">
                   <BookOpen size={11} /> {theme.scripture}
                 </p>
               )}
               {theme.description && (
-                <p className="text-sm text-charcoal/60 mt-1.5 leading-relaxed">{theme.description}</p>
+                <p className="text-sm text-charcoal/65 mt-1.5 leading-relaxed">{theme.description}</p>
               )}
               {assigned.length > 0 && (
                 <div className="flex flex-wrap gap-1.5 mt-2">
                   {assigned.map(ev => (
-                    <span key={ev.id} className="inline-flex items-center gap-1 text-[10px] bg-forest/8 text-forest px-2 py-0.5 rounded-full font-medium">
+                    <span key={ev.id} className="inline-flex items-center gap-1 text-[10px] bg-forest/10 text-forest px-2 py-0.5 rounded-full font-medium">
                       {sessionName(ev.title)}
                       <button
                         onClick={() => doUnassign(ev.id)}
                         disabled={busy === ev.id}
-                        className="text-forest/40 hover:text-rose-500 transition-colors"
+                        className="text-forest/80 hover:text-rose-500 transition-colors"
                         title="Unassign from this event"
                       >
                         {busy === ev.id ? <Loader2 size={8} className="animate-spin" /> : <X size={8} />}
@@ -199,7 +199,7 @@ function ThemeCard({
           <div className="flex items-center gap-1 flex-shrink-0">
             <button
               onClick={() => { setExpanded(v => !v); setAssigning(false); }}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-mist text-xs text-charcoal/60 hover:text-forest hover:border-forest/20 transition-all"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl border border-mist text-xs text-charcoal/65 hover:text-forest hover:border-forest/20 transition-all"
             >
               <Plus size={11} />
               Assign
@@ -207,14 +207,14 @@ function ThemeCard({
             </button>
             <button
               onClick={() => { setEditing(true); setExpanded(false); }}
-              className="w-7 h-7 rounded-xl border border-mist flex items-center justify-center text-charcoal/30 hover:text-forest hover:border-forest/20 transition-all"
+              className="w-7 h-7 rounded-xl border border-mist flex items-center justify-center text-charcoal/65 hover:text-forest hover:border-forest/20 transition-all"
             >
               <Edit2 size={12} />
             </button>
             <button
               onClick={doDelete}
               disabled={busy === "del"}
-              className="w-7 h-7 rounded-xl border border-mist flex items-center justify-center text-charcoal/30 hover:text-rose-500 hover:border-rose-200 transition-all disabled:opacity-50"
+              className="w-7 h-7 rounded-xl border border-mist flex items-center justify-center text-charcoal/65 hover:text-rose-500 hover:border-rose-200 transition-all disabled:opacity-50"
             >
               {busy === "del" ? <Loader2 size={11} className="animate-spin" /> : <Trash2 size={12} />}
             </button>
@@ -235,10 +235,10 @@ function ThemeCard({
       {expanded && !editing && (
         <div className="border-t border-mist px-5 py-3 bg-off-white">
           {unassigned.length === 0 ? (
-            <p className="text-xs text-charcoal/40 italic">All events already use this theme</p>
+            <p className="text-xs text-charcoal/65 italic">All events already use this theme</p>
           ) : (
             <>
-              <p className="text-[10px] font-semibold text-charcoal/40 uppercase tracking-wider mb-2">Assign to event</p>
+              <p className="text-[10px] font-semibold text-charcoal/65 uppercase tracking-wider mb-2">Assign to event</p>
               <div className="space-y-1">
                 {unassigned.map(ev => (
                   <button
@@ -320,7 +320,7 @@ export function ThemesLibrary({ initialThemes, events: initialEvents }: Props) {
     <div className="space-y-4">
       {/* New theme button */}
       <div className="flex items-center justify-between">
-        <p className="text-sm text-charcoal/40">{themes.length} theme{themes.length !== 1 ? "s" : ""}</p>
+        <p className="text-sm text-charcoal/65">{themes.length} theme{themes.length !== 1 ? "s" : ""}</p>
         <button
           onClick={() => setCreating(v => !v)}
           className="flex items-center gap-2 px-4 py-2 rounded-xl bg-forest text-cream text-sm font-semibold hover:bg-moss transition-colors"
@@ -338,33 +338,33 @@ export function ThemesLibrary({ initialThemes, events: initialEvents }: Props) {
           </h3>
           <form onSubmit={createTheme} className="space-y-3">
             <div>
-              <label className="text-xs font-semibold text-charcoal/60 mb-1.5 block">Theme title *</label>
+              <label className="text-xs font-semibold text-charcoal/65 mb-1.5 block">Theme title *</label>
               <input
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. Delusion"
                 required
                 autoFocus
-                className="w-full px-3.5 py-3 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
+                className="w-full px-3.5 py-3 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-charcoal/60 mb-1.5 block">Scripture <span className="font-normal text-charcoal/35">(optional)</span></label>
+              <label className="text-xs font-semibold text-charcoal/65 mb-1.5 block">Scripture <span className="font-normal text-charcoal/65">(optional)</span></label>
               <input
                 value={scripture}
                 onChange={e => setScripture(e.target.value)}
                 placeholder="e.g. 2 Timothy 4:3-6"
-                className="w-full px-3.5 py-3 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
+                className="w-full px-3.5 py-3 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-charcoal/60 mb-1.5 block">Description <span className="font-normal text-charcoal/35">(optional)</span></label>
+              <label className="text-xs font-semibold text-charcoal/65 mb-1.5 block">Description <span className="font-normal text-charcoal/65">(optional)</span></label>
               <textarea
                 value={desc}
                 onChange={e => setDesc(e.target.value)}
                 placeholder="A short description or reflection prompt…"
                 rows={2}
-                className="w-full px-3.5 py-3 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 resize-none"
+                className="w-full px-3.5 py-3 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 resize-none"
               />
             </div>
             {msg && (
@@ -385,7 +385,7 @@ export function ThemesLibrary({ initialThemes, events: initialEvents }: Props) {
               <button
                 type="button"
                 onClick={() => setCreating(false)}
-                className="px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/60 hover:text-charcoal transition-colors"
+                className="px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/65 hover:text-charcoal transition-colors"
               >
                 Cancel
               </button>
@@ -406,9 +406,9 @@ export function ThemesLibrary({ initialThemes, events: initialEvents }: Props) {
       {/* Theme list */}
       {themes.length === 0 ? (
         <div className="bg-white rounded-2xl border border-mist p-12 text-center">
-          <Palette size={28} className="text-charcoal/15 mx-auto mb-3" />
-          <p className="text-sm text-charcoal/40">No themes yet</p>
-          <p className="text-xs text-charcoal/25 mt-1">Create a theme and assign it to events</p>
+          <Palette size={28} className="text-charcoal/65 mx-auto mb-3" />
+          <p className="text-sm text-charcoal/65">No themes yet</p>
+          <p className="text-xs text-charcoal/65 mt-1">Create a theme and assign it to events</p>
         </div>
       ) : (
         <div className="space-y-3">

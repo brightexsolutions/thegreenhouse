@@ -1,9 +1,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Calendar, MapPin, ArrowUpRight, ArrowRight } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, formatEventTime } from "@/lib/utils";
 import { storageUrl } from "@/lib/constants";
-import type { Event } from "@/types/database";
+import type { PublicEvent } from "@/lib/public-event";
 
 const STATUS_LABELS: Record<string, string> = {
   published: "Open",
@@ -14,9 +14,9 @@ const STATUS_LABELS: Record<string, string> = {
 };
 
 const STATUS_COLORS: Record<string, string> = {
-  published: "bg-gold/15 text-gold border-gold/30",
-  live:      "bg-green-500/20 text-green-400 border-green-500/30",
-  past:      "bg-cream/10 text-cream/50 border-cream/20",
+  published: "bg-black/60 text-gold border-gold/60",
+  live:      "bg-black/60 text-green-300 border-green-400/60",
+  past:      "bg-black/60 text-cream border-cream/40",
 };
 
 // Atmospheric fallback photos when an event has no uploaded cover
@@ -33,15 +33,15 @@ function pickFallback(slug: string): string {
 }
 
 interface EventCardProps {
-  event:    Event;
+  event:    PublicEvent;
   featured?: boolean;
 }
 
 export function EventCard({ event, featured = false }: EventCardProps) {
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
-    day: "numeric", month: "long", year: "numeric",
+    day: "numeric", month: "long", year: "numeric", timeZone: "UTC",
   });
-  const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
+  const formattedTime = formatEventTime(event.event_time);
   const isPast = event.status === "past";
 
   // Cards always use banner_image — poster (cover_image) is for the detail page only
@@ -54,10 +54,9 @@ export function EventCard({ event, featured = false }: EventCardProps) {
       href={`/events/${event.slug}`}
       className={cn(
         "group relative rounded-3xl overflow-hidden block",
-        "bg-forest-dark transition-all duration-500",
-        "hover:-translate-y-1",
-        featured ? "aspect-[4/5] sm:aspect-[3/4]" : "aspect-[3/4]",
-        isPast && "opacity-75"
+        "bg-forest-dark transition-transform duration-300",
+        "hover:-translate-y-1 hover:shadow-card-hover",
+        featured ? "aspect-[4/5] sm:aspect-[3/4]" : "aspect-[3/4]"
       )}
     >
       {/* Background photo */}
@@ -70,26 +69,9 @@ export function EventCard({ event, featured = false }: EventCardProps) {
         unoptimized
       />
 
-      {/* Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/30 to-black/10" />
-
-      {/* Radial glow on hover */}
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-[radial-gradient(circle,rgba(201,162,74,0.18),transparent)] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-
-      {/* Dot grid */}
-      <div
-        className="absolute inset-0 opacity-[0.05]"
-        style={{
-          backgroundImage: "radial-gradient(circle, #fdfcf8 1px, transparent 1px)",
-          backgroundSize: "24px 24px",
-        }}
-      />
-
-      {/* Decorative ring */}
-      <div className="absolute top-4 right-4 w-20 h-20 rounded-full border border-cream/10 group-hover:border-gold/25 group-hover:scale-110 transition-all duration-500" />
-
-      {/* Bottom gold accent line */}
-      <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-gold group-hover:w-full transition-all duration-500 ease-out" />
+      {/* Scrim: posters are busy, so the lower half goes nearly solid to keep
+          the title and details readable whatever artwork is behind them. */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/95 from-0% via-black/70 via-40% to-black/5 to-75%" />
 
       {/* Content */}
       <div className="absolute inset-0 flex flex-col justify-between p-6 lg:p-7">
@@ -98,7 +80,7 @@ export function EventCard({ event, featured = false }: EventCardProps) {
           <span
             className={cn(
               "px-2.5 py-1 rounded-full text-xs font-semibold border tracking-wide uppercase",
-              STATUS_COLORS[event.status] ?? "bg-cream/10 text-cream/60 border-cream/20"
+              STATUS_COLORS[event.status] ?? "bg-black/50 text-cream border-cream/30"
             )}
           >
             {STATUS_LABELS[event.status] ?? event.status}
@@ -106,7 +88,7 @@ export function EventCard({ event, featured = false }: EventCardProps) {
               <span className="inline-block w-1.5 h-1.5 rounded-full bg-green-400 ml-1.5 animate-pulse-dot" />
             )}
           </span>
-          <span className="w-8 h-8 rounded-full border border-cream/20 flex items-center justify-center group-hover:border-gold/40 group-hover:text-gold text-cream/50 transition-all duration-300">
+          <span className="w-8 h-8 rounded-full border border-cream/40 bg-black/40 flex items-center justify-center group-hover:border-gold group-hover:text-gold text-cream transition-colors duration-300">
             <ArrowUpRight size={13} />
           </span>
         </div>
@@ -115,8 +97,8 @@ export function EventCard({ event, featured = false }: EventCardProps) {
         <div>
           {event.theme_title && (
             <div className="mb-3">
-              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-gold/20 border border-gold/35">
-                <span className="label-caps text-gold/80 text-[10px]">Theme</span>
+              <div className="inline-flex items-center gap-2 px-2.5 py-1 rounded-full bg-black/60 border border-gold/50">
+                <span className="label-caps text-gold text-[10px]">Theme</span>
                 <span className="text-xs font-semibold text-gold leading-none">{event.theme_title}</span>
               </div>
             </div>
@@ -125,19 +107,19 @@ export function EventCard({ event, featured = false }: EventCardProps) {
             {event.title}
           </h3>
           <div className="flex flex-col gap-1.5 mb-4">
-            <div className="flex items-center gap-1.5 text-sm text-cream/60">
+            <div className="flex items-center gap-1.5 text-sm text-cream/90">
               <Calendar size={12} />
-              <span>{formattedDate} · {formattedTime}pm</span>
+              <span>{formattedDate}{formattedTime ? ` · ${formattedTime}` : ""}</span>
             </div>
             {event.venue_name && (
-              <div className="flex items-center gap-1.5 text-sm text-cream/60">
+              <div className="flex items-center gap-1.5 text-sm text-cream/90">
                 <MapPin size={12} />
                 <span>{event.venue_name}</span>
               </div>
             )}
           </div>
           {/* Explicit tap affordance */}
-          <div className="flex items-center gap-1.5 text-xs text-cream/35 group-hover:text-gold/70 transition-colors duration-300 border-t border-cream/10 pt-3">
+          <div className="flex items-center gap-1.5 text-xs font-medium text-cream/90 group-hover:text-gold transition-colors duration-300 border-t border-cream/20 pt-3">
             <span>{isPast ? "View session recap" : "Register & view details"}</span>
             <ArrowRight size={10} className="group-hover:translate-x-0.5 transition-transform duration-300" />
           </div>

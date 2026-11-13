@@ -29,11 +29,11 @@ export default async function SessionsPage({ params }: Props) {
   return (
     <div className="space-y-6">
       <div className="mb-6">
-        <p className="text-xs font-medium text-charcoal/40 uppercase tracking-wider mb-1">
+        <p className="text-xs font-medium text-charcoal/65 uppercase tracking-wider mb-1">
           {(event as { title: string }).title}
         </p>
         <h1 className="text-2xl font-semibold text-forest">Program & Lyrics</h1>
-        <p className="text-sm text-charcoal/50 mt-1">Manage the evening&apos;s program and song lyrics</p>
+        <p className="text-sm text-charcoal/70 mt-1">Manage the evening&apos;s program and song lyrics</p>
       </div>
 
       <SessionManager eventId={id} initialSessions={sessions as unknown as Parameters<typeof SessionManager>[0]["initialSessions"]} />

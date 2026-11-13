@@ -29,7 +29,7 @@ export function DocsBanner() {
               <Leaf size={18} className="text-cream/90" />
             </div>
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cream/50">The Green House</p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-cream/75">The Green House</p>
               <p className="text-xs text-cream/60 font-medium">Worship Community · Nairobi, Kenya</p>
             </div>
           </div>
@@ -45,10 +45,10 @@ export function DocsBanner() {
             <span className="inline-flex items-center px-3 py-1 rounded-full bg-cream/10 border border-cream/20 text-[11px] font-semibold text-cream/80 tracking-wide">
               {VERSION}
             </span>
-            <span className="text-cream/25 text-xs">·</span>
-            <span className="text-[11px] text-cream/50">Created {DATE_CREATED}</span>
-            <span className="text-cream/25 text-xs">·</span>
-            <span className="text-[11px] text-cream/50">Last updated {DATE_UPDATED}</span>
+            <span className="text-cream/50 text-xs">·</span>
+            <span className="text-[11px] text-cream/75">Created {DATE_CREATED}</span>
+            <span className="text-cream/50 text-xs">·</span>
+            <span className="text-[11px] text-cream/75">Last updated {DATE_UPDATED}</span>
           </div>
         </div>
       </header>
@@ -67,15 +67,15 @@ export function DocsBanner() {
               <Leaf size={13} className="text-gold" />
             </div>
             <span className="text-sm font-semibold text-cream truncate">The Green House</span>
-            <span className="text-cream/30 text-xs hidden sm:inline">·</span>
+            <span className="text-cream/65 text-xs hidden sm:inline">·</span>
             <span className="text-xs text-cream/65 hidden sm:inline truncate">Platform Documentation</span>
           </div>
           <div className="flex items-center gap-2.5 flex-shrink-0">
             <span className="inline-flex items-center px-2.5 py-1 rounded-full bg-cream/10 border border-cream/20 text-xs font-semibold text-cream/80">
               {VERSION}
             </span>
-            <span className="text-cream/25 text-xs hidden sm:inline">·</span>
-            <span className="text-xs text-cream/55 hidden sm:inline">Updated {DATE_UPDATED}</span>
+            <span className="text-cream/50 text-xs hidden sm:inline">·</span>
+            <span className="text-xs text-cream/75 hidden sm:inline">Updated {DATE_UPDATED}</span>
           </div>
         </div>
       </div>

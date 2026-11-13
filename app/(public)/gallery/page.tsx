@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import { Camera } from "lucide-react";
 import { createAdminClient } from "@/lib/supabase/server";
 import { FadeIn } from "@/components/motion/fade-in";
 import { storageUrl } from "@/lib/constants";
@@ -63,7 +64,7 @@ export default async function GalleryPage() {
   return (
     <>
       {/* Hero — photo background */}
-      <section className="relative min-h-[55vh] flex items-end overflow-hidden pt-20">
+      <section className="on-dark relative min-h-[55vh] flex items-end overflow-hidden pt-20">
         <div className="absolute inset-0">
           <Image
             src="https://images.unsplash.com/photo-1574169208507-84376144848b?auto=format&fit=crop&w=1600&q=75"
@@ -77,11 +78,10 @@ export default async function GalleryPage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-forest via-forest/85 to-forest/50" />
         </div>
-        <div className="absolute top-20 right-24 w-56 h-56 rounded-full border border-cream/5 hidden lg:block" />
 
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 w-full">
           <FadeIn>
-            <span className="label-caps text-gold/80">Gallery</span>
+            <span className="label-caps text-gold">Gallery</span>
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream mt-2 leading-[0.95]">
               Moments worth
               <br />
@@ -127,12 +127,12 @@ export default async function GalleryPage() {
                 <FadeIn>
                   <div className="text-center px-6 py-12">
                     <div className="w-20 h-20 rounded-full bg-forest/10 border border-forest/15 flex items-center justify-center mx-auto mb-6">
-                      <span className="text-3xl">📷</span>
+                      <Camera className="w-8 h-8 text-forest" strokeWidth={1.5} aria-hidden />
                     </div>
                     <h3 className="font-display text-3xl font-semibold text-forest mb-3">
                       Photos coming after Session 02
                     </h3>
-                    <p className="text-charcoal/60 text-base max-w-xs mx-auto leading-relaxed">
+                    <p className="text-charcoal/65 text-base max-w-xs mx-auto leading-relaxed">
                       Every gathering gets documented. Check back after June 26.
                     </p>
                     <Link
@@ -164,7 +164,7 @@ export default async function GalleryPage() {
 
       {/* CTA — photo background */}
       {!isEmpty && (
-        <section className="relative py-16 text-center overflow-hidden">
+        <section className="on-dark relative py-16 text-center overflow-hidden">
           <div className="absolute inset-0">
             <Image
               src="https://images.unsplash.com/photo-1529156069898-49953e39b3ac?auto=format&fit=crop&w=1400&q=70"

@@ -5,7 +5,10 @@ export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
-  const next = req.nextUrl.searchParams.get("next") ?? "/admin/dashboard";
+  // Only same-site paths. "//host" and "/\\host" are read by browsers as
+  // another origin, so a crafted link could bounce a signed-in admin away.
+  const requested = req.nextUrl.searchParams.get("next");
+  const next = requested && /^\/(?![\/\\])/.test(requested) ? requested : "/admin/dashboard";
 
   if (code) {
     const supabase = await createClient();

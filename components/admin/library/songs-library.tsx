@@ -114,7 +114,7 @@ export function SongsLibrary({ initialSongs }: Props) {
         {/* Search + add */}
         <div className="flex gap-2">
           <div className="relative flex-1">
-            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+            <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/65" />
             <input
               value={query}
               onChange={e => setQuery(e.target.value)}
@@ -126,7 +126,7 @@ export function SongsLibrary({ initialSongs }: Props) {
             onClick={() => setAdding(a => !a)}
             className={cn(
               "px-3 py-2 rounded-xl border text-sm font-medium transition-all flex items-center gap-1.5",
-              adding ? "bg-forest text-cream border-forest" : "bg-white border-mist text-charcoal/50 hover:text-forest hover:border-forest/30"
+              adding ? "bg-forest text-cream border-forest" : "bg-white border-mist text-charcoal/70 hover:text-forest hover:border-forest/30"
             )}
           >
             <Plus size={13} /> Add
@@ -151,7 +151,7 @@ export function SongsLibrary({ initialSongs }: Props) {
               className="w-full px-3 py-2 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
             />
             <div className="flex items-center gap-2">
-              <label className="text-xs text-charcoal/50 w-12 flex-shrink-0">Key</label>
+              <label className="text-xs text-charcoal/70 w-12 flex-shrink-0">Key</label>
               <select
                 value={newSong.key}
                 onChange={e => setNewSong(p => ({ ...p, key: e.target.value }))}
@@ -167,7 +167,7 @@ export function SongsLibrary({ initialSongs }: Props) {
               value={newSong.lyrics}
               onChange={e => setNewSong(p => ({ ...p, lyrics: e.target.value }))}
               rows={5}
-              className="w-full px-3 py-2 rounded-xl border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-none placeholder:text-charcoal/25"
+              className="w-full px-3 py-2 rounded-xl border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-none placeholder:text-charcoal/50"
             />
             <div className="flex gap-2">
               <button
@@ -179,7 +179,7 @@ export function SongsLibrary({ initialSongs }: Props) {
               </button>
               <button
                 onClick={() => setAdding(false)}
-                className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/60"
+                className="px-4 py-2 rounded-full border border-mist text-xs text-charcoal/65"
               >
                 Cancel
               </button>
@@ -191,9 +191,9 @@ export function SongsLibrary({ initialSongs }: Props) {
         <div className="bg-white rounded-2xl border border-mist overflow-hidden flex-1">
           {filtered.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16">
-              <Music2 size={22} className="text-charcoal/15 mb-3" />
-              <p className="text-sm text-charcoal/40">{query ? "No songs found" : "No songs yet"}</p>
-              <p className="text-xs text-charcoal/25 mt-1">Songs are added when you build event programs</p>
+              <Music2 size={22} className="text-charcoal/65 mb-3" />
+              <p className="text-sm text-charcoal/65">{query ? "No songs found" : "No songs yet"}</p>
+              <p className="text-xs text-charcoal/65 mt-1">Songs are added when you build event programs</p>
             </div>
           ) : (
             <div className="divide-y divide-mist max-h-[520px] overflow-y-auto">
@@ -205,7 +205,7 @@ export function SongsLibrary({ initialSongs }: Props) {
                     key={song.id}
                     onClick={() => setSelected(isActive ? null : song.id)}
                     className={cn(
-                      "w-full flex items-center gap-3 px-4 py-3 hover:bg-charcoal/3 transition-colors text-left",
+                      "w-full flex items-center gap-3 px-4 py-3 hover:bg-charcoal/5 transition-colors text-left",
                       isActive && "bg-forest/5 border-l-2 border-forest"
                     )}
                   >
@@ -222,24 +222,24 @@ export function SongsLibrary({ initialSongs }: Props) {
                           {song.title}
                         </p>
                         {song.key && (
-                          <span className="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-gold/15 text-gold/80 border border-gold/20">
+                          <span className="flex-shrink-0 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-gold/15 text-gold border border-gold/20">
                             {song.key}
                           </span>
                         )}
                       </div>
-                      <p className="text-xs text-charcoal/40 truncate mt-0.5">
+                      <p className="text-xs text-charcoal/65 truncate mt-0.5">
                         {song.artist ?? <span className="italic">Unknown artist</span>}
-                        {song.lyrics && <span className="text-charcoal/25"> · has lyrics</span>}
+                        {song.lyrics && <span className="text-charcoal/65"> · has lyrics</span>}
                       </p>
                     </div>
-                    {isActive && <ChevronDown size={14} className="text-forest/50 flex-shrink-0" />}
+                    {isActive && <ChevronDown size={14} className="text-forest/80 flex-shrink-0" />}
                   </button>
                 );
               })}
             </div>
           )}
           <div className="px-4 py-2 border-t border-mist bg-off-white">
-            <p className="text-[10px] text-charcoal/35">{filtered.length} song{filtered.length !== 1 ? "s" : ""}</p>
+            <p className="text-[10px] text-charcoal/65">{filtered.length} song{filtered.length !== 1 ? "s" : ""}</p>
           </div>
         </div>
       </div>
@@ -248,11 +248,11 @@ export function SongsLibrary({ initialSongs }: Props) {
       <div className="flex-1 min-w-0">
         {!activeSong ? (
           <div className="h-full min-h-[300px] bg-white rounded-2xl border border-mist flex flex-col items-center justify-center text-center p-8">
-            <div className="w-16 h-16 rounded-3xl bg-forest/6 flex items-center justify-center mb-4">
-              <Music2 size={26} className="text-forest/30" />
+            <div className="w-16 h-16 rounded-3xl bg-forest/5 flex items-center justify-center mb-4">
+              <Music2 size={26} className="text-forest/80" />
             </div>
-            <p className="text-sm font-medium text-charcoal/40">Select a song</p>
-            <p className="text-xs text-charcoal/25 mt-1">View or edit lyrics, title, and artist</p>
+            <p className="text-sm font-medium text-charcoal/65">Select a song</p>
+            <p className="text-xs text-charcoal/65 mt-1">View or edit lyrics, title, and artist</p>
           </div>
         ) : (
           <div className="bg-white rounded-2xl border border-mist overflow-hidden">
@@ -279,7 +279,7 @@ export function SongsLibrary({ initialSongs }: Props) {
                       className="w-full px-3 py-1.5 rounded-xl border border-mist text-sm focus:outline-none focus:border-forest"
                     />
                     <div className="flex items-center gap-2">
-                      <label className="text-xs text-charcoal/50 w-12 flex-shrink-0">Key</label>
+                      <label className="text-xs text-charcoal/70 w-12 flex-shrink-0">Key</label>
                       <select
                         value={editData.key ?? ""}
                         onChange={e => setEditData(p => ({ ...p, key: e.target.value || null }))}
@@ -296,12 +296,12 @@ export function SongsLibrary({ initialSongs }: Props) {
                     <div className="flex items-center gap-2">
                       <h2 className="text-xl font-semibold text-charcoal truncate">{activeSong.title}</h2>
                       {activeSong.key && (
-                        <span className="flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-lg bg-gold/15 text-gold/80 border border-gold/20">
+                        <span className="flex-shrink-0 text-xs font-bold px-2 py-0.5 rounded-lg bg-gold/15 text-gold border border-gold/20">
                           {activeSong.key}
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-charcoal/50 mt-0.5">{activeSong.artist ?? <span className="italic">Unknown artist</span>}</p>
+                    <p className="text-sm text-charcoal/70 mt-0.5">{activeSong.artist ?? <span className="italic">Unknown artist</span>}</p>
                   </>
                 )}
               </div>
@@ -318,7 +318,7 @@ export function SongsLibrary({ initialSongs }: Props) {
                     </button>
                     <button
                       onClick={() => setEditing(null)}
-                      className="p-2 rounded-xl bg-charcoal/5 text-charcoal/50 hover:bg-charcoal/10 transition-colors"
+                      className="p-2 rounded-xl bg-charcoal/5 text-charcoal/70 hover:bg-charcoal/10 transition-colors"
                       title="Cancel"
                     >
                       <X size={14} />
@@ -328,14 +328,14 @@ export function SongsLibrary({ initialSongs }: Props) {
                   <>
                     <button
                       onClick={() => startEdit(activeSong)}
-                      className="p-2 rounded-xl text-charcoal/40 hover:text-forest hover:bg-forest/8 transition-colors"
+                      className="p-2 rounded-xl text-charcoal/65 hover:text-forest hover:bg-forest/10 transition-colors"
                       title="Edit"
                     >
                       <Edit2 size={14} />
                     </button>
                     <button
                       onClick={() => deleteSong(activeSong.id)}
-                      className="p-2 rounded-xl text-charcoal/30 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      className="p-2 rounded-xl text-charcoal/65 hover:text-red-500 hover:bg-red-50 transition-colors"
                       title="Delete"
                     >
                       <Trash2 size={14} />
@@ -348,9 +348,9 @@ export function SongsLibrary({ initialSongs }: Props) {
             {/* Lyrics */}
             <div className="p-6">
               <div className="flex items-center justify-between mb-3">
-                <p className="text-[10px] font-semibold text-charcoal/40 uppercase tracking-wider">Lyrics</p>
+                <p className="text-[10px] font-semibold text-charcoal/65 uppercase tracking-wider">Lyrics</p>
                 {!editing && activeSong.lyrics && (
-                  <span className="text-[10px] text-charcoal/25">
+                  <span className="text-[10px] text-charcoal/65">
                     {activeSong.lyrics.split(/\n{2,}/).filter(Boolean).length} section{activeSong.lyrics.split(/\n{2,}/).filter(Boolean).length !== 1 ? "s" : ""}
                   </span>
                 )}
@@ -361,7 +361,7 @@ export function SongsLibrary({ initialSongs }: Props) {
                   onChange={e => setEditData(p => ({ ...p, lyrics: e.target.value || null }))}
                   rows={18}
                   placeholder={"Verse 1:\n...\n\nChorus:\n..."}
-                  className="w-full px-4 py-3 rounded-xl border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-y bg-off-white placeholder:text-charcoal/20"
+                  className="w-full px-4 py-3 rounded-xl border border-mist text-sm font-mono focus:outline-none focus:border-forest resize-y bg-off-white placeholder:text-charcoal/50"
                 />
               ) : activeSong.lyrics ? (
                 <pre className="text-sm text-charcoal/70 leading-loose whitespace-pre-wrap font-sans bg-off-white rounded-xl px-4 py-3 max-h-[400px] overflow-y-auto">
@@ -369,7 +369,7 @@ export function SongsLibrary({ initialSongs }: Props) {
                 </pre>
               ) : (
                 <div className="bg-off-white rounded-xl px-4 py-6 text-center">
-                  <p className="text-sm text-charcoal/30 italic">No lyrics yet</p>
+                  <p className="text-sm text-charcoal/65 italic">No lyrics yet</p>
                   <button
                     onClick={() => startEdit(activeSong)}
                     className="mt-2 text-xs text-forest hover:underline"

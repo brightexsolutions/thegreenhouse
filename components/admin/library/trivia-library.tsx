@@ -61,7 +61,7 @@ const DEFAULT_FORM: FormState = {
 function inputCls(err?: boolean) {
   return cn(
     "w-full px-3 py-2.5 rounded-xl border text-sm text-charcoal bg-white",
-    "placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all",
+    "placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all",
     err ? "border-red-300" : "border-mist hover:border-forest/20"
   );
 }
@@ -165,7 +165,7 @@ export function TriviaLibrary() {
           <button
             onClick={() => setCatFilter("all")}
             className={cn("px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-              catFilter === "all" ? "bg-forest text-cream" : "bg-white border border-mist text-charcoal/60 hover:border-forest/30")}
+              catFilter === "all" ? "bg-forest text-cream" : "bg-white border border-mist text-charcoal/65 hover:border-forest/30")}
           >
             All ({questions.length})
           </button>
@@ -177,7 +177,7 @@ export function TriviaLibrary() {
                 key={value}
                 onClick={() => setCatFilter(value)}
                 className={cn("px-3 py-1.5 rounded-full text-xs font-medium transition-all",
-                  catFilter === value ? "bg-forest text-cream" : "bg-white border border-mist text-charcoal/60 hover:border-forest/30")}
+                  catFilter === value ? "bg-forest text-cream" : "bg-white border border-mist text-charcoal/65 hover:border-forest/30")}
               >
                 {label} ({count})
               </button>
@@ -195,13 +195,13 @@ export function TriviaLibrary() {
       {/* Question list */}
       {loading ? (
         <div className="flex items-center justify-center py-16">
-          <Loader2 size={22} className="animate-spin text-forest/30" />
+          <Loader2 size={22} className="animate-spin text-forest/80" />
         </div>
       ) : filtered.length === 0 ? (
         <div className="bg-white rounded-2xl border border-mist p-14 text-center">
-          <Sparkles size={26} className="text-charcoal/15 mx-auto mb-3" />
-          <p className="text-sm text-charcoal/40">No trivia questions yet</p>
-          <p className="text-xs text-charcoal/25 mt-1">Create your first question to get started</p>
+          <Sparkles size={26} className="text-charcoal/65 mx-auto mb-3" />
+          <p className="text-sm text-charcoal/65">No trivia questions yet</p>
+          <p className="text-xs text-charcoal/65 mt-1">Create your first question to get started</p>
           <button onClick={openCreate}
             className="mt-4 px-4 py-2 rounded-xl bg-forest text-cream text-sm font-medium hover:bg-moss transition-colors">
             Add question
@@ -230,14 +230,14 @@ export function TriviaLibrary() {
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold text-charcoal leading-snug line-clamp-1">{q.question}</p>
                     <div className="flex items-center gap-2 mt-0.5">
-                      <Icon size={10} className="text-charcoal/30" />
-                      <span className="text-[10px] text-charcoal/40 capitalize">{q.category}</span>
-                      <span className="text-[9px] text-charcoal/20">·</span>
-                      <span className="text-[10px] text-charcoal/40">{q.points} pts</span>
+                      <Icon size={10} className="text-charcoal/65" />
+                      <span className="text-[10px] text-charcoal/65 capitalize">{q.category}</span>
+                      <span className="text-[10px] text-charcoal/65">·</span>
+                      <span className="text-[10px] text-charcoal/65">{q.points} pts</span>
                       {q.type === "multiple_choice" && (
                         <>
-                          <span className="text-[9px] text-charcoal/20">·</span>
-                          <span className="text-[10px] text-charcoal/40">{q.options?.length ?? 0} options</span>
+                          <span className="text-[10px] text-charcoal/65">·</span>
+                          <span className="text-[10px] text-charcoal/65">{q.options?.length ?? 0} options</span>
                         </>
                       )}
                     </div>
@@ -246,18 +246,18 @@ export function TriviaLibrary() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     <button
                       onClick={e => { e.stopPropagation(); openEdit(q); }}
-                      className="p-1.5 rounded-lg text-charcoal/30 hover:text-forest hover:bg-forest/8 transition-colors"
+                      className="p-1.5 rounded-lg text-charcoal/65 hover:text-forest hover:bg-forest/10 transition-colors"
                     >
                       <Edit2 size={13} />
                     </button>
                     <button
                       onClick={e => { e.stopPropagation(); deleteQuestion(q.id); }}
                       disabled={deleting === q.id}
-                      className="p-1.5 rounded-lg text-charcoal/30 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
+                      className="p-1.5 rounded-lg text-charcoal/65 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-40"
                     >
                       {deleting === q.id ? <Loader2 size={13} className="animate-spin" /> : <Trash2 size={13} />}
                     </button>
-                    <ChevronDown size={14} className={cn("text-charcoal/25 transition-transform duration-200", isExp && "rotate-180")} />
+                    <ChevronDown size={14} className={cn("text-charcoal/65 transition-transform duration-200", isExp && "rotate-180")} />
                   </div>
                 </button>
 
@@ -283,11 +283,11 @@ export function TriviaLibrary() {
                       </div>
                     )}
                     {q.type === "open_input" && (
-                      <p className="text-xs text-charcoal/50 italic">Open text response, no correct answer marked</p>
+                      <p className="text-xs text-charcoal/70 italic">Open text response, no correct answer marked</p>
                     )}
                     {q.hint && (
-                      <p className="text-xs text-charcoal/50">
-                        <span className="font-semibold text-charcoal/60">Hint:</span> {q.hint}
+                      <p className="text-xs text-charcoal/70">
+                        <span className="font-semibold text-charcoal/65">Hint:</span> {q.hint}
                       </p>
                     )}
                   </div>
@@ -307,7 +307,7 @@ export function TriviaLibrary() {
               <h3 className="font-display text-lg font-semibold text-forest">
                 {editing ? "Edit question" : "New trivia question"}
               </h3>
-              <button onClick={closeForm} className="p-1.5 rounded-xl text-charcoal/40 hover:bg-charcoal/8 transition-colors">
+              <button onClick={closeForm} className="p-1.5 rounded-xl text-charcoal/65 hover:bg-charcoal/10 transition-colors">
                 <X size={16} />
               </button>
             </div>
@@ -315,7 +315,7 @@ export function TriviaLibrary() {
             <div className="overflow-y-auto p-5 space-y-4">
               {/* Type toggle */}
               <div>
-                <p className="text-xs font-semibold text-charcoal/50 uppercase tracking-wider mb-2">Type</p>
+                <p className="text-xs font-semibold text-charcoal/70 uppercase tracking-wider mb-2">Type</p>
                 <div className="flex gap-2">
                   {(["multiple_choice", "open_input"] as const).map(t => (
                     <button
@@ -324,7 +324,7 @@ export function TriviaLibrary() {
                       className={cn("flex-1 py-2.5 rounded-xl text-xs font-semibold border transition-all",
                         form.type === t
                           ? "bg-forest text-cream border-forest"
-                          : "bg-white text-charcoal/60 border-mist hover:border-forest/30")}
+                          : "bg-white text-charcoal/65 border-mist hover:border-forest/30")}
                     >
                       {t === "multiple_choice" ? "Multiple choice" : "Open response"}
                     </button>
@@ -334,7 +334,7 @@ export function TriviaLibrary() {
 
               {/* Question text */}
               <div>
-                <p className="text-xs font-semibold text-charcoal/50 uppercase tracking-wider mb-1.5">Question</p>
+                <p className="text-xs font-semibold text-charcoal/70 uppercase tracking-wider mb-1.5">Question</p>
                 <textarea
                   value={form.question}
                   onChange={e => setForm(f => ({ ...f, question: e.target.value }))}
@@ -347,7 +347,7 @@ export function TriviaLibrary() {
               {/* Options (MC only) */}
               {form.type === "multiple_choice" && (
                 <div>
-                  <p className="text-xs font-semibold text-charcoal/50 uppercase tracking-wider mb-2">
+                  <p className="text-xs font-semibold text-charcoal/70 uppercase tracking-wider mb-2">
                     Options, tap the letter to mark correct answer
                   </p>
                   <div className="space-y-2">
@@ -385,7 +385,7 @@ export function TriviaLibrary() {
               {/* Category + Points row */}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <p className="text-xs font-semibold text-charcoal/50 uppercase tracking-wider mb-1.5">Category</p>
+                  <p className="text-xs font-semibold text-charcoal/70 uppercase tracking-wider mb-1.5">Category</p>
                   <select
                     value={form.category}
                     onChange={e => setForm(f => ({ ...f, category: e.target.value }))}
@@ -395,7 +395,7 @@ export function TriviaLibrary() {
                   </select>
                 </div>
                 <div>
-                  <p className="text-xs font-semibold text-charcoal/50 uppercase tracking-wider mb-1.5">Points</p>
+                  <p className="text-xs font-semibold text-charcoal/70 uppercase tracking-wider mb-1.5">Points</p>
                   <input
                     type="number"
                     min={1} max={100}
@@ -408,7 +408,7 @@ export function TriviaLibrary() {
 
               {/* Hint */}
               <div>
-                <p className="text-xs font-semibold text-charcoal/50 uppercase tracking-wider mb-1.5">Hint <span className="normal-case text-charcoal/30 font-normal">(optional)</span></p>
+                <p className="text-xs font-semibold text-charcoal/70 uppercase tracking-wider mb-1.5">Hint <span className="normal-case text-charcoal/65 font-normal">(optional)</span></p>
                 <input
                   value={form.hint}
                   onChange={e => setForm(f => ({ ...f, hint: e.target.value }))}
@@ -423,7 +423,7 @@ export function TriviaLibrary() {
             </div>
 
             <div className="px-5 pb-5 pt-3 border-t border-mist flex-shrink-0 flex gap-3">
-              <button onClick={closeForm} className="flex-1 py-3 rounded-xl border border-mist text-sm text-charcoal/60 hover:bg-charcoal/5 transition-colors">
+              <button onClick={closeForm} className="flex-1 py-3 rounded-xl border border-mist text-sm text-charcoal/65 hover:bg-charcoal/5 transition-colors">
                 Cancel
               </button>
               <button onClick={saveForm} disabled={saving}

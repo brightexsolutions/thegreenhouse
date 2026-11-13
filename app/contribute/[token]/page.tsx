@@ -37,15 +37,15 @@ function SongRow({ song, isOpen, onToggle, showSubmitter }: { song: Song; isOpen
         onClick={onToggle}
         className="w-full flex items-center gap-3 px-4 py-3.5 hover:bg-off-white transition-colors text-left"
       >
-        <div className="w-8 h-8 rounded-full bg-forest/8 flex items-center justify-center flex-shrink-0">
+        <div className="w-8 h-8 rounded-full bg-forest/10 flex items-center justify-center flex-shrink-0">
           <Music2 size={13} className="text-forest" />
         </div>
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-charcoal truncate">{song.title}</p>
           <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-            {song.artist && <p className="text-xs text-charcoal/45">{song.artist}</p>}
+            {song.artist && <p className="text-xs text-charcoal/65">{song.artist}</p>}
             {showSubmitter && song.submitted_by && (
-              <span className="text-[10px] text-charcoal/35 flex items-center gap-1">
+              <span className="text-[10px] text-charcoal/65 flex items-center gap-1">
                 <Mic2 size={9} className="inline" />{song.submitted_by}
               </span>
             )}
@@ -53,11 +53,11 @@ function SongRow({ song, isOpen, onToggle, showSubmitter }: { song: Song; isOpen
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {song.lyrics ? (
-            <span className="text-[10px] text-forest/60 bg-forest/8 px-2 py-0.5 rounded-full">Has lyrics</span>
+            <span className="text-[10px] text-forest/80 bg-forest/10 px-2 py-0.5 rounded-full">Has lyrics</span>
           ) : (
-            <span className="text-[10px] text-charcoal/30 bg-charcoal/5 px-2 py-0.5 rounded-full">No lyrics</span>
+            <span className="text-[10px] text-charcoal/65 bg-charcoal/5 px-2 py-0.5 rounded-full">No lyrics</span>
           )}
-          {isOpen ? <ChevronUp size={14} className="text-charcoal/30" /> : <ChevronDown size={14} className="text-charcoal/30" />}
+          {isOpen ? <ChevronUp size={14} className="text-charcoal/65" /> : <ChevronDown size={14} className="text-charcoal/65" />}
         </div>
       </button>
 
@@ -68,7 +68,7 @@ function SongRow({ song, isOpen, onToggle, showSubmitter }: { song: Song; isOpen
               {song.lyrics}
             </pre>
           ) : (
-            <p className="text-sm text-charcoal/35 italic">No lyrics added yet</p>
+            <p className="text-sm text-charcoal/65 italic">No lyrics added yet</p>
           )}
         </div>
       )}
@@ -175,7 +175,7 @@ export default function ContributePage({ params }: { params: { token: string } }
   if (loading) {
     return (
       <div className="min-h-screen bg-off-white flex items-center justify-center">
-        <Loader2 size={24} className="animate-spin text-forest/30" />
+        <Loader2 size={24} className="animate-spin text-forest/80" />
       </div>
     );
   }
@@ -185,10 +185,10 @@ export default function ContributePage({ params }: { params: { token: string } }
       <div className="min-h-screen bg-off-white flex items-center justify-center p-6">
         <div className="text-center">
           <div className="w-12 h-12 rounded-2xl bg-charcoal/5 flex items-center justify-center mx-auto mb-4">
-            <Music2 size={20} className="text-charcoal/25" />
+            <Music2 size={20} className="text-charcoal/65" />
           </div>
-          <p className="text-sm font-semibold text-charcoal/60">This link is invalid or has expired.</p>
-          <p className="text-xs text-charcoal/35 mt-1">Ask the admin to share the current contribution link.</p>
+          <p className="text-sm font-semibold text-charcoal/65">This link is invalid or has expired.</p>
+          <p className="text-xs text-charcoal/65 mt-1">Ask the admin to share the current contribution link.</p>
         </div>
       </div>
     );
@@ -203,32 +203,32 @@ export default function ContributePage({ params }: { params: { token: string } }
           <div className="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-forest/8 flex items-center justify-center">
+                <div className="w-9 h-9 rounded-xl bg-forest/10 flex items-center justify-center">
                   <Mic2 size={16} className="text-forest" />
                 </div>
                 <h2 className="text-sm font-semibold text-charcoal">Will you be singing?</h2>
               </div>
               <button onClick={dismissVocalist} className="w-7 h-7 rounded-xl bg-charcoal/5 hover:bg-charcoal/10 flex items-center justify-center transition-colors">
-                <X size={13} className="text-charcoal/40" />
+                <X size={13} className="text-charcoal/65" />
               </button>
             </div>
 
-            <p className="text-sm text-charcoal/60 mb-4 leading-relaxed">
+            <p className="text-sm text-charcoal/65 mb-4 leading-relaxed">
               Are you a vocalist for <span className="font-semibold text-charcoal">{sessionName(event?.title)}</span>?
               Add your name so your songs are credited to you on the program.
             </p>
 
             <div className="mb-4">
-              <label className="text-xs font-semibold text-charcoal/60 mb-1.5 block">Your preferred name</label>
+              <label className="text-xs font-semibold text-charcoal/65 mb-1.5 block">Your preferred name</label>
               <div className="relative">
-                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+                <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/65" />
                 <input
                   value={vocalistInput}
                   onChange={e => setVocalistInput(e.target.value)}
                   onKeyDown={e => { if (e.key === "Enter") confirmVocalist(); }}
                   placeholder="e.g. Sarah M."
                   autoFocus
-                  className="w-full pl-9 pr-4 py-3 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
+                  className="w-full pl-9 pr-4 py-3 rounded-xl border border-mist text-sm text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40"
                 />
               </div>
             </div>
@@ -242,7 +242,7 @@ export default function ContributePage({ params }: { params: { token: string } }
               </button>
               <button
                 onClick={dismissVocalist}
-                className="flex-1 py-3 rounded-xl border border-mist text-sm text-charcoal/60 hover:text-charcoal hover:border-charcoal/20 transition-colors"
+                className="flex-1 py-3 rounded-xl border border-mist text-sm text-charcoal/65 hover:text-charcoal hover:border-charcoal/20 transition-colors"
               >
                 Just browsing
               </button>
@@ -270,7 +270,7 @@ export default function ContributePage({ params }: { params: { token: string } }
               </div>
               <button
                 onClick={() => { setVocalistInput(vocalistName); setVocalistDialog(true); }}
-                className="text-[10px] text-cream/35 hover:text-cream/60 transition-colors"
+                className="text-[10px] text-cream/65 hover:text-cream/60 transition-colors"
               >
                 Change
               </button>
@@ -279,13 +279,13 @@ export default function ContributePage({ params }: { params: { token: string } }
           {!vocalistName && !vocalistDialog && (
             <button
               onClick={() => { setVocalistInput(""); setVocalistDialog(true); }}
-              className="mt-3 flex items-center gap-1.5 text-xs text-cream/40 hover:text-cream/70 transition-colors"
+              className="mt-3 flex items-center gap-1.5 text-xs text-cream/65 hover:text-cream/70 transition-colors"
             >
               <Mic2 size={11} />
               Are you a vocalist? Tap to add your name
             </button>
           )}
-          <p className="text-sm text-cream/55 mt-3">
+          <p className="text-sm text-cream/75 mt-3">
             Add the songs you&apos;ll be singing. Others can see the full list and read lyrics.
           </p>
         </div>
@@ -306,28 +306,28 @@ export default function ContributePage({ params }: { params: { token: string } }
                 onChange={e => setTitle(e.target.value)}
                 placeholder="e.g. Great Are You Lord"
                 required
-                className="w-full px-3.5 py-3 rounded-xl border border-mist text-base text-charcoal placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
+                className="w-full px-3.5 py-3 rounded-xl border border-mist text-base text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
               />
             </div>
             <div>
-              <label className="text-xs font-semibold text-charcoal/70 mb-1.5 block">Artist / band <span className="text-charcoal/40 font-normal">(optional)</span></label>
+              <label className="text-xs font-semibold text-charcoal/70 mb-1.5 block">Artist / band <span className="text-charcoal/65 font-normal">(optional)</span></label>
               <input
                 value={artist}
                 onChange={e => setArtist(e.target.value)}
                 placeholder="e.g. All Sons & Daughters"
-                className="w-full px-3.5 py-3 rounded-xl border border-mist text-base text-charcoal placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
+                className="w-full px-3.5 py-3 rounded-xl border border-mist text-base text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
               />
             </div>
             <div>
               <label className="text-xs font-semibold text-charcoal/70 mb-1.5 block">
-                Lyrics <span className="text-charcoal/40 font-normal">(optional, separate verses with a blank line)</span>
+                Lyrics <span className="text-charcoal/65 font-normal">(optional, separate verses with a blank line)</span>
               </label>
               <textarea
                 value={lyrics}
                 onChange={e => setLyrics(e.target.value)}
                 placeholder={"Verse 1 lyrics here...\n\nChorus lyrics here...\n\nVerse 2 lyrics here..."}
                 rows={7}
-                className="w-full px-3.5 py-3 rounded-xl border border-mist text-base text-charcoal placeholder:text-charcoal/35 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all resize-none leading-relaxed"
+                className="w-full px-3.5 py-3 rounded-xl border border-mist text-base text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all resize-none leading-relaxed"
               />
             </div>
 
@@ -367,7 +367,7 @@ export default function ContributePage({ params }: { params: { token: string } }
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-charcoal">
               Song library
-              <span className="ml-2 text-xs font-normal text-charcoal/40">{songs.length} song{songs.length !== 1 ? "s" : ""}</span>
+              <span className="ml-2 text-xs font-normal text-charcoal/65">{songs.length} song{songs.length !== 1 ? "s" : ""}</span>
             </h2>
           </div>
 
@@ -377,7 +377,7 @@ export default function ContributePage({ params }: { params: { token: string } }
               onClick={() => { setTab("all"); setVisibleCount(PAGE_SIZE); setOpenSongId(null); }}
               className={cn(
                 "flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                tab === "all" ? "bg-white text-charcoal shadow-sm" : "text-charcoal/45 hover:text-charcoal/70"
+                tab === "all" ? "bg-white text-charcoal shadow-sm" : "text-charcoal/65 hover:text-charcoal/70"
               )}
             >
               All songs
@@ -387,7 +387,7 @@ export default function ContributePage({ params }: { params: { token: string } }
               onClick={() => { setTab("mine"); setVisibleCount(PAGE_SIZE); setOpenSongId(null); }}
               className={cn(
                 "flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all",
-                tab === "mine" ? "bg-white text-charcoal shadow-sm" : "text-charcoal/45 hover:text-charcoal/70"
+                tab === "mine" ? "bg-white text-charcoal shadow-sm" : "text-charcoal/65 hover:text-charcoal/70"
               )}
             >
               Mine
@@ -398,8 +398,8 @@ export default function ContributePage({ params }: { params: { token: string } }
           {/* "Mine" tab with no vocalist set */}
           {tab === "mine" && !vocalistName && (
             <div className="flex flex-col items-center py-8 bg-white rounded-2xl border border-mist mb-3">
-              <Mic2 size={20} className="text-charcoal/20 mb-2" />
-              <p className="text-sm text-charcoal/50 font-medium">Set your vocalist name first</p>
+              <Mic2 size={20} className="text-charcoal/65 mb-2" />
+              <p className="text-sm text-charcoal/70 font-medium">Set your vocalist name first</p>
               <button
                 onClick={() => { setVocalistInput(""); setVocalistDialog(true); }}
                 className="mt-3 px-4 py-2 rounded-xl bg-forest text-cream text-xs font-semibold hover:bg-moss transition-colors"
@@ -412,12 +412,12 @@ export default function ContributePage({ params }: { params: { token: string } }
           {/* Search — always visible when there are songs or a query */}
           {(tab === "all" || vocalistName) && (
             <div className="relative mb-3">
-              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+              <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/65" />
               <input
                 value={query}
                 onChange={e => { setQuery(e.target.value); setVisibleCount(PAGE_SIZE); }}
                 placeholder="Search songs…"
-                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-mist bg-white text-sm placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
+                className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-mist bg-white text-sm placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
               />
             </div>
           )}
@@ -426,16 +426,16 @@ export default function ContributePage({ params }: { params: { token: string } }
             visibleSongs.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12 bg-white rounded-2xl border border-mist">
                 <div className="w-10 h-10 rounded-2xl bg-charcoal/5 flex items-center justify-center mb-3">
-                  <Music2 size={16} className="text-charcoal/20" />
+                  <Music2 size={16} className="text-charcoal/65" />
                 </div>
-                <p className="text-sm text-charcoal/40 font-medium">
+                <p className="text-sm text-charcoal/65 font-medium">
                   {query
                     ? "No songs match your search"
                     : tab === "mine"
                     ? "You haven't submitted any songs yet"
                     : "No songs submitted yet"}
                 </p>
-                {!query && tab === "all" && <p className="text-xs text-charcoal/25 mt-1">Be the first to add one above</p>}
+                {!query && tab === "all" && <p className="text-xs text-charcoal/65 mt-1">Be the first to add one above</p>}
               </div>
             ) : (
               <>
@@ -454,7 +454,7 @@ export default function ContributePage({ params }: { params: { token: string } }
                 {hasMore && (
                   <button
                     onClick={() => setVisibleCount(v => v + PAGE_SIZE)}
-                    className="w-full mt-3 py-3 rounded-xl border border-mist text-sm text-charcoal/50 hover:text-forest hover:border-forest/20 transition-all"
+                    className="w-full mt-3 py-3 rounded-xl border border-mist text-sm text-charcoal/70 hover:text-forest hover:border-forest/20 transition-all"
                   >
                     Load more ({filtered.length - visibleCount} remaining)
                   </button>

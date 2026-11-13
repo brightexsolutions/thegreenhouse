@@ -15,6 +15,9 @@ const config: Config = {
         "sage-light": "#7fa98a",
         moss:         "#2d5240",
         gold:         "#c9a24a",
+        // Gold dark enough to read as text on cream and white (4.9:1 on cream).
+        // Plain gold is 2.2:1 there: use it on forest, never on light surfaces.
+        "gold-deep":  "#856417",
         "gold-light": "#e4c97e",
         "gold-pale":  "#f5edce",
         cream:        "#f7f2e8",
@@ -23,6 +26,12 @@ const config: Config = {
         charcoal:     "#1a1a18",
         bark:         "#5c4a35",
         mist:         "#e8ede9",
+      },
+      // Gold as TEXT follows the surface it sits on (see --gold-text in
+      // globals.css): bright on forest, a deeper tone on cream and white where
+      // bright gold is only 2.2:1. Backgrounds and borders keep plain gold.
+      textColor: {
+        gold: "rgb(var(--gold-text) / <alpha-value>)",
       },
       fontFamily: {
         display: ["var(--font-display)", "Georgia", "serif"],

@@ -6,7 +6,7 @@ import { useMemo, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { Eye, ExternalLink, Pencil, Trash2, Clock } from "lucide-react";
 import { useConfirm } from "@/components/ui/confirm-dialog";
-import { categoryLabel, formatPostDate } from "@/lib/blog";
+import { categoryLabel, formatPostDate } from "@/lib/blog-shared";
 import { cn } from "@/lib/utils";
 
 type PostRow = {
@@ -111,7 +111,7 @@ export function BlogTable({ posts }: { posts: PostRow[] }) {
                 "text-xs font-medium px-3 py-1.5 rounded transition-colors",
                 filter === f.key
                   ? "bg-forest text-cream"
-                  : "text-charcoal/50 hover:text-charcoal hover:bg-mist/60"
+                  : "text-charcoal/70 hover:text-charcoal hover:bg-mist/60"
               )}
             >
               {f.label}
@@ -129,7 +129,7 @@ export function BlogTable({ posts }: { posts: PostRow[] }) {
       </div>
 
       {visible.length === 0 ? (
-        <div className="py-14 text-center text-sm text-charcoal/35">
+        <div className="py-14 text-center text-sm text-charcoal/65">
           No posts match that filter
         </div>
       ) : (
@@ -141,11 +141,11 @@ export function BlogTable({ posts }: { posts: PostRow[] }) {
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-sm font-medium text-charcoal leading-snug">{p.title}</p>
-                    <p className="text-[11px] text-charcoal/40 mt-0.5 font-mono break-all">/blog/{p.slug}</p>
+                    <p className="text-[11px] text-charcoal/65 mt-0.5 font-mono break-all">/blog/{p.slug}</p>
                   </div>
                   <StatusPill status={p.status} />
                 </div>
-                <div className="flex items-center gap-2 text-[11px] text-charcoal/45">
+                <div className="flex items-center gap-2 text-[11px] text-charcoal/65">
                   <span>{categoryLabel(p.category)}</span>
                   <span aria-hidden>·</span>
                   <span className="inline-flex items-center gap-1"><Clock size={11} />{p.reading_minutes} min</span>
@@ -166,11 +166,11 @@ export function BlogTable({ posts }: { posts: PostRow[] }) {
             <table className="w-full">
               <thead className="sticky top-0 z-10 bg-white">
                 <tr className="border-b border-mist">
-                  <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3">Post</th>
-                  <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden lg:table-cell">Category</th>
-                  <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3">Status</th>
-                  <th className="text-left text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-4 py-3 hidden lg:table-cell">Published</th>
-                  <th className="text-right text-[9px] font-semibold uppercase tracking-wider text-charcoal/35 px-5 py-3">Actions</th>
+                  <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-5 py-3">Post</th>
+                  <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3 hidden lg:table-cell">Category</th>
+                  <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3">Status</th>
+                  <th className="text-left text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-4 py-3 hidden lg:table-cell">Published</th>
+                  <th className="text-right text-[10px] font-semibold uppercase tracking-wider text-charcoal/65 px-5 py-3">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-mist">
@@ -178,16 +178,16 @@ export function BlogTable({ posts }: { posts: PostRow[] }) {
                   <tr key={p.id} className="hover:bg-mist/25 transition-colors">
                     <td className="px-5 py-3.5 max-w-[340px]">
                       <p className="text-sm font-medium text-charcoal leading-snug truncate">{p.title}</p>
-                      <p className="text-[11px] text-charcoal/35 mt-0.5 font-mono truncate">
+                      <p className="text-[11px] text-charcoal/65 mt-0.5 font-mono truncate">
                         /blog/{p.slug} · {p.reading_minutes} min read
                       </p>
                     </td>
                     <td className="px-4 py-3.5 hidden lg:table-cell">
-                      <span className="text-xs text-charcoal/55">{categoryLabel(p.category)}</span>
+                      <span className="text-xs text-charcoal/70">{categoryLabel(p.category)}</span>
                     </td>
                     <td className="px-4 py-3.5"><StatusPill status={p.status} /></td>
                     <td className="px-4 py-3.5 hidden lg:table-cell">
-                      <span className="text-xs text-charcoal/45 tabular-nums">
+                      <span className="text-xs text-charcoal/65 tabular-nums">
                         {p.published_at ? formatPostDate(p.published_at) : "Not yet"}
                       </span>
                     </td>
@@ -219,8 +219,8 @@ function StatusPill({ status }: { status: string }) {
       className={cn(
         "inline-flex items-center gap-1.5 text-[10px] font-medium px-2 py-1 rounded border whitespace-nowrap",
         published
-          ? "bg-forest/8 text-forest border-forest/15"
-          : "bg-gold/12 text-[#8a6a1a] border-gold/25"
+          ? "bg-forest/10 text-forest border-forest/15"
+          : "bg-gold/10 text-[#8a6a1a] border-gold/25"
       )}
     >
       <span className={cn("w-1.5 h-1.5 rounded-full", published ? "bg-forest" : "bg-gold")} />
@@ -245,7 +245,7 @@ function RowActions({
           target="_blank"
           rel="noopener noreferrer"
           title="View on the site"
-          className="p-1.5 rounded text-charcoal/40 hover:text-forest hover:bg-mist transition-colors"
+          className="p-1.5 rounded text-charcoal/65 hover:text-forest hover:bg-mist transition-colors"
         >
           <ExternalLink size={14} />
         </Link>
@@ -255,14 +255,14 @@ function RowActions({
         disabled={busy}
         onClick={() => onToggle(post)}
         title={post.status === "published" ? "Move back to draft" : "Publish"}
-        className="p-1.5 rounded text-charcoal/40 hover:text-forest hover:bg-mist transition-colors disabled:opacity-40"
+        className="p-1.5 rounded text-charcoal/65 hover:text-forest hover:bg-mist transition-colors disabled:opacity-40"
       >
         <Eye size={14} />
       </button>
       <Link
         href={`/admin/blog/${post.id}`}
         title="Edit"
-        className="p-1.5 rounded text-charcoal/40 hover:text-forest hover:bg-mist transition-colors"
+        className="p-1.5 rounded text-charcoal/65 hover:text-forest hover:bg-mist transition-colors"
       >
         <Pencil size={14} />
       </Link>
@@ -271,7 +271,7 @@ function RowActions({
         disabled={busy}
         onClick={() => onDelete(post)}
         title="Delete"
-        className="p-1.5 rounded text-charcoal/40 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
+        className="p-1.5 rounded text-charcoal/65 hover:text-red-600 hover:bg-red-50 transition-colors disabled:opacity-40"
       >
         <Trash2 size={14} />
       </button>

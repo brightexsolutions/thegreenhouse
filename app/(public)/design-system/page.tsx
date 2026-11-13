@@ -33,9 +33,9 @@ const COLORS = {
 function SectionLabel({ n, title }: { n: string; title: string }) {
   return (
     <div className="flex items-center gap-4 mb-8">
-      <span className="text-[11px] font-mono font-semibold text-charcoal/35 tracking-widest uppercase">{n}</span>
+      <span className="text-[11px] font-mono font-semibold text-charcoal/65 tracking-widest uppercase">{n}</span>
       <div className="h-px flex-1 bg-mist" />
-      <span className="text-[11px] font-mono font-semibold text-charcoal/35 tracking-widest uppercase">{title}</span>
+      <span className="text-[11px] font-mono font-semibold text-charcoal/65 tracking-widest uppercase">{title}</span>
       <div className="h-px flex-1 bg-mist" />
     </div>
   );
@@ -43,7 +43,7 @@ function SectionLabel({ n, title }: { n: string; title: string }) {
 
 function DSBlock({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
   return (
-    <div className={`rounded-2xl border p-7 mb-4 ${dark ? "bg-forest border-cream/8" : "bg-white border-mist"}`}>
+    <div className={`rounded-2xl border p-7 mb-4 ${dark ? "bg-forest border-cream/10" : "bg-white border-mist"}`}>
       {children}
     </div>
   );
@@ -51,7 +51,7 @@ function DSBlock({ children, dark = false }: { children: React.ReactNode; dark?:
 
 function TypeTag({ children, light = false }: { children: React.ReactNode; light?: boolean }) {
   return (
-    <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] mb-4 ${light ? "text-cream/40" : "text-charcoal/40"}`}>
+    <p className={`text-[11px] font-semibold uppercase tracking-[0.18em] mb-4 ${light ? "text-cream/65" : "text-charcoal/65"}`}>
       {children}
     </p>
   );
@@ -70,7 +70,7 @@ export default function DesignSystemPage() {
         }} />
         <div className="relative max-w-5xl mx-auto px-6 py-16 sm:py-20">
           {/* Breadcrumb */}
-          <nav className="flex items-center gap-2 text-[11px] text-cream/40 mb-8 font-medium tracking-wide uppercase">
+          <nav className="flex items-center gap-2 text-[11px] text-cream/65 mb-8 font-medium tracking-wide uppercase">
             <Link href="/" className="hover:text-cream/70 transition-colors">Home</Link>
             <span>/</span>
             <span className="text-cream/60">Brand System</span>
@@ -79,7 +79,7 @@ export default function DesignSystemPage() {
           <h1 className="font-display text-5xl sm:text-6xl font-light text-cream leading-tight mb-4">
             Brand <em className="not-italic text-gold">System</em>
           </h1>
-          <p className="text-cream/55 text-base sm:text-lg max-w-xl leading-relaxed mb-10">
+          <p className="text-cream/75 text-base sm:text-lg max-w-xl leading-relaxed mb-10">
             The complete visual language for The Green House: color, typography, spacing, components, motion, and voice.
           </p>
 
@@ -89,7 +89,7 @@ export default function DesignSystemPage() {
               <a
                 key={s}
                 href={`#${s.toLowerCase().replace(/[^a-z]/g, "-")}`}
-                className="px-4 py-2 rounded-full border border-cream/15 text-[11px] font-semibold uppercase tracking-widest text-cream/55 hover:border-gold/50 hover:text-gold transition-all duration-150"
+                className="px-4 py-2 rounded-full border border-cream/15 text-[11px] font-semibold uppercase tracking-widest text-cream/75 hover:border-gold/50 hover:text-gold transition-all duration-150"
               >
                 {s}
               </a>
@@ -115,8 +115,8 @@ export default function DesignSystemPage() {
                     <div key={hex}>
                       <div className="h-20 rounded-xl mb-2.5" style={{ backgroundColor: hex }} />
                       <p className="text-xs font-semibold text-charcoal mb-0.5">{name}</p>
-                      <p className="font-mono text-[10px] text-charcoal/45">{hex}</p>
-                      <p className="text-[10px] text-charcoal/35 leading-tight mt-1">{label}</p>
+                      <p className="font-mono text-[10px] text-charcoal/65">{hex}</p>
+                      <p className="text-[10px] text-charcoal/65 leading-tight mt-1">{label}</p>
                     </div>
                   ))}
                 </div>
@@ -130,8 +130,8 @@ export default function DesignSystemPage() {
                     <div key={hex}>
                       <div className="h-20 rounded-xl mb-2.5" style={{ backgroundColor: hex }} />
                       <p className="text-xs font-semibold text-charcoal mb-0.5">{name}</p>
-                      <p className="font-mono text-[10px] text-charcoal/45">{hex}</p>
-                      <p className="text-[10px] text-charcoal/35 leading-tight mt-1">{label}</p>
+                      <p className="font-mono text-[10px] text-charcoal/65">{hex}</p>
+                      <p className="text-[10px] text-charcoal/65 leading-tight mt-1">{label}</p>
                     </div>
                   ))}
                 </div>
@@ -145,8 +145,8 @@ export default function DesignSystemPage() {
                     <div key={hex}>
                       <div className="h-20 rounded-xl mb-2.5 border border-mist/60" style={{ backgroundColor: hex }} />
                       <p className="text-xs font-semibold text-charcoal mb-0.5">{name}</p>
-                      <p className="font-mono text-[10px] text-charcoal/45">{hex}</p>
-                      <p className="text-[10px] text-charcoal/35 leading-tight mt-1">{label}</p>
+                      <p className="font-mono text-[10px] text-charcoal/65">{hex}</p>
+                      <p className="text-[10px] text-charcoal/65 leading-tight mt-1">{label}</p>
                     </div>
                   ))}
                 </div>
@@ -170,7 +170,7 @@ export default function DesignSystemPage() {
                 <div className="font-display text-2xl italic text-gold mb-4">
                   Italic em phrase, sub-heading / 24px
                 </div>
-                <code className="text-[10px] font-mono text-charcoal/40 bg-off-white px-2 py-1 rounded">
+                <code className="text-[10px] font-mono text-charcoal/65 bg-off-white px-2 py-1 rounded">
                   font-family: &apos;Cormorant Garamond&apos;, Georgia, serif, var(--font-display)
                 </code>
               </DSBlock>
@@ -182,11 +182,11 @@ export default function DesignSystemPage() {
                   Body regular, A quarterly cross-church gathering in Nairobi. Low pressure, real connection, everyone welcome. Each session is a curated evening of worship, sharing, and stillness.
                 </p>
                 <div className="flex flex-wrap gap-5 items-center mb-4">
-                  <span className="label-caps text-gold/80 tracking-widest text-[10px]">Nairobi · Quarterly</span>
-                  <span className="text-[10px] text-charcoal/35 uppercase tracking-widest font-semibold">Label Caps / 10px</span>
-                  <span className="text-xs text-charcoal/40">Caption · Muted</span>
+                  <span className="label-caps text-gold tracking-widest text-[10px]">Nairobi · Quarterly</span>
+                  <span className="text-[10px] text-charcoal/65 uppercase tracking-widest font-semibold">Label Caps / 10px</span>
+                  <span className="text-xs text-charcoal/65">Caption · Muted</span>
                 </div>
-                <code className="text-[10px] font-mono text-charcoal/40 bg-off-white px-2 py-1 rounded">
+                <code className="text-[10px] font-mono text-charcoal/65 bg-off-white px-2 py-1 rounded">
                   font-family: &apos;DM Sans&apos;, system-ui, sans-serif, var(--font-sans)
                 </code>
               </DSBlock>
@@ -231,7 +231,7 @@ export default function DesignSystemPage() {
                 </div>
               </DSBlock>
 
-              <div className="bg-white border border-mist rounded-xl px-5 py-3.5 text-sm text-charcoal/55">
+              <div className="bg-white border border-mist rounded-xl px-5 py-3.5 text-sm text-charcoal/70">
                 <strong className="text-charcoal">Spec:</strong> DM Sans · 14px / 600 · rounded-full · px-6 py-3 · 200ms transition · hover:-translate-y-0.5 on primary
               </div>
             </div>
@@ -243,12 +243,12 @@ export default function DesignSystemPage() {
 
             <div className="space-y-4">
               {/* Eyebrow pattern */}
-              <div className="text-[11px] font-semibold uppercase tracking-widest text-charcoal/40 mb-3">Eyebrow + Heading Pattern, used above every major section</div>
+              <div className="text-[11px] font-semibold uppercase tracking-widest text-charcoal/65 mb-3">Eyebrow + Heading Pattern, used above every major section</div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                 <DSBlock>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="w-1.5 h-1.5 rounded-full bg-gold" />
-                    <span className="label-caps text-gold/80 tracking-widest text-[10px]">Nairobi · Quarterly</span>
+                    <span className="label-caps text-gold tracking-widest text-[10px]">Nairobi · Quarterly</span>
                   </div>
                   <div className="font-display text-3xl font-light text-charcoal leading-tight">
                     Section <em className="not-italic text-gold">Title</em> Here
@@ -257,7 +257,7 @@ export default function DesignSystemPage() {
                 <DSBlock dark>
                   <div className="flex items-center gap-2 mb-3">
                     <span className="w-1.5 h-1.5 rounded-full bg-gold animate-pulse" />
-                    <span className="label-caps text-gold/80 tracking-widest text-[10px]">Nairobi · Quarterly</span>
+                    <span className="label-caps text-gold tracking-widest text-[10px]">Nairobi · Quarterly</span>
                   </div>
                   <div className="font-display text-3xl font-light text-cream leading-tight">
                     Dark Section <em className="not-italic text-gold">Title</em>
@@ -276,11 +276,11 @@ export default function DesignSystemPage() {
                   <span className="inline-flex items-center px-3 py-1 rounded-full bg-gold/10 border border-gold/20 text-xs font-semibold text-gold">
                     Live Now
                   </span>
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/8 text-xs font-medium text-forest">
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-forest/10 text-xs font-medium text-forest">
                     <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
                     Session Open
                   </span>
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-charcoal/6 text-xs font-semibold text-charcoal/60">
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-charcoal/5 text-xs font-semibold text-charcoal/65">
                     Past Event
                   </span>
                 </div>
@@ -310,7 +310,7 @@ export default function DesignSystemPage() {
               {/* Card pattern */}
               <DSBlock dark>
                 <TypeTag light>Event Card, dark with radial gold glow</TypeTag>
-                <div className="relative rounded-2xl overflow-hidden border border-cream/8 bg-forest max-w-xs">
+                <div className="relative rounded-2xl overflow-hidden border border-cream/10 bg-forest max-w-xs">
                   <div className="absolute inset-0" style={{
                     background: "radial-gradient(ellipse 80% 60% at 20% 80%, rgba(201,162,74,0.15) 0%, transparent 65%)",
                   }} />
@@ -319,10 +319,10 @@ export default function DesignSystemPage() {
                       Published
                     </span>
                     <div className="font-display text-xl font-light text-cream mb-1">Session 02</div>
-                    <p className="text-xs text-cream/50">26 June 2026 · Nairobi, Kenya</p>
-                    <div className="mt-4 h-px bg-cream/8" />
+                    <p className="text-xs text-cream/75">26 June 2026 · Nairobi, Kenya</p>
+                    <div className="mt-4 h-px bg-cream/10" />
                     <div className="mt-4 flex items-center justify-between">
-                      <span className="text-xs text-cream/40">Free entry</span>
+                      <span className="text-xs text-cream/65">Free entry</span>
                       <span className="text-xs text-gold hover:text-gold-light transition-colors cursor-pointer">Register →</span>
                     </div>
                   </div>
@@ -354,22 +354,22 @@ export default function DesignSystemPage() {
                       className="bg-gold/80 rounded mx-auto mb-2"
                       style={{ width: Math.min(size, 64), height: Math.min(size, 64) }}
                     />
-                    <span className="text-[10px] text-charcoal/40 font-mono">{label}</span>
+                    <span className="text-[10px] text-charcoal/65 font-mono">{label}</span>
                   </div>
                 ))}
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm">
                 <div className="bg-off-white rounded-xl border border-mist p-4">
                   <p className="font-semibold text-charcoal mb-1">Section Padding</p>
-                  <p className="text-charcoal/55 text-xs">96px top/bottom desktop · 64px tablet · 48px mobile</p>
+                  <p className="text-charcoal/70 text-xs">96px top/bottom desktop · 64px tablet · 48px mobile</p>
                 </div>
                 <div className="bg-off-white rounded-xl border border-mist p-4">
                   <p className="font-semibold text-charcoal mb-1">Card Padding</p>
-                  <p className="text-charcoal/55 text-xs">20–28px internal · rounded-2xl (1rem) consistently</p>
+                  <p className="text-charcoal/70 text-xs">20–28px internal · rounded-2xl (1rem) consistently</p>
                 </div>
                 <div className="bg-off-white rounded-xl border border-mist p-4">
                   <p className="font-semibold text-charcoal mb-1">Grid Gap</p>
-                  <p className="text-charcoal/55 text-xs">16–24px card grids · 32–48px on split 2-col layouts</p>
+                  <p className="text-charcoal/70 text-xs">16–24px card grids · 32–48px on split 2-col layouts</p>
                 </div>
               </div>
             </DSBlock>
@@ -385,25 +385,25 @@ export default function DesignSystemPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-sm text-charcoal/70">
                   <div className="bg-off-white rounded-xl border border-mist p-4">
                     <p className="font-semibold text-charcoal mb-2">FadeIn</p>
-                    <code className="text-[10px] font-mono text-charcoal/45 block">opacity: 0→1, y: 24→0</code>
-                    <code className="text-[10px] font-mono text-charcoal/45 block">duration: 0.65s · ease [0.16,1,0.3,1]</code>
+                    <code className="text-[10px] font-mono text-charcoal/65 block">opacity: 0→1, y: 24→0</code>
+                    <code className="text-[10px] font-mono text-charcoal/65 block">duration: 0.65s · ease [0.16,1,0.3,1]</code>
                   </div>
                   <div className="bg-off-white rounded-xl border border-mist p-4">
                     <p className="font-semibold text-charcoal mb-2">Float Loop</p>
-                    <code className="text-[10px] font-mono text-charcoal/45 block">y: 0→-12→0</code>
-                    <code className="text-[10px] font-mono text-charcoal/45 block">duration: 3.6–4.8s · easeInOut · ∞</code>
+                    <code className="text-[10px] font-mono text-charcoal/65 block">y: 0→-12→0</code>
+                    <code className="text-[10px] font-mono text-charcoal/65 block">duration: 3.6–4.8s · easeInOut · ∞</code>
                   </div>
                   <div className="bg-off-white rounded-xl border border-mist p-4">
                     <p className="font-semibold text-charcoal mb-2">Ripple Expand</p>
-                    <code className="text-[10px] font-mono text-charcoal/45 block">scale: 1→1.7 · opacity: 0.5→0</code>
-                    <code className="text-[10px] font-mono text-charcoal/45 block">duration: 5s · easeOut · ∞</code>
+                    <code className="text-[10px] font-mono text-charcoal/65 block">scale: 1→1.7 · opacity: 0.5→0</code>
+                    <code className="text-[10px] font-mono text-charcoal/65 block">duration: 5s · easeOut · ∞</code>
                   </div>
                 </div>
               </DSBlock>
 
               <DSBlock>
                 <TypeTag>Reduced motion, always respected</TypeTag>
-                <p className="text-sm text-charcoal/60 leading-relaxed max-w-xl">
+                <p className="text-sm text-charcoal/65 leading-relaxed max-w-xl">
                   All animated elements check <code className="font-mono text-xs bg-off-white px-1.5 py-0.5 rounded text-charcoal/70">useReducedMotion()</code> from Framer Motion.
                   When enabled, float loops and ripple pulses are suppressed. Entrance animations (opacity/y) still run as they are non-looping and brief.
                 </p>

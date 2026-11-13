@@ -5,6 +5,7 @@ import { ArrowRight, Clock, PenLine } from "lucide-react";
 import { FadeIn, FadeInStagger, StaggerChild } from "@/components/motion/fade-in";
 import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_URL, storageUrl } from "@/lib/constants";
+import { safeJsonLd } from "@/lib/html";
 import { categoryLabel, formatPostDate, type BlogPost } from "@/lib/blog";
 
 // Short window so a freshly published post reaches the index and the sitemap
@@ -79,18 +80,14 @@ export default async function BlogIndexPage() {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(blogJsonLd) }}
+        dangerouslySetInnerHTML={{ __html: safeJsonLd(blogJsonLd) }}
       />
 
       {/* Hero */}
       <section className="relative bg-forest overflow-hidden pt-28 pb-16 sm:pb-20">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_30%_20%,rgba(201,162,74,0.10),transparent)]" />
-        <div className="absolute top-24 right-24 w-52 h-52 rounded-full border border-cream/5 hidden lg:block" />
-        <div className="absolute -bottom-10 left-10 w-32 h-32 rounded-full border border-gold/10 hidden lg:block" />
-
         <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <FadeIn>
-            <span className="label-caps text-gold/80">Writing</span>
+            <span className="label-caps text-gold">Writing</span>
             <h1 className="font-display text-5xl sm:text-6xl lg:text-7xl font-semibold text-cream mt-2 leading-[0.95]">
               Between the
               <br />
@@ -111,9 +108,9 @@ export default async function BlogIndexPage() {
           {posts.length === 0 ? (
             <FadeIn>
               <div className="flex flex-col items-center text-center py-20">
-                <PenLine size={26} className="text-charcoal/15 mb-4" />
+                <PenLine size={26} className="text-charcoal/65 mb-4" />
                 <p className="font-display text-2xl text-charcoal/70">The first post is on its way</p>
-                <p className="text-sm text-charcoal/40 mt-2 max-w-sm">
+                <p className="text-sm text-charcoal/65 mt-2 max-w-sm">
                   Nothing published yet. In the meantime, the sessions page has everything
                   about the next gathering.
                 </p>
@@ -150,7 +147,7 @@ export default async function BlogIndexPage() {
                     </div>
 
                     <div className="order-2 lg:order-1">
-                      <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-charcoal/40">
+                      <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-charcoal/65">
                         <span className="text-gold">{categoryLabel(lead.category)}</span>
                         <span aria-hidden>·</span>
                         <span>{formatPostDate(lead.published_at)}</span>
@@ -159,7 +156,7 @@ export default async function BlogIndexPage() {
                         {lead.title}
                       </h2>
                       {lead.excerpt && (
-                        <p className="text-charcoal/55 mt-4 leading-relaxed max-w-lg">{lead.excerpt}</p>
+                        <p className="text-charcoal/70 mt-4 leading-relaxed max-w-lg">{lead.excerpt}</p>
                       )}
                       <span className="inline-flex items-center gap-2 text-sm font-medium text-forest mt-6">
                         Read this
@@ -192,7 +189,7 @@ export default async function BlogIndexPage() {
                                 <div className="absolute inset-0 bg-forest-gradient" />
                               )}
                             </div>
-                            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-charcoal/40 mt-4">
+                            <div className="flex items-center gap-2 text-[10px] uppercase tracking-widest text-charcoal/65 mt-4">
                               <span className="text-gold">{categoryLabel(p.category)}</span>
                               <span aria-hidden>·</span>
                               <span className="inline-flex items-center gap-1">
@@ -203,11 +200,11 @@ export default async function BlogIndexPage() {
                               {p.title}
                             </h3>
                             {p.excerpt && (
-                              <p className="text-sm text-charcoal/50 mt-2 leading-relaxed line-clamp-3">
+                              <p className="text-sm text-charcoal/70 mt-2 leading-relaxed line-clamp-3">
                                 {p.excerpt}
                               </p>
                             )}
-                            <span className="text-[11px] text-charcoal/35 mt-auto pt-4">
+                            <span className="text-[11px] text-charcoal/65 mt-auto pt-4">
                               {formatPostDate(p.published_at)}
                             </span>
                           </Link>

@@ -32,7 +32,7 @@ export async function PartnersStrip() {
         <FadeIn>
           <div className="flex items-center gap-4 mb-10">
             <span className="h-px flex-1 bg-gradient-to-r from-transparent to-gold/25" />
-            <span className="text-[10px] uppercase tracking-[0.22em] text-charcoal/40 font-semibold">
+            <span className="text-[10px] uppercase tracking-[0.22em] text-charcoal/65 font-semibold">
               Partners &amp; Supporters
             </span>
             <span className="h-px flex-1 bg-gradient-to-l from-transparent to-gold/25" />
@@ -47,7 +47,7 @@ export async function PartnersStrip() {
         {/* Partner CTA */}
         <FadeIn delay={0.25}>
           <div className="mt-12 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-5">
-            <p className="text-sm text-charcoal/55 font-medium">
+            <p className="text-sm text-charcoal/70 font-medium">
               Want to partner with {siteName}?
             </p>
             <Link

@@ -3,6 +3,12 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
+// The response is the same for every caller (no token, no per-user data), so
+// the CDN may share it briefly. A room of phones polling as a Realtime fallback
+// then costs one database read every couple of seconds, not one per phone.
+// Callers that need the latest state add a unique query string to skip it.
+const SHARED_CACHE = { "Cache-Control": "public, s-maxage=2, stale-while-revalidate=4" };
+
 // GET /api/trivia/[roundId] — public: fetch round + question
 // Hides correct_index while still active; reveals it when status = revealing/closed
 export async function GET(_: NextRequest, { params }: { params: { roundId: string } }) {
@@ -36,5 +42,5 @@ export async function GET(_: NextRequest, { params }: { params: { roundId: strin
     category:      q?.category ?? "fun",
     points:        q?.points ?? 10,
     correct_index: isRevealed ? q?.correct_index : null,
-  });
+  }, { headers: SHARED_CACHE });
 }

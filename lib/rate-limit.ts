@@ -2,12 +2,16 @@ import { RateLimiterMemory, RateLimiterRes } from "rate-limiter-flexible";
 import { NextRequest, NextResponse } from "next/server";
 
 const limiters = {
-  register: new RateLimiterMemory({ points: 5,   duration: 60 }),
+  // Limits are per IP, and a whole venue on one Wi-Fi network is one IP.
+  // Anything attendees do together in the room needs room for all of them.
+  register: new RateLimiterMemory({ points: 20,  duration: 60 }),
   // Every volunteer phone at the door shares the venue Wi-Fi, so they share
   // one IP. 60 a minute across all of them ran out during a busy arrival.
   checkin:  new RateLimiterMemory({ points: 600, duration: 60 }),
   admin:    new RateLimiterMemory({ points: 120, duration: 60 }),
   public:   new RateLimiterMemory({ points: 60,  duration: 60 }),
+  // Trivia answers, live feedback and photo shares: everyone taps at once.
+  live:     new RateLimiterMemory({ points: 900, duration: 60 }),
 };
 
 export const registerLimiter = limiters.register;

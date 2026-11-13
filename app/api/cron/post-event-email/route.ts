@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
-import { sendBroadcastEmail } from "@/lib/communications/email";
+import { sendPersonalisedEmails, buildEmailLogRows, type PersonalisedEmail } from "@/lib/communications/email";
 import { postEventEmailHtml, postEventEmailText, missedYouEmailHtml, missedYouEmailText } from "@/lib/email-templates";
 import { logger } from "@/lib/logger";
 
@@ -44,6 +44,21 @@ export async function GET(req: NextRequest) {
   const summary: Array<{ eventId: string; title: string; sent: number; failed: number }> = [];
 
   for (const event of events) {
+    // Claim the event before sending. If two runs overlap (cron and the manual
+    // button, or a retry after a timeout) only one of them gets a row back, so
+    // the same list is never emailed twice.
+    const { data: claimed, error: claimError } = await supabase
+      .from("events")
+      .update({ post_event_email_sent: true })
+      .eq("id", event.id)
+      .eq("post_event_email_sent", false)
+      .select("id");
+    if (claimError) {
+      logger.error("cron_post_event_email_claim_failed", { eventId: event.id, error: claimError.message });
+      continue;
+    }
+    if (!claimed || claimed.length === 0) continue;
+
     const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
       weekday: "long", day: "numeric", month: "long", year: "numeric",
     });
@@ -70,89 +85,43 @@ export async function GET(req: NextRequest) {
 
     const absentees = (absentRows ?? []).filter(r => r.email) as Array<{ id: string; first_name: string; email: string }>;
 
-    let sent = 0;
-    let failed = 0;
+    const base = {
+      eventTitle:     event.title,
+      eventDate:      formattedDate,
+      themeTitle:     event.theme_title,
+      themeScripture: event.theme_scripture,
+      eventSlug:      event.slug,
+    };
 
-    // Send thank-you to attendees
-    for (const r of attendees) {
-      const html = postEventEmailHtml({
-        firstName:      r.first_name,
-        eventTitle:     event.title,
-        eventDate:      formattedDate,
-        themeTitle:     event.theme_title,
-        themeScripture: event.theme_scripture,
-        eventSlug:      event.slug,
-      });
-      const text = postEventEmailText({
-        firstName:      r.first_name,
-        eventTitle:     event.title,
-        eventDate:      formattedDate,
-        themeTitle:     event.theme_title,
-        themeScripture: event.theme_scripture,
-        eventSlug:      event.slug,
-      });
-      const subject = `Thank you for being there, ${event.title}`;
-      const results = await sendBroadcastEmail({ to: [r.email], subject, html, text });
-      const result = results[0];
-      if (result?.success) {
-        sent++;
-        await supabase.from("communications_log").insert({
-          event_id: event.id, registration_id: r.id,
-          channel: "email", recipient: r.email, subject,
-          message_body: text, status: "sent",
-          provider_id: result.providerId, sent_at: new Date().toISOString(),
-        });
-      } else {
-        failed++;
-        await supabase.from("communications_log").insert({
-          event_id: event.id, registration_id: r.id,
-          channel: "email", recipient: r.email, subject,
-          status: "failed", error_message: result?.error ?? "Unknown error",
-        });
-      }
+    const messages: PersonalisedEmail[] = [
+      ...attendees.map(r => ({
+        to: r.email, registrationId: r.id,
+        subject: `Thank you for being there, ${event.title}`,
+        html: postEventEmailHtml({ firstName: r.first_name, ...base }),
+        text: postEventEmailText({ firstName: r.first_name, ...base }),
+      })),
+      ...absentees.map(r => ({
+        to: r.email, registrationId: r.id,
+        subject: `We missed you at ${event.title}`,
+        html: missedYouEmailHtml({ firstName: r.first_name, ...base }),
+        text: missedYouEmailText({ firstName: r.first_name, ...base }),
+      })),
+    ];
+
+    const results = await sendPersonalisedEmails(messages);
+    const sent = results.filter(r => r.success).length;
+    const failed = results.length - sent;
+
+    if (messages.length > 0) {
+      const { error: logError } = await supabase
+        .from("communications_log")
+        .insert(buildEmailLogRows(event.id, messages, results));
+      if (logError) logger.error("comms_log_insert_failed", { error: logError.message, rows: messages.length });
+    }
+    if (failed > 0) {
+      logger.error("cron_post_event_email_failures", { eventId: event.id, sent, failed });
     }
 
-    // Send missed-you to non-attendees
-    for (const r of absentees) {
-      const html = missedYouEmailHtml({
-        firstName:      r.first_name,
-        eventTitle:     event.title,
-        eventDate:      formattedDate,
-        themeTitle:     event.theme_title,
-        themeScripture: event.theme_scripture,
-        eventSlug:      event.slug,
-      });
-      const text = missedYouEmailText({
-        firstName:      r.first_name,
-        eventTitle:     event.title,
-        eventDate:      formattedDate,
-        themeTitle:     event.theme_title,
-        themeScripture: event.theme_scripture,
-        eventSlug:      event.slug,
-      });
-      const subject = `We missed you at ${event.title}`;
-      const results = await sendBroadcastEmail({ to: [r.email], subject, html, text });
-      const result = results[0];
-      if (result?.success) {
-        sent++;
-        await supabase.from("communications_log").insert({
-          event_id: event.id, registration_id: r.id,
-          channel: "email", recipient: r.email, subject,
-          message_body: text, status: "sent",
-          provider_id: result.providerId, sent_at: new Date().toISOString(),
-        });
-      } else {
-        failed++;
-        await supabase.from("communications_log").insert({
-          event_id: event.id, registration_id: r.id,
-          channel: "email", recipient: r.email, subject,
-          status: "failed", error_message: result?.error ?? "Unknown error",
-        });
-      }
-    }
-
-    // Mark as sent — avoid re-triggering for this event
-    await supabase.from("events").update({ post_event_email_sent: true }).eq("id", event.id);
     logger.info("cron_post_event_email_sent", {
       eventId: event.id, title: event.title,
       attendees: attendees.length, absentees: absentees.length, sent, failed,

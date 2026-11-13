@@ -30,7 +30,7 @@ export function EventTabBar({ eventId }: { eventId: string }) {
                 "flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap",
                 active
                   ? "bg-forest text-cream shadow-sm"
-                  : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
+                  : "text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5"
               )}
             >
               <Icon size={13} />

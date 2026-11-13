@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
 
 // POST /api/songs?token=xxx — submit a new song
 export async function POST(req: NextRequest) {
-  const limited = await rateLimit(req, "public");
+  const limited = await rateLimit(req, "live");
   if (limited) return limited;
 
   const token = req.nextUrl.searchParams.get("token");

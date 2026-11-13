@@ -13,12 +13,12 @@ export function GetInvolvedCta() {
       <div className="relative max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <FadeIn>
           <div className="text-center mb-12">
-            <span className="label-caps text-forest/60 text-xs">Get Involved</span>
+            <span className="label-caps text-forest/80 text-xs">Get Involved</span>
             <h2 className="font-display text-4xl md:text-5xl font-semibold text-charcoal mt-2 leading-tight">
               There&apos;s a place<br />
               <em className="not-italic text-forest">for you here</em>
             </h2>
-            <p className="text-charcoal/50 text-base mt-4 max-w-lg mx-auto leading-relaxed">
+            <p className="text-charcoal/70 text-base mt-4 max-w-lg mx-auto leading-relaxed">
               The Green House grows through people who believe in what it is. Whether you give your
               time or your resources, you make the next session possible.
             </p>
@@ -32,12 +32,12 @@ export function GetInvolvedCta() {
               className="group relative rounded-3xl border border-forest/15 bg-white hover:border-forest/30 hover:shadow-lg p-7 flex flex-col gap-5 transition-all duration-300 hover:-translate-y-1 overflow-hidden shadow-sm"
             >
               <div className="absolute bottom-0 left-0 h-0.5 w-0 bg-forest group-hover:w-full transition-all duration-500" />
-              <div className="w-11 h-11 rounded-2xl bg-forest/8 flex items-center justify-center">
+              <div className="w-11 h-11 rounded-2xl bg-forest/10 flex items-center justify-center">
                 <Handshake size={20} className="text-forest" />
               </div>
               <div>
                 <h3 className="font-display text-xl font-semibold text-charcoal">Partner with us</h3>
-                <p className="text-charcoal/50 text-sm mt-2 leading-relaxed">
+                <p className="text-charcoal/70 text-sm mt-2 leading-relaxed">
                   Serve on the team: vocals, instruments, photography, creative, logistics.
                 </p>
               </div>
@@ -59,7 +59,7 @@ export function GetInvolvedCta() {
               </div>
               <div>
                 <h3 className="font-display text-xl font-semibold text-charcoal">Support financially</h3>
-                <p className="text-charcoal/50 text-sm mt-2 leading-relaxed">
+                <p className="text-charcoal/70 text-sm mt-2 leading-relaxed">
                   Venue, production, outreach, your contribution covers what makes it all possible.
                 </p>
               </div>

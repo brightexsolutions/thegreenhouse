@@ -11,10 +11,10 @@ import {
 export function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="w-5 h-5 rounded-full bg-forest/10 flex items-center justify-center text-[9px] font-bold text-forest flex-shrink-0 mt-0.5">{n}</span>
+      <span className="w-5 h-5 rounded-full bg-forest/10 flex items-center justify-center text-[10px] font-bold text-forest flex-shrink-0 mt-0.5">{n}</span>
       <div>
         <span className="font-semibold text-charcoal">{title}, </span>
-        <span className="text-charcoal/60">{children}</span>
+        <span className="text-charcoal/65">{children}</span>
       </div>
     </div>
   );
@@ -32,7 +32,7 @@ export function JourneyPhase({ title, color, children }: { title: string; color:
 export function JourneyStep({ done, children }: { done?: boolean; children: React.ReactNode }) {
   return (
     <div className="flex items-start gap-2 text-[12px] text-charcoal/65">
-      <span className={`mt-0.5 flex-shrink-0 ${done ? "text-green-500" : "text-charcoal/25"}`}>
+      <span className={`mt-0.5 flex-shrink-0 ${done ? "text-green-500" : "text-charcoal/65"}`}>
         {done ? "✓" : "□"}
       </span>
       <span>{children}</span>
@@ -56,7 +56,7 @@ export function DeploySection({
         <Icon size={14} className="text-indigo-500 flex-shrink-0" />
         <div>
           <p className="text-xs font-semibold text-charcoal">{title}</p>
-          <p className="text-[10px] text-charcoal/45">{subtitle}</p>
+          <p className="text-[10px] text-charcoal/65">{subtitle}</p>
         </div>
       </div>
       <div className="px-4 py-3 text-sm text-charcoal/70 leading-relaxed space-y-2">
@@ -107,15 +107,15 @@ export const SECTIONS = [
               <span className={`w-2 h-2 rounded-full mt-1.5 flex-shrink-0 ${dot}`} />
               <div>
                 <span className="font-semibold text-charcoal">{status}</span>
-                <span className="text-charcoal/50">, {desc}</span>
+                <span className="text-charcoal/70">, {desc}</span>
               </div>
             </div>
           ))}
         </div>
 
-        <div className="bg-gold/8 border border-gold/20 rounded-xl px-4 py-3">
+        <div className="bg-gold/10 border border-gold/20 rounded-xl px-4 py-3">
           <p className="text-xs font-semibold text-amber-700 mb-1">Day-of workflow</p>
-          <p className="text-xs text-charcoal/60">Morning → confirm Published. 30 min before → set to <strong>Live</strong>. After the night → set to <strong>Past</strong>.</p>
+          <p className="text-xs text-charcoal/65">Morning → confirm Published. 30 min before → set to <strong>Live</strong>. After the night → set to <strong>Past</strong>.</p>
         </div>
       </div>
     ),
@@ -158,21 +158,21 @@ export const SECTIONS = [
         <ul className="pl-4 list-disc space-y-1">
           <li><strong>Email provided</strong>, a PDF ticket is emailed via Resend. The success screen stays open (no auto-close) with quick links to About, Gallery, and Get Involved.</li>
         </ul>
-        <p>The ticket page at <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">/ticket/[token]</code> is always publicly accessible and printable.</p>
+        <p>The ticket page at <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">/ticket/[token]</code> is always publicly accessible and printable.</p>
 
-        <div className="bg-forest/6 border border-forest/15 rounded-xl px-4 py-3 space-y-1.5">
+        <div className="bg-forest/5 border border-forest/15 rounded-xl px-4 py-3 space-y-1.5">
           <p className="text-xs font-semibold text-forest">Support contact on the form</p>
-          <p className="text-xs text-charcoal/60">The registration form and success screen both show a WhatsApp and call link for attendees who have trouble signing up or receiving their ticket. The number is set in <code className="bg-charcoal/6 px-1 rounded">lib/constants.ts</code> → <code className="bg-charcoal/6 px-1 rounded">REGISTRATION_SUPPORT_WA</code>.</p>
+          <p className="text-xs text-charcoal/65">The registration form and success screen both show a WhatsApp and call link for attendees who have trouble signing up or receiving their ticket. The number is set in <code className="bg-charcoal/5 px-1 rounded">lib/constants.ts</code> → <code className="bg-charcoal/5 px-1 rounded">REGISTRATION_SUPPORT_WA</code>.</p>
         </div>
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
-          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-charcoal/50">Duplicate prevention: a second sign-up with the same email for the same event is rejected and the ticket is resent to that email address.</p>
+          <Info size={13} className="text-charcoal/65 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/70">Duplicate prevention: a second sign-up with the same email for the same event is rejected and the ticket is resent to that email address.</p>
         </div>
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
-          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-charcoal/50"><strong className="text-charcoal">Resend ticket from admin</strong>: on the Registrants table, every row with an email address has a small send icon. Clicking it immediately re-sends the PDF ticket email to that person. Useful when someone says they never received it.</p>
+          <Info size={13} className="text-charcoal/65 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/70"><strong className="text-charcoal">Resend ticket from admin</strong>: on the Registrants table, every row with an email address has a small send icon. Clicking it immediately re-sends the PDF ticket email to that person. Useful when someone says they never received it.</p>
         </div>
       </div>
     ),
@@ -202,8 +202,8 @@ export const SECTIONS = [
         </div>
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
-          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-charcoal/50">The same song library is available across all events. When you add a song to a section, you can pick from the library or create a new one.</p>
+          <Info size={13} className="text-charcoal/65 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/70">The same song library is available across all events. When you add a song to a section, you can pick from the library or create a new one.</p>
         </div>
       </div>
     ),
@@ -220,8 +220,8 @@ export const SECTIONS = [
         <div className="space-y-3">
           <div className="border border-mist rounded-xl p-4">
             <p className="text-xs font-semibold text-charcoal mb-1.5">Event Photos</p>
-            <p className="text-xs text-charcoal/60 mb-2">Upload and manage photos for each session. These appear in the Gallery scene on the projection display and on the public Gallery page.</p>
-            <ul className="text-xs text-charcoal/55 space-y-1 pl-3 list-disc">
+            <p className="text-xs text-charcoal/65 mb-2">Upload and manage photos for each session. These appear in the Gallery scene on the projection display and on the public Gallery page.</p>
+            <ul className="text-xs text-charcoal/70 space-y-1 pl-3 list-disc">
               <li>Select an event using the <strong>card picker</strong> at the top. Each card shows the session name, date (Past / Upcoming badge), and, once loaded, the photo count and total storage size for that event.</li>
               <li>Drag photos into the upload zone or click to browse. Multiple files can be queued. JPEG, PNG, or WebP, max 15 MB each.</li>
               <li>Add an optional caption before uploading, it applies to all photos in that batch.</li>
@@ -232,22 +232,22 @@ export const SECTIONS = [
 
           <div className="border border-mist rounded-xl p-4">
             <p className="text-xs font-semibold text-charcoal mb-1.5">Songs</p>
-            <p className="text-xs text-charcoal/60">A searchable library of all songs used across sessions. Add new songs here or inline when building the program. Songs are reusable, adding a song to Session 03&apos;s program does not duplicate it.</p>
+            <p className="text-xs text-charcoal/65">A searchable library of all songs used across sessions. Add new songs here or inline when building the program. Songs are reusable, adding a song to Session 03&apos;s program does not duplicate it.</p>
           </div>
 
           <div className="border border-mist rounded-xl p-4">
             <p className="text-xs font-semibold text-charcoal mb-1.5">Themes</p>
-            <p className="text-xs text-charcoal/60">Create and manage reusable themes (title, scripture, description). Themes can be assigned to events from the event details page. The active theme appears on the Theme scene of the projection display and on the attendee live page.</p>
+            <p className="text-xs text-charcoal/65">Create and manage reusable themes (title, scripture, description). Themes can be assigned to events from the event details page. The active theme appears on the Theme scene of the projection display and on the attendee live page.</p>
           </div>
 
           <div className="border border-mist rounded-xl p-4">
             <p className="text-xs font-semibold text-charcoal mb-1.5">Attendee Photos</p>
-            <p className="text-xs text-charcoal/60">Attendees can submit their own photos from the live page during the gathering. This tab shows submitted photos pending approval. Approve photos to make them appear in the public gallery; reject to discard.</p>
+            <p className="text-xs text-charcoal/65">Attendees can submit their own photos from the live page during the gathering. This tab shows submitted photos pending approval. Approve photos to make them appear in the public gallery; reject to discard.</p>
           </div>
 
           <div className="border border-mist rounded-xl p-4">
             <p className="text-xs font-semibold text-charcoal mb-1.5">Trivia</p>
-            <p className="text-xs text-charcoal/60">Build the question bank used during live trivia rounds. See the <strong>Trivia</strong> section below for the full workflow.</p>
+            <p className="text-xs text-charcoal/65">Build the question bank used during live trivia rounds. See the <strong>Trivia</strong> section below for the full workflow.</p>
           </div>
         </div>
       </div>
@@ -257,7 +257,7 @@ export const SECTIONS = [
     id:    "live-display",
     icon:  Monitor,
     title: "Projection display system",
-    color: "bg-charcoal/8 text-charcoal",
+    color: "bg-charcoal/10 text-charcoal",
     content: (
       <div className="space-y-4 text-sm text-charcoal/70 leading-relaxed">
         <p>Two linked pages that sync in real time via Supabase Realtime (sub-second latency, WebSocket connection):</p>
@@ -265,11 +265,11 @@ export const SECTIONS = [
         <div className="grid sm:grid-cols-2 gap-3">
           <div className="bg-[#1b3a2a]/6 rounded-xl p-4">
             <p className="text-xs font-semibold text-forest mb-2 uppercase tracking-wider">Display screen</p>
-            <p className="text-xs text-charcoal/60"><code>/live/[slug]/display</code>, open on the laptop connected to the projector. It auto-requests fullscreen. The cursor hides after 3 s of inactivity.</p>
+            <p className="text-xs text-charcoal/65"><code>/live/[slug]/display</code>, open on the laptop connected to the projector. It auto-requests fullscreen. The cursor hides after 3 s of inactivity.</p>
           </div>
-          <div className="bg-gold/8 rounded-xl p-4">
+          <div className="bg-gold/10 rounded-xl p-4">
             <p className="text-xs font-semibold text-amber-700 mb-2 uppercase tracking-wider">Control panel</p>
-            <p className="text-xs text-charcoal/60"><code>/live/[slug]/control</code>, open on the worship leader&apos;s phone (admin login required). Controls scene, lyrics, feedback projection, and theme.</p>
+            <p className="text-xs text-charcoal/65"><code>/live/[slug]/control</code>, open on the worship leader&apos;s phone (admin login required). Controls scene, lyrics, feedback projection, and theme.</p>
           </div>
         </div>
 
@@ -288,10 +288,10 @@ export const SECTIONS = [
             ["Custom",      "Push any text you type in the control panel instantly to the screen."],
           ].map(([name, desc]) => (
             <div key={name} className="flex items-start gap-2">
-              <ChevronRight size={12} className="text-forest/50 mt-0.5 flex-shrink-0" />
+              <ChevronRight size={12} className="text-forest/80 mt-0.5 flex-shrink-0" />
               <div>
                 <span className="text-xs font-semibold text-charcoal">{name}</span>
-                <span className="text-[11px] text-charcoal/50">, {desc}</span>
+                <span className="text-[11px] text-charcoal/70">, {desc}</span>
               </div>
             </div>
           ))}
@@ -311,7 +311,7 @@ export const SECTIONS = [
     color: "bg-green-50 text-green-700",
     content: (
       <div className="space-y-3 text-sm text-charcoal/70 leading-relaxed">
-        <p>Every event has a live companion page at <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">/live/[slug]</code>, designed for attendees&apos; phones during the gathering.</p>
+        <p>Every event has a live companion page at <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">/live/[slug]</code>, designed for attendees&apos; phones during the gathering.</p>
 
         <p>Attendees reach it by:</p>
         <ul className="pl-4 list-disc space-y-1">
@@ -329,8 +329,8 @@ export const SECTIONS = [
         </ul>
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
-          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-charcoal/50">After an attendee expands two or more sections, a contextual prompt appears nudging them to share a thought. The prompts vary to feel natural, not repetitive.</p>
+          <Info size={13} className="text-charcoal/65 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/70">After an attendee expands two or more sections, a contextual prompt appears nudging them to share a thought. The prompts vary to feel natural, not repetitive.</p>
         </div>
       </div>
     ),
@@ -346,7 +346,7 @@ export const SECTIONS = [
 
         <div className="space-y-2 pl-1">
           <Step n={1} title="Attendees submit">
-            Via the feedback form on <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">/live/[slug]</code>. Toggle &quot;Post anonymously&quot; on/off. Tap &quot;Send message&quot;. A confirmation replaces the form.
+            Via the feedback form on <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">/live/[slug]</code>. Toggle &quot;Post anonymously&quot; on/off. Tap &quot;Send message&quot;. A confirmation replaces the form.
           </Step>
           <Step n={2} title="Control panel receives">
             The worship leader&apos;s control panel polls for new feedback every 10 seconds. Messages appear in a scrollable list under &quot;Attendee feedback&quot;, newest first.
@@ -360,8 +360,8 @@ export const SECTIONS = [
         </div>
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
-          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-charcoal/50">Only one message can be projected at a time. Projecting a new one automatically replaces the current overlay on the display.</p>
+          <Info size={13} className="text-charcoal/65 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/70">Only one message can be projected at a time. Projecting a new one automatically replaces the current overlay on the display.</p>
         </div>
       </div>
     ),
@@ -386,8 +386,8 @@ export const SECTIONS = [
         </div>
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
-          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-charcoal/50">If no images have been uploaded for the event, the gallery falls back to a set of tasteful nature placeholder images automatically.</p>
+          <Info size={13} className="text-charcoal/65 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/70">If no images have been uploaded for the event, the gallery falls back to a set of tasteful nature placeholder images automatically.</p>
         </div>
       </div>
     ),
@@ -415,14 +415,14 @@ export const SECTIONS = [
           </Step>
         </div>
 
-        <div className="bg-forest/6 border border-forest/15 rounded-xl px-4 py-3">
+        <div className="bg-forest/5 border border-forest/15 rounded-xl px-4 py-3">
           <p className="text-xs font-semibold text-forest mb-1">Community scene + check-in</p>
-          <p className="text-xs text-charcoal/60">The Community display scene shows the <strong>checked-in count</strong> (not total registrations). It updates live as the door team marks people present, including walk-ins. This means the number on the projector reflects who&apos;s actually in the room.</p>
+          <p className="text-xs text-charcoal/65">The Community display scene shows the <strong>checked-in count</strong> (not total registrations). It updates live as the door team marks people present, including walk-ins. This means the number on the projector reflects who&apos;s actually in the room.</p>
         </div>
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
-          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-charcoal/50">If the link is compromised, click &quot;Regenerate token&quot;, the old URL immediately stops working.</p>
+          <Info size={13} className="text-charcoal/65 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/70">If the link is compromised, click &quot;Regenerate token&quot;, the old URL immediately stops working.</p>
         </div>
       </div>
     ),
@@ -453,7 +453,7 @@ export const SECTIONS = [
             <li><strong>Thank-you email</strong>, sent to every registrant who was checked in as present.</li>
             <li><strong>Missed-you email</strong>, sent to registrants who were not checked in. Encourages them to join the next session.</li>
           </ul>
-          <p>Both are logged in the Comms log with status and timestamps. The event is marked <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">post_event_email_sent = true</code> once both batches complete, so they are never sent twice.</p>
+          <p>Both are logged in the Comms log with status and timestamps. The event is marked <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">post_event_email_sent = true</code> once both batches complete, so they are never sent twice.</p>
         </div>
 
         <div>
@@ -469,8 +469,8 @@ export const SECTIONS = [
         </div>
 
         <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
-          <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-charcoal/50">Individual ticket emails are sent automatically on registration and are also logged here. Use broadcasts for event-wide announcements: venue change, session start reminder, post-event community update.</p>
+          <Info size={13} className="text-charcoal/65 flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-charcoal/70">Individual ticket emails are sent automatically on registration and are also logged here. Use broadcasts for event-wide announcements: venue change, session start reminder, post-event community update.</p>
         </div>
       </div>
     ),
@@ -479,23 +479,23 @@ export const SECTIONS = [
     id:    "qr",
     icon:  QrCode,
     title: "QR code & sharing",
-    color: "bg-charcoal/6 text-charcoal/60",
+    color: "bg-charcoal/5 text-charcoal/65",
     content: (
       <div className="space-y-3 text-sm text-charcoal/70 leading-relaxed">
         <p>Two distinct QR codes exist for each event:</p>
         <div className="space-y-2">
           <div className="flex items-start gap-3">
-            <ChevronRight size={12} className="text-forest/50 mt-0.5 flex-shrink-0" />
+            <ChevronRight size={12} className="text-forest/80 mt-0.5 flex-shrink-0" />
             <div>
               <span className="text-xs font-semibold text-charcoal">Event QR (Tools tab)</span>
-              <span className="text-[11px] text-charcoal/50">, links to <code>/events/[slug]</code>. Use on flyers and social media to drive pre-event registration.</span>
+              <span className="text-[11px] text-charcoal/70">, links to <code>/events/[slug]</code>. Use on flyers and social media to drive pre-event registration.</span>
             </div>
           </div>
           <div className="flex items-start gap-3">
-            <ChevronRight size={12} className="text-forest/50 mt-0.5 flex-shrink-0" />
+            <ChevronRight size={12} className="text-forest/80 mt-0.5 flex-shrink-0" />
             <div>
               <span className="text-xs font-semibold text-charcoal">Live QR (display screen)</span>
-              <span className="text-[11px] text-charcoal/50">, links to <code>/live/[slug]</code>. Shown on the projector during the gathering. Attendees scan to follow the program, read lyrics, and drop feedback, all on their phones.</span>
+              <span className="text-[11px] text-charcoal/70">, links to <code>/live/[slug]</code>. Shown on the projector during the gathering. Attendees scan to follow the program, read lyrics, and drop feedback, all on their phones.</span>
             </div>
           </div>
         </div>
@@ -507,7 +507,7 @@ export const SECTIONS = [
     id:    "settings",
     icon:  Settings2,
     title: "Site settings",
-    color: "bg-off-white text-charcoal/60",
+    color: "bg-off-white text-charcoal/65",
     content: (
       <div className="space-y-3 text-sm text-charcoal/70 leading-relaxed">
         <p>Super Admin only. Found at <strong>System → Settings</strong>.</p>
@@ -517,7 +517,7 @@ export const SECTIONS = [
           <li><strong>Social Links</strong>: Instagram, Twitter/X, Facebook shown in the public footer.</li>
           <li><strong>Platform Behaviour</strong>: global registration toggle, default event capacity.</li>
         </ul>
-        <p>All values live in the <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">site_settings</code> table. Changes are immediate, no redeploy needed.</p>
+        <p>All values live in the <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">site_settings</code> table. Changes are immediate, no redeploy needed.</p>
       </div>
     ),
   },
@@ -540,7 +540,7 @@ export const SECTIONS = [
               <ChevronRight size={12} className="text-red-400 mt-0.5 flex-shrink-0" />
               <div>
                 <span className="text-xs font-semibold text-charcoal">{name}</span>
-                <span className="text-[11px] text-charcoal/50">, {desc}</span>
+                <span className="text-[11px] text-charcoal/70">, {desc}</span>
               </div>
             </div>
           ))}
@@ -571,8 +571,8 @@ export const SECTIONS = [
           <JourneyPhase title="Day of the gathering" color="border-forest/40">
             <JourneyStep>Confirm all event details are accurate.</JourneyStep>
             <JourneyStep>Generate the check-in link (Tools tab) and share with the door team.</JourneyStep>
-            <JourneyStep>Open <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">/live/[slug]/display</code> on the projector laptop and enter fullscreen.</JourneyStep>
-            <JourneyStep>Open <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">/live/[slug]/control</code> on the worship leader&apos;s phone.</JourneyStep>
+            <JourneyStep>Open <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">/live/[slug]/display</code> on the projector laptop and enter fullscreen.</JourneyStep>
+            <JourneyStep>Open <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">/live/[slug]/control</code> on the worship leader&apos;s phone.</JourneyStep>
             <JourneyStep>Tap <strong>Initialise display</strong> on the control panel if prompted.</JourneyStep>
             <JourneyStep>Set display to <strong>Branding</strong> or <strong>Countdown</strong> as guests arrive.</JourneyStep>
             <JourneyStep>Change event status to <strong>Live</strong> when the gathering begins.</JourneyStep>
@@ -613,7 +613,7 @@ export const SECTIONS = [
 
         <div className="bg-amber-50 border border-amber-200/60 rounded-xl px-4 py-3 space-y-1">
           <p className="text-xs font-semibold text-amber-700">Two question types</p>
-          <ul className="text-xs text-charcoal/60 space-y-1 pl-3 list-disc">
+          <ul className="text-xs text-charcoal/65 space-y-1 pl-3 list-disc">
             <li><strong className="text-charcoal">Multiple choice</strong>: 2–4 options, one marked as correct. Results shown as percentage bars on reveal. Attendees see if they got it right.</li>
             <li><strong className="text-charcoal">Open response</strong>, Free-text input. No right/wrong: good for reflections, opinions, or ice-breakers.</li>
           </ul>
@@ -627,7 +627,7 @@ export const SECTIONS = [
             Open the <strong>control panel</strong> on your phone. Scroll to the <strong>Trivia</strong> section. Pick a question from the dropdown. Optionally set a countdown timer (30 s – 2 min). Tap <strong>Launch</strong>. The display switches instantly to the Trivia scene and the attendee live page shows the question card.
           </Step>
           <Step n={3} title="Attendees answer">
-            Attendees on the live page (<code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">/live/[slug]</code>) see a dark interactive card slide in at the top. They can optionally enter their name (stored on-device for the session, no re-typing for the next round). For MC, they tap an option and press <strong>Lock in answer</strong>. For open response, they type and submit.
+            Attendees on the live page (<code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">/live/[slug]</code>) see a dark interactive card slide in at the top. They can optionally enter their name (stored on-device for the session, no re-typing for the next round). For MC, they tap an option and press <strong>Lock in answer</strong>. For open response, they type and submit.
           </Step>
           <Step n={4} title="Reveal the answer">
             When you&apos;re ready, tap <strong>Reveal answer</strong> on the control panel. The display animates the correct option (glows green), shows percentage bars for all choices, and displays how many got it right. Attendees on their phones see whether they were correct with a celebration or sympathetic animation.
@@ -637,9 +637,9 @@ export const SECTIONS = [
           </Step>
         </div>
 
-        <div className="bg-forest/6 border border-forest/15 rounded-xl px-4 py-3 space-y-2">
+        <div className="bg-forest/5 border border-forest/15 rounded-xl px-4 py-3 space-y-2">
           <p className="text-xs font-semibold text-forest">Tips</p>
-          <ul className="text-xs text-charcoal/60 space-y-1 pl-3 list-disc">
+          <ul className="text-xs text-charcoal/65 space-y-1 pl-3 list-disc">
             <li>Use trivia during transitions: between worship sets, before the teaching, or as an ice-breaker while guests arrive.</li>
             <li>The <strong>Community category</strong> questions build connection (e.g., &quot;What one word describes tonight?&quot;).</li>
             <li>The <strong>Scripture category</strong> works well paired with the theme, quiz people on the key verse.</li>
@@ -680,12 +680,12 @@ export const SECTIONS = [
                   className="h-12 w-full flex items-end px-2.5 pb-1.5"
                   style={{ backgroundColor: hex }}
                 >
-                  <span className={`text-[9px] font-mono font-bold ${dark ? "text-white/60" : "text-black/40"}`}>{hex}</span>
+                  <span className={`text-[10px] font-mono font-bold ${dark ? "text-white/60" : "text-black/40"}`}>{hex}</span>
                 </div>
                 <div className="px-2.5 py-2 bg-white">
                   <p className="text-[11px] font-semibold text-charcoal">{name}</p>
-                  <p className="text-[9px] font-mono text-charcoal/40 mt-0.5">{css}</p>
-                  <p className="text-[10px] text-charcoal/50 mt-1 leading-snug">{usage}</p>
+                  <p className="text-[10px] font-mono text-charcoal/65 mt-0.5">{css}</p>
+                  <p className="text-[10px] text-charcoal/70 mt-1 leading-snug">{usage}</p>
                 </div>
               </div>
             ))}
@@ -700,12 +700,12 @@ export const SECTIONS = [
               <div className="flex items-start justify-between gap-4">
                 <div>
                   <p className="text-xs font-semibold text-charcoal mb-1">Cormorant Garamond, Display / Headings</p>
-                  <p className="text-xs text-charcoal/50 mb-3">Elegant, high-contrast serif. Use for event titles, section headings, hero text, pull quotes, and poster headlines. Feels timeless and warm.</p>
+                  <p className="text-xs text-charcoal/70 mb-3">Elegant, high-contrast serif. Use for event titles, section headings, hero text, pull quotes, and poster headlines. Feels timeless and warm.</p>
                   <p className="font-display text-4xl font-light text-charcoal leading-none">The Green House</p>
-                  <p className="font-display text-xl font-semibold text-charcoal/60 italic mt-1">Session 02, Delusion</p>
+                  <p className="font-display text-xl font-semibold text-charcoal/65 italic mt-1">Session 02, Delusion</p>
                 </div>
               </div>
-              <div className="mt-3 pt-3 border-t border-mist grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-charcoal/50">
+              <div className="mt-3 pt-3 border-t border-mist grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-charcoal/70">
                 <div><span className="font-display font-light text-charcoal text-sm">Light 300</span>, large text</div>
                 <div><span className="font-display font-normal text-charcoal text-sm">Regular 400</span>, subheads</div>
                 <div><span className="font-display font-semibold text-charcoal text-sm">Semi 600</span>, titles</div>
@@ -715,11 +715,11 @@ export const SECTIONS = [
             <div className="border border-mist rounded-xl p-4">
               <div>
                 <p className="text-xs font-semibold text-charcoal mb-1">DM Sans, Body / UI</p>
-                <p className="text-xs text-charcoal/50 mb-3">Clean, geometric sans-serif. Use for body text, captions, labels, buttons, and all UI elements. Highly legible at small sizes.</p>
+                <p className="text-xs text-charcoal/70 mb-3">Clean, geometric sans-serif. Use for body text, captions, labels, buttons, and all UI elements. Highly legible at small sizes.</p>
                 <p className="text-charcoal text-base font-normal leading-relaxed">A cross-church worship community in Nairobi, quarterly gatherings for real connection.</p>
-                <p className="text-charcoal/50 text-xs font-medium uppercase tracking-widest mt-2">Section Label · Event Name · Caption Text</p>
+                <p className="text-charcoal/70 text-xs font-medium uppercase tracking-widest mt-2">Section Label · Event Name · Caption Text</p>
               </div>
-              <div className="mt-3 pt-3 border-t border-mist grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-charcoal/50">
+              <div className="mt-3 pt-3 border-t border-mist grid grid-cols-2 sm:grid-cols-4 gap-2 text-[11px] text-charcoal/70">
                 <div><span className="font-medium text-charcoal text-sm">Light 300</span>, captions</div>
                 <div><span className="font-medium text-charcoal text-sm">Regular 400</span>, body</div>
                 <div><span className="font-semibold text-charcoal text-sm">Medium 500</span>, labels</div>
@@ -733,7 +733,7 @@ export const SECTIONS = [
         <div>
           <p className="text-xs font-bold text-charcoal uppercase tracking-wider mb-3">Poster & social graphics guide</p>
           <div className="grid sm:grid-cols-2 gap-3">
-            <div className="bg-forest/6 border border-forest/15 rounded-xl p-4">
+            <div className="bg-forest/5 border border-forest/15 rounded-xl p-4">
               <p className="text-xs font-semibold text-forest mb-2">✓ Do</p>
               <ul className="text-xs text-charcoal/65 space-y-1.5 pl-3 list-disc">
                 <li>Use <strong>Forest (#1b3a2a)</strong> or <strong>Charcoal (#1a1a18)</strong> as the primary background: they feel warm and intentional, not generic.</li>
@@ -775,7 +775,7 @@ export const SECTIONS = [
                 </div>
                 <div className="px-3 py-2 bg-white">
                   <p className="text-[11px] font-semibold text-charcoal">{label}</p>
-                  <p className="text-[10px] text-charcoal/45 mt-0.5">{note}</p>
+                  <p className="text-[10px] text-charcoal/65 mt-0.5">{note}</p>
                 </div>
               </div>
             ))}
@@ -783,9 +783,9 @@ export const SECTIONS = [
         </div>
 
         {/* ── CSS variables reference ── */}
-        <div className="bg-charcoal/4 rounded-xl p-4">
+        <div className="bg-charcoal/5 rounded-xl p-4">
           <p className="text-xs font-semibold text-charcoal mb-2">CSS variables (for developers)</p>
-          <div className="font-mono text-[11px] text-charcoal/60 grid grid-cols-2 gap-x-6 gap-y-0.5">
+          <div className="font-mono text-[11px] text-charcoal/65 grid grid-cols-2 gap-x-6 gap-y-0.5">
             {[
               ["--forest",     "#1b3a2a"],
               ["--moss",       "#2d5240"],
@@ -799,7 +799,7 @@ export const SECTIONS = [
               ["--bark",       "#5c4a35"],
             ].map(([v, h]) => (
               <div key={v} className="flex gap-2">
-                <span className="text-charcoal/40">{v}:</span>
+                <span className="text-charcoal/65">{v}:</span>
                 <span className="text-charcoal">{h}</span>
               </div>
             ))}
@@ -846,7 +846,7 @@ export const SECTIONS = [
           <div className="space-y-1.5 pl-1">
             <Step n={1} title="Create a GitHub repo">Go to github.com → New repository. Name it <strong>greenhouse-website</strong> (or similar). Keep it private.</Step>
             <Step n={2} title="Push the project">
-              <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded block mt-1">
+              <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded block mt-1">
                 git remote add origin https://github.com/your-org/greenhouse-website.git{"\n"}
                 git push -u origin main
               </code>
@@ -865,16 +865,16 @@ export const SECTIONS = [
               <Step n={1} title="Import project">Go to vercel.com → New Project → Import Git Repository. Select your repo. Framework is auto-detected as Next.js.</Step>
               <Step n={2} title="Add environment variables">Before clicking Deploy, expand &quot;Environment Variables&quot; and add all of the following:</Step>
             </div>
-            <div className="bg-charcoal/4 rounded-xl p-3 font-mono text-[11px] text-charcoal/70 space-y-1">
+            <div className="bg-charcoal/5 rounded-xl p-3 font-mono text-[11px] text-charcoal/70 space-y-1">
               <p>NEXT_PUBLIC_SUPABASE_URL=https://eperecxwzmxsoiudkucb.supabase.co</p>
-              <p>NEXT_PUBLIC_SUPABASE_ANON_KEY=<span className="text-charcoal/40">[your anon key]</span></p>
-              <p>SUPABASE_SERVICE_ROLE_KEY=<span className="text-charcoal/40">[your service role key]</span></p>
+              <p>NEXT_PUBLIC_SUPABASE_ANON_KEY=<span className="text-charcoal/65">[your anon key]</span></p>
+              <p>SUPABASE_SERVICE_ROLE_KEY=<span className="text-charcoal/65">[your service role key]</span></p>
               <p>NEXT_PUBLIC_SITE_URL=https://greenhousews.co.ke</p>
-              <p>RESEND_API_KEY=<span className="text-charcoal/40">[your Resend key]</span></p>
+              <p>RESEND_API_KEY=<span className="text-charcoal/65">[your Resend key]</span></p>
               <p>RESEND_FROM_EMAIL=The Green House &lt;hello@greenhousews.co.ke&gt;</p>
-              <p>CRON_SECRET=<span className="text-charcoal/40">[generate a strong random string]</span></p>
-              <p>TWILIO_ACCOUNT_SID=<span className="text-charcoal/40">[from Twilio console]</span></p>
-              <p>TWILIO_AUTH_TOKEN=<span className="text-charcoal/40">[from Twilio console]</span></p>
+              <p>CRON_SECRET=<span className="text-charcoal/65">[generate a strong random string]</span></p>
+              <p>TWILIO_ACCOUNT_SID=<span className="text-charcoal/65">[from Twilio console]</span></p>
+              <p>TWILIO_AUTH_TOKEN=<span className="text-charcoal/65">[from Twilio console]</span></p>
               <p>TWILIO_WHATSAPP_FROM=whatsapp:+14155238886</p>
             </div>
             <div className="space-y-1.5 pl-1">
@@ -895,8 +895,8 @@ export const SECTIONS = [
             <Step n={1} title="Open Supabase project">supabase.com → your project → Authentication → URL Configuration.</Step>
             <Step n={2} title="Add redirect URLs">
               Under &quot;Redirect URLs&quot;, add:<br />
-              <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">https://greenhousews.co.ke/auth/callback</code><br />
-              <code className="text-xs bg-charcoal/6 px-1.5 py-0.5 rounded">https://your-project.vercel.app/auth/callback</code>
+              <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">https://greenhousews.co.ke/auth/callback</code><br />
+              <code className="text-xs bg-charcoal/5 px-1.5 py-0.5 rounded">https://your-project.vercel.app/auth/callback</code>
             </Step>
             <Step n={3} title="Set Site URL">In the same section, set <strong>Site URL</strong> to <code>https://greenhousews.co.ke</code>.</Step>
           </div>
@@ -940,8 +940,8 @@ export const SECTIONS = [
               </Step>
             </div>
             <div className="bg-off-white border border-mist rounded-xl px-4 py-3 flex items-start gap-2">
-              <Info size={13} className="text-charcoal/40 flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-charcoal/50">Google typically crawls and indexes within a few days of the sitemap submission. The site already has Open Graph tags, JSON-LD structured data on event pages, and a <code>robots.txt</code> that allows the public routes, all good signals for ranking.</p>
+              <Info size={13} className="text-charcoal/65 flex-shrink-0 mt-0.5" />
+              <p className="text-xs text-charcoal/70">Google typically crawls and indexes within a few days of the sitemap submission. The site already has Open Graph tags, JSON-LD structured data on event pages, and a <code>robots.txt</code> that allows the public routes, all good signals for ranking.</p>
             </div>
           </div>
         </DeploySection>

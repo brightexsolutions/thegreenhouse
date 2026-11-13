@@ -129,3 +129,82 @@ export async function sendBroadcastEmail(p: BroadcastEmailParams): Promise<SendR
 
   return results;
 }
+
+export interface PersonalisedEmail {
+  to:             string;
+  subject:        string;
+  html:           string;
+  text:           string;
+  registrationId?: string | null;
+}
+
+/**
+ * Send a different email to each recipient, 100 per Resend batch call.
+ * Results come back in the same order as `messages`.
+ *
+ * The crons used to await one send per recipient. A session-sized list ran
+ * past the 60 second function limit before the "sent" flag was written, so the
+ * next run emailed everyone again.
+ */
+export async function sendPersonalisedEmails(messages: PersonalisedEmail[]): Promise<SendResult[]> {
+  const BATCH_SIZE = 100;
+  const results: SendResult[] = [];
+
+  for (let i = 0; i < messages.length; i += BATCH_SIZE) {
+    const chunk = messages.slice(i, i + BATCH_SIZE);
+    try {
+      const response = await getResend().batch.send(
+        chunk.map(m => ({
+          from:    COMMS_FROM_EMAIL(),
+          to:      [m.to],
+          replyTo: REPLY_TO_EMAIL,
+          subject: m.subject,
+          html:    m.html,
+          text:    m.text,
+        }))
+      );
+
+      if (response.error) {
+        const message = response.error.message;
+        logger.error("resend_batch_error", { error: message, size: chunk.length });
+        chunk.forEach(() => results.push({ success: false, providerId: null, error: message }));
+        continue;
+      }
+
+      const sent = response.data?.data ?? [];
+      chunk.forEach((_, idx) => {
+        const id = sent[idx]?.id ?? null;
+        results.push(id
+          ? { success: true, providerId: id }
+          : { success: false, providerId: null, error: "No provider id returned" });
+      });
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Unknown email error";
+      logger.error("resend_batch_failed", { error: msg, size: chunk.length });
+      chunk.forEach(() => results.push({ success: false, providerId: null, error: msg }));
+    }
+  }
+
+  return results;
+}
+
+/** One communications_log row per message, ready for a single bulk insert. */
+export function buildEmailLogRows(eventId: string, messages: PersonalisedEmail[], results: SendResult[]) {
+  const now = new Date().toISOString();
+  return messages.map((m, i) => {
+    const r = results[i];
+    const ok = !!r?.success;
+    return {
+      event_id:        eventId,
+      registration_id: m.registrationId ?? null,
+      channel:         "email",
+      recipient:       m.to,
+      subject:         m.subject,
+      message_body:    ok ? m.text : null,
+      status:          ok ? "sent" : "failed",
+      provider_id:     r?.providerId ?? null,
+      error_message:   ok ? null : (r?.error ?? "Unknown error"),
+      sent_at:         ok ? now : null,
+    };
+  });
+}

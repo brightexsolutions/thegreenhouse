@@ -11,6 +11,8 @@ const nextConfig = {
     // Disable client-side router cache for dynamic routes so admin pages
     // always show fresh data on navigation (not just on full browser refresh)
     staleTimes: { dynamic: 0 },
+    // Import only the icons and motion pieces a file uses, not the barrel.
+    optimizePackageImports: ["lucide-react", "framer-motion"],
   },
   images: {
     remotePatterns: [
@@ -28,12 +30,16 @@ const nextConfig = {
   async headers() {
     return [
       {
-        // Apply security headers to all public pages (not admin/api)
-        source: "/((?!admin|api|_next).*)",
+        // Every route, admin and API included. No page on this site is meant
+        // to be framed by another origin; the only iframe is the YouTube
+        // embed, which is outbound and unaffected.
+        source: "/:path*",
         headers: [
-          { key: "X-Frame-Options",        value: "SAMEORIGIN" },
-          { key: "X-Content-Type-Options",  value: "nosniff" },
-          { key: "Referrer-Policy",         value: "strict-origin-when-cross-origin" },
+          { key: "X-Frame-Options",           value: "SAMEORIGIN" },
+          { key: "X-Content-Type-Options",    value: "nosniff" },
+          { key: "Referrer-Policy",           value: "strict-origin-when-cross-origin" },
+          { key: "Strict-Transport-Security", value: "max-age=63072000; includeSubDomains" },
+          { key: "Permissions-Policy",        value: "camera=(self), microphone=(), geolocation=()" },
         ],
       },
     ];

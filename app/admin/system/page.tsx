@@ -63,7 +63,7 @@ export default async function SystemPage() {
     <div className="space-y-6">
       <div className="mb-8">
         <h1 className="text-2xl font-semibold text-forest">System Overview</h1>
-        <p className="text-sm text-charcoal/50 mt-1">Super admin only, platform health at a glance</p>
+        <p className="text-sm text-charcoal/70 mt-1">Super admin only, platform health at a glance</p>
       </div>
 
       {/* Stats grid */}
@@ -76,11 +76,11 @@ export default async function SystemPage() {
           >
             <div className="flex items-start justify-between">
               <div>
-                <p className="text-xs text-charcoal/50 font-medium">{label}</p>
+                <p className="text-xs text-charcoal/70 font-medium">{label}</p>
                 <p className="text-2xl font-semibold text-forest mt-1">{value}</p>
               </div>
               <div className="w-9 h-9 rounded-xl bg-forest/5 flex items-center justify-center group-hover:bg-forest/10 transition-colors">
-                <Icon size={16} className="text-forest/50" />
+                <Icon size={16} className="text-forest/80" />
               </div>
             </div>
           </Link>
@@ -88,7 +88,7 @@ export default async function SystemPage() {
       </div>
 
       {/* Quick access */}
-      <h2 className="text-sm font-semibold text-charcoal/60 uppercase tracking-wider mb-3">Quick access</h2>
+      <h2 className="text-sm font-semibold text-charcoal/65 uppercase tracking-wider mb-3">Quick access</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-8">
         {links.map(({ href, label, desc }) => (
           <Link
@@ -97,7 +97,7 @@ export default async function SystemPage() {
             className="bg-white rounded-2xl border border-mist p-5 hover:border-forest/30 hover:bg-forest/[0.02] transition-all group"
           >
             <p className="font-medium text-forest text-sm group-hover:underline">{label}</p>
-            <p className="text-xs text-charcoal/50 mt-1">{desc}</p>
+            <p className="text-xs text-charcoal/70 mt-1">{desc}</p>
           </Link>
         ))}
       </div>
@@ -110,13 +110,13 @@ export default async function SystemPage() {
             <span className="text-sm font-medium text-forest">Platform healthy</span>
           </div>
           {stats.lastActivity && (
-            <span className="text-xs text-charcoal/40 ml-auto flex items-center gap-1">
+            <span className="text-xs text-charcoal/65 ml-auto flex items-center gap-1">
               <Clock size={12} />
               Last activity: {new Date(stats.lastActivity).toLocaleString("en-KE", { dateStyle: "short", timeStyle: "short" })}
             </span>
           )}
         </div>
-        <div className="mt-3 grid grid-cols-3 gap-3 text-xs text-charcoal/50">
+        <div className="mt-3 grid grid-cols-3 gap-3 text-xs text-charcoal/70">
           <a href="/api/health" target="_blank" rel="noopener" className="hover:text-forest flex items-center gap-1">
             <Database size={11} /> API health endpoint
           </a>

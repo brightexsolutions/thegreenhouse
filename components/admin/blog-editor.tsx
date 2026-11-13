@@ -8,7 +8,7 @@ import {
   Send, Sparkles, Upload, Wand2, X,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import { BLOG_CATEGORIES, slugify, readingMinutes, deriveExcerpt } from "@/lib/blog";
+import { BLOG_CATEGORIES, slugify, readingMinutes, deriveExcerpt } from "@/lib/blog-shared";
 import { SITE_URL, storageUrl } from "@/lib/constants";
 import { cn } from "@/lib/utils";
 
@@ -285,7 +285,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
         <button
           type="button"
           onClick={() => router.back()}
-          className="p-2 rounded text-charcoal/45 hover:text-charcoal hover:bg-mist transition-colors"
+          className="p-2 rounded text-charcoal/65 hover:text-charcoal hover:bg-mist transition-colors"
           aria-label="Go back"
         >
           <ArrowLeft size={16} />
@@ -294,7 +294,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
           <h1 className="text-lg font-semibold text-charcoal leading-none truncate">
             {isEdit ? "Edit post" : "New post"}
           </h1>
-          <p className="text-xs text-charcoal/40 mt-1">
+          <p className="text-xs text-charcoal/65 mt-1">
             {minutes > 0 ? `${minutes} min read` : "Markdown supported"}
           </p>
         </div>
@@ -311,7 +311,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 onClick={() => setMode(m)}
                 className={cn(
                   "inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded transition-colors capitalize",
-                  mode === m ? "bg-white text-charcoal shadow-sm" : "text-charcoal/50 hover:text-charcoal"
+                  mode === m ? "bg-white text-charcoal shadow-sm" : "text-charcoal/70 hover:text-charcoal"
                 )}
               >
                 {m === "edit" ? <Pencil size={12} /> : <Eye size={12} />}
@@ -357,9 +357,9 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
 
       {/* AI panel */}
       {aiOpen && (
-        <div className="bg-gold/6 border border-gold/25 rounded-2xl p-5">
+        <div className="bg-gold/5 border border-gold/25 rounded-2xl p-5">
           {!aiEnabled ? (
-            <p className="text-sm text-charcoal/60">
+            <p className="text-sm text-charcoal/65">
               AI is not configured on this deployment. Add <code className="font-mono text-xs bg-white/70 px-1.5 py-0.5 rounded">GEMINI_API_KEY</code> to the environment and redeploy to turn it on.
             </p>
           ) : (
@@ -387,10 +387,10 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                       aiMode === m.key ? "bg-white shadow-sm" : "hover:bg-white/60"
                     )}
                   >
-                    <span className={cn("block text-[11px] font-medium", aiMode === m.key ? "text-charcoal" : "text-charcoal/55")}>
+                    <span className={cn("block text-[11px] font-medium", aiMode === m.key ? "text-charcoal" : "text-charcoal/70")}>
                       {m.label}
                     </span>
-                    <span className="block text-[10px] text-charcoal/35">{m.hint}</span>
+                    <span className="block text-[10px] text-charcoal/65">{m.hint}</span>
                   </button>
                 ))}
               </div>
@@ -401,7 +401,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                   onChange={e => setAiBrief(e.target.value)}
                   rows={4}
                   placeholder="What is the post about? A sentence or two is enough. For example: who we are as a worship community, and why we gather quarterly rather than every week."
-                  className="w-full text-sm bg-white border border-gold/25 rounded p-3 outline-none focus:border-gold/60 transition-colors resize-y placeholder:text-charcoal/30"
+                  className="w-full text-sm bg-white border border-gold/25 rounded p-3 outline-none focus:border-gold/60 transition-colors resize-y placeholder:text-charcoal/50"
                 />
               ) : (
                 <>
@@ -410,9 +410,9 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                     onChange={e => setAiNotes(e.target.value)}
                     rows={8}
                     placeholder={"Paste your own notes, a rough outline, or the idea in your own words. Bullet points are fine.\n\nThe model keeps your facts, your order and your point of view. It will not invent names, dates, songs or scripture, and it marks anything unclear as [check this] rather than filling it in."}
-                    className="w-full text-sm bg-white border border-gold/25 rounded p-3 outline-none focus:border-gold/60 transition-colors resize-y placeholder:text-charcoal/30"
+                    className="w-full text-sm bg-white border border-gold/25 rounded p-3 outline-none focus:border-gold/60 transition-colors resize-y placeholder:text-charcoal/50"
                   />
-                  <p className="text-[11px] text-charcoal/45 mt-1.5">
+                  <p className="text-[11px] text-charcoal/65 mt-1.5">
                     Use this for session recaps and anything where the details matter.
                   </p>
                 </>
@@ -421,7 +421,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
               {/* Search phrases the post should target */}
               <div className="mt-3">
                 <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-charcoal/40">
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-charcoal/65">
                     Search phrases to target
                   </span>
                   <button
@@ -442,7 +442,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                         <button
                           type="button"
                           onClick={() => setKeywords(keywords.filter(x => x !== k))}
-                          className="text-charcoal/35 hover:text-red-600"
+                          className="text-charcoal/65 hover:text-red-600"
                           aria-label={`Remove ${k}`}
                         >
                           <X size={10} />
@@ -451,7 +451,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                     ))}
                   </div>
                 ) : (
-                  <p className="text-[11px] text-charcoal/35">
+                  <p className="text-[11px] text-charcoal/65">
                     None set. Anything here gets woven into the draft and the search copy.
                   </p>
                 )}
@@ -466,7 +466,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                       onClick={() => setAiTone(t)}
                       className={cn(
                         "text-[11px] px-2.5 py-1.5 rounded capitalize transition-colors",
-                        aiTone === t ? "bg-forest text-cream" : "bg-white/70 text-charcoal/55 hover:bg-white"
+                        aiTone === t ? "bg-forest text-cream" : "bg-white/70 text-charcoal/70 hover:bg-white"
                       )}
                     >
                       {t}
@@ -486,7 +486,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 </button>
 
                 {v.content.trim() && (
-                  <span className="text-[11px] text-charcoal/40">
+                  <span className="text-[11px] text-charcoal/65">
                     This replaces the body below.
                   </span>
                 )}
@@ -495,7 +495,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
               {/* Refinements, useful once there is a draft to work on. */}
               {v.content.trim() && (
                 <details className="mt-3 group">
-                  <summary className="text-[11px] text-charcoal/50 cursor-pointer select-none hover:text-charcoal/80">
+                  <summary className="text-[11px] text-charcoal/70 cursor-pointer select-none hover:text-charcoal/80">
                     Refine what is there
                   </summary>
                   <div className="flex flex-wrap items-center gap-2 mt-2.5">
@@ -509,7 +509,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
 
               {titleIdeas.length > 0 && (
                 <div className="mt-4 flex flex-col gap-1.5">
-                  <span className="text-[10px] font-semibold uppercase tracking-wider text-charcoal/35">Title ideas</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-charcoal/65">Title ideas</span>
                   {titleIdeas.map(t => (
                     <button
                       key={t}
@@ -523,7 +523,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 </div>
               )}
 
-              <p className="text-[11px] text-charcoal/45 mt-4">
+              <p className="text-[11px] text-charcoal/65 mt-4">
                 One press fills the title, body, excerpt, tags and search copy. Everything lands in the
                 editor as a draft: read it before publishing, because it does not know your venue,
                 your dates, or who was in the room.
@@ -544,7 +544,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 value={v.title}
                 onChange={e => set("title", e.target.value)}
                 placeholder="What is this post about?"
-                className="w-full text-lg font-medium bg-transparent outline-none placeholder:text-charcoal/25"
+                className="w-full text-lg font-medium bg-transparent outline-none placeholder:text-charcoal/50"
               />
             </Field>
 
@@ -553,7 +553,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 value={v.slug}
                 onChange={e => { setSlugTouched(true); set("slug", slugify(e.target.value)); }}
                 placeholder="auto-generated-from-title"
-                className="w-full text-sm font-mono bg-transparent outline-none placeholder:text-charcoal/25"
+                className="w-full text-sm font-mono bg-transparent outline-none placeholder:text-charcoal/50"
               />
             </Field>
           </Card>
@@ -562,7 +562,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
             <div className="flex items-center justify-between mb-2">
               <Label>{mode === "edit" ? "Body" : "Preview"}</Label>
               {mode === "preview" && previewing && (
-                <span className="inline-flex items-center gap-1.5 text-[11px] text-charcoal/40">
+                <span className="inline-flex items-center gap-1.5 text-[11px] text-charcoal/65">
                   <Loader2 size={11} className="animate-spin" />
                   Rendering
                 </span>
@@ -576,9 +576,9 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                   onChange={e => set("content", e.target.value)}
                   rows={22}
                   placeholder={"Write in Markdown.\n\n## Headings become links in the contents list\n\n**bold**, *italic*, > quotes, - lists"}
-                  className="w-full text-sm leading-relaxed font-mono bg-mist/25 border border-mist rounded p-4 outline-none focus:border-forest/30 focus:bg-white transition-colors resize-y placeholder:text-charcoal/25"
+                  className="w-full text-sm leading-relaxed font-mono bg-mist/25 border border-mist rounded p-4 outline-none focus:border-forest/30 focus:bg-white transition-colors resize-y placeholder:text-charcoal/50"
                 />
-                <p className="text-[11px] text-charcoal/35 mt-2">
+                <p className="text-[11px] text-charcoal/65 mt-2">
                   Markdown. Headings written as <code className="font-mono">##</code> get their own link on the page.
                 </p>
               </>
@@ -587,7 +587,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 {previewHtml ? (
                   <article className="article-body" dangerouslySetInnerHTML={{ __html: previewHtml }} />
                 ) : (
-                  <p className="text-sm text-charcoal/35">Nothing to preview yet.</p>
+                  <p className="text-sm text-charcoal/65">Nothing to preview yet.</p>
                 )}
               </div>
             )}
@@ -596,17 +596,17 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
           {/* Search preview */}
           <Card>
             <div className="flex items-center gap-2 mb-3">
-              <Search size={13} className="text-charcoal/35" />
+              <Search size={13} className="text-charcoal/65" />
               <Label>How this looks on Google</Label>
             </div>
             <div className="bg-mist/30 rounded p-4 border border-mist">
-              <p className="text-[11px] text-charcoal/45 truncate">
+              <p className="text-[11px] text-charcoal/65 truncate">
                 {SITE_URL.replace(/^https?:\/\//, "")} › blog › {v.slug || "post-url"}
               </p>
               <p className="text-[17px] text-[#1a5fb4] leading-snug mt-1 truncate">
                 {searchTitle.length > 60 ? `${searchTitle.slice(0, 60)}...` : searchTitle}
               </p>
-              <p className="text-[13px] text-charcoal/60 leading-snug mt-1 line-clamp-2">
+              <p className="text-[13px] text-charcoal/65 leading-snug mt-1 line-clamp-2">
                 {searchDesc || "Add an excerpt so search results show a proper summary."}
               </p>
             </div>
@@ -655,13 +655,13 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 />
                 <div className="flex items-center gap-2 bg-mist/40 rounded p-2 border border-mist">
                   {v.cover_image.startsWith("http")
-                    ? <Link2 size={13} className="text-charcoal/40 flex-shrink-0" />
-                    : <ImageIcon size={13} className="text-charcoal/40 flex-shrink-0" />}
-                  <span className="text-[11px] font-mono text-charcoal/55 truncate flex-1">{v.cover_image}</span>
+                    ? <Link2 size={13} className="text-charcoal/65 flex-shrink-0" />
+                    : <ImageIcon size={13} className="text-charcoal/65 flex-shrink-0" />}
+                  <span className="text-[11px] font-mono text-charcoal/70 truncate flex-1">{v.cover_image}</span>
                   <button
                     type="button"
                     onClick={() => { set("cover_image", ""); set("cover_alt", ""); setLinkDraft(""); }}
-                    className="p-1 rounded text-charcoal/40 hover:text-red-600 transition-colors"
+                    className="p-1 rounded text-charcoal/65 hover:text-red-600 transition-colors"
                     aria-label="Remove cover image"
                   >
                     <X size={13} />
@@ -689,7 +689,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                     placeholder="What a sighted reader would see"
                     className="w-full text-xs bg-mist/25 border border-mist rounded px-3 py-2 outline-none focus:border-forest/30 focus:bg-white transition-colors"
                   />
-                  <p className="text-[10px] text-charcoal/35 mt-1.5">
+                  <p className="text-[10px] text-charcoal/65 mt-1.5">
                     Required before publishing. Screen readers and search engines both use it.
                   </p>
                 </div>
@@ -704,7 +704,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                       onClick={() => setCoverMode(m)}
                       className={cn(
                         "flex-1 inline-flex items-center justify-center gap-1.5 text-[11px] font-medium px-2 py-1.5 rounded transition-colors capitalize",
-                        coverMode === m ? "bg-white text-charcoal shadow-sm" : "text-charcoal/50 hover:text-charcoal"
+                        coverMode === m ? "bg-white text-charcoal shadow-sm" : "text-charcoal/70 hover:text-charcoal"
                       )}
                     >
                       {m === "upload" ? <Upload size={11} /> : <Link2 size={11} />}
@@ -716,9 +716,9 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 {coverMode === "upload" ? (
                   <label className="flex flex-col items-center justify-center gap-1.5 border border-dashed border-mist rounded py-7 cursor-pointer hover:border-forest/30 hover:bg-mist/20 transition-colors">
                     {uploading
-                      ? <Loader2 size={16} className="animate-spin text-charcoal/40" />
-                      : <ImageIcon size={16} className="text-charcoal/30" />}
-                    <span className="text-[11px] text-charcoal/45">
+                      ? <Loader2 size={16} className="animate-spin text-charcoal/65" />
+                      : <ImageIcon size={16} className="text-charcoal/65" />}
+                    <span className="text-[11px] text-charcoal/65">
                       {uploading ? "Uploading" : "JPEG, PNG, or WebP"}
                     </span>
                     <input
@@ -744,7 +744,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                     >
                       Use this image
                     </button>
-                    <p className="text-[10px] text-charcoal/35">
+                    <p className="text-[10px] text-charcoal/65">
                       The image stays on whichever host you link to. If that host goes away, so does the image.
                     </p>
                   </div>
@@ -768,7 +768,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 </button>
               )}
             </div>
-            <p className="text-[10px] text-charcoal/35 mt-1 mb-2">
+            <p className="text-[10px] text-charcoal/65 mt-1 mb-2">
               Shown on the blog index and in search results.
             </p>
             <textarea
@@ -776,7 +776,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
               onChange={e => set("excerpt", e.target.value)}
               rows={3}
               placeholder="Leave blank to use the opening lines of the post."
-              className="w-full text-sm bg-mist/25 border border-mist rounded px-3 py-2 outline-none focus:border-forest/30 focus:bg-white transition-colors resize-y placeholder:text-charcoal/25"
+              className="w-full text-sm bg-mist/25 border border-mist rounded px-3 py-2 outline-none focus:border-forest/30 focus:bg-white transition-colors resize-y placeholder:text-charcoal/50"
             />
           </Card>
 
@@ -789,7 +789,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                   <button
                     type="button"
                     onClick={() => set("tags", v.tags.filter(x => x !== t))}
-                    className="text-charcoal/35 hover:text-red-600"
+                    className="text-charcoal/65 hover:text-red-600"
                     aria-label={`Remove tag ${t}`}
                   >
                     <X size={11} />
@@ -823,7 +823,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 </button>
               )}
             </div>
-            <p className="text-[10px] text-charcoal/35 mt-1 mb-3">
+            <p className="text-[10px] text-charcoal/65 mt-1 mb-3">
               Only fill these in when the search copy should differ from the post copy.
             </p>
             <Field label="Meta title">
@@ -832,7 +832,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 onChange={e => set("meta_title", e.target.value)}
                 maxLength={70}
                 placeholder="Defaults to the post title"
-                className="w-full text-sm bg-transparent outline-none placeholder:text-charcoal/25"
+                className="w-full text-sm bg-transparent outline-none placeholder:text-charcoal/50"
               />
             </Field>
             <Field label="Meta description">
@@ -842,7 +842,7 @@ export function BlogEditor({ initial, aiEnabled }: { initial?: Partial<BlogEdito
                 maxLength={170}
                 rows={3}
                 placeholder="Defaults to the excerpt"
-                className="w-full text-sm bg-transparent outline-none resize-y placeholder:text-charcoal/25"
+                className="w-full text-sm bg-transparent outline-none resize-y placeholder:text-charcoal/50"
               />
             </Field>
           </Card>
@@ -890,7 +890,7 @@ function Card({ children }: { children: React.ReactNode }) {
 
 function Label({ children }: { children: React.ReactNode }) {
   return (
-    <span className="text-[10px] font-semibold uppercase tracking-wider text-charcoal/35">
+    <span className="text-[10px] font-semibold uppercase tracking-wider text-charcoal/65">
       {children}
     </span>
   );
@@ -901,7 +901,7 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
     <div className="py-2.5 first:pt-0 last:pb-0 border-b border-mist/70 last:border-0">
       <div className="flex items-baseline gap-2 mb-1">
         <Label>{label}</Label>
-        {hint && <span className="text-[10px] text-charcoal/25 font-mono truncate">{hint}</span>}
+        {hint && <span className="text-[10px] text-charcoal/65 font-mono truncate">{hint}</span>}
       </div>
       {children}
     </div>
@@ -913,10 +913,10 @@ function Counter({ label, value, max }: { label: string; value: number; max: num
   const empty = value === 0;
   return (
     <div className="flex items-center justify-between gap-2 text-[11px]">
-      <span className="text-charcoal/40">{label}</span>
+      <span className="text-charcoal/65">{label}</span>
       <span className={cn(
         "tabular-nums font-medium",
-        over ? "text-red-600" : empty ? "text-charcoal/30" : "text-forest"
+        over ? "text-red-600" : empty ? "text-charcoal/65" : "text-forest"
       )}>
         {value} / {max}
       </span>

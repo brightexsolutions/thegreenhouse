@@ -24,7 +24,7 @@ export function QrSharePanel({ eventId, eventSlug }: QrSharePanelProps) {
         <QrCode size={13} className="text-forest" />
         <h3 className="text-sm font-semibold text-charcoal">Registration QR</h3>
       </div>
-      <p className="text-[11px] text-charcoal/50 mb-4 leading-relaxed">
+      <p className="text-[11px] text-charcoal/70 mb-4 leading-relaxed">
         Print or display this code, it links to the event registration page.
       </p>
 
@@ -33,7 +33,7 @@ export function QrSharePanel({ eventId, eventSlug }: QrSharePanelProps) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={qrUrl} alt="QR code" className="w-20 h-20 rounded-lg border border-mist" />
           <div className="flex flex-col gap-2">
-            <p className="text-[10px] text-charcoal/40 font-mono break-all">{eventUrl}</p>
+            <p className="text-[10px] text-charcoal/65 font-mono break-all">{eventUrl}</p>
             <a
               href={qrUrl}
               download={`qr-${eventSlug}.png`}

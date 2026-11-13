@@ -65,7 +65,7 @@ export function GalleryGrid({ images }: Props) {
                   {img.caption && <p className="text-cream text-sm">{img.caption}</p>}
                   {img.eventTitle && img.eventSlug && (
                     <span
-                      className="text-gold/80 text-xs flex items-center gap-1 mt-0.5 hover:text-gold"
+                      className="text-gold text-xs flex items-center gap-1 mt-0.5 hover:text-gold"
                       onClick={e => e.stopPropagation()}
                     >
                       <Link href={`/events/${img.eventSlug}`} className="flex items-center gap-1">
@@ -120,7 +120,7 @@ export function GalleryGrid({ images }: Props) {
                 {images[lightboxIdx].eventTitle && images[lightboxIdx].eventSlug && (
                   <Link
                     href={`/events/${images[lightboxIdx].eventSlug}`}
-                    className="text-gold/70 text-xs flex items-center gap-1 mt-0.5 hover:text-gold"
+                    className="text-gold text-xs flex items-center gap-1 mt-0.5 hover:text-gold"
                     onClick={e => e.stopPropagation()}
                   >
                     {images[lightboxIdx].eventTitle} <ArrowUpRight size={10} />
@@ -142,7 +142,7 @@ export function GalleryGrid({ images }: Props) {
             </button>
           )}
 
-          <div className="absolute bottom-5 left-0 right-0 text-center text-xs text-white/40 pointer-events-none">
+          <div className="absolute bottom-5 left-0 right-0 text-center text-xs text-white/70 pointer-events-none">
             {lightboxIdx + 1} / {images.length}
           </div>
         </div>

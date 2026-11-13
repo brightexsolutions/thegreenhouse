@@ -54,8 +54,8 @@ export function DocsNav({ scrollContainerId, excludeIds = [] }: Props) {
             className={cn(
               "group flex items-center gap-2 px-3 py-2 rounded-xl text-xs transition-all",
               active
-                ? "text-forest bg-forest/8 font-medium"
-                : "text-charcoal/55 hover:text-forest hover:bg-forest/5"
+                ? "text-forest bg-forest/10 font-medium"
+                : "text-charcoal/70 hover:text-forest hover:bg-forest/5"
             )}
           >
             <div

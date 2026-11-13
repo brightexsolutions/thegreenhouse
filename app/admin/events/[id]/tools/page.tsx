@@ -67,10 +67,10 @@ export default async function EventToolsPage({ params }: Props) {
         <div className="flex items-start justify-between mb-1">
           <h3 className="text-sm font-semibold text-charcoal">Projection Display</h3>
           {isPreviewOnly && (
-            <span className="text-[10px] font-semibold uppercase tracking-wide bg-gold/15 text-gold/80 px-2 py-0.5 rounded-full">Preview mode</span>
+            <span className="text-[10px] font-semibold uppercase tracking-wide bg-gold/15 text-gold px-2 py-0.5 rounded-full">Preview mode</span>
           )}
         </div>
-        <p className="text-xs text-charcoal/50 mb-4">
+        <p className="text-xs text-charcoal/70 mb-4">
           {isPreviewOnly
             ? "Event is not yet published. These links are available for testing, the display and control panel will work as normal."
             : "Open the display screen on a projector and use the control panel on your phone to manage scenes, lyrics, and messages in real time."}
@@ -127,7 +127,7 @@ export default async function EventToolsPage({ params }: Props) {
         <div className="flex items-center justify-between">
           <h3 className="text-sm font-semibold text-charcoal">Export & Communicate</h3>
           {(registrantCount ?? 0) === 0 && (
-            <span className="text-[10px] text-charcoal/35 bg-charcoal/5 px-2 py-0.5 rounded-full">No registrants yet</span>
+            <span className="text-[10px] text-charcoal/65 bg-charcoal/5 px-2 py-0.5 rounded-full">No registrants yet</span>
           )}
         </div>
 
@@ -138,7 +138,7 @@ export default async function EventToolsPage({ params }: Props) {
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm font-semibold text-charcoal mb-0.5">Event Summary Report</p>
-            <p className="text-xs text-charcoal/50 leading-relaxed mb-2.5">
+            <p className="text-xs text-charcoal/70 leading-relaxed mb-2.5">
               A clear, shareable overview for your team: registrations, attendance, session feedback, and trivia participation.
             </p>
             <a
@@ -170,10 +170,10 @@ export default async function EventToolsPage({ params }: Props) {
             </>
           ) : (
             <>
-              <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/25 font-medium cursor-not-allowed">
+              <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/65 font-medium cursor-not-allowed">
                 <Download size={14} /> Download CSV
               </span>
-              <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/25 font-medium cursor-not-allowed">
+              <span className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-mist text-sm text-charcoal/65 font-medium cursor-not-allowed">
                 <Download size={14} /> Download PDF list
               </span>
             </>

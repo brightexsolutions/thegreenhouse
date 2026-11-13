@@ -190,7 +190,7 @@ export function EventPhotoUpload({ events }: Props) {
 
       {/* ── Event picker ── */}
       <div>
-        <p className="text-[10px] font-semibold text-charcoal/45 uppercase tracking-wider mb-2.5 px-0.5">
+        <p className="text-[10px] font-semibold text-charcoal/65 uppercase tracking-wider mb-2.5 px-0.5">
           Select event
         </p>
         <div className="flex gap-3 overflow-x-auto pb-1 scrollbar-hide">
@@ -205,14 +205,14 @@ export function EventPhotoUpload({ events }: Props) {
                 className={cn(
                   "relative flex-shrink-0 w-44 text-left rounded-2xl border-2 p-3.5 transition-all",
                   isSelected
-                    ? "border-forest bg-forest/4 shadow-sm"
-                    : "border-mist bg-white hover:border-forest/30 hover:bg-forest/2"
+                    ? "border-forest bg-forest/5 shadow-sm"
+                    : "border-mist bg-white hover:border-forest/30 hover:bg-forest/5"
                 )}
               >
                 {/* Session icon */}
                 <div className={cn(
                   "w-8 h-8 rounded-xl flex items-center justify-center mb-2.5",
-                  isSelected ? "bg-forest text-cream" : "bg-charcoal/6 text-charcoal/35"
+                  isSelected ? "bg-forest text-cream" : "bg-charcoal/5 text-charcoal/65"
                 )}>
                   {isLoading
                     ? <Loader2 size={14} className="animate-spin" />
@@ -229,7 +229,7 @@ export function EventPhotoUpload({ events }: Props) {
                 </p>
 
                 {/* Date */}
-                <p className="text-[10px] text-charcoal/40 mt-1">
+                <p className="text-[10px] text-charcoal/65 mt-1">
                   {new Date(event.event_date).toLocaleDateString("en-KE", {
                     day: "numeric", month: "short", year: "numeric"
                   })}
@@ -237,10 +237,10 @@ export function EventPhotoUpload({ events }: Props) {
 
                 {/* Past / upcoming badge */}
                 <div className={cn(
-                  "mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-[9px] font-semibold uppercase tracking-wide",
+                  "mt-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-semibold uppercase tracking-wide",
                   isPast
-                    ? "bg-charcoal/6 text-charcoal/40"
-                    : "bg-gold/12 text-gold-dark"
+                    ? "bg-charcoal/5 text-charcoal/65"
+                    : "bg-gold/10 text-gold-dark"
                 )}>
                   {isPast ? "Past" : "Upcoming"}
                 </div>
@@ -254,7 +254,7 @@ export function EventPhotoUpload({ events }: Props) {
                     {photos.length > 0 && (() => {
                       const totalKb = photos.reduce((sum, p) => sum + (p.size_kb ?? 0), 0);
                       return totalKb > 0 ? (
-                        <span className="text-[10px] text-charcoal/35">{formatKb(totalKb)} total</span>
+                        <span className="text-[10px] text-charcoal/65">{formatKb(totalKb)} total</span>
                       ) : null;
                     })()}
                   </div>
@@ -276,11 +276,11 @@ export function EventPhotoUpload({ events }: Props) {
         <>
           {/* ── Upload zone ── */}
           <div className="bg-white rounded-2xl border border-mist p-5 space-y-3">
-            <p className="text-xs font-semibold text-charcoal/50 uppercase tracking-wider">Upload photos</p>
+            <p className="text-xs font-semibold text-charcoal/70 uppercase tracking-wider">Upload photos</p>
             <div
               className={cn(
                 "border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-all",
-                dragOver ? "border-forest bg-forest/5" : "border-mist hover:border-forest/40 hover:bg-forest/3"
+                dragOver ? "border-forest bg-forest/5" : "border-mist hover:border-forest/40 hover:bg-forest/5"
               )}
               onClick={() => inputRef.current?.click()}
               onDragOver={e => { e.preventDefault(); setDragOver(true); }}
@@ -303,19 +303,19 @@ export function EventPhotoUpload({ events }: Props) {
               />
               {isUploading ? (
                 <div className="flex flex-col items-center gap-2">
-                  <Loader2 size={24} className="animate-spin text-forest/60" />
-                  <p className="text-sm font-medium text-charcoal/60">
+                  <Loader2 size={24} className="animate-spin text-forest/80" />
+                  <p className="text-sm font-medium text-charcoal/65">
                     Uploading {uploadState.done + 1} of {uploadState.done + uploadState.total + 1}…
                   </p>
-                  <p className="text-xs text-charcoal/30">
+                  <p className="text-xs text-charcoal/65">
                     {uploadState.current} · {formatSize(uploadState.currentSize)}
                   </p>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2">
-                  <Upload size={24} className="text-charcoal/25" />
-                  <p className="text-sm font-medium text-charcoal/50">Drop photos here or click to browse</p>
-                  <p className="text-xs text-charcoal/30">Select up to 10 at once · JPEG, PNG, or WebP · Max 15MB each</p>
+                  <Upload size={24} className="text-charcoal/65" />
+                  <p className="text-sm font-medium text-charcoal/70">Drop photos here or click to browse</p>
+                  <p className="text-xs text-charcoal/65">Select up to 10 at once · JPEG, PNG, or WebP · Max 15MB each</p>
                 </div>
               )}
             </div>
@@ -328,7 +328,7 @@ export function EventPhotoUpload({ events }: Props) {
                     "flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-medium border",
                     i === 0 && isUploading
                       ? "bg-forest/10 border-forest/20 text-forest"
-                      : "bg-charcoal/5 border-mist text-charcoal/50"
+                      : "bg-charcoal/5 border-mist text-charcoal/70"
                   )}>
                     {i === 0 && isUploading && <Loader2 size={10} className="animate-spin" />}
                     <span>{f.name.length > 18 ? f.name.slice(0, 16) + "…" : f.name}</span>
@@ -362,13 +362,13 @@ export function EventPhotoUpload({ events }: Props) {
 
                     {meta && (
                       <div className="absolute top-2 left-2 flex items-center gap-1">
-                        <span className="px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-medium leading-none">
+                        <span className="px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[10px] font-medium leading-none">
                           {meta.size_kb >= 1024
                             ? `${(meta.size_kb / 1024).toFixed(1)} MB`
                             : `${meta.size_kb} KB`}
                         </span>
                         {meta.width && meta.height && (
-                          <span className="px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[9px] font-medium leading-none">
+                          <span className="px-1.5 py-0.5 rounded-md bg-black/60 text-white text-[10px] font-medium leading-none">
                             {meta.width}×{meta.height}
                           </span>
                         )}
@@ -404,9 +404,9 @@ export function EventPhotoUpload({ events }: Props) {
             </div>
           ) : (
             <div className="bg-white rounded-2xl border border-mist p-12 flex flex-col items-center gap-3 text-center">
-              <ImageIcon size={26} className="text-charcoal/15" />
-              <p className="text-sm text-charcoal/40">No photos uploaded yet</p>
-              <p className="text-xs text-charcoal/25">Upload photos from this session above</p>
+              <ImageIcon size={26} className="text-charcoal/65" />
+              <p className="text-sm text-charcoal/65">No photos uploaded yet</p>
+              <p className="text-xs text-charcoal/65">Upload photos from this session above</p>
             </div>
           )}
         </>

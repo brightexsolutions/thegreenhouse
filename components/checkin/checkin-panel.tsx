@@ -309,7 +309,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
             <span className="text-sm font-semibold text-charcoal">{present} present</span>
           </div>
           <div className="flex items-center gap-2">
-            <Users size={13} className="text-charcoal/50" />
+            <Users size={13} className="text-charcoal/70" />
             <span className="text-xs text-charcoal/65">{total} registered</span>
           </div>
         </div>
@@ -319,13 +319,13 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
             style={{ width: `${pct}%` }}
           />
         </div>
-        <p className="text-[10px] text-charcoal/60 mt-1.5 text-right">{pct}% attendance</p>
+        <p className="text-[10px] text-charcoal/65 mt-1.5 text-right">{pct}% attendance</p>
       </div>
 
       {/* ── Search + filter ── */}
       <div className="flex gap-2">
         <div className="relative flex-1">
-          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/30" />
+          <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal/65" />
           <input
             value={query}
             onChange={e => setQuery(e.target.value)}
@@ -357,7 +357,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
             <p className="text-xs font-semibold text-charcoal">Add attendee (no ticket)</p>
             <button type="button" onClick={() => { setShowWalkIn(false); setWalkInError(null); }}
               className="p-1 rounded-lg hover:bg-charcoal/5 transition-colors">
-              <X size={13} className="text-charcoal/40" />
+              <X size={13} className="text-charcoal/65" />
             </button>
           </div>
           <div className="grid grid-cols-2 gap-2">
@@ -379,7 +379,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
               "w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl border text-xs font-medium transition-all text-left",
               walkInConsent
                 ? "border-green-200 bg-green-50 text-green-700"
-                : "border-mist bg-off-white text-charcoal/50"
+                : "border-mist bg-off-white text-charcoal/70"
             )}
           >
             <div className={cn(
@@ -393,7 +393,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
               )}
             </div>
             <div className="flex items-center gap-1.5">
-              <Camera size={12} className={walkInConsent ? "text-green-600" : "text-charcoal/30"} />
+              <Camera size={12} className={walkInConsent ? "text-green-600" : "text-charcoal/65"} />
               <span>Consents to photography &amp; filming</span>
             </div>
           </button>
@@ -416,7 +416,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
       {/* ── Registrant list ── */}
       <div className="bg-white rounded-2xl border border-mist overflow-hidden">
         {filtered.length === 0 ? (
-          <p className="py-10 text-center text-sm text-charcoal/60">{items.length === 0 ? "No one has registered yet." : "No one matches that search."}</p>
+          <p className="py-10 text-center text-sm text-charcoal/65">{items.length === 0 ? "No one has registered yet." : "No one matches that search."}</p>
         ) : (
           <div className="divide-y divide-mist">
             {filtered.map(r => (
@@ -444,7 +444,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
                       </span>
                     ) : (
                       <span title="No photo consent" className="flex-shrink-0">
-                        <CameraOff size={11} className="text-charcoal/45" />
+                        <CameraOff size={11} className="text-charcoal/65" />
                       </span>
                     )}
                   </div>
@@ -458,7 +458,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
                       ) : null}
                     </div>
                     {r.ticket_token && (
-                      <span className="text-[11px] font-mono text-charcoal/55 flex-shrink-0">
+                      <span className="text-[11px] font-mono text-charcoal/70 flex-shrink-0">
                         #{r.ticket_token.slice(0, 8).toUpperCase()}
                       </span>
                     )}
@@ -490,7 +490,7 @@ export function CheckinPanel({ registrants: initial, eventSlug, checkinToken }: 
         )}
       </div>
 
-      <p className="text-center text-[11px] text-charcoal/60">
+      <p className="text-center text-[11px] text-charcoal/65">
         {filtered.length} of {total} shown · {present} present
       </p>
     </div>

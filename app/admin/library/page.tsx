@@ -67,7 +67,7 @@ export default async function LibraryPage({ searchParams }: Props) {
       <div className="flex-shrink-0 bg-off-white border-b border-mist px-6 pt-6 pb-3">
         <div className="mb-4">
           <h1 className="text-lg font-semibold text-charcoal leading-none">Library</h1>
-          <p className="text-sm text-charcoal/40 mt-1">Manage songs, event photos, and themes</p>
+          <p className="text-sm text-charcoal/65 mt-1">Manage songs, event photos, and themes</p>
         </div>
 
         {/* Tab bar — scrollable on mobile */}
@@ -80,7 +80,7 @@ export default async function LibraryPage({ searchParams }: Props) {
                 className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap ${
                   activeTab === key
                     ? "bg-forest text-cream shadow-sm"
-                    : "text-charcoal/50 hover:text-charcoal hover:bg-charcoal/5"
+                    : "text-charcoal/70 hover:text-charcoal hover:bg-charcoal/5"
                 }`}
               >
                 <Icon size={14} />

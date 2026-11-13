@@ -7,7 +7,7 @@ import { Loader2, Maximize2, Minimize2, Music2, Sparkles } from "lucide-react";
 import { QRCodeSVG } from "qrcode.react";
 import { AnimatePresence, motion, type Variants } from "framer-motion";
 import { SITE_NAME } from "@/lib/constants";
-import { sessionName } from "@/lib/utils";
+import { sessionName, eventStart } from "@/lib/utils";
 
 type DisplayState = {
   scene:                    string;
@@ -586,7 +586,10 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
     return () => { supabase.removeChannel(channel); };
   }, [event?.id]);
 
-  // Poll community attendee count every 4s — runs at top level so data is ready when scene shows
+  // Community attendees. Fetched once on load so the data is ready, then again
+  // the moment the community scene comes up and every 8s while it stays up.
+  // No other scene shows this, so nothing is polled the rest of the evening.
+  const onCommunityScene = display?.scene === "community";
   useEffect(() => {
     let cancelled = false;
     async function pollAttendees() {
@@ -598,9 +601,9 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
       } catch { /* ignore */ }
     }
     pollAttendees();
-    const id = setInterval(pollAttendees, 2000);
-    return () => { cancelled = true; clearInterval(id); };
-  }, [slug]);
+    const id = onCommunityScene ? setInterval(pollAttendees, 8000) : null;
+    return () => { cancelled = true; if (id) clearInterval(id); };
+  }, [slug, onCommunityScene]);
 
   // Poll trivia round + results every 5s when scene = trivia.
   // display?.updated_at is included so that any display_state change (reveal, close)
@@ -611,9 +614,12 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
       const roundId = display?.trivia_round_id;
       if (!roundId || display?.scene !== "trivia") { setTriviaRound(null); setTriviaResults(null); return; }
       try {
+        // Unique query string so the projector always reads past the short CDN
+        // cache on these two routes: the reveal must not lag on the big screen.
+        const bust = `?fresh=${Date.now()}`;
         const [roundRes, resultsRes] = await Promise.all([
-          fetch(`/api/trivia/${roundId}`, { cache: "no-store" }),
-          fetch(`/api/trivia/${roundId}/results`, { cache: "no-store" }),
+          fetch(`/api/trivia/${roundId}${bust}`, { cache: "no-store" }),
+          fetch(`/api/trivia/${roundId}/results${bust}`, { cache: "no-store" }),
         ]);
         if (cancelled) return;
         if (roundRes.ok)   setTriviaRound(await roundRes.json() as TriviaRound);
@@ -1079,7 +1085,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
                       </div>
                       {/* Chat bubble */}
                       <div
-                        className="rounded-full text-[9px] font-bold whitespace-nowrap px-2 py-0.5"
+                        className="rounded-full text-[10px] font-bold whitespace-nowrap px-2 py-0.5"
                         style={{
                           background: "rgba(78,195,120,0.18)",
                           border: "1px solid rgba(78,195,120,0.38)",
@@ -1387,7 +1393,7 @@ export default function DisplayPage({ params }: { params: { slug: string } }) {
             <p className="text-[11px] font-bold text-center tracking-wide" style={{ color: t.qrFg, opacity: 0.85 }}>
               {liveUrl.replace(/^https?:\/\//, "")}
             </p>
-            <p className="text-[9px] font-mono" style={{ color: t.qrFg, opacity: 0.3 }}>
+            <p className="text-[10px] font-mono" style={{ color: t.qrFg, opacity: 0.3 }}>
               Program · Lyrics · Feedback
             </p>
           </motion.div>
@@ -1458,7 +1464,8 @@ function CountdownScene({
   sessionsRef.current = sessions;
 
   useEffect(() => {
-    const target = new Date(`${eventDate}T${eventTime}`);
+    // Fixed to Nairobi time, whatever the clock zone of the projector laptop.
+    const target = eventStart(eventDate, eventTime);
 
     function update() {
       const now  = Date.now();
@@ -1907,7 +1914,7 @@ function TriviaScene({
           <div className="flex flex-col items-center gap-2 rounded-2xl p-4"
             style={{ background: t.qrBg, border: `1px solid ${t.border}` }}>
             <QRCodeSVG value={liveUrl} size={110} bgColor={t.qrBg} fgColor={t.qrFg} level="M" />
-            <p className="text-[9px] uppercase tracking-widest text-center font-medium"
+            <p className="text-[10px] uppercase tracking-widest text-center font-medium"
               style={{ color: t.qrFg, opacity: 0.55 }}>
               Scan to answer
             </p>

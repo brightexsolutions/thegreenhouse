@@ -46,12 +46,12 @@ export function FeedbackForm({ eventId }: FeedbackFormProps) {
     <div className="bg-white rounded-3xl border border-mist overflow-hidden">
       {/* Header */}
       <div className="px-5 py-4 border-b border-mist flex items-center gap-3">
-        <div className="w-9 h-9 rounded-xl bg-forest/8 flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 rounded-xl bg-forest/10 flex items-center justify-center flex-shrink-0">
           <MessageSquare size={15} className="text-forest" />
         </div>
         <div>
           <p className="text-sm font-semibold text-charcoal">Share a thought or question</p>
-          <p className="text-xs text-charcoal/45 mt-0.5">
+          <p className="text-xs text-charcoal/65 mt-0.5">
             Your message may appear on the display screen
           </p>
         </div>
@@ -61,7 +61,7 @@ export function FeedbackForm({ eventId }: FeedbackFormProps) {
         <div className="px-5 py-10 text-center">
           <CheckCircle2 size={30} className="text-forest mx-auto mb-3" />
           <p className="text-sm font-semibold text-charcoal">Received, thank you!</p>
-          <p className="text-xs text-charcoal/50 mt-1.5 leading-relaxed">
+          <p className="text-xs text-charcoal/70 mt-1.5 leading-relaxed">
             Your message has been sent to the team.
           </p>
           <button
@@ -80,10 +80,10 @@ export function FeedbackForm({ eventId }: FeedbackFormProps) {
             maxLength={280}
             rows={3}
             className="w-full px-3.5 py-3 rounded-2xl border border-charcoal/15 text-base text-charcoal
-                       placeholder:text-charcoal/35 bg-off-white focus:outline-none focus:ring-2
+                       placeholder:text-charcoal/50 bg-off-white focus:outline-none focus:ring-2
                        focus:ring-forest/20 focus:border-forest/40 resize-none transition-all leading-relaxed"
           />
-          <p className="text-right text-[11px] text-charcoal/30 -mt-1">{message.length}/280</p>
+          <p className="text-right text-[11px] text-charcoal/65 -mt-1">{message.length}/280</p>
 
           {/* Anonymous toggle */}
           <label className="flex items-center gap-3 cursor-pointer select-none">
@@ -108,7 +108,7 @@ export function FeedbackForm({ eventId }: FeedbackFormProps) {
               placeholder="Your name (optional)"
               maxLength={60}
               className="w-full px-3.5 py-3 rounded-xl border border-charcoal/15 text-base text-charcoal
-                         placeholder:text-charcoal/35 bg-off-white focus:outline-none focus:ring-2
+                         placeholder:text-charcoal/50 bg-off-white focus:outline-none focus:ring-2
                          focus:ring-forest/20 focus:border-forest/40 transition-all"
             />
           )}
