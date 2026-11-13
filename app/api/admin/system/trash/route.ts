@@ -20,7 +20,7 @@ export async function GET() {
   const supabase = await guardSuperAdmin();
   if (!supabase) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const [{ data: events }, { data: registrations }, { data: posts }] = await Promise.all([
+  const [{ data: events }, { data: registrations }, { data: posts }, { data: sessions }, { data: songs }] = await Promise.all([
     supabase
       .from("events")
       .select("id, title, event_date, status, deleted_at")
@@ -36,12 +36,25 @@ export async function GET() {
       .select("id, title, slug, deleted_at")
       .not("deleted_at", "is", null)
       .order("deleted_at", { ascending: false }),
+    // PATCH below can restore these two, so they have to be listed as well.
+    supabase
+      .from("event_sessions")
+      .select("id, title, event_id, deleted_at, events(title)")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false }),
+    supabase
+      .from("songs")
+      .select("id, title, artist, deleted_at")
+      .not("deleted_at", "is", null)
+      .order("deleted_at", { ascending: false }),
   ]);
 
   return NextResponse.json({
     events:        events ?? [],
     registrations: registrations ?? [],
     posts:         posts ?? [],
+    sessions:      sessions ?? [],
+    songs:         songs ?? [],
   });
 }
 

@@ -8,6 +8,7 @@ import { registerLimiter } from "@/lib/rate-limit";
 import { sendTicketEmail } from "@/lib/communications/email";
 import { waTicketShareUrl } from "@/lib/communications/whatsapp";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
+import { formatEventTime, todayInNairobi } from "@/lib/utils";
 import { TicketPdf } from "@/lib/pdf/ticket-pdf";
 import { logger } from "@/lib/logger";
 
@@ -65,6 +66,15 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Registration is closed for this event" }, { status: 409 });
   }
 
+  // A session can stay "published" for a while after it has happened. Do not
+  // hand out tickets for a date that has already passed.
+  if (event.event_date < todayInNairobi()) {
+    return NextResponse.json(
+      { error: "Registration is closed: this session has already taken place." },
+      { status: 409 }
+    );
+  }
+
   // Capacity check
   if (event.capacity) {
     const { count } = await supabase
@@ -80,13 +90,18 @@ export async function POST(req: NextRequest) {
 
   // Duplicate check
   if (data.email) {
-    const { data: existing } = await supabase
+    // Case-insensitive, because older rows were stored exactly as typed. The
+    // LIKE wildcards are escaped so "_" in an address only matches itself. An
+    // address containing "*" (which PostgREST reads as "%") gets an exact match.
+    const base = supabase
       .from("registrations")
       .select("id")
       .eq("event_id", data.event_id)
-      .eq("email", data.email)
-      .is("deleted_at", null)
-      .single();
+      .is("deleted_at", null);
+    const { data: existing } = await (data.email.includes("*")
+      ? base.eq("email", data.email)
+      : base.ilike("email", data.email.replace(/[\\%_]/g, "\\$&"))
+    ).limit(1).maybeSingle();
     if (existing) {
       return NextResponse.json({ error: "You have already registered with this email" }, { status: 409 });
     }
@@ -130,6 +145,16 @@ export async function POST(req: NextRequest) {
     .select("id, ticket_token")
     .single();
 
+  // Two submissions can pass the checks above at the same moment. The unique
+  // index then rejects the second one, which is a duplicate, not a failure.
+  if (regErr?.code === "23505") {
+    const onPhone = `${regErr.message ?? ""} ${regErr.details ?? ""}`.includes("phone");
+    return NextResponse.json(
+      { error: onPhone ? "You have already registered with this number" : "You have already registered with this email" },
+      { status: 409 }
+    );
+  }
+
   if (regErr || !reg) {
     logger.error("registration_insert_failed", { error: regErr?.message });
     return NextResponse.json({ error: "Failed to register. Please try again." }, { status: 500 });
@@ -138,7 +163,7 @@ export async function POST(req: NextRequest) {
   const formattedDate = new Date(event.event_date).toLocaleDateString("en-KE", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
-  const formattedTime = event.event_time.slice(0, 5).replace(":", ".");
+  const formattedTime = formatEventTime(event.event_time);
 
   // Generate PDF
   let pdfBuffer: Buffer | null = null;
@@ -166,6 +191,11 @@ export async function POST(req: NextRequest) {
   } catch (err) {
     logger.warn("pdf_generation_failed", { error: err instanceof Error ? err.message : String(err) });
   }
+
+  // Whether the ticket actually went out by email. The success screen relies
+  // on this: when it is false the attendee is shown the download instead of
+  // being told to check an inbox that will stay empty.
+  let emailSent = false;
 
   // Send email if email provided
   if (data.email && pdfBuffer) {
@@ -199,6 +229,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (emailResult.success) {
+      emailSent = true;
       await supabase.from("registrations").update({ ticket_sent: true }).eq("id", reg.id);
     }
   }
@@ -227,5 +258,6 @@ export async function POST(req: NextRequest) {
     ticketToken: reg.ticket_token,
     ticketUrl,
     waShareUrl,
+    emailSent,
   }, { status: 201 });
 }

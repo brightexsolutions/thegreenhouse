@@ -3,6 +3,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { Resend } from "resend";
 import { SITE_NAME, SITE_URL, COMMS_FROM_EMAIL } from "@/lib/constants";
 import { logger } from "@/lib/logger";
+import { escapeHtml } from "@/lib/html";
 
 export const dynamic = "force-dynamic";
 
@@ -81,14 +82,21 @@ export async function POST(req: NextRequest) {
     const { data: linkData } = await supabaseAdmin.auth.admin.generateLink({
       type:  "recovery",
       email,
-      options: { redirectTo: `${SITE_URL}/admin/login` },
+      options: { redirectTo: `${SITE_URL}/auth/callback?next=/admin/set-password` },
     });
 
-    const resetLink = (linkData as { properties?: { action_link?: string } })?.properties?.action_link;
+    // Supabase's own action_link hands the session back in the URL fragment,
+    // which the server never sees and the PKCE browser client refuses. The
+    // hashed token is verified server side at /auth/confirm instead, which
+    // signs the person in and sends them to the set-password form.
+    const hashedToken = (linkData as { properties?: { hashed_token?: string } })?.properties?.hashed_token;
+    const resetLink = hashedToken
+      ? `${SITE_URL}/auth/confirm?token_hash=${encodeURIComponent(hashedToken)}&type=recovery&next=${encodeURIComponent("/admin/set-password")}`
+      : null;
 
     if (resetLink) {
       const resend = new Resend(process.env.RESEND_API_KEY ?? "");
-      const firstName = (full_name ?? email).split(" ")[0];
+      const firstName = escapeHtml((full_name || email).split(" ")[0]);
       await resend.emails.send({
         from:    COMMS_FROM_EMAIL(),
         to:      email,
@@ -108,7 +116,10 @@ export async function POST(req: NextRequest) {
         `,
       });
     }
-  } catch { /* email is a best-effort — don't fail the whole request */ }
+  } catch (err) {
+    // Best effort: the admin exists either way, but say why no email went out.
+    logger.error("admin_invite_email_failed", { error: err instanceof Error ? err.message : String(err) });
+  }
 
   return NextResponse.json({ success: true });
 }

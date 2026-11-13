@@ -17,13 +17,19 @@ export function PostEventEmailPanel({ eventId, alreadySent, emailCount }: Props)
   const [result,  setResult]  = useState<{ sent: number; failed: number } | null>(null);
   const [error,   setError]   = useState<string | null>(null);
 
-  async function sendNow() {
+  async function sendNow(resend = false) {
     const ok = await confirm({ title: "Send post-event email", message: `This will send a thank-you email to all ${emailCount} registrant${emailCount !== 1 ? "s" : ""} with email addresses. This cannot be undone.`, confirmLabel: "Send now" });
     if (!ok) return;
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/admin/events/${eventId}/post-event-email`, { method: "POST" });
+      const res = await fetch(`/api/admin/events/${eventId}/post-event-email`, {
+        method:  "POST",
+        headers: { "Content-Type": "application/json" },
+        // Without this flag the server refuses a second send, which is what
+        // stops the cron and this button from both mailing the list.
+        body:    JSON.stringify({ resend }),
+      });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed");
       setResult(data);
@@ -71,7 +77,7 @@ export function PostEventEmailPanel({ eventId, alreadySent, emailCount }: Props)
       {sent && !result ? (
         <button
           type="button"
-          onClick={sendNow}
+          onClick={() => sendNow(true)}
           disabled={loading || emailCount === 0}
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-mist text-xs text-charcoal/50 hover:border-forest/20 hover:text-forest transition-all disabled:opacity-40"
         >
@@ -81,7 +87,7 @@ export function PostEventEmailPanel({ eventId, alreadySent, emailCount }: Props)
       ) : !sent ? (
         <button
           type="button"
-          onClick={sendNow}
+          onClick={() => sendNow(false)}
           disabled={loading || emailCount === 0}
           className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-forest text-cream text-xs font-semibold hover:bg-moss transition-colors disabled:opacity-40"
         >

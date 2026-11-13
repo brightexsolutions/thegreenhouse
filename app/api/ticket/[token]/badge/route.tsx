@@ -8,6 +8,25 @@ export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ token: string }> };
 
+/**
+ * Content-Disposition for a download named after the attendee. Header values
+ * must be Latin-1, so a name with characters outside it used to throw and turn
+ * the download into a 500. The plain `filename` is reduced to ASCII and the
+ * real name travels in `filename*` (RFC 5987), which browsers prefer.
+ */
+function attachmentHeader(filename: string, fallback: string): string {
+  const ascii = filename
+    .normalize("NFKD")
+    .replace(/[^\x20-\x7E]/g, "")
+    .replace(/["\\/;]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-{2,}/g, "-");
+  const safe = /[A-Za-z0-9]/.test(ascii.replace(/\.[a-z]+$/, "").replace(/^(ticket|badge)-?/, "")) ? ascii : fallback;
+  const encoded = encodeURIComponent(filename)
+    .replace(/['()*!]/g, c => `%${c.charCodeAt(0).toString(16).toUpperCase()}`);
+  return `attachment; filename="${safe}"; filename*=UTF-8''${encoded}`;
+}
+
 export async function GET(req: NextRequest, { params }: Props) {
   const { token } = await params;
 
@@ -274,7 +293,10 @@ export async function GET(req: NextRequest, { params }: Props) {
       height: SIZE,
       fonts,
       headers: {
-        "Content-Disposition": `attachment; filename="badge-${t.first_name.toLowerCase()}-${t.last_name.toLowerCase()}.png"`,
+        "Content-Disposition": attachmentHeader(
+          `badge-${t.first_name.toLowerCase()}-${t.last_name.toLowerCase()}.png`,
+          "badge.png"
+        ),
         "Cache-Control":       "no-store",
       },
     }

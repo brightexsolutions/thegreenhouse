@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 import { SITE_NAME, SITE_URL } from "@/lib/constants";
 import { TicketBadgeSection } from "@/components/ticket/ticket-badge-section";
 import type { Metadata } from "next";
-import { sessionName } from "@/lib/utils";
+import { sessionName, formatEventTime } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -81,7 +81,7 @@ export default async function TicketPage({ params }: Props) {
   const shortDate = new Date(event.event_date).toLocaleDateString("en-KE", {
     day: "numeric", month: "long", year: "numeric",
   });
-  const formattedTime = `${event.event_time.slice(0, 5).replace(":", ".")} pm`;
+  const formattedTime = formatEventTime(event.event_time);
   // Strip "The Green House — " prefix for cleaner display
   const sessionLabel = sessionName(event.title);
 

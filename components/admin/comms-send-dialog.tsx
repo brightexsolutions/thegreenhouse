@@ -33,7 +33,11 @@ export function CommsSendDialog({ events }: CommsDialogProps) {
       });
       const data = await res.json();
       if (res.ok) {
-        setResult({ ok: true, text: `Sent to ${data.count} recipient${data.count !== 1 ? "s" : ""}` });
+        const failed = Number(data.failed ?? 0);
+        setResult({
+          ok:   failed === 0,
+          text: `Sent to ${data.count} recipient${data.count !== 1 ? "s" : ""}${failed > 0 ? `, ${failed} failed. Check the log below for details.` : ""}`,
+        });
         setMessage(""); setSubject("");
       } else {
         setResult({ ok: false, text: data.error ?? "Something went wrong" });

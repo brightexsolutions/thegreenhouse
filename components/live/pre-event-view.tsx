@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Leaf, BookOpen, MessageSquare, Music2, Clock } from "lucide-react";
 import { motion } from "framer-motion";
+import { eventStart, formatEventTime } from "@/lib/utils";
 
 interface PreEventViewProps {
   eventTitle:      string;
@@ -19,8 +21,9 @@ function useCountdown(targetDate: string, targetTime: string) {
 
   useEffect(() => {
     function calc() {
-      const target = new Date(`${targetDate}T${targetTime}`);
-      setDiff(target.getTime() - Date.now());
+      // eventStart pins the time to Nairobi, so the countdown is right on
+      // any device rather than only on phones set to Kenyan time.
+      setDiff(eventStart(targetDate, targetTime).getTime() - Date.now());
     }
     calc();
     const id = setInterval(calc, 1000);
@@ -61,7 +64,18 @@ export function PreEventView({
   const formattedDate = new Date(eventDate).toLocaleDateString("en-KE", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
-  const formattedTime = eventTime.slice(0, 5);
+  const formattedTime = formatEventTime(eventTime);
+
+  // Once the countdown is over, ask the server for the page again every 30s.
+  // The live view appears when an admin flips the event to "live", and nobody
+  // in the room should have to reload by hand to see it.
+  const router  = useRouter();
+  const started = !isPast && diff <= 0;
+  useEffect(() => {
+    if (!started) return;
+    const id = setInterval(() => router.refresh(), 30_000);
+    return () => clearInterval(id);
+  }, [started, router]);
 
   return (
     <div className="min-h-screen bg-cream flex flex-col">
@@ -83,7 +97,7 @@ export function PreEventView({
             </h1>
 
             <p className="text-cream/50 text-sm">
-              {formattedDate} &middot; {formattedTime}pm
+              {formattedDate} &middot; {formattedTime}
               {venueName && venueName !== "TBA" && ` · ${venueName}`}
             </p>
 
@@ -121,7 +135,7 @@ export function PreEventView({
           >
             <div className="w-2.5 h-2.5 rounded-full bg-green-400 mx-auto mb-3 animate-pulse" />
             <p className="text-cream font-semibold text-lg">Starting now</p>
-            <p className="text-cream/50 text-sm mt-1">Refresh the page to access the live program.</p>
+            <p className="text-cream/50 text-sm mt-1">The live program will open here automatically.</p>
           </motion.div>
         ) : (
           <motion.div

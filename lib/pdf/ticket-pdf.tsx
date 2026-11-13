@@ -242,7 +242,7 @@ export function TicketPdf(p: TicketPdfProps) {
             </View>
             <View style={styles.detailCell}>
               <Text style={styles.detailLabel}>TIME</Text>
-              <Text style={styles.detailValue}>{p.eventTime} pm</Text>
+              <Text style={styles.detailValue}>{p.eventTime}</Text>
             </View>
             {p.venueName && (
               <View style={styles.detailCell}>

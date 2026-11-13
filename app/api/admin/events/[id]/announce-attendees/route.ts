@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { requireAdmin } from "@/lib/auth-guard";
+import { formatEventTime } from "@/lib/utils";
 import { COMMS_FROM_EMAIL, REPLY_TO_EMAIL } from "@/lib/constants";
 import { announceAttendeeEmailHtml, announceAttendeeEmailText } from "@/lib/email-templates";
 import { logger } from "@/lib/logger";
@@ -18,13 +19,12 @@ function getResend() {
 }
 
 export async function POST(req: NextRequest, { params }: Props) {
-  // Auth guard — admin session required
-  const userSupabase = await createClient();
-  const { data: { user } } = await userSupabase.auth.getUser();
-  if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  // A session alone is not enough: the account must still have an admin profile.
+  const guard = await requireAdmin();
+  if (!guard.ok) return guard.response;
 
   const { id } = await params;
-  const supabase = createAdminClient();
+  const supabase = guard.supabase;
 
   // Fetch the new event being announced
   const { data: event } = await supabase
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest, { params }: Props) {
   const eventDate = new Date(event.event_date).toLocaleDateString("en-KE", {
     weekday: "long", day: "numeric", month: "long", year: "numeric",
   });
-  const eventTime = event.event_time.slice(0, 5).replace(":", ".") + "pm";
+  const eventTime = formatEventTime(event.event_time);
 
   // Format early bird deadline for display
   let earlyBirdDisplay: string | null = null;

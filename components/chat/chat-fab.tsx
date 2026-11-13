@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, X, Send, Leaf, ArrowRight } from "lucide-react";
-import { SESSION_FREQUENCY, CONTACT_EMAIL, SITE_NAME } from "@/lib/constants";
+import { SESSION_FREQUENCY, CONTACT_EMAIL, SITE_NAME, SOCIAL_INSTAGRAM, SOCIAL_TIKTOK } from "@/lib/constants";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -62,7 +62,24 @@ function hasVenue(e: UpcomingEvent | null | undefined): boolean {
 
 const GREET_RE = /\b(hi+|hello+|hey+|hiya|howdy|yo+|sup|greetings|good\s+(morning|afternoon|evening|day)|wassup|what'?s\s*up|peace)\b/i;
 
-const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
+/** "@handle" taken from a profile URL, so the chat can never cite a stale one. */
+function handleFromUrl(url: string): string {
+  try {
+    const first = new URL(url).pathname.split("/").filter(Boolean)[0] ?? "";
+    return first ? `@${first.replace(/^@/, "")}` : "";
+  } catch {
+    return "";
+  }
+}
+const INSTAGRAM_HANDLE = handleFromUrl(SOCIAL_INSTAGRAM);
+const TIKTOK_HANDLE    = handleFromUrl(SOCIAL_TIKTOK);
+
+/** Where "register" buttons point: the upcoming session if there is one. */
+function eventHref(event?: UpcomingEvent | null): string {
+  return event ? `/events/${event.slug}` : "/events";
+}
+
+const INTENTS: Array<{ re: RegExp; reply: (event?: UpcomingEvent | null) => BotReply }> = [
   {
     re: /what\s*(is|'?s)?\s*(the\s*)?green\s*house|about\s*(you|green\s*house|this)|tell\s*me\s*more|who\s*are\s*you/i,
     reply: () => ({
@@ -73,26 +90,34 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   },
   {
     re: /how\s*(do\s*i|to|can\s*i)?\s*(register|sign\s*up|book|get\s*a?\s*ticket)/i,
-    reply: () => ({
-      text:   "Head to our **Events** page, click on Session 02, and fill in your details. You'll receive a **PDF ticket via email**, you can also copy your ticket link to save it anywhere.",
+    reply: (event) => ({
+      text:   event
+        ? "Head to our **Events** page, open the upcoming session, and fill in your details. You'll receive a **PDF ticket via email**, you can also copy your ticket link to save it anywhere."
+        : "Registration opens as soon as the next session is announced. Keep an eye on our **Events** page: once it is listed, fill in your details and you'll receive a **PDF ticket via email**.",
       chips:  ["Is it free?", "What do I receive after registering?"],
-      action: { label: "Register for Session 02", href: "/events/session-02" },
+      action: event
+        ? { label: "Register now", href: eventHref(event) }
+        : { label: "See events", href: "/events" },
     }),
   },
   {
     re: /free|cost|price|pay|charge|fee/i,
-    reply: () => ({
+    reply: (event) => ({
       text:   "Yes, entry is completely free. Some future sessions may include a small venue contribution, but this will always be communicated clearly in advance.",
       chips:  ["How do I register?", "Who can attend?"],
-      action: { label: "Register for free", href: "/events/session-02" },
+      action: event
+        ? { label: "Register for free", href: eventHref(event) }
+        : { label: "See events", href: "/events" },
     }),
   },
   {
     re: /ticket|receive|get\s*(after|my)|confirmation/i,
-    reply: () => ({
+    reply: (event) => ({
       text:   "After registering, you'll get a **PDF ticket via email**. You can also copy your ticket link to save it somewhere handy, bring it on your phone screen to the door.",
       chips:  ["Where will it be held?", "When is the next session?"],
-      action: { label: "Register now", href: "/events/session-02" },
+      action: event
+        ? { label: "Register now", href: eventHref(event) }
+        : { label: "See events", href: "/events" },
     }),
   },
   {
@@ -106,7 +131,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
     re: /what\s*happen|what\s*to\s*expect|program|agenda|evening\s*like|session\s*like|structure/i,
     reply: () => ({
       text:  "A Green House evening includes live worship, prayer, open sharing, and genuine connection time. It's relaxed and intimate, more like a gathering of friends than a formal service.",
-      chips: ["What's the theme for Session 02?", "Who can attend?"],
+      chips: ["What's the theme?", "Who can attend?"],
     }),
   },
   {
@@ -140,7 +165,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /stay\s*inform|notify|notification|news|announce|update|broadcast|mailing/i,
     reply: () => ({
-      text:   "Register on the site and you'll receive updates via email before each session. You can also follow us on Instagram **@thegreenhouseke** for announcements.",
+      text:   `Register on the site and you'll receive updates via email before each session. You can also follow us on Instagram **${INSTAGRAM_HANDLE}** for announcements.`,
       chips:  ["Follow on Instagram", "How do I register?"],
       action: { label: "Get involved", href: "/get-involved" },
     }),
@@ -148,7 +173,7 @@ const INTENTS: Array<{ re: RegExp; reply: () => BotReply }> = [
   {
     re: /instagram|tiktok|youtube|social|follow|@thegreen/i,
     reply: () => ({
-      text:  "Find us on Instagram and TikTok, both **@thegreenhouseke**. We post session announcements, highlights, and community moments there.",
+      text:  `Find us on Instagram at **${INSTAGRAM_HANDLE}** and on TikTok at **${TIKTOK_HANDLE}**. We post session announcements, highlights, and community moments there.`,
       chips: ["How do I register?", "Contact the team"],
     }),
   },
@@ -220,9 +245,9 @@ function getBotReply(input: string, hasGreeted: boolean, event?: UpcomingEvent |
       };
     }
     return {
-      text:   "The next gathering is **Session 02** on **June 26, 2026** at **7:00 PM**. Venue details will be shared soon, register and we'll notify you via email.",
-      chips:  ["How do I register?", "Where will it be held?", "What's the theme?"],
-      action: { label: "View Session 02", href: "/events/session-02" },
+      text:   `We gather **${SESSION_FREQUENCY}**, and the date for the next session has not been announced yet. It will appear on our Events page as soon as it is confirmed.`,
+      chips:  ["What is The Green House?", "How do I stay informed?"],
+      action: { label: "See events", href: "/events" },
     };
   }
 
@@ -254,13 +279,13 @@ function getBotReply(input: string, hasGreeted: boolean, event?: UpcomingEvent |
       };
     }
     return {
-      text:  "The theme for Session 02 is **'Delusion'**, drawn from **2 Timothy 4:3–6**: a conversation about truth, comfort, and what we choose to hear.",
+      text:  "The theme for the next session has not been announced yet. It will be shared on our Events page along with the date.",
       chips: ["When is the next session?", "How do I register?"],
     };
   }
 
   for (const { re, reply } of INTENTS) {
-    if (re.test(t)) return reply();
+    if (re.test(t)) return reply(event);
   }
 
   return {

@@ -153,8 +153,7 @@ export default async function LiveAttendeePageWrapper({ params }: Props) {
         }}
       />
 
-      {/* TESTING: remove delayMs before go-live */}
-      <DonationPrompt eventId={typedEvent.id} slug={slug} giving={giving} delayMs={5000} />
+      <DonationPrompt eventId={typedEvent.id} slug={slug} giving={giving} />
     </div>
   );
 }

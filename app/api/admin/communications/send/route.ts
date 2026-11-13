@@ -82,5 +82,17 @@ export async function POST(req: NextRequest) {
   const count = results.filter(r => r.success).length;
   const failed = results.length - count;
 
+  // Every batch failed: say so. A 200 here showed a green "Sent to 0
+  // recipients" while nobody had been emailed.
+  if (count === 0 && failed > 0) {
+    const reason = results.find(r => r.error)?.error;
+    return NextResponse.json({
+      success: false,
+      count,
+      failed,
+      error: `No emails were sent. All ${failed} failed${reason ? `: ${reason}` : "."}`,
+    }, { status: 502 });
+  }
+
   return NextResponse.json({ success: true, count, failed });
 }

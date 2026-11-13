@@ -47,13 +47,16 @@ const SOURCE_OPTIONS = [
 interface RegistrationFormProps {
   event: Pick<Event, "id" | "slug" | "title" | "event_date" | "venue_name" | "theme_title">;
   onSuccess?: (hasEmail: boolean) => void;
+  /** Pass `event.type === "free"`. Left out, the form keeps its "free" wording. */
+  isFree?: boolean;
 }
 
-export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
+export function RegistrationForm({ event, onSuccess, isFree }: RegistrationFormProps) {
   const [submitted,    setSubmitted]    = useState(false);
   const [ticketToken,  setTicketToken]  = useState<string | null>(null);
   const [ticketUrl,    setTicketUrl]    = useState<string | null>(null);
   const [waShareUrl,   setWaShareUrl]   = useState<string | null>(null);
+  const [emailSent,    setEmailSent]    = useState(true);
   const [copied,       setCopied]       = useState(false);
   const [apiError,     setApiError]     = useState<string | null>(null);
 
@@ -100,13 +103,20 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
     setTicketToken(body.ticketToken ?? null);
     setTicketUrl(body.ticketUrl ?? null);
     setWaShareUrl(body.waShareUrl ?? null);
+    // Older responses carry no flag; only an explicit false means the email
+    // did not go out.
+    const sent = body.emailSent !== false;
+    setEmailSent(sent);
     setSubmitted(true);
-    onSuccess?.(!!data.email?.trim());
+    onSuccess?.(!!data.email?.trim() && sent);
   }
 
   /* ── Success screen ─────────────────────────────────────── */
   if (submitted) {
-    const hasEmail   = !!(emailValue?.trim());
+    const typedEmail = !!(emailValue?.trim());
+    // Only promise an email when one was really sent. If sending failed, the
+    // attendee gets the same download and link a phone-only registrant does.
+    const hasEmail   = typedEmail && emailSent;
     const pdfUrl     = ticketToken ? `/api/ticket/${ticketToken}/pdf` : null;
     const ticketPageUrl = ticketToken ? `/ticket/${ticketToken}` : null;
 
@@ -139,7 +149,9 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         {!hasEmail && (
           <>
             <p className="text-charcoal/60 text-sm max-w-xs mx-auto leading-relaxed mb-6">
-              Your spot is confirmed. Download your ticket below or copy the link to save it somewhere handy, you&apos;ll need it at the door.
+              {typedEmail
+                ? "Your spot is confirmed, but we could not email your ticket just now. Download it below or copy the link to save it somewhere handy, you'll need it at the door."
+                : "Your spot is confirmed. Download your ticket below or copy the link to save it somewhere handy, you'll need it at the door."}
             </p>
 
             <div className="space-y-3 max-w-xs mx-auto">
@@ -372,7 +384,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
                 we&apos;ll sort it out before the session.
               </p>
               <a
-                href={`https://wa.me/${REGISTRATION_SUPPORT_WA}?text=${encodeURIComponent("Hi, I need help with my registration for The Green House Session 02.")}`}
+                href={`https://wa.me/${REGISTRATION_SUPPORT_WA}?text=${encodeURIComponent(`Hi, I need help with my registration for ${event.title}.`)}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 text-xs font-semibold text-amber-800 underline underline-offset-2 hover:text-amber-900"
@@ -396,7 +408,7 @@ export function RegistrationForm({ event, onSuccess }: RegistrationFormProps) {
         {isSubmitting ? (
           <><Loader2 size={15} className="animate-spin" />Registering…</>
         ) : (
-          "Reserve my spot, it's free"
+          isFree === false ? "Reserve my spot" : "Reserve my spot, it's free"
         )}
       </button>
 

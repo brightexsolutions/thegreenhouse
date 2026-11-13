@@ -33,6 +33,11 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+// A cleared number input reports "", which `valueAsNumber` turns into NaN and
+// the schema then rejects, so optional numbers could never be left blank.
+const blankToUndefined = (v: unknown) =>
+  v === "" || v == null || Number.isNaN(Number(v)) ? undefined : Number(v);
+
 interface EventFormProps {
   eventId?: string;
   defaultValues?: Partial<FormData & { cover_image?: string; banner_image?: string; highlight_video?: string; slug?: string; dress_code?: string }>;
@@ -137,6 +142,9 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
       banner_image:     bannerPath,
       highlight_video:  videoPath,
       price_kes:   data.type === "paid" ? (data.price_kes ?? 0) : 0,
+      // Blank means "no limit". Sent as null so clearing the field also
+      // clears a capacity that was saved earlier.
+      capacity:    data.capacity ?? null,
       // store early_bird_deadline as midnight EAT (21:00 UTC) of chosen date; null when cleared or type=free
       early_bird_deadline: data.type === "paid" && data.early_bird_deadline
         ? `${data.early_bird_deadline}T21:00:00Z`
@@ -443,7 +451,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         {type === "paid" && (
           <>
             <Field label="Price (KES)" error={errors.price_kes?.message}>
-              <input {...register("price_kes", { valueAsNumber: true })} type="number" min="0" placeholder="500" className={inp(!!errors.price_kes)} />
+              <input {...register("price_kes", { setValueAs: blankToUndefined })} type="number" min="0" placeholder="500" className={inp(!!errors.price_kes)} />
             </Field>
             <Field label="Early bird deadline (optional)" error={errors.early_bird_deadline?.message}>
               <input {...register("early_bird_deadline")} type="date" className={inp(false)} />
@@ -453,7 +461,7 @@ export function EventForm({ eventId, defaultValues }: EventFormProps) {
         )}
 
         <Field label="Capacity (optional)" error={errors.capacity?.message}>
-          <input {...register("capacity", { valueAsNumber: true })} type="number" min="1" placeholder="150" className={inp(!!errors.capacity)} />
+          <input {...register("capacity", { setValueAs: blankToUndefined })} type="number" min="1" placeholder="150" className={inp(!!errors.capacity)} />
         </Field>
 
         <Field label="Description">

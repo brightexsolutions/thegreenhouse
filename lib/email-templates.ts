@@ -1,4 +1,5 @@
 import { SITE_NAME, EMAIL_FROM_NAME, SITE_URL, CONTACT_EMAIL, SOCIAL_INSTAGRAM } from "./constants";
+import { escapeHtml } from "./html";
 
 interface TicketEmailData {
   firstName:      string;
@@ -26,7 +27,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Your Ticket, ${d.eventTitle}</title>
+<title>Your Ticket, ${escapeHtml(d.eventTitle)}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -60,15 +61,15 @@ export function ticketEmailHtml(d: TicketEmailData): string {
 <div class="wrap">
   <div class="header">
     <div class="logo">${EMAIL_FROM_NAME}</div>
-    <h1>See you there,<br />${d.firstName}.</h1>
+    <h1>See you there,<br />${escapeHtml(d.firstName)}.</h1>
   </div>
   <div class="body">
     <p class="greeting">Your registration is confirmed. Here are the details for the evening, your PDF ticket is attached.</p>
 
     ${d.themeTitle ? `
     <div class="theme-block">
-      <p class="theme-title">${d.themeTitle}</p>
-      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+      <p class="theme-title">${escapeHtml(d.themeTitle)}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${escapeHtml(d.themeScripture)}</p>` : ""}
     </div>` : ""}
 
     <div class="detail-row">
@@ -76,7 +77,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
         <td class="detail-icon" width="40">📅</td>
         <td style="padding-left:14px;vertical-align:top">
           <div class="detail-label">Date</div>
-          <div class="detail-value">${d.eventDate}</div>
+          <div class="detail-value">${escapeHtml(d.eventDate)}</div>
         </td>
       </tr></table>
     </div>
@@ -85,7 +86,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
         <td class="detail-icon" width="40">🕖</td>
         <td style="padding-left:14px;vertical-align:top">
           <div class="detail-label">Time</div>
-          <div class="detail-value">${d.eventTime}pm</div>
+          <div class="detail-value">${escapeHtml(d.eventTime)}</div>
         </td>
       </tr></table>
     </div>
@@ -95,7 +96,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
         <td class="detail-icon" width="40">📍</td>
         <td style="padding-left:14px;vertical-align:top">
           <div class="detail-label">Venue</div>
-          <div class="detail-value">${d.venueName}</div>
+          <div class="detail-value">${escapeHtml(d.venueName)}</div>
         </td>
       </tr></table>
     </div>` : ""}
@@ -107,10 +108,10 @@ export function ticketEmailHtml(d: TicketEmailData): string {
       <div class="token">${d.ticketToken.slice(0, 8).toUpperCase()}</div>
     </div>
 
-    <a href="${d.ticketUrl}" class="cta">View your ticket online</a>
+    <a href="${escapeHtml(d.ticketUrl)}" class="cta">View your ticket online</a>
 
     ${d.liveUrl ? `
-    <a href="${d.liveUrl}" class="cta-secondary">📱 Open live program on the night</a>
+    <a href="${escapeHtml(d.liveUrl)}" class="cta-secondary">📱 Open live program on the night</a>
     <p class="live-note">This link gives you the program, song lyrics, and a way to share your thoughts, bookmark it for the session.</p>
     ` : ""}
 
@@ -118,7 +119,7 @@ export function ticketEmailHtml(d: TicketEmailData): string {
     <p class="doors-note">Doors open 30 minutes before the session begins.</p>
   </div>
   <div class="footer">
-    <p>This email was sent because you registered for <strong>${d.eventTitle}</strong>.</p>
+    <p>This email was sent because you registered for <strong>${escapeHtml(d.eventTitle)}</strong>.</p>
     <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
     <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${EMAIL_FROM_NAME}</p>
   </div>
@@ -146,7 +147,7 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Thank you for being there, ${d.eventTitle}</title>
+<title>Thank you for being there, ${escapeHtml(d.eventTitle)}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -174,20 +175,20 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
 <div class="wrap">
   <div class="header">
     <div class="logo">${EMAIL_FROM_NAME}</div>
-    <h1>Thank you,<br />${d.firstName}.</h1>
-    <p>We're glad you were part of ${d.eventTitle}.</p>
+    <h1>Thank you,<br />${escapeHtml(d.firstName)}.</h1>
+    <p>We're glad you were part of ${escapeHtml(d.eventTitle)}.</p>
   </div>
   <div class="body">
     <p class="greeting">
-      Something real happens when people gather with open hearts. Thank you for bringing yours on ${eventDayName}.
+      Something real happens when people gather with open hearts. Thank you for bringing yours on ${escapeHtml(eventDayName)}.
       Whether you sang, prayed, listened, or simply showed up, you were part of what made it meaningful.
     </p>
 
     ${d.themeTitle ? `
     <div class="theme-block">
       <p class="theme-label">Session theme</p>
-      <p class="theme-title">${d.themeTitle}</p>
-      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+      <p class="theme-title">${escapeHtml(d.themeTitle)}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${escapeHtml(d.themeScripture)}</p>` : ""}
     </div>` : ""}
 
     <hr class="divider" />
@@ -198,7 +199,7 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
         We'd love to hear your reflection: what stayed with you, what moved you, or even what you'd want to see next time.
         It takes less than a minute and shapes what we build next.
       </p>
-      <a href="${feedbackUrl}" class="cta">Share your reflection</a>
+      <a href="${escapeHtml(feedbackUrl)}" class="cta">Share your reflection</a>
     </div>
 
     <p style="font-size:14px;color:#6b7280;line-height:1.7;text-align:center;">
@@ -208,7 +209,7 @@ export function postEventEmailHtml(d: PostEventEmailData): string {
     </p>
   </div>
   <div class="footer">
-    <p>You received this because you attended <strong>${d.eventTitle}</strong>.</p>
+    <p>You received this because you attended <strong>${escapeHtml(d.eventTitle)}</strong>.</p>
     <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
     <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${EMAIL_FROM_NAME}</p>
   </div>
@@ -260,7 +261,7 @@ export function missedYouEmailHtml(d: MissedYouEmailData): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>We missed you, ${d.eventTitle}</title>
+<title>We missed you, ${escapeHtml(d.eventTitle)}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -288,20 +289,20 @@ export function missedYouEmailHtml(d: MissedYouEmailData): string {
 <div class="wrap">
   <div class="header">
     <div class="logo">${EMAIL_FROM_NAME}</div>
-    <h1>We missed you,<br />${d.firstName}.</h1>
-    <p>${d.eventTitle} · ${d.eventDate}</p>
+    <h1>We missed you,<br />${escapeHtml(d.firstName)}.</h1>
+    <p>${escapeHtml(d.eventTitle)} · ${escapeHtml(d.eventDate)}</p>
   </div>
   <div class="body">
     <p class="greeting">
-      We had hoped to see you at ${d.eventTitle}, and we completely understand that life sometimes has other plans.
+      We had hoped to see you at ${escapeHtml(d.eventTitle)}, and we completely understand that life sometimes has other plans.
       The evening was a beautiful one, and we genuinely look forward to having you with us at the next one.
     </p>
 
     ${d.themeTitle ? `
     <div class="theme-block">
       <p class="theme-label">What the evening was about</p>
-      <p class="theme-title">${d.themeTitle}</p>
-      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+      <p class="theme-title">${escapeHtml(d.themeTitle)}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${escapeHtml(d.themeScripture)}</p>` : ""}
     </div>` : ""}
 
     <hr class="divider" />
@@ -312,11 +313,11 @@ export function missedYouEmailHtml(d: MissedYouEmailData): string {
         Photos, highlights, and a feel for the evening are up on the event page.
         Take a look, it might make you even more excited for the next one.
       </p>
-      <a href="${eventUrl}" class="cta-primary">See the event recap →</a>
+      <a href="${escapeHtml(eventUrl)}" class="cta-primary">See the event recap →</a>
     </div>
 
     <div style="text-align:center;">
-      <a href="${eventsUrl}" class="cta-secondary">See upcoming sessions</a>
+      <a href="${escapeHtml(eventsUrl)}" class="cta-secondary">See upcoming sessions</a>
     </div>
 
     <p style="font-size:14px;color:#6b7280;line-height:1.7;text-align:center;margin-top:28px;">
@@ -326,7 +327,7 @@ export function missedYouEmailHtml(d: MissedYouEmailData): string {
     </p>
   </div>
   <div class="footer">
-    <p>You received this because you registered for <strong>${d.eventTitle}</strong>.</p>
+    <p>You received this because you registered for <strong>${escapeHtml(d.eventTitle)}</strong>.</p>
     <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
     <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${EMAIL_FROM_NAME}</p>
   </div>
@@ -384,7 +385,7 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>See you tomorrow, ${d.eventTitle}</title>
+<title>See you tomorrow, ${escapeHtml(d.eventTitle)}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -416,8 +417,8 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
 <div class="wrap">
   <div class="header">
     <div class="logo">${EMAIL_FROM_NAME}</div>
-    <h1>See you tomorrow,<br />${d.firstName}.</h1>
-    <p>${d.eventTitle} · ${d.eventDate}</p>
+    <h1>See you tomorrow,<br />${escapeHtml(d.firstName)}.</h1>
+    <p>${escapeHtml(d.eventTitle)} · ${escapeHtml(d.eventDate)}</p>
   </div>
   <div class="body">
     <p class="greeting">
@@ -428,8 +429,8 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
     ${d.themeTitle ? `
     <div class="theme-block">
       <p class="theme-label">Tonight's theme</p>
-      <p class="theme-title">${d.themeTitle}</p>
-      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+      <p class="theme-title">${escapeHtml(d.themeTitle)}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${escapeHtml(d.themeScripture)}</p>` : ""}
     </div>` : ""}
 
     <div class="detail-row">
@@ -437,7 +438,7 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
         <td class="detail-icon" width="40">📅</td>
         <td style="padding-left:14px;vertical-align:top">
           <div class="detail-label">Date</div>
-          <div class="detail-value">${d.eventDate}</div>
+          <div class="detail-value">${escapeHtml(d.eventDate)}</div>
         </td>
       </tr></table>
     </div>
@@ -446,7 +447,7 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
         <td class="detail-icon" width="40">🕖</td>
         <td style="padding-left:14px;vertical-align:top">
           <div class="detail-label">Time</div>
-          <div class="detail-value">${d.eventTime}pm</div>
+          <div class="detail-value">${escapeHtml(d.eventTime)}</div>
         </td>
       </tr></table>
     </div>
@@ -456,7 +457,7 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
         <td class="detail-icon" width="40">📍</td>
         <td style="padding-left:14px;vertical-align:top">
           <div class="detail-label">Venue</div>
-          <div class="detail-value">${d.venueName}${d.venueMapUrl ? ` &nbsp;<a href="${d.venueMapUrl}" style="font-size:13px;color:#1b3a2a;font-weight:600;text-decoration:none;">View on map →</a>` : ""}</div>
+          <div class="detail-value">${escapeHtml(d.venueName)}${d.venueMapUrl ? ` &nbsp;<a href="${escapeHtml(d.venueMapUrl)}" style="font-size:13px;color:#1b3a2a;font-weight:600;text-decoration:none;">View on map →</a>` : ""}</div>
         </td>
       </tr></table>
     </div>` : ""}
@@ -466,22 +467,22 @@ export function reminderEmailHtml(d: ReminderEmailData): string {
         <td class="detail-icon" width="40">👔</td>
         <td style="padding-left:14px;vertical-align:top">
           <div class="detail-label">Dress Code</div>
-          <div class="detail-value">${d.dressCode}</div>
+          <div class="detail-value">${escapeHtml(d.dressCode)}</div>
         </td>
       </tr></table>
     </div>` : ""}
 
     <hr class="divider" />
 
-    <a href="${ticketUrl}" class="cta">View your ticket</a>
-    <a href="${liveUrl}" class="cta-secondary">📱 Open live program on the night</a>
+    <a href="${escapeHtml(ticketUrl)}" class="cta">View your ticket</a>
+    <a href="${escapeHtml(liveUrl)}" class="cta-secondary">📱 Open live program on the night</a>
 
     <div class="note-box">
       <p>Doors open 30 minutes before the session begins. Your ticket (this email or the link above) is all you need at the door.</p>
     </div>
   </div>
   <div class="footer">
-    <p>You received this because you registered for <strong>${d.eventTitle}</strong>.</p>
+    <p>You received this because you registered for <strong>${escapeHtml(d.eventTitle)}</strong>.</p>
     <p>Questions? <a href="mailto:${CONTACT_EMAIL}">${CONTACT_EMAIL}</a></p>
     <p><a href="${SITE_URL}">${SITE_URL}</a> &nbsp;·&nbsp; ${EMAIL_FROM_NAME}</p>
   </div>
@@ -500,7 +501,7 @@ Hi ${d.firstName},
 Just a quick reminder, ${d.eventTitle} is tomorrow and we can't wait to see you there.
 ${d.themeTitle ? `\nTheme: ${d.themeTitle}${d.themeScripture ? `, ${d.themeScripture}` : ""}\n` : ""}
 Date:  ${d.eventDate}
-Time:  ${d.eventTime}pm${d.venueName ? `\nVenue: ${d.venueName}${d.venueMapUrl ? `\nMap:   ${d.venueMapUrl}` : ""}` : ""}${d.dressCode ? `\nDress code: ${d.dressCode}` : ""}
+Time:  ${d.eventTime}${d.venueName ? `\nVenue: ${d.venueName}${d.venueMapUrl ? `\nMap:   ${d.venueMapUrl}` : ""}` : ""}${d.dressCode ? `\nDress code: ${d.dressCode}` : ""}
 
 View your ticket: ${ticketUrl}
 Live program (use on the night): ${liveUrl}
@@ -526,7 +527,7 @@ Hi ${d.firstName},
 Your spot at ${d.eventTitle} is confirmed.
 ${d.themeTitle ? `\nSession theme: ${d.themeTitle}${d.themeScripture ? `, ${d.themeScripture}` : ""}\n` : ""}
 Date:  ${d.eventDate}
-Time:  ${d.eventTime}pm${d.venueName ? `\nVenue: ${d.venueName}` : ""}
+Time:  ${d.eventTime}${d.venueName ? `\nVenue: ${d.venueName}` : ""}
 
 Ticket reference: ${d.ticketToken.slice(0, 8).toUpperCase()}
 View ticket: ${d.ticketUrl}
@@ -566,7 +567,7 @@ export function announceAttendeeEmailHtml(d: AnnounceAttendeeEmailData): string 
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>You're invited, ${d.newEventTitle}</title>
+<title>You're invited, ${escapeHtml(d.newEventTitle)}</title>
 <style>
   body { margin: 0; padding: 0; background: #f0ebe0; font-family: 'DM Sans', Arial, sans-serif; color: #1a1a18; }
   .wrap { max-width: 560px; margin: 0 auto; }
@@ -601,7 +602,7 @@ export function announceAttendeeEmailHtml(d: AnnounceAttendeeEmailData): string 
 <div class="wrap">
   <div class="header">
     <div class="logo">${EMAIL_FROM_NAME}</div>
-    <h1>You're invited back,<br />${d.firstName}.</h1>
+    <h1>You're invited back,<br />${escapeHtml(d.firstName)}.</h1>
     <p>The next session is here.</p>
   </div>
   <div class="body">
@@ -614,26 +615,26 @@ export function announceAttendeeEmailHtml(d: AnnounceAttendeeEmailData): string 
       <div class="detail-row">
         <table><tr>
           <td class="detail-icon">📋</td>
-          <td><div class="detail-label">Session</div><div class="detail-value">${d.newEventTitle}</div></td>
+          <td><div class="detail-label">Session</div><div class="detail-value">${escapeHtml(d.newEventTitle)}</div></td>
         </tr></table>
       </div>
       <div class="detail-row">
         <table><tr>
           <td class="detail-icon">📅</td>
-          <td><div class="detail-label">Date</div><div class="detail-value">${d.newEventDate}</div></td>
+          <td><div class="detail-label">Date</div><div class="detail-value">${escapeHtml(d.newEventDate)}</div></td>
         </tr></table>
       </div>
       <div class="detail-row">
         <table><tr>
           <td class="detail-icon">🕐</td>
-          <td><div class="detail-label">Time</div><div class="detail-value">${d.newEventTime}</div></td>
+          <td><div class="detail-label">Time</div><div class="detail-value">${escapeHtml(d.newEventTime)}</div></td>
         </tr></table>
       </div>
       ${d.venueName ? `
       <div class="detail-row">
         <table><tr>
           <td class="detail-icon">📍</td>
-          <td><div class="detail-label">Venue</div><div class="detail-value">${d.venueName}</div></td>
+          <td><div class="detail-label">Venue</div><div class="detail-value">${escapeHtml(d.venueName)}</div></td>
         </tr></table>
       </div>` : ""}
     </div>
@@ -641,22 +642,22 @@ export function announceAttendeeEmailHtml(d: AnnounceAttendeeEmailData): string 
     ${d.themeTitle ? `
     <div class="theme-block">
       <p class="theme-label">Theme</p>
-      <p class="theme-title">${d.themeTitle}</p>
-      ${d.themeScripture ? `<p class="theme-verse">📖 ${d.themeScripture}</p>` : ""}
+      <p class="theme-title">${escapeHtml(d.themeTitle)}</p>
+      ${d.themeScripture ? `<p class="theme-verse">📖 ${escapeHtml(d.themeScripture)}</p>` : ""}
     </div>` : ""}
 
     ${hasEarlyBird ? `
     <div class="early-bird-box">
       <p class="early-bird-label">Early bird, past attendees only</p>
-      <p class="early-bird-title">Free entry until ${d.earlyBirdDeadline}</p>
+      <p class="early-bird-title">Free entry until ${escapeHtml(d.earlyBirdDeadline)}</p>
       <p class="early-bird-body">
-        As a returning member of our community, you get early bird access, register before ${d.earlyBirdDeadline}
+        As a returning member of our community, you get early bird access, register before ${escapeHtml(d.earlyBirdDeadline)}
         and your entry fee is waived. After that, entry is KES ${(d.priceKes ?? 0).toLocaleString()}.
         Be first.
       </p>
     </div>` : ""}
 
-    <a href="${registerUrl}" class="cta">${hasEarlyBird ? "Claim my free early bird spot →" : "Reserve my spot →"}</a>
+    <a href="${escapeHtml(registerUrl)}" class="cta">${hasEarlyBird ? "Claim my free early bird spot →" : "Reserve my spot →"}</a>
 
     <hr class="divider" />
 

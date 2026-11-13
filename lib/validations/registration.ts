@@ -6,7 +6,12 @@ export const registrationSchema = z
     event_id:        z.string().uuid(),
     first_name:      z.string().min(1, "First name is required").max(60),
     last_name:       z.string().min(1, "Last name is required").max(60),
-    email:           z.string().email("Invalid email").optional().or(z.literal("")),
+    // Trimmed and lowercased before validation so "Amara@Mail.com" and
+    // "amara@mail.com" count as the same person in the duplicate check.
+    email:           z.preprocess(
+      (v) => (typeof v === "string" ? v.trim().toLowerCase() : v),
+      z.string().email("Invalid email").optional().or(z.literal(""))
+    ),
     phone:           z.string().optional().or(z.literal("")),
     role:            z.enum(["guest", "vocalist", "instrumentalist", "vision_carrier", "curious"]),
     source:          z.enum(["friend", "whatsapp", "instagram", "church", "website", "other"]).optional(),
