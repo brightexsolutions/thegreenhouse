@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserClient } from "@supabase/ssr";
 import { Loader2, Leaf, Eye, EyeOff } from "lucide-react";
@@ -12,6 +12,13 @@ export default function AdminLoginPage() {
   const [show,     setShow]     = useState(false);
   const [loading,  setLoading]  = useState(false);
   const [error,    setError]    = useState<string | null>(null);
+
+  // /auth/confirm sends people back here when a set-password link is spent.
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("error") === "link_expired") {
+      setError("That link has expired or was already used. Ask a super admin to send a new invite.");
+    }
+  }, []);
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -52,7 +59,7 @@ export default function AdminLoginPage() {
             <Leaf size={20} className="text-gold" />
           </div>
           <h1 className="font-display text-2xl font-semibold text-cream">Admin</h1>
-          <p className="text-cream/40 text-sm mt-1">The Green House</p>
+          <p className="text-cream/65 text-sm mt-1">The Green House</p>
         </div>
 
         {/* Form */}
@@ -63,9 +70,9 @@ export default function AdminLoginPage() {
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="admin@thegreenhouseke.com"
+              placeholder="you@example.com"
               required
-              className="w-full px-4 py-3 rounded-2xl border border-mist bg-off-white text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
+              className="w-full px-4 py-3 rounded-2xl border border-mist bg-off-white text-sm text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all"
             />
           </div>
 
@@ -78,12 +85,12 @@ export default function AdminLoginPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full px-4 py-3 rounded-2xl border border-mist bg-off-white text-sm text-charcoal placeholder:text-charcoal/30 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all pr-11"
+                className="w-full px-4 py-3 rounded-2xl border border-mist bg-off-white text-sm text-charcoal placeholder:text-charcoal/50 focus:outline-none focus:ring-2 focus:ring-forest/20 focus:border-forest/40 transition-all pr-11"
               />
               <button
                 type="button"
                 onClick={() => setShow(!show)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/30 hover:text-charcoal/60 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal/65 hover:text-charcoal/65 transition-colors"
               >
                 {show ? <EyeOff size={15} /> : <Eye size={15} />}
               </button>

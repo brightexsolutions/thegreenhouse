@@ -14,7 +14,7 @@ const MAX_BYTES = 15 * 1024 * 1024;
 const MAX_PHOTOS_PER_EVENT = 400;
 
 export async function POST(req: NextRequest, { params }: Props) {
-  const limited = await rateLimit(req, "public");
+  const limited = await rateLimit(req, "live");
   if (limited) return limited;
 
   const { slug } = await params;

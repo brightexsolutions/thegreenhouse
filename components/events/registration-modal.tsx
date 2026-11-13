@@ -87,12 +87,12 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
                 {event.title}
               </h2>
               <div className="flex flex-wrap gap-x-3 gap-y-0.5 mt-1">
-                <div className="flex items-center gap-1 text-[11px] text-charcoal/55">
+                <div className="flex items-center gap-1 text-[11px] text-charcoal/70">
                   <Calendar size={10} />
                   <span>{formattedDate}</span>
                 </div>
                 {event.venue_name && event.venue_name !== "TBA" && (
-                  <div className="flex items-center gap-1 text-[11px] text-charcoal/55">
+                  <div className="flex items-center gap-1 text-[11px] text-charcoal/70">
                     <MapPin size={10} />
                     <span>{event.venue_name}</span>
                   </div>
@@ -101,7 +101,7 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
             </div>
             <button
               onClick={() => setOpen(false)}
-              className="w-8 h-8 rounded-full border border-mist flex items-center justify-center text-charcoal/45 hover:text-charcoal hover:border-charcoal/25 transition-all flex-shrink-0 mt-0.5"
+              className="w-8 h-8 rounded-full border border-mist flex items-center justify-center text-charcoal/65 hover:text-charcoal hover:border-charcoal/25 transition-all flex-shrink-0 mt-0.5"
               aria-label="Close"
             >
               <X size={14} />
@@ -120,6 +120,7 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
               venue_name:  event.venue_name,
               theme_title: (event as { theme_title?: string | null }).theme_title ?? null,
             }}
+            isFree={event.type !== "paid"}
             onSuccess={() => {}}
           />
         </div>
@@ -133,7 +134,7 @@ export function RegistrationModal({ event, trigger }: RegistrationModalProps) {
       <div onClick={() => setOpen(true)}>
         {trigger ?? (
           <button className="w-full flex items-center justify-center gap-2 px-8 py-4 rounded-full bg-forest text-cream font-semibold text-sm hover:bg-moss transition-all duration-200">
-            Register, it&apos;s free
+            {event.type === "paid" ? "Register" : <>Register, it&apos;s free</>}
           </button>
         )}
       </div>

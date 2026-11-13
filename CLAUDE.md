@@ -24,7 +24,7 @@
 | `/Users/brown/.claude/plans/i-would-like-us-indexed-nebula.md` | Full architecture plan — DB schema, all flows, design philosophy, phase breakdown |
 | `lib/constants.ts` | SITE_NAME, SITE_URL, SESSION_FREQUENCY, partners, video URLs, social links |
 | `app/globals.css` | Design tokens, keyframe animations (`ripple-out`, `play-pulse`) |
-| `supabase/schema.sql` | Single-file schema — update inline, never create separate migration files |
+| `supabase/migrations/` | Numbered SQL migrations (001 to 034). There is no single schema file. |
 | `middleware.ts` | Auth gates: `/admin/*` requires admin session; `/admin/system/*` requires super_admin |
 | `lib/email-templates.ts` | All Resend email HTML templates |
 | `components/chat/chat-fab.tsx` | Chat assistant FAB — intent engine, ripple, popup, dynamic event data |
@@ -82,6 +82,32 @@ The site does **not** send tickets via WhatsApp automatically. Resend email is t
 
 ### Buttons
 Use `rounded` (4px) or no rounding on buttons. Never `rounded-lg` or larger.
+
+### Colour and contrast (measured, not eyeballed)
+- **Gold as text follows its surface.** `text-gold` resolves through
+  `--gold-text` (`app/globals.css`): bright `#c9a24a` on dark brand surfaces,
+  deep `#856417` on cream and white, where bright gold is only 2.2:1. Dark
+  surfaces painted with a photo, gradient or inline style opt in with the
+  `on-dark` class. Never hardcode a gold hex for text.
+- **Opacity floors for text:** `text-charcoal/65` on light, `text-cream/65` on
+  forest. Anything fainter fails 4.5:1. Placeholders use `/50`.
+- **Tailwind 3 only generates opacity steps in multiples of 5.** `bg-forest/8`
+  or `text-charcoal/38` produce no CSS at all, silently. Use `/5`, `/10`, `/40`.
+- Smallest text is `text-[10px]`, and only for uppercase labels.
+- No emoji as icons: use `lucide-react` at `strokeWidth={1.5}`. No decorative
+  rings, dot grids, glow blobs or floating particles.
+
+### Rate limits and shared Wi-Fi
+Limits in `lib/rate-limit.ts` are per IP, and a whole venue on one network is
+one IP. Anything attendees or volunteers do together in the room uses the
+`checkin` (600/min) or `live` (900/min) limiter, never `public` (60/min).
+
+### Check-in sync
+`components/checkin/checkin-panel.tsx` orders polls against writes: a poll may
+only overwrite a row if the poll started after that row's last save finished
+(`lastWrite`). Do not replace this with a fixed time window: that is what made
+marks flip back on slow connections. The save endpoint must keep returning the
+row it wrote (`.select()`), so a write that matched nothing is not a success.
 
 ### Admin tables
 All admin listing tables: `max-h-[440px] overflow-y-auto` + `sticky` `<thead>`. Hugs content when short, scrolls when tall.
@@ -238,6 +264,37 @@ Everything from the platform audit, applied.
 - `supabase/migrations/032_security_hardening.sql` — RLS on `live_feedback` (the only table that lacked it), and the anon write grants on `display_state` revoked.
 - `force-dynamic` added to 11 database-backed GET routes that could have been frozen at build time.
 
+### Phase 14 — Full review ✅ (2026-11-13)
+Three independent reviews (security, correctness, performance), fixes, then a
+separate verification pass.
+
+- **Check-in** rebuilt around write-ordered polling. See "Check-in sync" above.
+- **Admin API:** 20 routes checked only for a session, not an `admin_profiles`
+  row. All now use `requireAdmin()`. Event create/update take a field
+  whitelist, so tokens cannot be set from a request body.
+- **Public pages no longer ship event tokens.** They select
+  `PUBLIC_EVENT_COLUMNS` (`lib/public-event.ts`), never `*`.
+- **Escaping:** `lib/html.ts` (`escapeHtml`, `safeJsonLd`, `csvCell`) is used by
+  the event report, every email template, JSON-LD blocks and CSV exports.
+- **Event time** is formatted by `formatEventTime()` in `lib/utils.ts`
+  ("7:00 PM"). The old slice-and-append-"pm" produced "19.00pm" on tickets.
+  Countdowns use `eventStart()` (fixed UTC+3).
+- **Crons and post-event email** claim their sent flag atomically, then send in
+  batches of 100. They no longer re-mail everyone after a timeout.
+- **Invited admins** set a password at `/admin/set-password` via `/auth/confirm`.
+- **Performance:** hero text and lead photo render without waiting for
+  hydration, chat and session prompt load lazily, live polling slowed and
+  paused in background tabs, `/get-involved` is static again.
+- **UI:** contrast raised to WCAG AA across public and admin pages, about 170
+  dead opacity classes fixed, emoji icons and decorative filler removed, error
+  boundaries added (`app/error.tsx`, `app/admin/error.tsx`, `app/global-error.tsx`).
+
+**Migrations 033 and 034 are written but NOT applied.** 033 closes a hole where
+any signed-in user could make themselves super admin (email signup is open on
+the Supabase project: also turn that off under Authentication, Sign In). 034
+stops the anon key reading event tokens and writing to tables directly. Both
+are safe to run against the current code.
+
 **Still open from the audit:** the shared admin table component, public error boundaries, and replacing `RateLimiterMemory` with something that survives a cold start.
 
 ---
@@ -248,7 +305,7 @@ Probed against the live database through PostgREST with the service role key:
 `GET {SUPABASE_URL}/rest/v1/{table}?select={column}&limit=1` with the key in
 both `apikey` and `Authorization`. A 200 means the migration landed; a 400 with
 code `42703` names the missing column. 001 through 031 are applied and verified.
-**032_security_hardening.sql has NOT been run yet.**
+032 is applied (verified 2026-11-13 from `pg_policies`). **033 and 034 are NOT applied yet.**
 
 Three migrations cannot be checked this way because they create storage
 policies or realtime publications rather than queryable tables:
