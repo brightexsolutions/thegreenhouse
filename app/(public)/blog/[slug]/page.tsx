@@ -20,7 +20,7 @@ type Props = { params: Promise<{ slug: string }> };
 // cache() so generateMetadata and the page share one fetch per request.
 const getPost = cache(async function getPost(slug: string): Promise<BlogPost | null> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 120 });
     const { data } = await supabase
       .from("blog_posts")
       .select("*")
@@ -36,7 +36,7 @@ const getPost = cache(async function getPost(slug: string): Promise<BlogPost | n
 
 async function getMorePosts(excludeId: string) {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 120 });
     const { data } = await supabase
       .from("blog_posts")
       .select("id, slug, title, excerpt, category, reading_minutes, published_at")
@@ -58,7 +58,7 @@ function coverSrc(path: string): string {
 /** Pre-render every published post so crawlers get static HTML, not a spinner. */
 export async function generateStaticParams() {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 120 });
     const { data } = await supabase
       .from("blog_posts")
       .select("slug")

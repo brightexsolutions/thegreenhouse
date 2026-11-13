@@ -27,7 +27,7 @@ export interface SitePhoto {
  */
 export async function getSitePhotos(limit = 12): Promise<SitePhoto[]> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 300 });
     const { data } = await supabase
       .from("event_images")
       .select("path, caption, sort_order, events!inner(event_date, status, deleted_at)")

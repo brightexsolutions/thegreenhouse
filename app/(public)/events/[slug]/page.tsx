@@ -30,7 +30,7 @@ const PUBLIC_STATUSES = ["published", "live", "past"];
 // cache() so generateMetadata and the page share one fetch per request.
 const getEventWithCount = cache(async function getEventWithCount(slug: string): Promise<{ event: PublicEvent; registrantCount: number; galleryImages: EventImageRow[] } | null> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 60 });
     const { data } = await supabase
       .from("events")
       .select(PUBLIC_EVENT_COLUMNS)
@@ -89,7 +89,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export async function generateStaticParams() {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 60 });
     const { data } = await supabase
       .from("events")
       .select("slug")

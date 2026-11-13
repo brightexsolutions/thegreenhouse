@@ -1,3 +1,4 @@
+import { safeInternalPath } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import type { EmailOtpType } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
@@ -21,9 +22,7 @@ export async function GET(req: NextRequest) {
   const nextParam = req.nextUrl.searchParams.get("next") ?? "/admin/set-password";
 
   // Same-site paths only: never redirect to a host taken from the query string.
-  const next = nextParam.startsWith("/") && !nextParam.startsWith("//") && !nextParam.includes("\\")
-    ? nextParam
-    : "/admin/set-password";
+  const next = safeInternalPath(nextParam, "/admin/set-password");
 
   const failed = new URL("/admin/login", req.url);
   failed.searchParams.set("error", "link_expired");

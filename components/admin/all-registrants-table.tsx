@@ -273,9 +273,9 @@ export function AllRegistrantsTable({ registrants: initialRegistrants, events }:
                       </td>
                       <td className="px-5 py-3 text-right hidden lg:table-cell">
                         <p className="text-[10px] text-charcoal/65">
-                          {new Date(r.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "2-digit" })}
+                          {new Date(r.created_at).toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi", day: "numeric", month: "short", year: "2-digit" })}
                           <span className="block text-charcoal/65 text-[10px] mt-0.5">
-                            {new Date(r.created_at).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                            {new Date(r.created_at).toLocaleTimeString("en-KE", { timeZone: "Africa/Nairobi", hour: "2-digit", minute: "2-digit", hour12: true })}
                           </span>
                         </p>
                       </td>

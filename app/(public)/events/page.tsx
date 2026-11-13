@@ -22,7 +22,7 @@ export const metadata: Metadata = {
 
 async function getEvents(): Promise<PublicEvent[]> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 300 });
     const { data } = await supabase
       .from("events")
       .select(PUBLIC_EVENT_COLUMNS)

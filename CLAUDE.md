@@ -289,11 +289,15 @@ separate verification pass.
   dead opacity classes fixed, emoji icons and decorative filler removed, error
   boundaries added (`app/error.tsx`, `app/admin/error.tsx`, `app/global-error.tsx`).
 
-**Migrations 033 and 034 are written but NOT applied.** 033 closes a hole where
-any signed-in user could make themselves super admin (email signup is open on
-the Supabase project: also turn that off under Authentication, Sign In). 034
-stops the anon key reading event tokens and writing to tables directly. Both
-are safe to run against the current code.
+**Migrations 033 and 034 were applied on 2026-11-13** and verified with the
+anon key: the live display and control queries still return 200, and reading
+`checkin_token`, `control_token` or `registrations` returns 401. 033 closes a
+hole where any signed-in user could make themselves super admin; 034 stops the
+anon key reading event tokens and writing to tables directly.
+
+**Email signup is still open on the Supabase project.** Turn it off under
+Authentication, Sign In / Providers. Nothing in the app needs it: admins are
+created by a super admin through the service role.
 
 **Still open from the audit:** the shared admin table component, public error boundaries, and replacing `RateLimiterMemory` with something that survives a cold start.
 
@@ -305,7 +309,7 @@ Probed against the live database through PostgREST with the service role key:
 `GET {SUPABASE_URL}/rest/v1/{table}?select={column}&limit=1` with the key in
 both `apikey` and `Authorization`. A 200 means the migration landed; a 400 with
 code `42703` names the missing column. 001 through 031 are applied and verified.
-032 is applied (verified 2026-11-13 from `pg_policies`). **033 and 034 are NOT applied yet.**
+001 through 034 are applied (032 to 034 verified 2026-11-13 from `pg_policies` and with the anon key).
 
 Three migrations cannot be checked this way because they create storage
 policies or realtime publications rather than queryable tables:

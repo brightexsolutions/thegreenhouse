@@ -200,14 +200,14 @@ export function PartnersCarousel({ partners }: { partners: Partner[] }) {
           <button
             onClick={() => { setPaused(false); goTo(current - 1); }}
             aria-label="Previous partner"
-            className="absolute -left-5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-white/65 backdrop-blur-sm shadow-md border border-charcoal/10 flex items-center justify-center text-charcoal/65 hover:bg-white/90 hover:text-forest hover:shadow-lg transition-all z-30"
+            className="absolute left-1 sm:-left-5 top-1/2 -translate-y-1/2 w-9 h-9 rounded bg-white/65 backdrop-blur-sm shadow-md border border-charcoal/10 flex items-center justify-center text-charcoal/65 hover:bg-white/90 hover:text-forest hover:shadow-lg transition-all z-30"
           >
             <ChevronLeft size={16} />
           </button>
           <button
             onClick={() => { setPaused(false); goTo(current + 1); }}
             aria-label="Next partner"
-            className="absolute -right-5 top-1/2 -translate-y-1/2 w-9 h-9 rounded-lg bg-white/65 backdrop-blur-sm shadow-md border border-charcoal/10 flex items-center justify-center text-charcoal/65 hover:bg-white/90 hover:text-forest hover:shadow-lg transition-all z-30"
+            className="absolute right-1 sm:-right-5 top-1/2 -translate-y-1/2 w-9 h-9 rounded bg-white/65 backdrop-blur-sm shadow-md border border-charcoal/10 flex items-center justify-center text-charcoal/65 hover:bg-white/90 hover:text-forest hover:shadow-lg transition-all z-30"
           >
             <ChevronRight size={16} />
           </button>

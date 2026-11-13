@@ -99,7 +99,7 @@ export function SiteNav({ liveSlug }: SiteNavProps) {
                         ? "text-forest after:w-full"
                         : "text-charcoal/70 hover:text-forest after:w-0 hover:after:w-full"
                       : active
-                        ? "text-gold after:w-full"
+                        ? "on-dark text-gold after:w-full"
                         : "text-cream hover:text-gold after:w-0 hover:after:w-full"
                   )}
                 >

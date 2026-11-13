@@ -209,7 +209,7 @@ export function RegistrantsTable({ registrants, eventId }: RegistrantsTableProps
 
                 {/* Date */}
                 <p className="text-[10px] text-charcoal/65 flex-shrink-0 hidden md:block">
-                  {new Date(r.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short" })}
+                  {new Date(r.created_at).toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi", day: "numeric", month: "short" })}
                 </p>
               </div>
             ))}

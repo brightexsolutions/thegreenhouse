@@ -209,10 +209,10 @@ export function EnquiriesTable({ enquiries }: { enquiries: Enquiry[] }) {
                 {/* Date */}
                 <td className="px-4 py-4 text-right">
                   <p className="text-[10px] text-charcoal/65 whitespace-nowrap">
-                    {new Date(e.created_at).toLocaleDateString("en-KE", { day: "numeric", month: "short", year: "2-digit" })}
+                    {new Date(e.created_at).toLocaleDateString("en-KE", { timeZone: "Africa/Nairobi", day: "numeric", month: "short", year: "2-digit" })}
                   </p>
                   <p className="text-[10px] text-charcoal/65 mt-0.5">
-                    {new Date(e.created_at).toLocaleTimeString("en-KE", { hour: "2-digit", minute: "2-digit", hour12: true })}
+                    {new Date(e.created_at).toLocaleTimeString("en-KE", { timeZone: "Africa/Nairobi", hour: "2-digit", minute: "2-digit", hour12: true })}
                   </p>
                 </td>
               </tr>

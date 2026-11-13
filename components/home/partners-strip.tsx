@@ -7,7 +7,7 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 async function getSiteName(): Promise<string> {
   try {
-    const supabase = createAdminClient();
+    const supabase = createAdminClient({ revalidate: 300 });
     const { data } = await supabase
       .from("site_settings")
       .select("value")
